@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kerberos End-to-End Workflow</title>
+<style>
+  :root {
+    --bg:       #0b0f1a;
+    --surface:  #111827;
+    --surface2: #1a2236;
+    --border:   #1e2d45;
+    --accent:   #38bdf8;
+    --gold:     #fbbf24;
+    --green:    #34d399;
+    --red:      #f87171;
+    --orange:   #fb923c;
+    --purple:   #a78bfa;
+    --text:     #e2e8f0;
+    --text2:    #94a3b8;
+    --text3:    #4a5a7a;
+    --mono:     'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
+    --sans:     'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.65;
+    padding: 0 0 80px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: #070a12;
+    border-bottom: 1px solid var(--border);
+    padding: 18px 48px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .topbar h1 {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .02em;
+  }
+  .topbar span {
+    color: var(--text2);
+    font-size: .82em;
+  }
+
+  /* ── PAGE WRAPPER ── */
+  .page {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px 48px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 52px 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .phase-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .phase-header h2 {
+    font-size: 1.05em;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .phase-header .phase-sub {
+    font-size: .8em;
+    color: var(--text2);
+    margin-left: auto;
+  }
+  .ph-0  .phase-dot { background: #64748b; }
+  .ph-0  h2         { color: #94a3b8; }
+  .ph-1  .phase-dot { background: #facc15; }
+  .ph-1  h2         { color: #fde68a; }
+  .ph-2  .phase-dot { background: #fb923c; }
+  .ph-2  h2         { color: #fed7aa; }
+  .ph-3  .phase-dot { background: #f87171; }
+  .ph-3  h2         { color: #fecaca; }
+  .ph-4  .phase-dot { background: #a78bfa; }
+  .ph-4  h2         { color: #ddd6fe; }
+
+  /* ── TABLE WRAPPER ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  /* Column widths */
+  col.c-id     { width: 46px; }
+  col.c-action { width: 155px; }
+  col.c-actor  { width: 100px; }
+  col.c-recip  { width: 100px; }
+  col.c-obj    { width: 185px; }
+  col.c-what   { width: 420px; }
+  col.c-why    { width: 370px; }
+  col.c-sec    { width: 300px; }
+
+  thead tr {
+    background: #0d1526;
+  }
+  th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: .72em;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th:first-child { border-radius: 10px 0 0 0; }
+  th:last-child  { border-radius: 0 10px 0 0; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #0f1a2e; }
+
+  td {
+    padding: 13px 14px;
+    vertical-align: top;
+    font-size: .875em;
+    line-height: 1.7;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* ── CELL VARIANTS ── */
+  .c-id-val {
+    font-family: var(--mono);
+    font-size: .72em;
+    font-weight: 700;
+    color: var(--text3);
+    text-align: center;
+    padding-top: 16px;
+  }
+  .action-cell {
+    font-weight: 600;
+    color: var(--text);
+    font-size: .85em;
+  }
+  .actor-cell, .recip-cell {
+    font-family: var(--mono);
+    font-size: .78em;
+    color: var(--accent);
+  }
+  .obj-cell {
+    font-family: var(--mono);
+    font-size: .78em;
+    color: #c4b5fd;
+    line-height: 1.75;
+  }
+  .what-cell  { color: var(--text); }
+  .why-cell   { color: #cbd5e1; }
+  .sec-cell   { color: #86efac; }
+
+  /* Key highlight */
+  .k {
+    background: #1a1a3a;
+    color: #c4b5fd;
+    font-family: var(--mono);
+    font-size: .82em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .kv { color: #34d399; }   /* session key */
+  .kc { color: #fbbf24; }   /* long-term key */
+  .kn { color: #f87171; }   /* attacker / danger */
+
+  /* Field names */
+  .f {
+    color: #7dd3fc;
+    font-family: var(--mono);
+    font-size: .82em;
+    font-weight: 600;
+  }
+
+  /* Inline emphasis */
+  strong  { color: #e2e8f0; font-weight: 700; }
+  em      { color: var(--gold); font-style: normal; font-weight: 600; }
+  .warn   { color: var(--red); font-weight: 600; }
+  .good   { color: var(--green); font-weight: 600; }
+  .note   { color: var(--orange); font-weight: 600; }
+
+  /* Small label pills */
+  .pill {
+    display: inline-block;
+    font-size: .68em;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+  }
+  .pill-setup  { background: #1e293b; color: #94a3b8; }
+  .pill-as     { background: #2d2200; color: #fbbf24; }
+  .pill-tgs    { background: #1a1800; color: #fb923c; }
+  .pill-svc    { background: #1a0a0a; color: #f87171; }
+  .pill-threat { background: #1a0a2a; color: #a78bfa; }
+
+  /* Row stripe */
+  tbody tr:nth-child(even) td { background: #0d1525; }
+  tbody tr:nth-child(even):hover td { background: #0f1a2e; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 36px;
+    font-size: .8em;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .legend-swatch {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-label { color: var(--text2); }
+
+  /* ── INTRO ── */
+  .intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 22px;
+    margin-bottom: 32px;
+    font-size: .88em;
+    color: var(--text2);
+    line-height: 1.75;
+  }
+  .intro strong { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Kerberos Authentication Protocol — End-to-End Workflow</h1>
+  <span>CS 448/548 Network Security · All 5 Phases · 35 Granular Actions</span>
+</div>
+
+<div class="page">
+
+<div class="intro">
+  <strong>Reading guide:</strong> Each row is one atomic action in the Kerberos protocol.
+  <span class="k">Monospace boxes</span> denote cryptographic keys or protocol fields.
+  <span style="color:#c4b5fd;font-family:monospace;font-size:.9em">Purple</span> = any key in the Object column.
+  <span style="color:#fbbf24;font-family:monospace;font-size:.9em">Gold</span> = long-term key (high-value, minimal use).
+  <span style="color:#34d399;font-family:monospace;font-size:.9em">Green</span> = short-term session key (workhorse, expires).
+  <span style="color:#7dd3fc;font-family:monospace;font-size:.9em">Blue</span> = protocol field name (ID_client, TS, etc.).
+  Phases run top-to-bottom; within each phase, rows run in execution order.
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#64748b"></div><div class="legend-label">Phase 0 — Pre-Setup</div></div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#facc15"></div><div class="legend-label">Phase 1 — Initial Auth (AS exchange)</div></div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fb923c"></div><div class="legend-label">Phase 2 — Service Ticket Request (TGS exchange)</div></div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f87171"></div><div class="legend-label">Phase 3 — Service Access</div></div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#a78bfa"></div><div class="legend-label">Phase 4 — Expiry &amp; Attack Surface</div></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 0                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="phase-header ph-0">
+  <div class="phase-dot"></div>
+  <h2>Phase 0 — Pre-Setup</h2>
+  <span class="phase-sub">Before any login · One-time admin configuration</span>
+</div>
+
+<div class="tbl-wrap">
+<table>
+  <colgroup>
+    <col class="c-id"><col class="c-action"><col class="c-actor"><col class="c-recip">
+    <col class="c-obj"><col class="c-what"><col class="c-why"><col class="c-sec">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Phase &amp; Action</th>
+      <th>Actor (Sender)</th>
+      <th>Recipient</th>
+      <th>Object / Key Involved</th>
+      <th>What happens (procedure)</th>
+      <th>Why this design (rationale)</th>
+      <th>Security guarantee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id-val">0.1</td>
+      <td class="action-cell"><div class="pill pill-setup">Setup</div><br>KDC registers client</td>
+      <td class="actor-cell">KDC Admin</td>
+      <td class="recip-cell">KDC Database</td>
+      <td class="obj-cell"><span class="k kc">Kc</span><br>(long-term client key)</td>
+      <td class="what-cell">Admin creates an account for Alice. The KDC computes <span class="k kc">Kc</span> = hash(Alice's password) and stores <span class="k kc">Kc</span> in its database. <span class="k kc">Kc</span> is the cryptographic key that <em>represents Alice's identity</em> — it is never the raw password, always the derived key. The same hash function will run on Alice's own machine at login time to reproduce <span class="k kc">Kc</span> locally without the KDC sending it to her.</td>
+      <td class="why-cell"><span class="k kc">Kc</span> is stored instead of the raw password so that even if the KDC database is stolen, the attacker gets only a derived key, not a reusable plaintext password. The derivation is deterministic — Alice can always re-derive <span class="k kc">Kc</span> from her password without the KDC sending anything to her.</td>
+      <td class="sec-cell">If the KDC database is compromised, passwords are not directly exposed — only their derived keys. Alice's password never leaves her machine in any form.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">0.2</td>
+      <td class="action-cell"><div class="pill pill-setup">Setup</div><br>KDC registers each service</td>
+      <td class="actor-cell">KDC Admin</td>
+      <td class="recip-cell">KDC Database + Server V</td>
+      <td class="obj-cell"><span class="k kc">Kv</span><br>(long-term server key — one per service)</td>
+      <td class="what-cell">Admin generates a random secret key <span class="k kc">Kv</span> specifically for service V (e.g., the file server). <span class="k kc">Kv</span> is stored in two places: (1) the KDC database alongside V's service record; (2) installed directly on Server V's machine by the sysadmin out-of-band. <span class="k kc">Kv</span> is <strong>not derived from a password</strong> — it is a purely random key. Each service (file server, mail server, print server) gets its own completely independent <span class="k kc">Kv</span>.</td>
+      <td class="why-cell">A random key per service means no shared secret between services. If the mail server's <span class="k kc">Kv</span> is stolen, the file server's <span class="k kc">Kv</span> is entirely unaffected. The out-of-band installation (sysadmin physically installs it on the server) avoids transmitting <span class="k kc">Kv</span> over the network at all.</td>
+      <td class="sec-cell">Compromise of one service's <span class="k kc">Kv</span> does not expose any other service or any client. Blast radius is limited to a single service.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">0.3</td>
+      <td class="action-cell"><div class="pill pill-setup">Setup</div><br>TGS key established</td>
+      <td class="actor-cell">KDC Admin</td>
+      <td class="recip-cell">KDC (AS component) + TGS</td>
+      <td class="obj-cell"><span class="k kc">K<sub>TGS</sub></span><br>(long-term TGS key)</td>
+      <td class="what-cell">Admin generates a random secret key <span class="k kc">K<sub>TGS</sub></span> shared between the KDC's Authentication Server (AS) component and the Ticket Granting Service (TGS). <span class="k kc">K<sub>TGS</sub></span> is what allows the AS to seal TGT tickets that <em>only the TGS</em> can open. In most real deployments, AS and TGS run on the same physical KDC machine, so <span class="k kc">K<sub>TGS</sub></span> is an internal key on that machine.</td>
+      <td class="why-cell"><span class="k kc">K<sub>TGS</sub></span> is what makes the TGT mechanism possible. The AS encrypts TGTs with <span class="k kc">K<sub>TGS</sub></span> so that the client — who carries the TGT — cannot read or modify its contents. Only the TGS, the intended recipient, can decrypt it using <span class="k kc">K<sub>TGS</sub></span>.</td>
+      <td class="sec-cell">The client is a <em>ticket courier</em>, not a ticket creator. The TGT's integrity and confidentiality are guaranteed by <span class="k kc">K<sub>TGS</sub></span> encryption. The client cannot forge or tamper with a TGT.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 1                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="phase-header ph-1">
+  <div class="phase-dot"></div>
+  <h2>Phase 1 — Initial Authentication</h2>
+  <span class="phase-sub">Client ↔ Authentication Server (AS) · Password verification · TGT issuance</span>
+</div>
+
+<div class="tbl-wrap">
+<table>
+  <colgroup>
+    <col class="c-id"><col class="c-action"><col class="c-actor"><col class="c-recip">
+    <col class="c-obj"><col class="c-what"><col class="c-why"><col class="c-sec">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>#</th><th>Phase &amp; Action</th><th>Actor (Sender)</th><th>Recipient</th>
+      <th>Object / Key Involved</th><th>What happens (procedure)</th>
+      <th>Why this design (rationale)</th><th>Security guarantee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id-val">1.1</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>Client sends login request</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">AS (KDC)</td>
+      <td class="obj-cell">
+        <span class="f">ID_client</span> — Alice's username<br>
+        <span class="f">ID_TGS</span> — TGS identifier<br>
+        <span class="f">TS1</span> — Alice's current timestamp<br>
+        <em>All sent in plaintext — no encryption</em>
+      </td>
+      <td class="what-cell">Alice's machine sends three fields: (1) <span class="f">ID_client</span> = Alice's username (e.g., "alice@REALM.COM") — tells the AS <em>which account</em> is requesting authentication; (2) <span class="f">ID_TGS</span> = the name of the Ticket Granting Service (e.g., "krbtgt/REALM.COM") — tells the AS Alice wants a TGT specifically, not a service ticket; (3) <span class="f">TS1</span> = Alice's current clock time — included so the AS can correlate this request and so the TGT validity window has a clear start point. <strong>No password, no key, no credential of any kind is sent.</strong></td>
+      <td class="why-cell">Sending only <span class="f">ID_client</span> — not the password or <span class="k kc">Kc</span> — is the <em>foundational security decision</em> of Kerberos. The AS does not need the password to verify Alice. Instead, it encrypts its response with <span class="k kc">Kc</span>, and only the real Alice (who can re-derive <span class="k kc">Kc</span> from her password) can decrypt it. The verification is implicit. <span class="f">ID_TGS</span> is explicit so the AS knows the intended scope. <span class="f">TS1</span> prevents replay of this request itself.</td>
+      <td class="sec-cell">The password cannot be intercepted, sniffed, or stolen from the network — <strong>it never appears on the wire in any form</strong>, not even encrypted.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.2</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>AS looks up client record</td>
+      <td class="actor-cell">AS (KDC)</td>
+      <td class="recip-cell">KDC Database</td>
+      <td class="obj-cell"><span class="k kc">Kc</span><br>(retrieved from DB using <span class="f">ID_client</span> as lookup key)</td>
+      <td class="what-cell">The AS receives <span class="f">ID_client</span> = "alice@REALM.COM" and queries the KDC database using this as the primary key. The database record returns <span class="k kc">Kc</span> — the stored key derived from Alice's password during account setup (Phase 0.1). The AS now holds <span class="k kc">Kc</span> in memory and uses it in steps 1.4 and 1.5.</td>
+      <td class="why-cell">The KDC is the <em>single authoritative store</em> of all long-term keys. Every client's <span class="k kc">Kc</span> and every server's <span class="k kc">Kv</span> lives here. This centralisation is Kerberos's core design trade-off: strong security guarantees in exchange for a single point of failure. If the KDC is unavailable, no authentication is possible.</td>
+      <td class="sec-cell">AS can now prepare a response that <em>only the real Alice can decrypt</em>, because only Alice (via her password) and the KDC database know <span class="k kc">Kc</span>.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.3</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>AS generates fresh session key</td>
+      <td class="actor-cell">AS (KDC)</td>
+      <td class="recip-cell">Internal (not yet sent)</td>
+      <td class="obj-cell"><span class="k kv">K<sub>c,TGS</sub></span><br>(brand-new random session key — generated fresh for this login session)</td>
+      <td class="what-cell">The AS calls a cryptographically secure random number generator (CSPRNG) to produce a new <span class="k kv">K<sub>c,TGS</sub></span>. This key has <strong>never existed before</strong> and will <strong>never be reused</strong>. <span class="k kv">K<sub>c,TGS</sub></span> is the <em>session key</em> that Alice and the TGS will use to communicate securely for the duration of this login session (until the TGT expires). It is not derived from any password — it is purely random.</td>
+      <td class="why-cell">Generating a fresh <span class="k kv">K<sub>c,TGS</sub></span> per session means: (1) if this session's key is ever compromised, it reveals nothing about Alice's password (<span class="k kc">Kc</span>) or any other session's key; (2) an attacker recording encrypted traffic today cannot decrypt it even if they later steal <span class="k kc">Kc</span>. The session key is the workhorse; <span class="k kc">Kc</span> is the master key used only to bootstrap.</td>
+      <td class="sec-cell">Session key compromise is <em>time-bounded</em> (expires with TGT) and <em>session-isolated</em> — one session's key reveals nothing about any other session's key or the underlying password.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.4</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>AS constructs the TGT</td>
+      <td class="actor-cell">AS (KDC)</td>
+      <td class="recip-cell">Internal (will become Part B of response)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kc">K<sub>TGS</sub></span><br>
+        Contents:<br>
+        <span class="k kv">K<sub>c,TGS</sub></span>, <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">ID_TGS</span>, <span class="f">TS1</span>, <span class="f">Lifetime</span>
+      </td>
+      <td class="what-cell">AS assembles the TGT plaintext with: (1) <span class="k kv">K<sub>c,TGS</sub></span> — the session key just generated; the TGS will need this to later verify Alice's Authenticators; (2) <span class="f">ID_client</span> = "alice@REALM.COM" — so the TGS knows whose identity this TGT represents; (3) <span class="f">AD_client</span> = Alice's network address (IP) — optionally binds the ticket to Alice's machine; (4) <span class="f">ID_TGS</span> — confirms this TGT is intended for the TGS; (5) <span class="f">TS1</span> — start of validity window; (6) <span class="f">Lifetime</span> — typically 8–10 hours. The AS then encrypts this entire structure with <span class="k kc">K<sub>TGS</sub></span>:<br><strong>TGT = E(K<sub>TGS</sub>, [K<sub>c,TGS</sub> ‖ ID_client ‖ AD_client ‖ ID_TGS ‖ TS1 ‖ Lifetime])</strong></td>
+      <td class="why-cell">Encrypting with <span class="k kc">K<sub>TGS</sub></span> achieves two things: (1) the client, who carries this TGT, <em>cannot read</em> what is inside — specifically cannot read <span class="k kv">K<sub>c,TGS</sub></span> embedded inside it; (2) the client <em>cannot modify</em> the TGT — any tampering corrupts the encryption and TGS will reject it. <span class="f">Lifetime</span> is inside the encrypted content so the client cannot extend it. <span class="f">AD_client</span> binds the ticket to Alice's IP.</td>
+      <td class="sec-cell">TGT is simultaneously <em>opaque</em> (client cannot read <span class="k kv">K<sub>c,TGS</sub></span> inside) and <em>tamper-proof</em> (<span class="k kc">K<sub>TGS</sub></span> encryption detects any modification). A stolen TGT without <span class="k kv">K<sub>c,TGS</sub></span> is useless.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.5</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>AS encrypts session key for client</td>
+      <td class="actor-cell">AS (KDC)</td>
+      <td class="recip-cell">Internal (will become Part A of response)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kc">Kc</span><br>
+        Contents:<br>
+        <span class="k kv">K<sub>c,TGS</sub></span>, <span class="f">ID_TGS</span>, <span class="f">TS1</span>
+      </td>
+      <td class="what-cell">The AS takes <span class="k kv">K<sub>c,TGS</sub></span> (the same session key embedded in the TGT) and encrypts it separately with <span class="k kc">Kc</span> (Alice's key from the database):<br><strong>Part A = E(Kc, [K<sub>c,TGS</sub> ‖ ID_TGS ‖ TS1])</strong><br>Fields inside: (1) <span class="k kv">K<sub>c,TGS</sub></span> — the session key Alice needs to communicate with TGS; (2) <span class="f">ID_TGS</span> — tells Alice which service this key is for; (3) <span class="f">TS1</span> — echoed back so Alice can verify the AS responded to her specific request and not a replayed old response.</td>
+      <td class="why-cell">This is the <em>secure key delivery mechanism</em>. Encrypting with <span class="k kc">Kc</span> means only Alice (who can derive <span class="k kc">Kc</span> from her password) can unwrap it. This is also the <em>implicit password verification step</em> — if Alice types the wrong password, she derives the wrong <span class="k kc">Kc</span>, decryption of Part A produces garbage, and she cannot extract a valid <span class="k kv">K<sub>c,TGS</sub></span>. The AS never explicitly says "wrong password."</td>
+      <td class="sec-cell"><span class="k kv">K<sub>c,TGS</sub></span> is delivered securely: a network attacker who intercepts Part A cannot extract <span class="k kv">K<sub>c,TGS</sub></span> without knowing <span class="k kc">Kc</span>, which requires knowing Alice's password.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.6</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>AS sends complete response to client</td>
+      <td class="actor-cell">AS (KDC)</td>
+      <td class="recip-cell">Client (Alice)</td>
+      <td class="obj-cell">
+        <strong>Part A</strong>: E(<span class="k kc">Kc</span>, [<span class="k kv">K<sub>c,TGS</sub></span> ‖ <span class="f">ID_TGS</span> ‖ <span class="f">TS1</span>])<br><br>
+        <strong>Part B (TGT)</strong>: E(<span class="k kc">K<sub>TGS</sub></span>, [<span class="k kv">K<sub>c,TGS</sub></span> ‖ <span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">ID_TGS</span> ‖ <span class="f">TS1</span> ‖ <span class="f">Lifetime</span>])
+      </td>
+      <td class="what-cell">The AS bundles Part A and Part B (TGT) into a single response message to Alice. <strong>Part A</strong> is addressed to Alice (encrypted with <span class="k kc">Kc</span> — only Alice can open it). <strong>Part B</strong> is addressed to the TGS (encrypted with <span class="k kc">K<sub>TGS</sub></span> — only TGS can open it). Alice receives both simultaneously but can only read Part A.</td>
+      <td class="why-cell">Bundling both in one message reduces round trips. Alice needs both pieces immediately: <span class="k kv">K<sub>c,TGS</sub></span> from Part A to authenticate to the TGS, and the TGT from Part B to present to the TGS as proof of KDC endorsement. Neither piece is useful without the other.</td>
+      <td class="sec-cell">Single round trip completes the AS phase. Part A and Part B each have different intended recipients, so interception of either part by a third party yields no useful information.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.7</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>Client derives Kc locally</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Internal (no network)</td>
+      <td class="obj-cell">
+        Input: password (typed by Alice)<br>
+        Output: <span class="k kc">Kc</span> = hash(password)<br>
+        <em>Computed entirely on Alice's machine</em>
+      </td>
+      <td class="what-cell">Alice types her password into the Kerberos client software. The software immediately runs <span class="k kc">Kc</span> = hash(password) using the same algorithm the KDC used during account setup (Phase 0.1). This computation happens entirely on Alice's machine — no network packet is sent. <span class="k kc">Kc</span> exists only in Alice's local memory for the duration of the decryption operation in step 1.8.</td>
+      <td class="why-cell">The password is the one thing that never leaves Alice's machine. By using <span class="k kc">Kc</span> = hash(password) rather than the password itself, Kerberos cleanly separates the human-memorable password from the cryptographic key. Even if Alice's machine memory is dumped, <span class="k kc">Kc</span> is a hash — an attacker cannot reverse it to recover the original password (one-way hash property).</td>
+      <td class="sec-cell">The password cannot be stolen from the network because it is never placed on the network. <span class="k kc">Kc</span> is also discarded after step 1.8 — its in-memory lifetime is seconds, not hours.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.8</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>Client decrypts Part A</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kc">Kc</span><br>
+        Input: E(<span class="k kc">Kc</span>, [<span class="k kv">K<sub>c,TGS</sub></span> ‖ <span class="f">ID_TGS</span> ‖ <span class="f">TS1</span>])<br>
+        Output: <span class="k kv">K<sub>c,TGS</sub></span>, <span class="f">ID_TGS</span>, <span class="f">TS1</span>
+      </td>
+      <td class="what-cell">Alice's software uses the locally-derived <span class="k kc">Kc</span> to decrypt Part A from the AS response. If the password was correct, decryption succeeds and Alice extracts: (1) <span class="k kv">K<sub>c,TGS</sub></span> — the session key she will use to communicate with the TGS, now known to Alice for the first time; (2) <span class="f">ID_TGS</span> — Alice verifies this is the TGS she intended to contact; (3) <span class="f">TS1</span> — Alice verifies this matches the timestamp she sent in step 1.1. If the password was wrong → <span class="k kc">Kc</span> is wrong → decryption produces garbage → authentication failure.</td>
+      <td class="why-cell">This step is simultaneously: (a) <em>key delivery</em> — Alice learns <span class="k kv">K<sub>c,TGS</sub></span>; (b) <em>password verification</em> — correct decryption proves the correct password was entered; (c) <em>AS authentication</em> — only the real AS (holding <span class="k kc">Kc</span> from the KDC database) could have produced a message that decrypts correctly with Alice's <span class="k kc">Kc</span>. The <span class="f">TS1</span> echo-check prevents a replay of an old AS response.</td>
+      <td class="sec-cell">Alice now holds <span class="k kv">K<sub>c,TGS</sub></span>. An eavesdropper who captured the AS response cannot extract <span class="k kv">K<sub>c,TGS</sub></span> without <span class="k kc">Kc</span>, which requires Alice's password.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">1.9</td>
+      <td class="action-cell"><div class="pill pill-as">AS</div><br>Client stores credentials; discards Kc</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Credentials cache (local memory)</td>
+      <td class="obj-cell">
+        Stored: <span class="k kv">K<sub>c,TGS</sub></span>, TGT (opaque blob)<br>
+        <span class="warn">Discarded: <span class="k kc">Kc</span></span>
+      </td>
+      <td class="what-cell">Alice's Kerberos software stores two items in the local credentials cache (e.g., <code>/tmp/krb5cc_1000</code> on Linux, LSASS process memory on Windows): (1) <span class="k kv">K<sub>c,TGS</sub></span> — stored because Alice will need it repeatedly to request service tickets without re-entering her password; (2) <strong>TGT</strong> — stored exactly as received from AS, untouched and opaque, ready to be forwarded to TGS. Simultaneously, <span class="k kc">Kc</span> (derived from the password) is <strong>erased from memory</strong> — it is no longer needed until the TGT expires.</td>
+      <td class="why-cell"><span class="k kc">Kc</span> is discarded immediately after serving its one purpose (decrypting Part A). The longer a key remains in memory, the larger the window for a memory-dump attack (e.g., Mimikatz on Windows). <span class="k kc">Kc</span> is the highest-value key — it represents Alice's permanent identity — so minimising its in-memory lifetime is critical.</td>
+      <td class="sec-cell">The password-derived key <span class="k kc">Kc</span> has the shortest possible in-memory lifetime: derive → decrypt → discard. The stored credentials (TGT + <span class="k kv">K<sub>c,TGS</sub></span>) are sufficient for all service access until TGT expiry without ever needing the password again.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 2                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="phase-header ph-2">
+  <div class="phase-dot"></div>
+  <h2>Phase 2 — Service Ticket Request</h2>
+  <span class="phase-sub">Client ↔ TGS · TGT presented · Service ticket (Ticket_v) issued</span>
+</div>
+
+<div class="tbl-wrap">
+<table>
+  <colgroup>
+    <col class="c-id"><col class="c-action"><col class="c-actor"><col class="c-recip">
+    <col class="c-obj"><col class="c-what"><col class="c-why"><col class="c-sec">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>#</th><th>Phase &amp; Action</th><th>Actor (Sender)</th><th>Recipient</th>
+      <th>Object / Key Involved</th><th>What happens (procedure)</th>
+      <th>Why this design (rationale)</th><th>Security guarantee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id-val">2.1</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>Client constructs Authenticator for TGS</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Internal (will be sent to TGS)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kv">K<sub>c,TGS</sub></span><br>
+        Contents:<br>
+        <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">TS2</span> (fresh timestamp)
+      </td>
+      <td class="what-cell">Alice creates Authenticator1 = E(<span class="k kv">K<sub>c,TGS</sub></span>, [<span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">TS2</span>]). Fields: (1) <span class="f">ID_client</span> = "alice@REALM.COM" — Alice's identity stated inside the Authenticator; (2) <span class="f">AD_client</span> = Alice's current network address — TGS can compare with what the TGT recorded; (3) <span class="f">TS2</span> = the current timestamp at the exact moment of this TGS request — a freshly read clock value, distinct from <span class="f">TS1</span>. The Authenticator is created moments before sending so <span class="f">TS2</span> is as current as possible.</td>
+      <td class="why-cell">The Authenticator is a <em>proof of live presence</em>. The TGT alone proves the KDC endorsed Alice, but the TGT was issued hours ago — the TGS cannot know if Alice is still present or if the TGT was stolen. The Authenticator, encrypted with <span class="k kv">K<sub>c,TGS</sub></span>, proves: (1) the sender knows <span class="k kv">K<sub>c,TGS</sub></span> right now; (2) the request is happening right now (fresh <span class="f">TS2</span>). A new Authenticator is created for every TGS request — never reused.</td>
+      <td class="sec-cell">Replay attacks are prevented: a captured Authenticator with an old <span class="f">TS2</span> is rejected by TGS. Ticket theft without <span class="k kv">K<sub>c,TGS</sub></span> is prevented: the thief cannot create a valid Authenticator without the session key.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.2</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>Client sends TGS request</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">TGS</td>
+      <td class="obj-cell">
+        <span class="f">ID_v</span> (desired service)<br>
+        TGT = E(<span class="k kc">K<sub>TGS</sub></span>, [...]) — opaque, forwarded untouched<br>
+        Authenticator1 = E(<span class="k kv">K<sub>c,TGS</sub></span>, [<span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">TS2</span>])
+      </td>
+      <td class="what-cell">Alice sends three items to the TGS: (1) <span class="f">ID_v</span> = the identifier of the service Alice wants to access (e.g., "cifs/fileserver.realm.com") — tells the TGS which service ticket to issue; (2) <strong>TGT</strong> = the opaque blob received in Phase 1, forwarded byte-for-byte without modification — Alice cannot read it but TGS can; (3) <strong>Authenticator1</strong> = the freshly constructed Authenticator from step 2.1 — proves Alice is present and knows <span class="k kv">K<sub>c,TGS</sub></span>.</td>
+      <td class="why-cell">The three-part message covers: <em>what Alice wants</em> (<span class="f">ID_v</span>), <em>KDC's endorsement of Alice</em> (TGT), and <em>proof Alice is genuinely present right now</em> (Authenticator1). Removing any one piece breaks the security model. Alice forwards the TGT without reading it because she cannot — it is encrypted with <span class="k kc">K<sub>TGS</sub></span>, which she does not possess.</td>
+      <td class="sec-cell">TGS receives a complete, unforgeable request. Alice cannot fabricate the TGT (doesn't know <span class="k kc">K<sub>TGS</sub></span>) and cannot fake an Authenticator for a different identity (doesn't know <span class="k kv">K<sub>c,TGS</sub></span> for any other user).</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.3</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS decrypts TGT</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kc">K<sub>TGS</sub></span><br>
+        Input: TGT = E(<span class="k kc">K<sub>TGS</sub></span>, [...])<br>
+        Extracts: <span class="k kv">K<sub>c,TGS</sub></span>, <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">ID_TGS</span>, <span class="f">TS1</span>, <span class="f">Lifetime</span>
+      </td>
+      <td class="what-cell">TGS uses its own long-term secret key <span class="k kc">K<sub>TGS</sub></span> to decrypt the TGT. Upon successful decryption, TGS extracts: (1) <span class="k kv">K<sub>c,TGS</sub></span> — the session key; TGS now knows the key needed to decrypt Alice's Authenticator in step 2.5; (2) <span class="f">ID_client</span> = "alice@REALM.COM" — the identity the KDC vouches for; (3) <span class="f">AD_client</span> = Alice's IP as recorded by KDC; (4) <span class="f">ID_TGS</span> — confirms this TGT was intended for this TGS; (5) <span class="f">TS1</span> and <span class="f">Lifetime</span> — used to calculate remaining validity.</td>
+      <td class="why-cell">Only the TGS knows <span class="k kc">K<sub>TGS</sub></span> — this decryption step is computationally impossible for any other party. Successful decryption is itself a proof that this TGT was created by the legitimate KDC/AS. An attacker who forged a TGT would not know <span class="k kc">K<sub>TGS</sub></span>, so their forgery would decrypt to garbage and be rejected. <span class="k kv">K<sub>c,TGS</sub></span> extracted here is the critical piece for step 2.5.</td>
+      <td class="sec-cell">TGS verifies the KDC's endorsement of Alice's identity without any live network call to the KDC — the TGT is <em>self-contained proof</em>. The protocol scales to any number of TGS requests without burdening the KDC.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.4</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS checks TGT validity</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        <span class="f">TS1</span> and <span class="f">Lifetime</span> from decrypted TGT<br>
+        Compared against TGS's current clock
+      </td>
+      <td class="what-cell">TGS performs temporal validation: computes <span class="f">TS1</span> + <span class="f">Lifetime</span> and checks whether current time falls within the validity window: <strong>TS1 ≤ now ≤ TS1 + Lifetime</strong>. If <em>now &gt; TS1 + Lifetime</em> → TGT is expired → TGS rejects with KRB_AP_ERR_TKT_EXPIRED error, and Alice must re-enter her password to get a new TGT from the AS. TGS also optionally checks <span class="f">AD_client</span> (the IP from the TGT) matches the actual source IP of the incoming request.</td>
+      <td class="why-cell">The <span class="f">Lifetime</span> field is embedded inside the TGT's encrypted content — Alice cannot extend it because she cannot modify the TGT (it is encrypted with <span class="k kc">K<sub>TGS</sub></span> which she doesn't have). This is deliberate: validity controls are entirely under the KDC's authority, not the client's. The typical 8–10 hour Lifetime corresponds to a workday — long enough for convenience, short enough to limit damage from a stolen TGT.</td>
+      <td class="sec-cell">A stolen TGT automatically becomes worthless after <span class="f">Lifetime</span> expires. The KDC controls validity; the client cannot extend it under any circumstances.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.5</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS decrypts Authenticator</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kv">K<sub>c,TGS</sub></span> (just extracted from TGT in 2.3)<br>
+        Input: Authenticator1 = E(<span class="k kv">K<sub>c,TGS</sub></span>, [<span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">TS2</span>])<br>
+        Extracts: <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">TS2</span>
+      </td>
+      <td class="what-cell">TGS uses <span class="k kv">K<sub>c,TGS</sub></span> (just extracted from the TGT in step 2.3) to decrypt Authenticator1. Extracts: (1) <span class="f">ID_client</span> = "alice@REALM.COM" — Alice's identity as stated inside the Authenticator; (2) <span class="f">AD_client</span> = Alice's network address as stated in the Authenticator; (3) <span class="f">TS2</span> = the timestamp Alice embedded moments ago — the freshness proof. If decryption succeeds, it proves the sender knows <span class="k kv">K<sub>c,TGS</sub></span>.</td>
+      <td class="why-cell">This is the <em>two-layer verification</em> that is the heart of Kerberos. <strong>Layer 1 (TGT):</strong> "The KDC says this session belongs to alice and the session key is <span class="k kv">K<sub>c,TGS</sub></span>." <strong>Layer 2 (Authenticator):</strong> "The sender of this request knows <span class="k kv">K<sub>c,TGS</sub></span> right now." Both layers together prove: (1) KDC endorsed Alice, AND (2) the person making this request is Alice — not someone who merely stole her TGT.</td>
+      <td class="sec-cell">Stolen TGT without <span class="k kv">K<sub>c,TGS</sub></span> is useless — the thief cannot create Authenticator1. Forged Authenticator without a valid TGT is also rejected. <strong>Both pieces must come from the same legitimate session.</strong></td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.6</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS cross-validates identities</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        <span class="f">ID_client</span> from TGT (KDC-endorsed, trusted)<br>
+        vs.<br>
+        <span class="f">ID_client</span> from Authenticator1 (claimed by sender)
+      </td>
+      <td class="what-cell">TGS compares the <span class="f">ID_client</span> extracted from the TGT (step 2.3, trusted — the KDC put it there) with the <span class="f">ID_client</span> extracted from Authenticator1 (step 2.5, claimed by the sender). They must match exactly: <strong>ID_client(TGT) == ID_client(Authenticator1)</strong>. If they differ → TGS rejects immediately. Example: Mallory steals Alice's TGT but not <span class="k kv">K<sub>c,TGS</sub></span>. She uses her own session key to make an Authenticator saying "mallory@REALM.COM". The TGT says "alice" — mismatch → rejected.</td>
+      <td class="why-cell">Without this cross-check, an attacker could combine Alice's TGT (for KDC endorsement) with their own Authenticator (for key possession proof) — effectively splicing two pieces from different sessions into one seemingly valid request. The cross-check requires both pieces to name the same identity, closing this combination attack.</td>
+      <td class="sec-cell">A TGT stolen from one user cannot be combined with a different user's Authenticator. Both pieces must be from the same legitimate session.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.7</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS checks timestamp and replay cache</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        <span class="f">TS2</span> from Authenticator1<br>
+        TGS's current clock<br>
+        TGS's <em>replay cache</em> (recent Authenticators seen)
+      </td>
+      <td class="what-cell">TGS performs two checks: (1) <strong>Freshness check</strong>: verifies |now − <span class="f">TS2</span>| ≤ 5 minutes. If <span class="f">TS2</span> is older than 5 minutes → reject with KRB_AP_ERR_SKEW. (2) <strong>Replay check</strong>: queries the replay cache — a record of all (<span class="f">ID_client</span>, <span class="f">TS2</span>) pairs seen within the last 5-minute window. If this exact pair already exists → reject with KRB_AP_ERR_REPEAT. If not in cache → add it → accept. This is why Kerberos environments require NTP clock synchronisation across all machines.</td>
+      <td class="why-cell">Without the freshness check: an attacker who captures Authenticator1 from the network could replay it hours or days later. Without the replay cache: even within the 5-minute window, an attacker could send the same Authenticator1 multiple times simultaneously. The combination gives a precise guarantee: each Authenticator is accepted <em>exactly once</em>.</td>
+      <td class="sec-cell">Each Authenticator is accepted at most once. Replay attacks are bounded to the 5-minute window, and even within that window, duplicates are rejected by the replay cache.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.8</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS generates new service session key</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal (not yet sent)</td>
+      <td class="obj-cell"><span class="k kv">K<sub>c,v</sub></span><br>(brand-new random key — fresh for this specific service session)</td>
+      <td class="what-cell">TGS calls a CSPRNG to produce a new <span class="k kv">K<sub>c,v</sub></span> — the session key that Alice and Service V will use for their communication. This key has never existed before. It is entirely independent of <span class="k kv">K<sub>c,TGS</sub></span> (which was for Alice↔TGS communication) and of any other service session key Alice may have (e.g., her concurrent session with the mail server uses a completely different <span class="k kv">K<sub>c,v</sub></span>).</td>
+      <td class="why-cell">A fresh <span class="k kv">K<sub>c,v</sub></span> per service per session means Alice's communication with the file server and her communication with the mail server each use completely separate keys. This is the <em>principle of key isolation</em> — each security relationship gets its own key, minimising the blast radius of any individual key compromise.</td>
+      <td class="sec-cell">Session key compromise is scoped to exactly one user↔service relationship. Compromise of <span class="k kv">K<sub>c,v</sub></span> for the file server has no impact on the mail server session or any other session.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.9</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS constructs Service Ticket (Ticket_v)</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal (will become Part B of TGS response)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kc">Kv</span><br>
+        Contents: <span class="k kv">K<sub>c,v</sub></span>, <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">ID_v</span>, <span class="f">TS2</span>, <span class="f">Lifetime_v</span>
+      </td>
+      <td class="what-cell">TGS assembles the plaintext body of Ticket_v with: (1) <span class="k kv">K<sub>c,v</sub></span> — the service session key just generated; Server V needs this to decrypt Alice's Authenticators; (2) <span class="f">ID_client</span> = "alice@REALM.COM" — Server V needs to know whose request this represents; (3) <span class="f">AD_client</span> = Alice's IP; (4) <span class="f">ID_v</span> = "cifs/fileserver" — Server V checks this matches its own service name; (5) <span class="f">TS2</span> — issuance time; (6) <span class="f">Lifetime_v</span> — validity (often shorter than TGT lifetime, e.g., 1–2 hours). TGS encrypts the whole structure with <span class="k kc">Kv</span>:<br><strong>Ticket_v = E(Kv, [K<sub>c,v</sub> ‖ ID_client ‖ AD_client ‖ ID_v ‖ TS2 ‖ Lifetime_v])</strong></td>
+      <td class="why-cell">Encrypting with <span class="k kc">Kv</span> (known only to TGS/KDC and Server V) means: (1) Alice carries Ticket_v but cannot read <span class="k kv">K<sub>c,v</sub></span> inside it; (2) Alice cannot modify Ticket_v; (3) Server V trusts the ticket contents because only TGS could have produced valid <span class="k kc">Kv</span>-encryption. <span class="f">ID_v</span> inside the encrypted content prevents ticket misdirection — V checks that <span class="f">ID_v</span> matches its own identity.</td>
+      <td class="sec-cell">Ticket_v is opaque to Alice (cannot read <span class="k kv">K<sub>c,v</sub></span> inside) and tamper-proof (<span class="k kc">Kv</span>-encryption detects modification). A stolen Ticket_v without <span class="k kv">K<sub>c,v</sub></span> cannot be used — the holder cannot create valid Authenticators for Server V.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.10</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS encrypts Kc,v for client</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Internal (will become Part A of TGS response)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kv">K<sub>c,TGS</sub></span><br>
+        Contents: <span class="k kv">K<sub>c,v</sub></span>, <span class="f">ID_v</span>, <span class="f">TS2</span>
+      </td>
+      <td class="what-cell">TGS creates Part A of its response: <strong>Part A = E(<span class="k kv">K<sub>c,TGS</sub></span>, [<span class="k kv">K<sub>c,v</sub></span> ‖ <span class="f">ID_v</span> ‖ <span class="f">TS2</span>])</strong>. Fields: (1) <span class="k kv">K<sub>c,v</sub></span> — the service session key Alice needs to communicate with Server V — the main payload of Part A; (2) <span class="f">ID_v</span> = "cifs/fileserver" — tells Alice which service this key is for, binding <span class="k kv">K<sub>c,v</sub></span> to a specific service; (3) <span class="f">TS2</span> — allows Alice to verify this response corresponds to her current request, not a replayed old TGS response.</td>
+      <td class="why-cell"><span class="k kv">K<sub>c,TGS</sub></span> is the established secure channel between Alice and TGS — created specifically to protect exactly this kind of key delivery. Encrypting with <span class="k kv">K<sub>c,TGS</sub></span> ensures only Alice can extract <span class="k kv">K<sub>c,v</sub></span>. The <span class="f">ID_v</span> field binds <span class="k kv">K<sub>c,v</sub></span> to a specific service — Alice cannot accidentally or maliciously use <span class="k kv">K<sub>c,v</sub></span> for a different service.</td>
+      <td class="sec-cell"><span class="k kv">K<sub>c,v</sub></span> is delivered without ever appearing in plaintext on the network. A network attacker cannot extract <span class="k kv">K<sub>c,v</sub></span> from Part A without knowing <span class="k kv">K<sub>c,TGS</sub></span>.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.11</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>TGS sends response to client</td>
+      <td class="actor-cell">TGS</td>
+      <td class="recip-cell">Client (Alice)</td>
+      <td class="obj-cell">
+        <strong>Part A</strong>: E(<span class="k kv">K<sub>c,TGS</sub></span>, [<span class="k kv">K<sub>c,v</sub></span> ‖ <span class="f">ID_v</span> ‖ <span class="f">TS2</span>])<br><br>
+        <strong>Part B (Ticket_v)</strong>: E(<span class="k kc">Kv</span>, [<span class="k kv">K<sub>c,v</sub></span> ‖ <span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">ID_v</span> ‖ <span class="f">TS2</span> ‖ <span class="f">Lifetime_v</span>])
+      </td>
+      <td class="what-cell">TGS bundles Part A and Part B (Ticket_v) into a single response to Alice. Part A is for Alice (encrypted with <span class="k kv">K<sub>c,TGS</sub></span> — only Alice can open it). Part B is for Server V (encrypted with <span class="k kc">Kv</span> — only Server V can open it). Alice receives both but can only read Part A. The structure mirrors exactly what the AS sent in Phase 1 — one part for the immediate recipient, one sealed part for forwarding to the next party.</td>
+      <td class="why-cell">The same structural pattern from Phase 1 repeats here: one part for Alice, one opaque part for forwarding. This consistency means Alice's Kerberos client software handles Phase 1 and Phase 2 responses with identical logic — same code path. Alice now has everything needed for Phase 3.</td>
+      <td class="sec-cell">Alice now has both <span class="k kv">K<sub>c,v</sub></span> (from Part A) and Ticket_v (from Part B) — all that is needed to contact Server V.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">2.12</td>
+      <td class="action-cell"><div class="pill pill-tgs">TGS</div><br>Client decrypts Part A from TGS</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kv">K<sub>c,TGS</sub></span><br>
+        Input: E(<span class="k kv">K<sub>c,TGS</sub></span>, [<span class="k kv">K<sub>c,v</sub></span> ‖ <span class="f">ID_v</span> ‖ <span class="f">TS2</span>])<br>
+        Extracts: <span class="k kv">K<sub>c,v</sub></span>, <span class="f">ID_v</span>, <span class="f">TS2</span>
+      </td>
+      <td class="what-cell">Alice uses <span class="k kv">K<sub>c,TGS</sub></span> (stored in the credentials cache since Phase 1) to decrypt Part A. Extracts: (1) <span class="k kv">K<sub>c,v</sub></span> — the service session key; Alice now knows this key for the first time and stores it in the credentials cache alongside Ticket_v as a matched pair; (2) <span class="f">ID_v</span> — Alice verifies this is the service she requested; (3) <span class="f">TS2</span> — Alice verifies freshness of the TGS response. Alice stores <span class="k kv">K<sub>c,v</sub></span> and Ticket_v together in the credentials cache.</td>
+      <td class="why-cell">Alice now knows <span class="k kv">K<sub>c,v</sub></span> but does not know the contents of Ticket_v (which also contains <span class="k kv">K<sub>c,v</sub></span>, but encrypted with <span class="k kc">Kv</span> which Alice doesn't have). Both Alice and Server V will independently arrive at <span class="k kv">K<sub>c,v</sub></span>: Alice from this decryption, Server V from opening Ticket_v. This is how a shared secret is established between two parties who have <em>never directly communicated</em>.</td>
+      <td class="sec-cell">Alice is ready to contact Server V with a TGS-endorsed proof of identity (Ticket_v) and a shared secret (<span class="k kv">K<sub>c,v</sub></span>) — without any direct exchange between Alice and Server V.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 3                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="phase-header ph-3">
+  <div class="phase-dot"></div>
+  <h2>Phase 3 — Service Access</h2>
+  <span class="phase-sub">Client ↔ Server V · Ticket presented · Mutual authentication · Secure session</span>
+</div>
+
+<div class="tbl-wrap">
+<table>
+  <colgroup>
+    <col class="c-id"><col class="c-action"><col class="c-actor"><col class="c-recip">
+    <col class="c-obj"><col class="c-what"><col class="c-why"><col class="c-sec">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>#</th><th>Phase &amp; Action</th><th>Actor (Sender)</th><th>Recipient</th>
+      <th>Object / Key Involved</th><th>What happens (procedure)</th>
+      <th>Why this design (rationale)</th><th>Security guarantee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id-val">3.1</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Client constructs Authenticator for Server V</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Internal (will be sent to Server V)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kv">K<sub>c,v</sub></span><br>
+        Contents: <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">TS3</span> (new timestamp — distinct from TS1 and TS2)
+      </td>
+      <td class="what-cell">Alice creates Authenticator2 = E(<span class="k kv">K<sub>c,v</sub></span>, [<span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">TS3</span>]). Fields: (1) <span class="f">ID_client</span> = "alice@REALM.COM" — Alice's identity inside this Authenticator; (2) <span class="f">AD_client</span> = Alice's current network address; (3) <span class="f">TS3</span> = current timestamp at the exact moment of this service request — a third fresh timestamp reading, distinct from <span class="f">TS1</span> and <span class="f">TS2</span>. This Authenticator uses <span class="k kv">K<sub>c,v</sub></span>, not <span class="k kv">K<sub>c,TGS</sub></span>, because the intended recipient is Server V.</td>
+      <td class="why-cell">A new Authenticator using the service-specific <span class="k kv">K<sub>c,v</sub></span> means: the TGS-phase Authenticator1 (encrypted with <span class="k kv">K<sub>c,TGS</sub></span>) cannot be replayed against Server V — wrong key. Each phase uses its own session key, so Authenticators from different phases are cryptographically incompatible.</td>
+      <td class="sec-cell">Replay of Phase 2 Authenticator1 against Server V is impossible — it was encrypted with <span class="k kv">K<sub>c,TGS</sub></span>, not <span class="k kv">K<sub>c,v</sub></span>. Replay of Authenticator2 itself is rejected by Server V's timestamp check.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.2</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Client sends service access request</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Server V</td>
+      <td class="obj-cell">
+        Ticket_v = E(<span class="k kc">Kv</span>, [...]) — opaque, forwarded untouched<br>
+        Authenticator2 = E(<span class="k kv">K<sub>c,v</sub></span>, [<span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">TS3</span>])
+      </td>
+      <td class="what-cell">Alice sends two items to Server V: (1) <strong>Ticket_v</strong> = the opaque blob forwarded exactly as received from TGS in step 2.11 — Alice cannot read it, but Server V can decrypt it with <span class="k kc">Kv</span> to learn <span class="k kv">K<sub>c,v</sub></span> and Alice's identity; (2) <strong>Authenticator2</strong> = the freshly created Authenticator using <span class="k kv">K<sub>c,v</sub></span> — proves Alice knows <span class="k kv">K<sub>c,v</sub></span> right now. Note: unlike the TGS request (3 items), here Alice sends only 2 — the <span class="f">ID_v</span> inside the encrypted Ticket_v is sufficient for Server V to verify the ticket was intended for it.</td>
+      <td class="why-cell">Server V needs exactly these two pieces: (1) the TGS-endorsed proof of Alice's identity (Ticket_v); (2) proof that Alice is present right now and knows the session key (Authenticator2). The design mirrors what Alice sent to the TGS — consistent two-piece authentication pattern throughout the entire protocol.</td>
+      <td class="sec-cell">Server V receives an unforgeable, TGS-endorsed identity claim paired with a live-presence proof. Alice cannot fabricate Ticket_v (doesn't know <span class="k kc">Kv</span>) and cannot fake Authenticator2 for a different identity (doesn't know <span class="k kv">K<sub>c,v</sub></span> for any other user).</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.3</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Server V decrypts Ticket_v</td>
+      <td class="actor-cell">Server V</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kc">Kv</span><br>
+        Input: Ticket_v = E(<span class="k kc">Kv</span>, [...])<br>
+        Extracts: <span class="k kv">K<sub>c,v</sub></span>, <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">ID_v</span>, <span class="f">TS2</span>, <span class="f">Lifetime_v</span>
+      </td>
+      <td class="what-cell">Server V uses its own long-term secret key <span class="k kc">Kv</span> (installed by the sysadmin during Phase 0.2) to decrypt Ticket_v. Extracts: (1) <span class="k kv">K<sub>c,v</sub></span> — the service session key; Server V now knows this key for the first time and can use it to decrypt Authenticator2; (2) <span class="f">ID_client</span> = "alice@REALM.COM" — the identity the TGS vouches for; (3) <span class="f">AD_client</span> = Alice's IP; (4) <span class="f">ID_v</span> = "cifs/fileserver" — Server V checks this matches its own name; (5) <span class="f">TS2</span> and <span class="f">Lifetime_v</span> — used for validity checking in step 3.4.</td>
+      <td class="why-cell">Only Server V knows <span class="k kc">Kv</span> — this decryption step is the moment Server V independently verifies the TGS's endorsement without contacting the TGS or KDC. This is fully <em>offline verification</em> — no network call to any central authority. The <span class="f">ID_v</span> inside the ticket prevents a ticket issued for the file server from being used at the mail server.</td>
+      <td class="sec-cell">Server V verifies KDC's endorsement of Alice without any live connection to KDC or TGS. The protocol scales to thousands of service accesses per second without creating a bottleneck at the KDC.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.4</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Server V checks Ticket_v validity</td>
+      <td class="actor-cell">Server V</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        <span class="f">TS2</span> and <span class="f">Lifetime_v</span> from decrypted Ticket_v<br>
+        <span class="f">AD_client</span> from Ticket_v vs. actual source IP
+      </td>
+      <td class="what-cell">Server V performs: (1) <strong>Expiry check</strong>: verifies <strong>TS2 ≤ now ≤ TS2 + Lifetime_v</strong>. If expired → reject; Alice must go back to TGS for a new Ticket_v (no password re-entry needed as long as TGT is valid); (2) <strong>Address check (optional)</strong>: compares <span class="f">AD_client</span> from Ticket_v (recorded by TGS at ticket issuance) with the actual source IP of the incoming TCP connection. If they differ → reject. In modern deployments this check is often disabled due to NAT and VPN complications.</td>
+      <td class="why-cell"><span class="f">Lifetime_v</span> in the service ticket is deliberately shorter than the TGT lifetime. A stolen Ticket_v for the file server will expire within hours, limiting the attacker's window. The address check provides an extra binding — even if both Ticket_v and <span class="k kv">K<sub>c,v</sub></span> are stolen, they can only be used from Alice's specific IP address.</td>
+      <td class="sec-cell">Time-bounded validity limits the usefulness of a stolen service ticket. Optional IP binding adds a second factor tying the ticket to a specific machine.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.5</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Server V decrypts Authenticator2</td>
+      <td class="actor-cell">Server V</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kv">K<sub>c,v</sub></span> (just extracted from Ticket_v in 3.3)<br>
+        Input: Authenticator2 = E(<span class="k kv">K<sub>c,v</sub></span>, [<span class="f">ID_client</span> ‖ <span class="f">AD_client</span> ‖ <span class="f">TS3</span>])<br>
+        Extracts: <span class="f">ID_client</span>, <span class="f">AD_client</span>, <span class="f">TS3</span>
+      </td>
+      <td class="what-cell">Server V uses <span class="k kv">K<sub>c,v</sub></span> (just extracted from Ticket_v in step 3.3) to decrypt Authenticator2. Extracts: (1) <span class="f">ID_client</span> = "alice@REALM.COM" — Alice's stated identity; (2) <span class="f">AD_client</span> = Alice's address; (3) <span class="f">TS3</span> = the timestamp Alice embedded moments ago — the freshness proof for this service request. Successful decryption proves the sender knows <span class="k kv">K<sub>c,v</sub></span>.</td>
+      <td class="why-cell"><em>Same two-layer verification as Phase 2 step 2.5, now applied by Server V:</em> <strong>Layer 1 (Ticket_v):</strong> "TGS says this session belongs to alice and <span class="k kv">K<sub>c,v</sub></span> is the session key." <strong>Layer 2 (Authenticator2):</strong> "The sender of this request knows <span class="k kv">K<sub>c,v</sub></span> right now." The identical two-layer pattern appears at every trust boundary in the protocol — it is the structural core of Kerberos.</td>
+      <td class="sec-cell">Stolen Ticket_v without <span class="k kv">K<sub>c,v</sub></span> cannot produce a valid Authenticator2. The two-layer check is enforced identically at the TGS and at every service server.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.6</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Server V cross-validates and checks timestamp</td>
+      <td class="actor-cell">Server V</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        <span class="f">ID_client</span>: Ticket_v vs Authenticator2<br>
+        <span class="f">TS3</span>: freshness check<br>
+        Server V's own <em>replay cache</em>
+      </td>
+      <td class="what-cell">Server V performs three checks: (1) <strong>Identity cross-check</strong>: <strong>ID_client(Ticket_v) == ID_client(Authenticator2)</strong> — same ticket-theft-combination prevention as TGS step 2.6; (2) <strong>Freshness check</strong>: |now − <span class="f">TS3</span>| ≤ 5 minutes; (3) <strong>Replay cache check</strong>: Server V maintains its own independent replay cache — checks that (alice@REALM.COM, <span class="f">TS3</span>) has not been seen before within the 5-minute window. All three checks must pass.</td>
+      <td class="why-cell">Each service runs all these checks <em>independently</em> — there is no central coordinator at access time. This is by design: the protocol is <em>decentralised at the access point</em>. Server V's replay cache is separate from TGS's cache because Authenticator2 has never been presented to TGS — it is a new Authenticator for a new relationship.</td>
+      <td class="sec-cell">Full authentication without any live connection to KDC or TGS. Each service independently enforces anti-replay protection using its own replay cache.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.7</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Server V grants access (authorisation)</td>
+      <td class="actor-cell">Server V</td>
+      <td class="recip-cell">Alice's session</td>
+      <td class="obj-cell">Access control policy applied to <span class="f">ID_client</span> = "alice@REALM.COM"</td>
+      <td class="what-cell">Server V has completed all authentication checks. It now performs <em>authorisation</em>: looks up what alice@REALM.COM is permitted to do (read files? write files? admin access?). This is typically an ACL (Access Control List) or a directory lookup (LDAP/Active Directory query). If Alice is authorised → access granted. If not → reject with an authorisation error — distinct from the earlier authentication errors, which indicate identity failure.</td>
+      <td class="why-cell"><em>Authentication</em> (the entire Phase 1–3 protocol) answers: "Is this really Alice?" <em>Authorisation</em> answers: "Is Alice allowed to do this?" These are deliberately separated in Kerberos. Kerberos handles authentication only — each service implements its own authorisation policy. This allows different services to have different permission models while sharing the same authentication infrastructure.</td>
+      <td class="sec-cell">Kerberos guarantees the identity; the service enforces its own permissions. Neither step is skipped. Authenticating as alice@REALM.COM does not automatically grant access — permissions are checked separately.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.8</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Server V sends mutual auth response (optional)</td>
+      <td class="actor-cell">Server V</td>
+      <td class="recip-cell">Client (Alice)</td>
+      <td class="obj-cell">
+        Encrypted with: <span class="k kv">K<sub>c,v</sub></span><br>
+        Content: <span class="f">TS3</span> + 1
+      </td>
+      <td class="what-cell">Server V takes <span class="f">TS3</span> from Authenticator2, increments it by exactly 1, and sends: <strong>E(<span class="k kv">K<sub>c,v</sub></span>, [TS3 + 1])</strong>. To produce this message, Server V had to: (1) decrypt Ticket_v with <span class="k kc">Kv</span> → required knowing <span class="k kc">Kv</span>; (2) extract <span class="k kv">K<sub>c,v</sub></span> from the ticket; (3) decrypt Authenticator2 → extracted <span class="f">TS3</span>; (4) encrypt <span class="f">TS3</span>+1 with <span class="k kv">K<sub>c,v</sub></span>. Only the real Server V (knowing <span class="k kc">Kv</span>) can execute all four steps.</td>
+      <td class="why-cell">An impostor server cannot produce this response — it doesn't know <span class="k kc">Kv</span>, cannot decrypt Ticket_v, cannot extract <span class="k kv">K<sub>c,v</sub></span>, and therefore cannot produce the encrypted <span class="f">TS3</span>+1. The +1 convention (not TS3 itself, not TS3+2) proves the server processed Alice's specific Authenticator and is not replaying a captured old mutual-auth message from a previous session.</td>
+      <td class="sec-cell">Alice is now assured she is communicating with the genuine Server V, not an impostor or man-in-the-middle. This step completes the loop: Server V authenticated Alice (3.3–3.6); now Alice authenticates Server V (3.8–3.9).</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.9</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Client verifies mutual authentication</td>
+      <td class="actor-cell">Client (Alice)</td>
+      <td class="recip-cell">Internal</td>
+      <td class="obj-cell">
+        Key used: <span class="k kv">K<sub>c,v</sub></span><br>
+        Input: E(<span class="k kv">K<sub>c,v</sub></span>, [<span class="f">TS3</span> + 1])<br>
+        Verifies: decrypted value == <span class="f">TS3</span> + 1
+      </td>
+      <td class="what-cell">Alice decrypts Server V's mutual-auth response using <span class="k kv">K<sub>c,v</sub></span>. Verifies three things: (1) <strong>Decryption succeeds</strong> — confirms Server V knows <span class="k kv">K<sub>c,v</sub></span>, which required knowing <span class="k kc">Kv</span> to extract from Ticket_v; (2) <strong>Decrypted value == TS3 + 1</strong> — <span class="f">TS3</span> was the timestamp Alice put in Authenticator2, so <span class="f">TS3</span>+1 proves Server V received and processed her specific Authenticator; (3) <strong>TS3+1 is appropriately recent</strong> — not a replay of a mutual-auth response from a previous session. All three checks must pass for Alice to trust Server V.</td>
+      <td class="why-cell">Without mutual authentication, Alice could be deceived by a rogue server that pretended to accept her Ticket_v (couldn't actually decrypt it, but could pretend) and sent fake data. The mutual auth response, requiring knowledge of <span class="k kc">Kv</span> to produce, is the cryptographic proof that this server is the genuine, KDC-registered Server V.</td>
+      <td class="sec-cell"><strong>Full mutual authentication achieved:</strong> Server V has verified Alice (steps 3.3–3.6); Alice has verified Server V (steps 3.8–3.9). Both parties have authenticated each other using only symmetric cryptography and the KDC as trusted third party.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">3.10</td>
+      <td class="action-cell"><div class="pill pill-svc">Service</div><br>Secure session established</td>
+      <td class="actor-cell">Alice ↔ Server V</td>
+      <td class="recip-cell">Both</td>
+      <td class="obj-cell"><span class="k kv">K<sub>c,v</sub></span><br>(shared session key — never transmitted in plaintext)</td>
+      <td class="what-cell">All subsequent application messages between Alice and Server V are encrypted and integrity-protected using <span class="k kv">K<sub>c,v</sub></span>: E(<span class="k kv">K<sub>c,v</sub></span>, [request]) from Alice; E(<span class="k kv">K<sub>c,v</sub></span>, [response]) from Server V. <span class="k kv">K<sub>c,v</sub></span> was <strong>never transmitted in plaintext</strong>: Alice learned it from TGS (step 2.12 via <span class="k kv">K<sub>c,TGS</sub></span> encryption); Server V learned it from Ticket_v (step 3.3 via <span class="k kc">Kv</span> encryption). Both arrived at the same key through independent, secure paths. The KDC is completely uninvolved from this point onward.</td>
+      <td class="why-cell"><span class="k kv">K<sub>c,v</sub></span> expires with Ticket_v. When it expires, Alice requests a new Ticket_v from TGS (Phase 2 repeats, no password re-entry). When TGT expires (typically after 8–10 hours), Alice must re-enter her password (Phase 1 repeats). This two-tier expiry is the key lifecycle design: short service key lifetime for security, longer TGT lifetime for usability.</td>
+      <td class="sec-cell">End-to-end confidentiality and integrity for all application communication. No further KDC involvement until Ticket_v expires. The KDC is entirely out of the critical path for all data communication.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 4                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="phase-header ph-4">
+  <div class="phase-dot"></div>
+  <h2>Phase 4 — Expiry &amp; Attack Surface</h2>
+  <span class="phase-sub">Ticket lifecycle · Real-world threats</span>
+</div>
+
+<div class="tbl-wrap">
+<table>
+  <colgroup>
+    <col class="c-id"><col class="c-action"><col class="c-actor"><col class="c-recip">
+    <col class="c-obj"><col class="c-what"><col class="c-why"><col class="c-sec">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>#</th><th>Phase &amp; Action</th><th>Actor (Sender)</th><th>Recipient</th>
+      <th>Object / Key Involved</th><th>What happens (procedure)</th>
+      <th>Why this design (rationale)</th><th>Security guarantee</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="c-id-val">4.1</td>
+      <td class="action-cell"><div class="pill pill-threat">Expiry</div><br>Ticket_v expires</td>
+      <td class="actor-cell">Server V (rejects)</td>
+      <td class="recip-cell">Client (Alice)</td>
+      <td class="obj-cell"><span class="f">Lifetime_v</span> field in Ticket_v<br>Checked against current time</td>
+      <td class="what-cell">Server V receives a request from Alice with a Ticket_v whose <strong>TS2 + Lifetime_v &lt; now</strong>. Server V rejects with KRB_AP_ERR_TKT_EXPIRED. Alice's Kerberos client detects this error and automatically returns to Phase 2 (TGS exchange) — presents her still-valid TGT to get a fresh Ticket_v. Alice does <strong>not</strong> need to re-enter her password as long as her TGT is still valid. The ticket refresh is transparent to Alice and to the application she is using.</td>
+      <td class="why-cell">Short service ticket lifetimes minimise the impact of a stolen Ticket_v. The automatic renewal process is transparent to Alice. Separating TGT lifetime (8–10 hours) from service ticket lifetime (1–2 hours) gives a two-tier system: service access refreshes quietly, full re-authentication happens once per workday.</td>
+      <td class="sec-cell">A stolen Ticket_v has a maximum usable lifetime of <span class="f">Lifetime_v</span> — typically 1–2 hours — before it expires automatically with no manual revocation needed.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">4.2</td>
+      <td class="action-cell"><div class="pill pill-threat">Expiry</div><br>TGT expires</td>
+      <td class="actor-cell">TGS (rejects)</td>
+      <td class="recip-cell">Client (Alice — must re-login)</td>
+      <td class="obj-cell"><span class="f">Lifetime</span> field in TGT<br>Checked against current time</td>
+      <td class="what-cell">Alice's TGT has expired (<strong>TS1 + Lifetime &lt; now</strong>). When Alice next tries to access any service, the TGS rejects the TGT with KRB_AP_ERR_TKT_EXPIRED. Alice must return to Phase 1 — re-enter her password to get a new TGT. The old TGT and all cached Ticket_v's and session keys are discarded from the credentials cache. Kerberos environments typically set TGT Lifetime to 8–10 hours, aligning with a standard workday.</td>
+      <td class="why-cell">TGT expiry forces periodic re-authentication. If Alice walked away from her desk and someone else sat down, they cannot continue her Kerberos session past the TGT lifetime — all service access requires going through Phase 1 again, which requires typing Alice's password. Expiry is automatic — it requires no manual revocation action from an administrator.</td>
+      <td class="sec-cell">A stolen TGT has a maximum lifetime of <span class="f">Lifetime</span> — typically 8–10 hours. After that the attacker is locked out automatically. No revocation infrastructure (CRL, OCSP) is needed for this guarantee.</td>
+    </tr>
+    <tr>
+      <td class="c-id-val">4.3</td>
+      <td class="action-cell"><div class="pill pill-threat">Threat</div><br>Pass-the-Ticket attack</td>
+      <td class="actor-cell"><span class="warn">Attacker</span></td>
+      <td class="recip-cell">Server V (impersonating Alice)</td>
+      <td class="obj-cell">
+        Stolen from LSASS memory:<br>
+        <span class="k kn">TGT</span> + <span class="k kn">K<sub>c,TGS</sub></span><br>
+        or<br>
+        <span class="k kn">Ticket_v</span> + <span class="k kn">K<sub>c,v</sub></span>
+      </td>
+      <td class="what-cell">An attacker compromises Alice's machine and uses a memory-dump tool (e.g., <strong>Mimikatz</strong> on Windows) to dump the LSASS process memory. Extracts from the credentials cache: <span class="k kn">TGT</span> (opaque blob) + <span class="k kn">K<sub>c,TGS</sub></span> (session key stored alongside it). With these two items, the attacker has everything needed to execute Phase 2 from any machine — they can request service tickets and access all services Alice could access, until the TGT expires. Alice's password is never recovered — only the temporary tickets are stolen.</td>
+      <td class="why-cell">This attack succeeds because the TGT + <span class="k kv">K<sub>c,TGS</sub></span> pair is equivalent to a temporary password. Kerberos itself is not broken — the attacker exploited OS-level credential storage. Countermeasures: (1) <strong>Credential Guard</strong> (Windows) — stores credentials in a hardware-isolated VM that Mimikatz cannot access; (2) <strong>Protected Users group</strong> — TGTs not cached in LSASS for high-privilege accounts; (3) <strong>Smart card / PKINIT</strong> — TGT cannot be used without the physical card; (4) <strong>Short TGT lifetimes</strong> — reduce the attacker's window.</td>
+      <td class="sec-cell">The Kerberos protocol design is sound — this attack exploits OS-level credential storage, not the cryptographic protocol. The primary defence must protect the host machine, not the protocol itself. Short ticket lifetimes and Credential Guard are the two most impactful mitigations.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
