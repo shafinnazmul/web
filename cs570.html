@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS570 Algorithms — Complete Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2330;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-dimmer: #484f58;
+    --slide-bg: #1a1f2e;
+    --slide-border: #2d4a7a;
+    --discussion-bg: #111a14;
+    --discussion-border: #2a4d2e;
+    --question-bg: #1a1520;
+    --question-border: #4a3060;
+    --code-bg: #0d1117;
+    --highlight: #ffa657;
+    --tag-bg: #21262d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0d2137 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 40% 40%, rgba(88,166,255,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(63,185,80,0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+
+  header .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  header .meta-tags {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+  }
+
+  .tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* TABLE OF CONTENTS */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 900px;
+    padding: 1.5rem 2rem;
+  }
+
+  .toc h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.3rem;
+  }
+
+  .toc a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.2rem 0;
+    display: block;
+    transition: color 0.2s;
+  }
+
+  .toc a:hover { color: var(--text); }
+
+  /* MAIN CONTAINER */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 4rem;
+  }
+
+  /* TOPIC SECTIONS */
+  .topic-section {
+    margin-bottom: 3rem;
+  }
+
+  .topic-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, var(--surface2), transparent);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .topic-num {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .topic-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+  }
+
+  /* LECTURE LABEL */
+  .lecture-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dimmer);
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SLIDE BOX */
+  .slide-box {
+    background: var(--slide-bg);
+    border: 1px solid var(--slide-border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .slide-box::before {
+    content: attr(data-slide);
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dimmer);
+  }
+
+  .slide-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .slide-content {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .slide-content ul, .slide-content ol {
+    padding-left: 1.25rem;
+  }
+
+  .slide-content li {
+    margin-bottom: 0.25rem;
+  }
+
+  code, .code-inline {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--code-bg);
+    color: var(--highlight);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: #c9d1d9;
+    line-height: 1.5;
+    margin: 0.75rem 0;
+  }
+
+  pre .kw { color: #ff7b72; }
+  pre .fn { color: #d2a8ff; }
+  pre .cm { color: #8b949e; font-style: italic; }
+  pre .nm { color: #79c0ff; }
+  pre .st { color: #a5d6ff; }
+
+  /* DISCUSSION BOX */
+  .discussion-box {
+    background: var(--discussion-bg);
+    border: 1px solid var(--discussion-border);
+    border-radius: 8px;
+    padding: 1.5rem 1.75rem;
+    margin: 0.5rem 0 1.25rem;
+    position: relative;
+  }
+
+  .discussion-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .discussion-label::before {
+    content: '◆';
+    font-size: 0.6rem;
+  }
+
+  .discussion-box h4 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1rem;
+    color: var(--accent2);
+    margin: 1rem 0 0.4rem;
+    font-style: italic;
+  }
+
+  .discussion-box p {
+    margin-bottom: 0.75rem;
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .discussion-box ul, .discussion-box ol {
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .discussion-box li {
+    margin-bottom: 0.4rem;
+    font-size: 0.92rem;
+  }
+
+  .why-box, .how-box, .what-box {
+    border-left: 3px solid;
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 0.75rem 0;
+    font-size: 0.9rem;
+  }
+
+  .why-box {
+    border-color: var(--accent3);
+    background: rgba(247,129,102,0.06);
+  }
+
+  .how-box {
+    border-color: var(--accent);
+    background: rgba(88,166,255,0.06);
+  }
+
+  .what-box {
+    border-color: var(--accent4);
+    background: rgba(210,168,255,0.06);
+  }
+
+  .golden-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+
+  .why-box .golden-label { color: var(--accent3); }
+  .how-box .golden-label { color: var(--accent); }
+  .what-box .golden-label { color: var(--accent4); }
+
+  /* COMPLEXITY TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.88rem;
+  }
+
+  th {
+    background: var(--tag-bg);
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td code { font-size: 0.82rem; }
+
+  /* QUESTION SECTION */
+  .questions-section {
+    background: var(--question-bg);
+    border: 1px solid var(--question-border);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .questions-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--question-border);
+    width: 100%;
+  }
+
+  .question-item {
+    margin-bottom: 1.25rem;
+  }
+
+  .question-text {
+    font-family: 'Libre Baskerville', serif;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .question-meta {
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dimmer);
+    margin-bottom: 0.5rem;
+  }
+
+  .answer-block {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .answer-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+
+  .answer-block p, .answer-block li {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .answer-block ul, .answer-block ol {
+    padding-left: 1.25rem;
+    margin-top: 0.25rem;
+  }
+
+  .answer-block li { margin-bottom: 0.3rem; }
+
+  /* DIVIDERS */
+  .topic-divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+    margin: 2.5rem 0;
+  }
+
+  /* FORMULA */
+  .formula {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    color: #ffa657;
+    font-size: 0.9rem;
+    display: block;
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--highlight);
+    background: rgba(255,166,87,0.06);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 0.75rem 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  .callout strong { color: var(--highlight); }
+
+  /* BACK TO TOP */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--accent);
+    color: #000;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-decoration: none;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+  .back-to-top:hover { opacity: 1; }
+
+  /* Responsive */
+  @media(max-width:640px){
+    header h1 { font-size: 1.4rem; }
+    .container { padding: 1rem; }
+    .topic-title { font-size: 1.15rem; }
+    .theme-toggle { bottom: 1.25rem; left: 1rem; }
+  }
+
+  /* ── LIGHT (DAYLIGHT) THEME ─────────────────────────────────── */
+  [data-theme="light"] {
+    --bg:                #f9f8f6;
+    --surface:           #efece8;
+    --surface2:          #e8e4de;
+    --border:            #d5d0c9;
+    --accent:            #c2622a;
+    --accent2:           #2e7d52;
+    --accent3:           #bf3b2c;
+    --accent4:           #7050a8;
+    --text:              #1a1816;
+    --text-dim:          #56524d;
+    --text-dimmer:       #9a958e;
+    --slide-bg:          #eeeae3;
+    --slide-border:      #b0c3d9;
+    --discussion-bg:     #e6ede8;
+    --discussion-border: #95bf9f;
+    --question-bg:       #ece7f4;
+    --question-border:   #b09dd0;
+    --code-bg:           #e8e4dd;
+    --highlight:         #c2622a;
+    --tag-bg:            #e4e0d9;
+  }
+
+  [data-theme="light"] header {
+    background: linear-gradient(135deg, #f2efe9 0%, #ece6dc 50%, #e8eef4 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  [data-theme="light"] header::before {
+    background: radial-gradient(ellipse at 40% 40%, rgba(194,98,42,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(46,125,82,0.05) 0%, transparent 50%);
+  }
+
+  [data-theme="light"] pre { color: #3d3a36; }
+  [data-theme="light"] pre .kw { color: #b93c2e; }
+  [data-theme="light"] pre .fn { color: #7050a8; }
+  [data-theme="light"] pre .cm { color: #9a958e; }
+  [data-theme="light"] pre .nm { color: #1a6dad; }
+  [data-theme="light"] pre .st { color: #2e7d8a; }
+
+  [data-theme="light"] .why-box  { background: rgba(191,59,44,0.06); }
+  [data-theme="light"] .how-box  { background: rgba(194,98,42,0.06); }
+  [data-theme="light"] .what-box { background: rgba(112,80,168,0.06); }
+
+  [data-theme="light"] .callout  { background: rgba(194,98,42,0.07); }
+  [data-theme="light"] .answer-block { background: rgba(0,0,0,0.04); }
+
+  [data-theme="light"] .topic-header {
+    background: linear-gradient(90deg, var(--surface2), transparent);
+  }
+
+  [data-theme="light"] .back-to-top {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ── THEME TOGGLE BUTTON ─────────────────────────────────────── */
+  .theme-toggle {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.38rem 0.9rem 0.38rem 0.45rem;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    z-index: 100;
+    transition: background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+    user-select: none;
+    border: 1px solid var(--border);
+  }
+
+  .theme-toggle:hover {
+    box-shadow: 0 3px 14px rgba(0,0,0,0.28);
+    color: var(--text);
+  }
+
+  .theme-toggle-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    background: var(--tag-bg);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+</style>
+</head>
+<body id="top">
+
+<!-- THEME TOGGLE -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle colour theme" title="Switch theme">
+  <span class="theme-toggle-icon" id="themeIcon">🌙</span>
+  <span id="themeLabel">Daylight</span>
+</button>
+
+<header>
+  <h1>CS 570 — Algorithms</h1>
+  <div class="subtitle">Comprehensive Study Guide · Lectures 1–27 · Spring 2026</div>
+  <div class="meta-tags">
+    <span class="tag">Kleinberg &amp; Tardos</span>
+    <span class="tag">CLRS</span>
+    <span class="tag">Simon Sinek Golden Circle</span>
+    <span class="tag">Beginner → Expert</span>
+    <span class="tag">Prof. Bineet Ghosh · UA</span>
+  </div>
+</header>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc" id="toc">
+  <h2>📚 Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#topic1">1. Course Introduction &amp; Motivation</a>
+    <a href="#topic2">2. Stable Matching Problem</a>
+    <a href="#topic3">3. Algorithm Comparison &amp; Complexity</a>
+    <a href="#topic4">4. Asymptotic Analysis (Big-O)</a>
+    <a href="#topic5">5. Recurrences &amp; Recursion</a>
+    <a href="#topic6">6. Sorting Algorithms</a>
+    <a href="#topic7">7. Merge Sort &amp; Divide and Conquer</a>
+    <a href="#topic8">8. Quicksort</a>
+    <a href="#topic9">9. Graph Fundamentals</a>
+    <a href="#topic10">10. BFS &amp; Shortest Paths</a>
+    <a href="#topic11">11. Depth First Search</a>
+    <a href="#topic12">12. DAGs &amp; Topological Ordering</a>
+    <a href="#topic13">13. Dijkstra's Algorithm</a>
+    <a href="#topic14">14. Bellman-Ford &amp; Negative Weights</a>
+    <a href="#topic15">15. Floyd-Warshall (All-Pairs)</a>
+    <a href="#topic16">16. Divide &amp; Conquer: Integer Multiplication</a>
+    <a href="#topic17">17. Intractability, NP &amp; Reductions</a>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 1: COURSE INTRO -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic1">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 01</span>
+    <h2 class="topic-title">Course Introduction &amp; Motivation</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 1–2 · Slides 1–21</span>
+
+  <div class="slide-box" data-slide="Slides 1–21">
+    <div class="slide-title">What This Course Is About</div>
+    <div class="slide-content">
+      <ul>
+        <li><strong>Course:</strong> COMP 570 — Algorithms (Spring 2026, Prof. Bineet Ghosh)</li>
+        <li><strong>Textbooks:</strong> Kleinberg &amp; Tardos <em>Algorithm Design</em>; Cormen et al. <em>Introduction to Algorithms (CLRS)</em></li>
+        <li><strong>Topics covered:</strong> Analysis, Searching/Sorting, Graphs, Divide &amp; Conquer, Greedy, Dynamic Programming, Flow, Intractability</li>
+        <li><strong>Learning outcomes:</strong> Design efficient algorithms, asymptotic analysis, apply graph/DP/greedy strategies, identify NP-hard problems</li>
+        <li><strong>Prerequisites:</strong> Algorithms (CS201), Data Structures, Discrete Math, Python, Mathematical Maturity (induction proofs, graph theory basics)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Annotated in light of Kleinberg &amp; Tardos + CLRS</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — The Purpose</div>
+      <p>Why study algorithms formally? Because <strong>not all algorithms are equally good</strong>. The gap between an O(n²) and an O(n log n) algorithm isn't a minor technical detail — it's the difference between a system that works for 10,000 inputs and one that works for 10 <em>million</em> inputs (assuming 10⁸ ops/sec). Kleinberg &amp; Tardos open their book with this exact argument: as problems grow in scale — genomics, social networks, supply chains — the algorithm you pick determines whether a solution is possible at all. CS is not just about writing code that works; it's about writing code that <em>scales</em>.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — The Process</div>
+      <p>The course is structured around three interlocking skills: (1) <strong>Design</strong> — picking the right paradigm (divide &amp; conquer, greedy, DP) for the right problem; (2) <strong>Analysis</strong> — proving your algorithm is fast using asymptotic notation; (3) <strong>Correctness</strong> — proving your algorithm is right, typically by induction or exchange argument. CLRS (Chapter 1) calls this the foundation of algorithmic thinking. You cannot shortcut any of the three.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — The Deliverable</div>
+      <p>By the end of this course you should be able to look at a novel problem and immediately ask: Is this a shortest-path problem? A matching problem? An NP-hard problem? And then choose — and justify — the right approach. This is exactly what technical interviews, research, and real-world engineering require.</p>
+    </div>
+
+    <h4>Mathematical Maturity — What You Need</h4>
+    <p>The course assumes comfort with <strong>proof by induction</strong>. This is non-negotiable because virtually every algorithm correctness proof uses induction. If you're rusty, review: (1) Base case, (2) Inductive hypothesis, (3) Inductive step. CLRS Appendix A reviews summations; Appendix B reviews basic combinatorics. Kleinberg &amp; Tardos Chapter 0 reviews asymptotic notation informally.</p>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 2: STABLE MATCHING -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic2">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 02</span>
+    <h2 class="topic-title">The Stable Matching Problem</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 2 · Slides 23–31</span>
+
+  <div class="slide-box" data-slide="Slides 23–31">
+    <div class="slide-title">Advisor Selection / Stable Marriages</div>
+    <div class="slide-content">
+      <p>The slides introduce the <strong>Stable Matching Problem</strong> through the lens of advisor selection: given a set of students and advisors, each with preference lists, find a matching that is <em>stable</em> — no student and advisor would both prefer each other over their current match.</p>
+      <ul>
+        <li>Motivating question: Can this be solved algorithmically? Are all algorithmic solutions equally good?</li>
+        <li>This is the canonical problem from Kleinberg &amp; Tardos, Chapter 1, Section 1.1</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Gale-Shapley Algorithm</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — The Purpose</div>
+      <p>The Stable Matching Problem is the <em>perfect opening problem</em> for an algorithms course because it illustrates the entire design-and-prove workflow on a problem you can fully understand without any prior theory. It's used in real life to match medical residents to hospitals (the NRMP program), students to schools, and even organ donors to recipients. The key insight: a "fair" or "stable" outcome is not obvious, and finding it efficiently requires a clever algorithm.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — The Gale-Shapley Algorithm (K&amp;T Ch. 1.1)</div>
+      <p>The Gale-Shapley algorithm (also called "deferred acceptance") works as follows. Kleinberg &amp; Tardos prove it finds a stable matching in O(n²) time:</p>
+      <pre>
+<span class="cm">// n students, n advisors, each with complete preference lists</span>
+Initialize: all students and advisors free
+<span class="kw">while</span> some student s is free and hasn't proposed to all advisors:
+    a = first advisor on s's list s hasn't proposed to yet
+    <span class="kw">if</span> a is free:
+        tentatively match (s, a)
+    <span class="kw">else if</span> a prefers s over current match s':
+        free s', tentatively match (s, a)
+    <span class="kw">else</span>:
+        a rejects s
+<span class="kw">return</span> the final matching
+      </pre>
+      <p><strong>Key invariant:</strong> Once an advisor is matched, they only trade up. Hence the algorithm terminates after at most n² proposals.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Correctness &amp; Optimality</div>
+      <p><strong>Claim 1 (Stability):</strong> The algorithm always produces a stable matching. Proof by contradiction: suppose student s and advisor a form an instability. Either s never proposed to a (impossible — s proposes in order and reaches a before any worse option) or a rejected s for someone better. Either way, a is not worse off — contradiction.</p>
+      <p><strong>Claim 2 (Student-optimality):</strong> The G-S algorithm gives every student their best valid partner — the best advisor they could be matched with in <em>any</em> stable matching. Advisors get their worst valid partner.</p>
+    </div>
+
+    <h4>Complexity</h4>
+    <p>Each student proposes to each advisor at most once → at most n² proposals → O(n²) time. This is optimal for this problem.</p>
+
+    <div class="callout">
+      <strong>K&amp;T Connection:</strong> Chapter 1, Section 1.1 covers this in full, including the proof of stability and optimality. This is also Problem 1 in K&amp;T's first problem set. The slides directly reference this section as required reading.
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Stable Matching</div>
+
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T 1.1 style) Prove that the Gale-Shapley algorithm always terminates and produces a perfect matching.</div>
+      <div class="question-meta">Source: K&amp;T Chapter 1 · Difficulty: Medium</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p><strong>Termination:</strong> Each student proposes to each advisor at most once. With n students and n advisors, there are at most n² proposals. Each iteration of the while loop makes at least one proposal, so the algorithm terminates in at most n² steps.</p>
+        <p><strong>Perfect matching:</strong> Suppose some student s is unmatched at termination. Then s proposed to all n advisors and was rejected by each. But an advisor only rejects a student to stay with (or upgrade to) someone better, so every advisor is matched at termination. But then there are n matched advisors and n students, so every student is matched — contradicting s being unmatched.</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q2. Is the stable matching produced by G-S unique? Provide an argument or counterexample.</div>
+      <div class="question-meta">Difficulty: Medium</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>No, stable matchings are not unique in general. Consider 2 students {s1, s2} and 2 advisors {a1, a2} with preferences: s1: a1 > a2; s2: a2 > a1; a1: s2 > s1; a2: s1 > s2. Both {(s1,a1),(s2,a2)} and {(s1,a2),(s2,a1)} are stable. The G-S algorithm, run with students proposing, will produce the student-optimal matching.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 3: COMPLEXITY & BIG-O -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic3">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 03</span>
+    <h2 class="topic-title">Algorithm Comparison &amp; Asymptotic Analysis</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 2–6 · Slides 32–77</span>
+
+  <div class="slide-box" data-slide="Slides 32–37">
+    <div class="slide-title">Linear Search vs. Binary Search</div>
+    <div class="slide-content">
+      <ul>
+        <li><strong>Linear Search:</strong> Check each element sequentially. Works on sorted &amp; unsorted. O(1) best, O(n) worst &amp; average.</li>
+        <li><strong>Binary Search:</strong> Repeatedly halve the search space. Requires sorted input. O(log n) all cases.</li>
+        <li>Motivates: we need a <em>formal framework</em> to compare algorithms.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-box" data-slide="Slides 40–41, 52–57">
+    <div class="slide-title">Big-O, Big-Ω, Big-Θ Notation</div>
+    <div class="slide-content">
+      <ul>
+        <li><strong>O(g(n)):</strong> Upper bound — f(n) grows no faster than c·g(n) for large n</li>
+        <li><strong>Ω(g(n)):</strong> Lower bound — f(n) grows at least as fast as c·g(n) for large n</li>
+        <li><strong>Θ(g(n)):</strong> Tight bound — both O and Ω simultaneously</li>
+        <li>Exercises: prove/disprove asymptotic claims (Exercises 1–3 from Lecture 5–6)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-box" data-slide="Slides 68–75">
+    <div class="slide-title">Recurrences — Recursive Factorial</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">def</span> <span class="fn">factorial</span>(n):
+    <span class="kw">if</span> n == 0 or n == 1: <span class="kw">return</span> 1
+    <span class="kw">return</span> n * factorial(n - 1)
+      </pre>
+      <ul>
+        <li>Each call does O(1) work, makes 1 recursive call on (n−1)</li>
+        <li>Recurrence: T(n) = T(n−1) + 1, T(1) = 1 → T(n) = O(n)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Asymptotic Notation Deeply</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — The Purpose</div>
+      <p>Asymptotic notation exists to let us reason about algorithm performance <em>independent of hardware</em>. Whether you run code on a 2010 laptop or a 2025 server cluster, the <em>scaling behavior</em> of the algorithm doesn't change. A Θ(n²) algorithm is always overtaken by a Θ(n log n) one as n grows. This allows us to make machine-agnostic performance claims — and it's why the notation appears everywhere in systems, research papers, and interviews.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Formal Definitions (CLRS Ch. 3)</div>
+      <p><strong>Definition (Big-O):</strong> f(n) = O(g(n)) iff there exist positive constants c and n₀ such that f(n) ≤ c·g(n) for all n ≥ n₀.</p>
+      <p><strong>Definition (Big-Ω):</strong> f(n) = Ω(g(n)) iff there exist positive constants c and n₀ such that f(n) ≥ c·g(n) for all n ≥ n₀.</p>
+      <p><strong>Definition (Big-Θ):</strong> f(n) = Θ(g(n)) iff f(n) = O(g(n)) AND f(n) = Ω(g(n)).</p>
+      <p><strong>Common hierarchy:</strong> O(1) ⊂ O(log n) ⊂ O(n) ⊂ O(n log n) ⊂ O(n²) ⊂ O(n³) ⊂ O(2ⁿ)</p>
+
+      <table>
+        <tr><th>n</th><th>log n</th><th>n log n</th><th>n²</th><th>2ⁿ</th></tr>
+        <tr><td>10</td><td>3.3</td><td>33</td><td>100</td><td>1,024</td></tr>
+        <tr><td>100</td><td>6.6</td><td>664</td><td>10,000</td><td>10³⁰</td></tr>
+        <tr><td>1,000</td><td>10</td><td>9,966</td><td>10⁶</td><td>10³⁰⁰</td></tr>
+      </table>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Key Proof Techniques</div>
+      <p><strong>To prove f(n) = O(g(n)):</strong> Find explicit c and n₀. Example: 3n² + 5n = O(n²). Choose c = 4: for n ≥ 5, 3n² + 5n ≤ 3n² + n² = 4n². So c = 4, n₀ = 5 works.</p>
+      <p><strong>To disprove f(n) = O(g(n)):</strong> Assume such c, n₀ exist and derive a contradiction.</p>
+      <p><strong>Limit method:</strong> If lim[n→∞] f(n)/g(n) = 0: f = o(g). If constant c &gt; 0: f = Θ(g). If ∞: f = ω(g).</p>
+    </div>
+
+    <h4>Solving Recurrences — The Master Theorem (CLRS Ch. 4)</h4>
+    <p>For recurrences of the form T(n) = aT(n/b) + f(n) where a ≥ 1, b &gt; 1:</p>
+    <ul>
+      <li>If f(n) = O(n^(log_b(a) − ε)): T(n) = Θ(n^(log_b a)) [Case 1: recursive work dominates]</li>
+      <li>If f(n) = Θ(n^(log_b a)): T(n) = Θ(n^(log_b a) · log n) [Case 2: tie]</li>
+      <li>If f(n) = Ω(n^(log_b(a) + ε)): T(n) = Θ(f(n)) [Case 3: combining dominates]</li>
+    </ul>
+    <span class="formula">Merge Sort: T(n) = 2T(n/2) + n → Case 2 → T(n) = Θ(n log n)</span>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Asymptotic Analysis</div>
+
+    <div class="question-item">
+      <div class="question-text">Q1. (CLRS Ch. 3 style) Is 2ⁿ⁺¹ = O(2ⁿ)? Is 2²ⁿ = O(2ⁿ)?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p><strong>2ⁿ⁺¹ = O(2ⁿ):</strong> Yes. 2ⁿ⁺¹ = 2·2ⁿ ≤ c·2ⁿ for c = 2, any n₀ ≥ 1. ✓</p>
+        <p><strong>2²ⁿ = O(2ⁿ):</strong> No. 2²ⁿ = (2ⁿ)². Assume 2²ⁿ ≤ c·2ⁿ for all large n. Then 2ⁿ ≤ c, which is false since 2ⁿ → ∞. Contradiction. ✗</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q2. (K&amp;T Ch. 2 style) Rank the following in increasing order of growth rate: n!, 2ⁿ, n³, n log n, n^(3/2), log² n, √n.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>log² n ⊂ √n ⊂ n log n ⊂ n^(3/2) ⊂ n³ ⊂ 2ⁿ ⊂ n!</p>
+        <p>Note: log² n means (log n)², not log(log n). Use L'Hôpital or limit comparisons to verify each step.</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q3. Solve the recurrence T(n) = 3T(n/3) + n using the Master Theorem.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Here a = 3, b = 3, f(n) = n. log_b(a) = log₃(3) = 1. f(n) = n = Θ(n¹) = Θ(n^(log_b a)). This is Case 2 of the Master Theorem. Therefore T(n) = Θ(n log n).</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 4: ASYMPTOTIC ANALYSIS (continued - exercises) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic4">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 04</span>
+    <h2 class="topic-title">Asymptotic Analysis: Deeper Exercises &amp; Recurrences</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 5–6 · Slides 52–77 · K&amp;T Ch. 2, CLRS Ch. 3–4</span>
+
+  <div class="slide-box" data-slide="Slides 52–55">
+    <div class="slide-title">Exercises 1–3 — True/False Asymptotic Claims</div>
+    <div class="slide-content">
+      <ul>
+        <li>Exercise 1: Prove or disprove various Big-O statements (from slides)</li>
+        <li>Exercise 2: All statements True — proving that specific polynomial/log combinations satisfy Big-O</li>
+        <li>Exercise 3: All statements True — examining tighter bounds including Θ</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-box" data-slide="Slides 58–75">
+    <div class="slide-title">Code Complexity Analysis — Multiple Algorithms</div>
+    <div class="slide-content">
+      <p>Slides 60–67 present a sequence of Python/pseudocode algorithms — for each, the question is: (1) What does this algorithm do? (2) What is its time complexity?</p>
+      <ul>
+        <li>Nested loops: typically O(n²) or O(n³)</li>
+        <li>Recursive algorithms: solve recurrence T(n) = aT(n/b) + f(n)</li>
+        <li>Slides 68–75 focus on recursive factorial: T(n) = T(n−1) + O(1) = O(n)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Analyzing Code Complexity Step by Step</div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Systematic Complexity Analysis</div>
+      <p><strong>Step 1: Identify the dominant operation.</strong> What operation is performed the most? (comparisons, assignments, function calls)</p>
+      <p><strong>Step 2: Count how many times it runs</strong> relative to input size n.</p>
+      <p><strong>Step 3: Express as a recurrence if recursive,</strong> then solve using substitution, recursion tree, or Master Theorem.</p>
+
+      <p><strong>Common patterns to recognize:</strong></p>
+      <ul>
+        <li>Single loop from 1 to n: O(n)</li>
+        <li>Nested loop (both to n): O(n²)</li>
+        <li>Loop halving input each iteration: O(log n)</li>
+        <li>Recursive call on half + linear work: O(n log n) [Master Case 2]</li>
+        <li>Recursive call on half + constant work: O(log n) [binary search]</li>
+        <li>Two recursive calls on half + linear: O(n log n) [merge sort]</li>
+        <li>Two recursive calls on half + nothing: O(n) [tree traversal]</li>
+      </ul>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Reading Exercises (from Slide 76)</div>
+      <p>The course recommends: <strong>K&amp;T Chapter 1 Section 1.1</strong> and <strong>K&amp;T Chapter 2, Sections 2.1, 2.2, 2.4</strong>; <strong>CLRS Chapters 1–3</strong>. These cover the formal definition of asymptotic notation, growth of functions, and standard summation formulae.</p>
+    </div>
+
+    <h4>Substitution Method for Recurrences (CLRS Ch. 4.3)</h4>
+    <p>To solve T(n) = T(n−1) + 1 by substitution:</p>
+    <ol>
+      <li>Guess: T(n) = O(n)</li>
+      <li>Assume T(k) ≤ c·k for all k &lt; n</li>
+      <li>Show T(n) ≤ c·n: T(n) = T(n−1) + 1 ≤ c(n−1) + 1 = cn − c + 1 ≤ cn for c ≥ 1.</li>
+      <li>Base case: T(1) = 1 ≤ c·1 for c ≥ 1. ✓</li>
+    </ol>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 5: RECURRENCES (summary) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic5">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 05</span>
+    <h2 class="topic-title">Recurrences &amp; Recursive Algorithm Analysis</h2>
+  </div>
+  <span class="lecture-label">Lectures 6–7 · Slides 68–84 · CLRS Ch. 4, K&amp;T Ch. 5.1</span>
+
+  <div class="slide-box" data-slide="Slides 70–77">
+    <div class="slide-title">Setting Up and Solving Recurrences</div>
+    <div class="slide-content">
+      <ul>
+        <li>Recurrence captures the recursive structure of an algorithm's running time</li>
+        <li>T(n) = 2T(n/2) + n is the canonical merge-sort recurrence</li>
+        <li>Methods: substitution, recursion tree, Master Theorem</li>
+        <li>Reading: K&amp;T Ch. 2 Sec. 2.4; CLRS Ch. 4</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Three Methods to Solve Recurrences</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why Do Recurrences Matter?</div>
+      <p>Recursive algorithms are everywhere: merge sort, quicksort, binary search, Karatsuba multiplication, Strassen matrix multiplication, FFT. Their running times all follow recurrences. Being able to solve T(n) = aT(n/b) + f(n) is not optional — it's the core of analyzing divide-and-conquer algorithms.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Recursion Tree Method</div>
+      <p>For T(n) = 2T(n/2) + n (merge sort):</p>
+      <ul>
+        <li>Level 0: one node, cost n</li>
+        <li>Level 1: two nodes, each cost n/2, total n</li>
+        <li>Level k: 2^k nodes, each cost n/2^k, total n</li>
+        <li>Depth = log₂ n (until size 1)</li>
+        <li>Total cost = n × log n = O(n log n)</li>
+      </ul>
+      <span class="formula">T(n) = 2T(n/2) + n → T(n) = Θ(n log n)</span>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Master Theorem Summary</div>
+      <p>For T(n) = aT(n/b) + Θ(n^d):</p>
+      <ul>
+        <li>If d &gt; log_b(a): T(n) = Θ(n^d)</li>
+        <li>If d = log_b(a): T(n) = Θ(n^d · log n)</li>
+        <li>If d &lt; log_b(a): T(n) = Θ(n^(log_b a))</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Recurrences</div>
+    <div class="question-item">
+      <div class="question-text">Q1. Solve T(n) = 4T(n/2) + n using the Master Theorem.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>a=4, b=2, f(n)=n. log_b(a) = log₂(4) = 2. f(n) = n = O(n^(2−1)) → Case 1. T(n) = Θ(n²).</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. Solve T(n) = T(n−1) + n.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Expand: T(n) = n + (n−1) + (n−2) + … + 1 = n(n+1)/2 = Θ(n²). This is insertion sort's worst case.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 6: SORTING -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic6">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 06</span>
+    <h2 class="topic-title">Sorting Algorithms — Insertion Sort &amp; Foundations</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 8–10 · Slides 86–101 · CLRS Ch. 2, K&amp;T Ch. 2.1</span>
+
+  <div class="slide-box" data-slide="Slides 87–91">
+    <div class="slide-title">Insertion Sort</div>
+    <div class="slide-content">
+      <ul>
+        <li>Build a sorted array one element at a time, inserting each new element in its correct position</li>
+        <li><strong>Best case:</strong> O(n) (already sorted)</li>
+        <li><strong>Worst case:</strong> O(n²) (reverse sorted)</li>
+        <li><strong>Average case:</strong> O(n²)</li>
+        <li><strong>In-place:</strong> Yes. <strong>Stable:</strong> Yes.</li>
+        <li>Useful in practice for small arrays (n &lt; 16), or nearly-sorted data</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Why Study Insertion Sort?</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — The Purpose</div>
+      <p>Insertion sort is the <em>canonical example</em> of a loop invariant proof in CLRS (Chapter 2). Understanding it is less about using it in production and more about practicing the skill of algorithm correctness proof. The invariant: "after the i-th iteration, the subarray A[1..i] is sorted." Every algorithms course starts here for good reason.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Loop Invariant Proof (CLRS 2.1)</div>
+      <p><strong>Invariant:</strong> At the start of iteration j, A[1..j-1] contains the first j-1 elements of the original array, in sorted order.</p>
+      <ul>
+        <li><strong>Initialization:</strong> j=2: A[1..1] is trivially sorted. ✓</li>
+        <li><strong>Maintenance:</strong> We insert A[j] into its correct position, maintaining sortedness. ✓</li>
+        <li><strong>Termination:</strong> j = n+1, so A[1..n] is sorted. ✓</li>
+      </ul>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Practical Notes</div>
+      <p>Hybrid sorting (e.g., Timsort, Introsort) uses insertion sort for small subarrays. Python's built-in sort and Java's Arrays.sort both use this hybrid approach. So insertion sort is not "dead" — it's the fast path for tiny chunks in real-world O(n log n) sorts.</p>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 7: MERGE SORT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic7">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 07</span>
+    <h2 class="topic-title">Merge Sort &amp; Divide-and-Conquer</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 10–11 · Slides 102–137 · K&amp;T Ch. 5.1, CLRS Ch. 2.3, Ch. 4</span>
+
+  <div class="slide-box" data-slide="Slides 102–116">
+    <div class="slide-title">Merge Sort — Algorithm &amp; Analysis</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">MergeSort</span>(A, left, right, B):
+    <span class="kw">if</span> (right - left == 1):
+        B[0] = A[left]          <span class="cm">// Base case</span>
+    <span class="kw">if</span> (right - left > 1):
+        mid = (left + right) / 2
+        MergeSort(A, left, mid, L)
+        MergeSort(A, mid, right, R)
+        Merge(L, mid-left, R, right-mid, B)
+
+<span class="kw">function</span> <span class="fn">Merge</span>(A, m, B, n, C):
+    i=0; j=0; k=0
+    <span class="kw">while</span> (k &lt; m+n):
+        <span class="kw">if</span> (j==n or A[i] &lt;= B[j]):
+            C[k] = A[i]; i++; k++
+        <span class="kw">else</span>:
+            C[k] = B[j]; j++; k++
+      </pre>
+      <ul>
+        <li>Recurrence: T(n) = 2T(n/2) + n → T(n) = O(n log n)</li>
+        <li>Stable: Yes (favor left when equal). In-place: No (needs O(n) extra space)</li>
+        <li>Variations: union/intersection/difference of sorted lists using merge!</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Divide and Conquer Deeply</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — The Purpose</div>
+      <p>Divide-and-conquer is not just a sorting trick — it's a fundamental algorithmic <em>paradigm</em>. The key insight: many problems have the property that a problem of size n can be broken into smaller versions of itself. When recombining solutions takes O(n) time, and we split into 2 halves, the master theorem gives O(n log n). This pattern appears in fast Fourier transforms, closest pair of points, matrix multiplication (Strassen), and beyond.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Full Analysis (K&amp;T 5.1)</div>
+      <p>Let T(n) = time to sort n elements.</p>
+      <span class="formula">T(1) = 1 &nbsp;&nbsp; T(n) = 2T(n/2) + n</span>
+      <p>Expanding the recurrence step by step (as shown in Slide 114):</p>
+      <pre>
+T(n) = 2T(n/2) + n
+     = 2[2T(n/4) + n/2] + n = 4T(n/4) + 2n
+     = 2^j · T(n/2^j) + j·n
+At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
+      </pre>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Practical Impact (Slide 115)</div>
+      <p>At 10⁸ operations/second: O(n²) is feasible up to n ≈ 10,000. O(n log n) is feasible up to n ≈ 10,000,000. <strong>That's a 1000× improvement.</strong> For real datasets (social networks: millions of nodes; genomics: billions of base pairs), the difference between O(n²) and O(n log n) determines whether a computation finishes in seconds or years.</p>
+      <p>Shortcomings of merge sort: requires O(n) extra space, inherently recursive (stack overhead). This motivates quicksort.</p>
+    </div>
+
+    <h4>Merge Sort Variations — Practical Applications (Slide 116)</h4>
+    <p>The merge subroutine is more general than just sorting:</p>
+    <ul>
+      <li><strong>Union</strong> of sorted lists: if A[i] == B[j], copy once and advance both</li>
+      <li><strong>Intersection</strong>: only copy when A[i] == B[j]</li>
+      <li><strong>Difference</strong> (A − B): copy A[i] only if A[i] &lt; B[j] or B is exhausted</li>
+    </ul>
+    <p>These run in O(m + n) time — far better than naive O(mn).</p>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Merge Sort &amp; Divide-and-Conquer</div>
+
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T Ch. 5 style) Trace through MergeSort on the array [43, 32, 22, 78, 63, 57, 91, 13]. Show the recursive calls and merges.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Split: [43,32,22,78] | [63,57,91,13]</p>
+        <p>Recurse left: [43,32] | [22,78] → merge: [32,43] → [22,78] → merge: [22,32,43,78]</p>
+        <p>Recurse right: [63,57] | [91,13] → [57,63] | [13,91] → merge: [13,57,63,91]</p>
+        <p>Final merge: [13,22,32,43,57,63,78,91] ✓</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q2. Counting Inversions (K&amp;T 5.3): An inversion in array A is a pair (i,j) with i &lt; j but A[i] &gt; A[j]. Design an O(n log n) algorithm to count inversions.</div>
+      <div class="question-meta">Source: K&amp;T Chapter 5, Section 5.3 — Classic D&amp;C Application</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Modify MergeSort to count inversions during the merge step. When we copy B[j] into C (because B[j] &lt; A[i]), every remaining element in A forms an inversion with B[j]. Count = (m − i) inversions per such step.</p>
+        <p>Correctness: every inversion is either (1) within the left half, (2) within the right half, or (3) across the two halves. Cases 1 and 2 are counted recursively. Case 3 is counted during merge.</p>
+        <p>Complexity: T(n) = 2T(n/2) + O(n) = O(n log n) — same as merge sort.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 8: QUICKSORT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic8">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 08</span>
+    <h2 class="topic-title">Quicksort — The Practical Champion</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 11 · Slides 121–137 · CLRS Ch. 7, K&amp;T Ch. 13.5</span>
+
+  <div class="slide-box" data-slide="Slides 122–136">
+    <div class="slide-title">Quicksort Algorithm &amp; Analysis</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">Quicksort</span>(A, l, r):
+    <span class="kw">if</span> (r - l &lt;= 1): <span class="kw">return</span>  <span class="cm">// Base case</span>
+    <span class="cm">// Partition with respect to pivot A[l]</span>
+    yellow = l + 1
+    <span class="kw">for</span> green = l+1 to r-1:
+        <span class="kw">if</span> A[green] &lt;= A[l]:
+            swap(A, yellow, green); yellow++
+    swap(A, l, yellow-1)  <span class="cm">// Move pivot into place</span>
+    Quicksort(A, l, yellow)
+    Quicksort(A, yellow+1, r)
+      </pre>
+      <ul>
+        <li><strong>Best/Average case:</strong> O(n log n)</li>
+        <li><strong>Worst case:</strong> O(n²) — sorted input with first-element pivot</li>
+        <li><strong>In-place:</strong> Yes. <strong>Stable:</strong> No.</li>
+        <li><strong>Randomization:</strong> Choose pivot randomly → expected O(n log n)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Quicksort Deeply</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why Quicksort Dominates in Practice</div>
+      <p>Despite a worst-case of O(n²), quicksort is typically the default sort in practice (Python, C++, Java all use variants). The reason: its constants are small, it's in-place (no auxiliary array), has excellent cache performance, and its average case is O(n log n). Merge sort's O(n) extra memory allocation is often the bottleneck in real systems.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Average Case Analysis (CLRS 7.4)</div>
+      <p>Assume input is a random permutation of {1…n}. The expected number of comparisons is Θ(n log n). The key argument uses indicator random variables: let X_ij = 1 if elements i and j are ever compared. E[total comparisons] = Σ Pr[X_ij = 1] = Σ 2/(j−i+1) = O(n log n).</p>
+      <p>This is a classic probabilistic analysis — one of the rare cases where average-case running time is rigorously provable.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Stability &amp; Other Criteria (Slides 134–137)</div>
+      <p><strong>Stable sort:</strong> preserves original order of equal elements. Merge sort is stable (favor left). Quicksort is NOT stable (swap operation can reorder equal elements).</p>
+      <p><strong>Why does stability matter?</strong> Sorting a spreadsheet by column B without disturbing a previous sort on column A requires stability.</p>
+      <p><strong>Hybrid algorithms:</strong> Timsort (Python's sort) and Introsort (C++ std::sort) use O(n log n) D&amp;C for large n, insertion sort for small n (n &lt; 16), and heap sort as a fallback if recursion depth exceeds O(log n).</p>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Quicksort</div>
+    <div class="question-item">
+      <div class="question-text">Q1. What input causes quicksort (with first-element pivot) to run in O(n²)?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>An already sorted (or reverse-sorted) array. In this case, every partition picks the minimum (or maximum) as pivot, creating partitions of size 0 and n−1. The recurrence becomes T(n) = T(n−1) + n = O(n²). To avoid this, use median-of-three or random pivot selection.</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. Explain why randomized quicksort has expected O(n log n) running time regardless of input.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>With random pivot selection, for any fixed input, each element is equally likely to be chosen as pivot. The expected split is approximately n/2 : n/2. The recurrence in expectation is E[T(n)] ≤ E[T(k)] + E[T(n−k−1)] + O(n) where k is uniform on {0,…,n−1}. Solving this expectation gives E[T(n)] = O(n log n). No adversary can construct a worst-case input because the pivot choice is unpredictable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 9: GRAPH FUNDAMENTALS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic9">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 09</span>
+    <h2 class="topic-title">Graph Theory Fundamentals</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 12 · Slides 138–151 · K&amp;T Ch. 3.1–3.3, CLRS Ch. 22</span>
+
+  <div class="slide-box" data-slide="Slides 141–151">
+    <div class="slide-title">Graph Definitions &amp; Representations</div>
+    <div class="slide-content">
+      <ul>
+        <li><strong>Graph:</strong> G = (V, E) where V = vertices, E ⊆ V × V = edges</li>
+        <li><strong>Undirected:</strong> (u,v) = (v,u). <strong>Directed:</strong> (u,v) ≠ (v,u)</li>
+        <li><strong>Adjacency matrix:</strong> A[i][j] = 1 if (i,j) ∈ E. Space O(n²). Query O(1). Neighbors: O(n).</li>
+        <li><strong>Adjacency list:</strong> For each vertex, list of neighbors. Space O(n+m). Neighbors of v: O(deg(v)). Query: O(deg(v)).</li>
+        <li>Map coloring intro: minimum colors to color a graph with no adjacent same-color vertices</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Graphs as Universal Models</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why Graphs Are Everywhere</div>
+      <p>Graphs are the most versatile data structure in computer science. They model: social networks (vertices = people, edges = friendships), road maps (vertices = intersections, edges = roads with weights = distances), the web (vertices = pages, directed edges = links), dependency graphs (build systems, course prerequisites), and biological networks (protein interactions, neural connectivity). Understanding graph algorithms means you can solve an enormous class of real-world problems.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Choosing the Right Representation</div>
+      <table>
+        <tr><th>Operation</th><th>Adjacency Matrix</th><th>Adjacency List</th></tr>
+        <tr><td>Space</td><td>O(n²)</td><td>O(n + m)</td></tr>
+        <tr><td>Is (u,v) an edge?</td><td>O(1)</td><td>O(deg(u))</td></tr>
+        <tr><td>All neighbors of u</td><td>O(n)</td><td>O(deg(u))</td></tr>
+        <tr><td>Add edge</td><td>O(1)</td><td>O(1) amortized</td></tr>
+        <tr><td>Best for</td><td>Dense graphs (m ≈ n²)</td><td>Sparse graphs (m ≪ n²)</td></tr>
+      </table>
+      <p>In practice, most real-world graphs are <strong>sparse</strong> (social networks: avg degree ~100, not 1 million), so adjacency lists are almost always preferred. BFS and DFS run O(n+m) with lists, O(n²) with matrices — a huge difference for large sparse graphs.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Key Terminology</div>
+      <ul>
+        <li><strong>Path:</strong> sequence of vertices v₁,v₂,…,vₖ where each consecutive pair is an edge</li>
+        <li><strong>Cycle:</strong> path where v₁ = vₖ</li>
+        <li><strong>Connected:</strong> there is a path between every pair of vertices (undirected)</li>
+        <li><strong>Degree:</strong> number of edges incident to a vertex</li>
+        <li><strong>Tree:</strong> connected acyclic undirected graph on n vertices has exactly n−1 edges</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 10: BFS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic10">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 10</span>
+    <h2 class="topic-title">Breadth-First Search (BFS)</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 12–14 · Slides 153–184 · K&amp;T Ch. 3.2, CLRS Ch. 22.2</span>
+
+  <div class="slide-box" data-slide="Slides 153–172">
+    <div class="slide-title">BFS Algorithm — Queue-Based</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">BFS</span>(i):
+    <span class="kw">for</span> j=1..n: visited[j]=0; Q=[]
+    visited[i]=1; append(Q,i)
+    <span class="kw">while</span> Q is not empty:
+        j = extract_head(Q)
+        <span class="kw">for</span> each (j,k) in E:
+            <span class="kw">if</span> visited[k]==0:
+                visited[k]=1; append(Q,k)
+                parent[k]=j
+                level[k]=level[j]+1
+      </pre>
+      <ul>
+        <li>Each vertex enters Q exactly once → O(n) queue operations</li>
+        <li>With adjacency matrix: O(n²). With adjacency list: O(n + m)</li>
+        <li>BFS computes <strong>shortest paths</strong> in terms of number of edges (not weights)</li>
+        <li>level[v] = shortest path length from source to v</li>
+        <li>parent[v] = predecessor on shortest path → reconstruct path by following parents</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — BFS Deeply</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why BFS Finds Shortest Paths</div>
+      <p>BFS explores vertices in order of increasing distance from the source. At any moment, the queue contains vertices at distance d and d+1. When we dequeue a vertex at distance d and explore its neighbors, those neighbors are at distance d+1 — and we only mark them if they haven't been visited, guaranteeing we record the shortest path. This is a classic argument-by-induction on BFS level.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — BFS Tree &amp; Level Structure</div>
+      <p>BFS builds a <strong>BFS tree</strong>: when we first visit vertex v from vertex u, we set parent[v] = u and level[v] = level[u] + 1. The BFS tree has the property: for every edge (u,v) in the original graph, |level[u] − level[v]| ≤ 1 (they can differ by at most 1). This immediately proves that the levels represent exact shortest-path distances.</p>
+      <p>The path from source s to any vertex v is recovered by: v → parent[v] → parent[parent[v]] → … → s, then reversing.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Applications Beyond Shortest Paths</div>
+      <ul>
+        <li><strong>Connectivity:</strong> Run BFS from any vertex. If not all vertices are visited, graph is disconnected.</li>
+        <li><strong>Bipartite testing:</strong> Try to 2-color the graph during BFS. If any edge connects two vertices of the same color, graph is not bipartite.</li>
+        <li><strong>Level-synchronous parallelism:</strong> BFS structure naturally parallelizes — all vertices at level k can be processed simultaneously.</li>
+        <li><strong>Six degrees of separation:</strong> BFS on the Facebook/LinkedIn graph gives "distance" between any two people.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — BFS</div>
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T Ch. 3 style) On a graph with n vertices and m edges, what is the complexity of BFS with adjacency list? Justify your answer.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Each vertex is enqueued and dequeued exactly once: O(n) total queue operations, each O(1). When we dequeue vertex v, we scan all neighbors of v. Total scanning across all vertices = total sum of degrees = 2m (handshaking lemma). Hence total work = O(n + m).</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. Does BFS find shortest paths in weighted graphs? Explain.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>No. BFS minimizes the number of edges, not the total weight. Example: a path of 1 edge with weight 100 vs. a path of 3 edges each with weight 1 (total weight 3). BFS returns the 1-edge path (shortest in hops) but the 3-edge path is shorter in weight. For weighted shortest paths, use Dijkstra's algorithm.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 11: DFS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic11">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 11</span>
+    <h2 class="topic-title">Depth-First Search (DFS) &amp; Applications</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 14–15 · Slides 185–221 · K&amp;T Ch. 3.3, 3.5–3.6, CLRS Ch. 22.3–22.5</span>
+
+  <div class="slide-box" data-slide="Slides 186–213">
+    <div class="slide-title">DFS Algorithm &amp; DFS Numbering</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">for</span> j=1..n: visited[j]=0; parent[j]=-1; count=0
+
+<span class="kw">function</span> <span class="fn">DFS</span>(i):
+    visited[i]=1; pre[i]=count; count++
+    <span class="kw">for</span> each (i,j) in E:
+        <span class="kw">if</span> visited[j]==0:
+            parent[j]=i
+            DFS(j)
+    post[i]=count; count++
+      </pre>
+      <ul>
+        <li>Complexity: O(n²) with matrix, O(n+m) with adjacency list</li>
+        <li><strong>DFS numbering:</strong> pre[v] = enter time, post[v] = exit time</li>
+        <li><strong>Edge types in directed graphs:</strong> Tree, Forward, Back, Cross edges</li>
+        <li><strong>Back edge ↔ Cycle:</strong> A directed graph has a cycle iff DFS reveals a back edge</li>
+        <li><strong>Interval nesting:</strong> [pre(u),post(u)] ⊃ [pre(v),post(v)] iff u is an ancestor of v in DFS tree</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — DFS Numbering and Its Power</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why DFS Over BFS?</div>
+      <p>BFS gives shortest paths — but DFS gives something richer: a complete structural decomposition of the graph. The pre/post numbering reveals the <em>depth</em> structure. From this one run, you can extract: all cycles, topological orderings, strongly connected components, cut vertices, bridges, and more. These structural properties are needed for compiler design (dependency analysis), network analysis, and scheduling.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Edge Classification (CLRS 22.3)</div>
+      <p>For a directed graph, classify each non-tree edge (u,v):</p>
+      <ul>
+        <li><strong>Tree edge:</strong> v was first discovered via u in DFS. [pre(u),post(u)] ⊃ [pre(v),post(v)]</li>
+        <li><strong>Forward edge:</strong> (u,v) where v is a descendant of u not via tree edge. pre(u) &lt; pre(v) &lt; post(v) &lt; post(u)</li>
+        <li><strong>Back edge:</strong> (u,v) where v is an ancestor of u. pre(v) &lt; pre(u) &lt; post(u) &lt; post(v). <strong>Indicates cycle.</strong></li>
+        <li><strong>Cross edge:</strong> all other edges. Intervals [pre(u),post(u)] and [pre(v),post(v)] are disjoint.</li>
+      </ul>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Strongly Connected Components (SCCs)</div>
+      <p>Kosaraju's Algorithm (O(n+m)): (1) Run DFS on G, record finish times. (2) Transpose graph G^T. (3) Run DFS on G^T in decreasing finish-time order. Each DFS tree in step 3 is a SCC. This is covered in Slides 215–220 and CLRS 22.5.</p>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — DFS</div>
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T 3.5 style) Prove: a directed graph has a cycle if and only if DFS reveals a back edge.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p><strong>(⇒)</strong> Suppose there's a cycle v₁→v₂→…→vₖ→v₁. Consider the first vertex in the cycle that DFS visits — say v₁. DFS will eventually reach vₖ (all vertices in cycle are reachable from v₁). When DFS processes vₖ, the edge vₖ→v₁ is a back edge (since v₁ is still on the DFS stack).</p>
+        <p><strong>(⇐)</strong> A back edge (u,v) means v is an ancestor of u in the DFS tree, so there's a path v → … → u in the tree. Combined with the edge u → v, we have a cycle.</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. What are cut vertices (articulation points)? How does DFS numbering help find them?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>A cut vertex is a vertex whose removal disconnects the graph. Using DFS: vertex u is a cut vertex if: (1) u is the root of the DFS tree and has ≥ 2 children, OR (2) u is not the root and has a child v such that no vertex in the subtree rooted at v has a back edge to an ancestor of u. This can be computed in O(n+m) using "low" values (lowest pre[] reachable from a subtree via back edges).</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 12: DAGs + TOPOLOGICAL SORT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic12">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 12</span>
+    <h2 class="topic-title">DAGs &amp; Topological Ordering</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 15–17 · Slides 222–263 · K&amp;T Ch. 3.6, CLRS Ch. 22.4</span>
+
+  <div class="slide-box" data-slide="Slides 222–247">
+    <div class="slide-title">DAGs, Topological Sort, Longest Path</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">TopologicalOrder</span>(G):  <span class="cm">// O(n+m) with adjacency list</span>
+    compute indegree[i] for all i  <span class="cm">// O(m)</span>
+    put all 0-indegree vertices in Queue
+    <span class="kw">while</span> Queue not empty:
+        j = remove_head(Queue)
+        enumerate j
+        <span class="kw">for</span> (j,k) in E:
+            indegree[k] -= 1
+            LPT[k] = max(LPT[k], 1 + LPT[j])
+            <span class="kw">if</span> indegree[k]==0: add k to Queue
+      </pre>
+      <ul>
+        <li>DAG = Directed Acyclic Graph (no directed cycles)</li>
+        <li>Topological sort lists vertices so that for every edge (u,v), u comes before v</li>
+        <li>Exists iff graph is a DAG. Computable in O(n+m).</li>
+        <li>Longest path in DAG = minimum number of "rounds" to complete all tasks</li>
+        <li>Contrast: Longest path in general graph is NP-hard!</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — DAGs and Scheduling</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — DAGs Model Dependency</div>
+      <p>Whenever you have tasks with prerequisites, you have a DAG. Examples: course prerequisites (COMP201 before COMP570), build systems (Makefile: compile A before linking B), project scheduling (Critical Path Method in project management), spreadsheet recalculation (recompute cells in dependency order). The topological sort gives you a valid execution order.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Two Algorithms for Topological Sort</div>
+      <p><strong>Kahn's Algorithm (used in slides):</strong> Repeatedly remove vertices with indegree 0. O(n+m) with adjacency list. Directly gives topological order and can detect cycles (if any vertex is never removed, a cycle exists).</p>
+      <p><strong>DFS-based (CLRS 22.4):</strong> Run DFS; output vertices in decreasing order of finish time. Correctness: for any edge (u,v), post(u) &gt; post(v) (v finishes before u). So decreasing finish time gives valid topological order.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Critical Path / Longest Path</div>
+      <p>The "longest path in a DAG" problem models the critical path in project scheduling — the minimum time to complete all tasks given parallelism. Algorithm: compute LPT[v] = longest path ending at v. Process vertices in topological order; for each vertex v and each incoming edge (u,v): LPT[v] = max(LPT[v], 1 + LPT[u]). This is O(n+m) — a beautiful application of dynamic programming on DAGs.</p>
+      <div class="callout">
+        <strong>Important contrast:</strong> Longest path in a DAG = O(n+m). Longest simple path in a general graph = NP-hard. The DAG structure is what makes it tractable.
+      </div>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — DAGs</div>
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T 3.6) Given a DAG with 8 vertices and the dependency structure from Slides 231–246, what is the minimum number of semesters to complete all courses if you can take any courses with satisfied prerequisites in the same semester?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution Approach</div>
+        <p>Compute the longest path in the DAG. Process vertices in topological order, setting LPT[v] = 1 + max{LPT[u] : (u,v) is an edge}. The answer is max{LPT[v]}. For the example in Slide 244, the longest path has length 4 (vertices with LPT values 0,1,2,3,4 along the critical path), so the answer is 5 semesters (length+1 to account for the starting semester).</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. If a directed graph has n vertices and you run Kahn's topological sort algorithm but only n−1 vertices get enumerated, what can you conclude?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>The graph has a directed cycle. One vertex remains unenumerated because it always has positive indegree (it's part of a cycle — each vertex in the cycle waits for the previous one to be removed first, creating a deadlock). This gives an O(n+m) cycle detection algorithm as a bonus of Kahn's algorithm.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 13: DIJKSTRA -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic13">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 13</span>
+    <h2 class="topic-title">Dijkstra's Algorithm — Single Source Shortest Paths</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 17–18 · Slides 264–291 · K&amp;T Ch. 4.4, CLRS Ch. 24.3</span>
+
+  <div class="slide-box" data-slide="Slides 276–286">
+    <div class="slide-title">Dijkstra's Algorithm</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">Dijkstra</span>(s):
+    <span class="kw">for</span> i=1..n: Visited[i]=False; Distance[i]=∞
+    Distance[s]=0
+    <span class="kw">for</span> i=1..n:
+        <span class="cm">// Find unvisited vertex with minimum distance</span>
+        u = argmin{Distance[u] : Visited[u]==False}
+        Visited[u]=True
+        <span class="kw">for</span> each edge (u,v) with Visited[v]==False:
+            <span class="kw">if</span> Distance[v] > Distance[u] + weight(u,v):
+                Distance[v] = Distance[u] + weight(u,v)
+      </pre>
+      <ul>
+        <li><strong>Precondition:</strong> All edge weights must be non-negative</li>
+        <li><strong>Complexity:</strong> O(n²) with array; O((n+m) log n) with priority queue (min-heap)</li>
+        <li>Greedy algorithm: always processes the closest unvisited vertex</li>
+        <li>Correctness proven by induction: shortest paths to "burned" vertices are final</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Dijkstra Deeply</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — The Burning Forest Intuition</div>
+      <p>Dijkstra's algorithm has an elegant physical interpretation: imagine setting fire to the source vertex. Fire spreads along edges at a rate proportional to edge weight. Vertices "burn" in order of their distance from the source. The first time a vertex burns, it burns via the shortest path — there's no shortcut through as-yet-unburned territory (since all edge weights are positive, a detour through an unburned vertex can only be longer).</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Correctness Proof (K&amp;T 4.4)</div>
+      <p><strong>Claim:</strong> When vertex u is extracted (burned), Distance[u] = true shortest path distance from s.</p>
+      <p><strong>Proof by induction</strong> on number of burned vertices:</p>
+      <ul>
+        <li>Base case: s is burned first with Distance[s] = 0. Correct since s has no self-loop and all weights ≥ 0. ✓</li>
+        <li>Inductive step: Suppose the claim holds for all previously burned vertices. When we burn u, suppose for contradiction there's a shorter path P from s to u. P must leave the burned set at some edge (x,y). But then Distance[y] ≤ dist(s,y) ≤ dist(s,u) (since P passes through y before u). Since all remaining edge weights are ≥ 0, the path from y to u adds more, so Distance[y] ≤ Distance[u]. But then Dijkstra would have burned y before u — contradiction!</li>
+      </ul>
+      <p><strong>Why non-negative weights are essential:</strong> If a negative-weight edge exists, we could find a shorter path to an already-burned vertex by going through a later-burned vertex with a negative edge — invalidating the induction.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Complexity with Priority Queue</div>
+      <p>Naive implementation: O(n) to find minimum each round, n rounds = O(n²) total.</p>
+      <p>With a binary min-heap (priority queue): each extract-min takes O(log n); each decrease-key (updating Distance[v]) takes O(log n); at most m updates total → O((n + m) log n) = O(m log n) for connected graphs.</p>
+      <p>With Fibonacci heap (theoretical): O(m + n log n) — optimal for dense graphs, but complex to implement.</p>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Dijkstra's Algorithm</div>
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T Ch. 4.4) Run Dijkstra's algorithm on the graph from Slide 271–272 (7 vertices with edge weights). Show the Distance array after each step.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution (from Slide 272 example)</div>
+        <p>Source = vertex 1. Initial: D=[0,∞,∞,∞,∞,∞,∞]</p>
+        <p>Step 1: Burn vertex 1 (D=0). Update neighbors. D=[0,10,∞,∞,∞,∞,80] (approx from slide)</p>
+        <p>Step 2: Burn vertex 2 (D=10). Update neighbors. D=[0,10,16,∞,∞,∞,80]</p>
+        <p>… Continue until all vertices burned. Final distances correspond to minimum-weight paths from vertex 1.</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. Why does Dijkstra's algorithm fail with negative edge weights? Give a concrete counterexample.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Consider: s → a (weight 3), s → b (weight 2), b → a (weight −2). True shortest path: s → b → a with total weight 0. Dijkstra burns b first (distance 2), then a (distance 3 via s→a), but the correct distance to a is 0. The algorithm misses the negative shortcut through b because b was burned after a was already "settled".</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 14: BELLMAN-FORD -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic14">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 14</span>
+    <h2 class="topic-title">Bellman-Ford Algorithm — Handling Negative Weights</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 18–21 · Slides 288–322 · K&amp;T Ch. 6.8, CLRS Ch. 24.1</span>
+
+  <div class="slide-box" data-slide="Slides 313–321">
+    <div class="slide-title">Bellman-Ford Algorithm</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">BellmanFord</span>(s):
+    <span class="kw">for</span> i=1..n: Distance[i]=∞
+    Distance[s]=0
+    <span class="kw">for</span> i=1 to n-1:       <span class="cm">// Repeat n-1 times</span>
+        <span class="kw">for</span> each edge (j,k) in E:
+            Distance[k] = min(Distance[k],
+                              Distance[j] + weight(j,k))
+    <span class="cm">// Optional: detect negative cycles</span>
+    <span class="kw">for</span> each edge (j,k) in E:
+        <span class="kw">if</span> Distance[k] > Distance[j] + weight(j,k):
+            <span class="nm">report negative cycle</span>
+      </pre>
+      <ul>
+        <li>Handles negative weights (but not negative cycles)</li>
+        <li>Complexity: O(nm) with adjacency list; O(n³) with matrix</li>
+        <li>Key insight: after k iterations, correct shortest path distances for paths using ≤ k edges</li>
+        <li>After n−1 iterations: all shortest paths have at most n−1 edges (since they're simple)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Bellman-Ford and Dynamic Programming</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — When Do Negative Weights Arise?</div>
+      <p>Negative weights aren't just a theoretical curiosity. In chemistry, reactions can release energy (negative weight = energy gain). In finance, some routes earn money (an airline segment where you earn more in cargo than you spend on fuel). In arbitrage detection, a negative cycle in a currency exchange graph means an infinite profit opportunity — which is why Bellman-Ford is used in financial systems to detect such cycles.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — Correctness via Dynamic Programming (K&amp;T 6.8)</div>
+      <p><strong>Key insight:</strong> Any simple shortest path has at most n−1 edges. Define OPT(i, v) = minimum cost of a path from s to v using at most i edges.</p>
+      <p><strong>Recurrence:</strong> OPT(i, v) = min(OPT(i−1, v), min over edges (u,v): OPT(i−1, u) + w(u,v))</p>
+      <p>This is exactly what Bellman-Ford computes. After n−1 iterations, OPT(n−1, v) = true shortest distance to v.</p>
+      <p><strong>Negative cycle detection:</strong> If OPT(n, v) &lt; OPT(n-1, v) for any v, then a negative cycle exists (the shortest "path" keeps shrinking beyond n−1 edges because it loops a negative cycle).</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Comparing Shortest Path Algorithms</div>
+      <table>
+        <tr><th>Algorithm</th><th>Negative Weights</th><th>Complexity</th><th>Use When</th></tr>
+        <tr><td>BFS</td><td>No (unit weights only)</td><td>O(n+m)</td><td>Unweighted graphs</td></tr>
+        <tr><td>Dijkstra</td><td>No</td><td>O((n+m) log n)</td><td>Non-neg weights, large graphs</td></tr>
+        <tr><td>Bellman-Ford</td><td>Yes</td><td>O(nm)</td><td>Negative weights, cycle detection</td></tr>
+        <tr><td>Floyd-Warshall</td><td>Yes</td><td>O(n³)</td><td>All-pairs, small-medium graphs</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Bellman-Ford</div>
+    <div class="question-item">
+      <div class="question-text">Q1. (CLRS 24.1 style) Trace Bellman-Ford on the graph from Slide 321. Verify the distances after each of the 7 iterations.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution Summary</div>
+        <p>Source = node 3 (0-indexed from slide). Initial distances: [∞,∞,0,∞,∞,∞,∞,∞]. Each iteration relaxes all edges. After iteration k, Distance[v] reflects the shortest path using at most k edges. By iteration 7 (n−1), the table in Slide 321 shows convergence. Key: some entries stabilize early (e.g., vertex 8 stabilizes at 8 in iteration 1 since there's a direct edge of weight 8).</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. Explain: "shortest paths will never loop" — why does this guarantee Bellman-Ford works in n−1 iterations?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>If there are no negative cycles, any shortest path is a simple path (never visits a vertex twice — if it did, removing the loop can only decrease or maintain cost since there are no negative cycles). A simple path on n vertices has at most n−1 edges. Therefore, after n−1 rounds of relaxation, we've covered all possible simple shortest paths. If running a 0th round would still improve any distance, a negative cycle must exist.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 15: FLOYD-WARSHALL -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic15">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 15</span>
+    <h2 class="topic-title">Floyd-Warshall — All-Pairs Shortest Paths</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 21–22 · Slides 323–342 · CLRS Ch. 25.2, K&amp;T Ch. 6.10</span>
+
+  <div class="slide-box" data-slide="Slides 331–342">
+    <div class="slide-title">Floyd-Warshall Algorithm</div>
+    <div class="slide-content">
+      <pre>
+<span class="kw">function</span> <span class="fn">FloydWarshall</span>():
+    <span class="kw">for</span> i=1..n, j=1..n:
+        W[i][j][0] = weight(i,j) if edge exists, else ∞
+    <span class="kw">for</span> k=1..n:
+        <span class="kw">for</span> i=1..n:
+            <span class="kw">for</span> j=1..n:
+                W[i][j][k] = min(W[i][j][k-1],
+                                  W[i][k][k-1] + W[k][j][k-1])
+      </pre>
+      <ul>
+        <li><strong>W[i][j][k]</strong> = shortest path from i to j using only intermediate vertices in {1,…,k}</li>
+        <li>Complexity: O(n³) time, O(n²) space (only need 2 slices at a time)</li>
+        <li>Handles negative weights (no negative cycles)</li>
+        <li><strong>Warshall's algorithm:</strong> Same structure but for transitive closure (reachability)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Floyd-Warshall as Dynamic Programming</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — All-Pairs vs Single-Source</div>
+      <p>Sometimes you need distances between ALL pairs of vertices (railway timetable, road atlas, "6 degrees" for all pairs). Running Dijkstra n times gives O(n · m log n). For dense graphs (m ≈ n²), Floyd-Warshall's O(n³) is competitive. For sparse graphs, repeated Dijkstra is better. The real advantage of Floyd-Warshall is its simplicity: just 3 nested loops.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — The DP Recurrence (CLRS 25.2)</div>
+      <p>Define W_k(i,j) = length of shortest path from i to j using only {1,2,…,k} as intermediate vertices.</p>
+      <ul>
+        <li><strong>Case 1:</strong> Shortest path from i to j via {1,…,k} doesn't use vertex k → W_k(i,j) = W_{k-1}(i,j)</li>
+        <li><strong>Case 2:</strong> Path goes through k → split as i→k→j, both using {1,…,k-1} as intermediates → W_k(i,j) = W_{k-1}(i,k) + W_{k-1}(k,j)</li>
+        <li><strong>Combine:</strong> W_k(i,j) = min(W_{k-1}(i,j), W_{k-1}(i,k) + W_{k-1}(k,j))</li>
+      </ul>
+      <p>Note k can appear at most once on any shortest path (since there are no negative cycles → no benefit from revisiting k). This is the key substructure property.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Warshall's Transitive Closure</div>
+      <p>The exact same recurrence works for boolean reachability: P_k(i,j) = 1 iff there's a path from i to j through intermediates {1,…,k}. Replace min(a,b) with OR, and addition with AND. This was the original Warshall algorithm for computing the transitive closure (path matrix) of a graph.</p>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Floyd-Warshall</div>
+    <div class="question-item">
+      <div class="question-text">Q1. (CLRS 25.2) What is the space complexity of Floyd-Warshall if we naively store W[i][j][k] for all k? How do we reduce it?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Naively: O(n³) — we store an n×n matrix for each of the n+1 values of k. Optimization: at iteration k, we only use W[...][...][k-1] to compute W[...][...][k]. So we only need two n×n slices at a time: O(n²) space. In practice, we can even update in-place (same matrix) — it can be shown this gives the same result due to the recurrence structure.</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. After running Floyd-Warshall, how do you check if a negative cycle exists?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Check the diagonal: if W[i][i] &lt; 0 for any vertex i, there is a negative cycle (a path from i to i with negative total weight). Without negative cycles, W[i][i] = 0 for all i (the empty path from i to i has cost 0, and no shorter path exists).</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 16: DIVIDE & CONQUER: INTEGER MULTIPLICATION -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic16">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 16</span>
+    <h2 class="topic-title">Integer Multiplication &amp; Karatsuba's Algorithm</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 23 · Slides 348–360 · K&amp;T Ch. 5.5, CLRS Ch. 30 (related)</span>
+
+  <div class="slide-box" data-slide="Slides 349–359">
+    <div class="slide-title">Grade-School vs. Divide-and-Conquer Multiplication</div>
+    <div class="slide-content">
+      <ul>
+        <li><strong>Grade-school multiplication:</strong> O(n²) bit operations for two n-bit integers</li>
+        <li><strong>Kolmogorov's conjecture (1956):</strong> O(n²) is optimal</li>
+        <li><strong>Karatsuba's refutation (1960):</strong> Only 3 recursive calls needed, not 4!</li>
+      </ul>
+      <pre>
+<span class="cm">// x = 2^m·a + b,  y = 2^m·c + d,  m = n/2</span>
+<span class="cm">// xy = 2^2m·ac + 2^m·(bc+ad) + bd</span>
+<span class="cm">// Karatsuba: bc+ad = ac + bd - (a-b)(c-d)</span>
+<span class="cm">// Only 3 multiplications: ac, bd, (a-b)(c-d)</span>
+T(n) = 3T(n/2) + Θ(n)
+     → T(n) = Θ(n^log₂3) ≈ Θ(n^1.585)
+      </pre>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — Karatsuba's Breakthrough</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why Integer Multiplication Matters</div>
+      <p>Big integer multiplication is the core operation in cryptography (RSA, elliptic curves), scientific computing, and arbitrary-precision arithmetic. Modern cryptographic keys are 2048–4096 bits. Multiplying such numbers with O(n²) bit operations is costly; Karatsuba's O(n^1.585) and more modern algorithms (Schönhage-Strassen O(n log n log log n), Harvey-van der Hoeven 2019 O(n log n)) are essential. GNU's GMP library uses different algorithms depending on input size.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — The Karatsuba Identity</div>
+      <p>Naive D&amp;C: xy = 2^2m·(ac) + 2^m·(bc + ad) + bd requires 4 half-size multiplications. Karatsuba's insight:</p>
+      <span class="formula">bc + ad = ac + bd − (a−b)(c−d)</span>
+      <p>This requires only 3 multiplications: (ac), (bd), (a−b)(c−d). The trick: compute ac and bd for the leading/trailing terms anyway, then use the identity to get the middle term "for free". Additions/subtractions are O(n) — much cheaper than multiplication.</p>
+      <p>Recurrence: T(n) = 3T(n/2) + O(n). By Master Theorem Case 1 (log₂3 ≈ 1.585 &gt; 1): T(n) = Θ(n^log₂3) ≈ O(n^1.585).</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Historical Progress (Slide 359)</div>
+      <table>
+        <tr><th>Year</th><th>Algorithm</th><th>Bit Complexity</th></tr>
+        <tr><td>~1200</td><td>Grade school</td><td>O(n²)</td></tr>
+        <tr><td>1962</td><td>Karatsuba</td><td>O(n^1.585)</td></tr>
+        <tr><td>1971</td><td>Schönhage-Strassen</td><td>O(n log n log log n)</td></tr>
+        <tr><td>2019</td><td>Harvey-van der Hoeven</td><td>O(n log n)</td></tr>
+        <tr><td>?</td><td>Conjectured optimal</td><td>O(n)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — Karatsuba</div>
+    <div class="question-item">
+      <div class="question-text">Q1. Apply Karatsuba to multiply x = 10001101₂ and y = 11100001₂ (8-bit integers). Show the three recursive products.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>m = 4. a = 1000₂ = 8, b = 1101₂ = 13, c = 1110₂ = 14, d = 0001₂ = 1.</p>
+        <p>e = ac = 8×14 = 112; f = bd = 13×1 = 13; g = (a−b)(c−d) = (8−13)(14−1) = (−5)(13) = −65.</p>
+        <p>Result = 2^8·e + 2^4·(e + f − g) + f = 256·112 + 16·(112+13+65) + 13 = 28672 + 3040 + 13 = 31725.</p>
+        <p>Verify: 141 × 225 = 31725 ✓</p>
+      </div>
+    </div>
+    <div class="question-item">
+      <div class="question-text">Q2. The naive D&amp;C algorithm (4 recursive calls) gives T(n) = 4T(n/2) + O(n). Solve this. Why is Karatsuba's 3-call version so much better?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>4T(n/2) + O(n): log₂4 = 2. f(n) = O(n) = O(n^(2−1)) → Master Theorem Case 1: T(n) = Θ(n²). This is the same as grade-school! Karatsuba's 3 calls: 3T(n/2) + O(n) → Θ(n^log₂3) ≈ Θ(n^1.585). Reducing from 4 to 3 recursive calls changes the exponent from 2 to 1.585 — a dramatic asymptotic improvement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOPIC 17: INTRACTABILITY & NP -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="topic-section" id="topic17">
+  <div class="topic-header">
+    <span class="topic-num">TOPIC 17</span>
+    <h2 class="topic-title">Computational Intractability, NP, &amp; Polynomial Reductions</h2>
+  </div>
+
+  <span class="lecture-label">Lectures 25–27 · Slides 373–389 · K&amp;T Ch. 8.1–8.4, CLRS Ch. 34</span>
+
+  <div class="slide-box" data-slide="Slides 373–389">
+    <div class="slide-title">P, NP, Reductions — Key Definitions &amp; Problems</div>
+    <div class="slide-content">
+      <ul>
+        <li><strong>P:</strong> problems solvable in polynomial time</li>
+        <li><strong>NP:</strong> problems where solutions can be <em>verified</em> in polynomial time</li>
+        <li><strong>NP-hard:</strong> at least as hard as any NP problem (via polynomial reductions)</li>
+        <li><strong>NP-complete:</strong> NP-hard AND in NP</li>
+        <li><strong>Polynomial reduction:</strong> X ≤_P Y means X can be solved using a polynomial-time algorithm for Y as a subroutine</li>
+        <li><strong>Key problems:</strong> 3-SAT, Independent Set, Vertex Cover, Set Cover</li>
+        <li><strong>3-SAT ≤_P Independent Set</strong> (proven in Slide 389)</li>
+        <li><strong>Independent Set ⟺_P Vertex Cover</strong> (S is independent set ↔ V−S is vertex cover)</li>
+        <li><strong>Vertex Cover ≤_P Set Cover</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Discussion — The Hardest Open Problem in CS</div>
+
+    <div class="why-box">
+      <div class="golden-label">WHY — Why Intractability Theory Matters</div>
+      <p>The P vs. NP question is arguably the most important open problem in mathematics and computer science. Its resolution would affect cryptography (most of the internet's security), optimization (logistics, scheduling), AI (can machines learn efficiently?), and mathematics itself. In practice, recognizing that a problem is NP-hard tells you to stop looking for an exact polynomial algorithm and instead consider: approximation algorithms, heuristics, special-case algorithms, or integer programming.</p>
+    </div>
+
+    <div class="how-box">
+      <div class="golden-label">HOW — The Reduction Chain</div>
+      <p>The reduction chain from Lecture 25–27 establishes relative hardness:</p>
+      <pre>
+3-SAT ≤_P INDEPENDENT-SET ≤_P VERTEX-COVER ≤_P SET-COVER
+      </pre>
+      <p><strong>Independent Set ↔ Vertex Cover (Slide 381):</strong> Complementarity theorem: S is an independent set iff V−S is a vertex cover. Proof: If S is independent, no edge has both endpoints in S, so every edge has at least one endpoint in V−S (vertex cover). Conversely, if V−S is a vertex cover, every edge has an endpoint in V−S, so no edge has both endpoints in S (independent set).</p>
+      <p><strong>Vertex Cover ≤_P Set Cover (Slide 385):</strong> Given a graph G=(V,E) and integer k, construct Set Cover instance with universe U=E, one set S_v = {edges incident to v} for each vertex v. G has a vertex cover of size k iff the set cover instance has a cover of size k.</p>
+    </div>
+
+    <div class="what-box">
+      <div class="golden-label">WHAT — Key NP-Complete Problems to Know</div>
+      <ul>
+        <li><strong>3-SAT:</strong> satisfying a boolean formula in 3-CNF form. The "base" NP-complete problem (by Cook's Theorem).</li>
+        <li><strong>Independent Set:</strong> find maximum set of vertices with no edges between them.</li>
+        <li><strong>Vertex Cover:</strong> find minimum set of vertices covering all edges.</li>
+        <li><strong>Set Cover:</strong> minimum number of subsets whose union = universe.</li>
+        <li><strong>Clique:</strong> find a complete subgraph of size k.</li>
+        <li><strong>Hamiltonian Path:</strong> visit every vertex exactly once.</li>
+        <li><strong>TSP:</strong> shortest tour visiting every vertex (generalization of Hamiltonian Path).</li>
+      </ul>
+      <div class="callout">
+        <strong>Key Fact:</strong> All NP-complete problems are polynomial-time reducible to each other. Solving any one in polynomial time would solve all NP problems in polynomial time (P = NP).
+      </div>
+    </div>
+
+    <h4>SAT and Electronic Design (Slide 387)</h4>
+    <p><strong>3-SAT:</strong> A CNF formula with exactly 3 literals per clause. E.g., (x₁ ∨ x₂ ∨ ¬x₃) ∧ (¬x₁ ∨ x₂ ∨ x₄) ∧ …. SAT solvers are used heavily in chip verification and formal methods — despite the worst case being exponential, modern SAT solvers handle formulas with millions of variables in practice using sophisticated heuristics.</p>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Practice Questions — NP &amp; Reductions</div>
+
+    <div class="question-item">
+      <div class="question-text">Q1. (K&amp;T Ch. 8.2) Prove: if X ≤_P Y and Y can be solved in polynomial time, then X can be solved in polynomial time.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>By definition of polynomial reduction, any instance of X can be solved using a polynomial number of steps plus a polynomial number of calls to a polynomial-time oracle for Y. Each call to the oracle takes polynomial time. A polynomial number of polynomial-time operations is still polynomial (composition of polynomials is polynomial). Therefore X can be solved in polynomial time overall.</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q2. (K&amp;T Ch. 8.2) Prove the complement theorem: S is an independent set in G iff V−S is a vertex cover. Use this to show INDEPENDENT-SET ≡_P VERTEX-COVER.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p><strong>Theorem:</strong> S is independent ↔ V−S is a vertex cover.</p>
+        <p><strong>Proof (⇒):</strong> Let S be independent. For any edge (u,v) ∈ E, since S is independent, not both u and v are in S. So at least one of u,v is in V−S. Thus V−S covers every edge. ✓</p>
+        <p><strong>Proof (⇐):</strong> Let V−S be a vertex cover. For any edge (u,v), at least one endpoint is in V−S. So it's impossible that both endpoints are in S. Thus no two vertices in S share an edge; S is independent. ✓</p>
+        <p><strong>Reduction:</strong> To solve INDEPENDENT-SET(G, k): call VERTEX-COVER(G, n−k). Return "yes" iff VERTEX-COVER returns "yes". The reduction is O(1) (same graph, different k). Hence both directions reduce to each other in constant time: INDEPENDENT-SET ≡_P VERTEX-COVER.</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q3. What is the significance of the reduction 3-SAT ≤_P INDEPENDENT-SET for the theory of NP-completeness?</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>3-SAT is NP-complete (this follows from Cook's Theorem). The reduction 3-SAT ≤_P INDEPENDENT-SET means that if we could solve INDEPENDENT-SET in polynomial time, we could also solve 3-SAT (and therefore all NP problems) in polynomial time. This establishes that INDEPENDENT-SET is NP-hard. Since INDEPENDENT-SET is also in NP (a solution — the independent set itself — can be verified in polynomial time), it is NP-complete. The reduction thus "transfers" hardness from 3-SAT to INDEPENDENT-SET.</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q4. (Reading Exercise — Slide 390 / K&amp;T Ch. 8) Is the decision version of VERTEX-COVER (does G have a vertex cover of size ≤ k?) in NP? Justify.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Yes. A certificate is the vertex cover itself (a subset S ⊆ V with |S| ≤ k). To verify: (1) check |S| ≤ k in O(n), (2) for every edge (u,v) ∈ E, check that at least one of u,v is in S in O(m) total. Total verification time: O(n + m) = polynomial. Since solutions can be verified in polynomial time, VERTEX-COVER ∈ NP.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="topic-divider"></div>
+
+<!-- FINAL SUMMARY / EXAM PREP -->
+<section class="topic-section">
+  <div class="topic-header">
+    <span class="topic-num">EXAM PREP</span>
+    <h2 class="topic-title">Quick Reference — Algorithm Complexities &amp; Key Facts</h2>
+  </div>
+
+  <div class="discussion-box">
+    <div class="discussion-label">Master Complexity Table</div>
+    <table>
+      <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th></tr>
+      <tr><td>Linear Search</td><td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(1)</td><td>–</td></tr>
+      <tr><td>Binary Search</td><td>O(1)</td><td>O(log n)</td><td>O(log n)</td><td>O(1)</td><td>–</td></tr>
+      <tr><td>Insertion Sort</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Yes</td></tr>
+      <tr><td>Merge Sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Yes</td></tr>
+      <tr><td>Quicksort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>No</td></tr>
+      <tr><td>BFS</td><td colspan="3">O(n + m)</td><td>O(n)</td><td>–</td></tr>
+      <tr><td>DFS</td><td colspan="3">O(n + m)</td><td>O(n)</td><td>–</td></tr>
+      <tr><td>Topological Sort</td><td colspan="3">O(n + m)</td><td>O(n)</td><td>–</td></tr>
+      <tr><td>Dijkstra (heap)</td><td colspan="3">O((n+m) log n)</td><td>O(n)</td><td>–</td></tr>
+      <tr><td>Bellman-Ford</td><td colspan="3">O(nm)</td><td>O(n)</td><td>–</td></tr>
+      <tr><td>Floyd-Warshall</td><td colspan="3">O(n³)</td><td>O(n²)</td><td>–</td></tr>
+      <tr><td>Karatsuba</td><td colspan="3">O(n^1.585)</td><td>O(log n)</td><td>–</td></tr>
+      <tr><td>Gale-Shapley</td><td colspan="3">O(n²)</td><td>O(n²)</td><td>–</td></tr>
+    </table>
+  </div>
+
+  <div class="discussion-box" style="margin-top:1rem;">
+    <div class="discussion-label">Algorithm Design Paradigms — At a Glance</div>
+    <div class="why-box">
+      <div class="golden-label">DIVIDE &amp; CONQUER</div>
+      <p>Split into subproblems of size n/b, solve recursively, recombine. T(n) = aT(n/b) + f(n). Use when: subproblems are independent and recombination is efficient. Examples: Merge sort, Binary search, Karatsuba multiplication.</p>
+    </div>
+    <div class="how-box">
+      <div class="golden-label">GREEDY</div>
+      <p>Make locally optimal choice at each step, never reconsider. Requires proof (exchange argument or inductive correctness). Examples: Dijkstra, Kahn's topological sort, Gale-Shapley. Key pitfall: greedy often fails — you must prove optimality.</p>
+    </div>
+    <div class="what-box">
+      <div class="golden-label">DYNAMIC PROGRAMMING</div>
+      <p>Solve overlapping subproblems, store results (memoization/tabulation). Optimal substructure + overlapping subproblems. Examples: Bellman-Ford, Floyd-Warshall, Longest Path in DAG. Coming in later lectures: interval scheduling, sequence alignment, knapsack.</p>
+    </div>
+  </div>
+
+  <div class="questions-section">
+    <div class="questions-label">✦ Final Exam Style Questions</div>
+
+    <div class="question-item">
+      <div class="question-text">Q1. Design an O(n + m) algorithm to detect whether an undirected graph is bipartite (2-colorable).</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Use BFS. Assign source to color 0. For each edge (u,v): if v is uncolored, assign it the opposite color of u. If v is already colored the same as u, the graph is not bipartite. If BFS completes without conflict, the graph is bipartite.</p>
+        <p><strong>Correctness:</strong> A graph is bipartite iff it has no odd-length cycle. BFS finds conflicts iff an odd cycle exists.</p>
+        <p><strong>Complexity:</strong> O(n + m) — standard BFS complexity.</p>
+      </div>
+    </div>
+
+    <div class="question-item">
+      <div class="question-text">Q2. (Design algorithms) You are given a DAG where each edge (u,v) has weight w(u,v). Design an O(n+m) algorithm to find the shortest path from a source s to all other vertices.</div>
+      <div class="answer-block">
+        <div class="answer-label">Solution</div>
+        <p>Use topological sort + dynamic programming. This works even with negative weights (no Dijkstra needed) because DAGs have no negative cycles.</p>
+        <ol>
+          <li>Compute topological order of vertices in O(n+m).</li>
+          <li>Initialize dist[s] = 0, dist[v] = ∞ for all v ≠ s.</li>
+          <li>Process vertices in topological order. For each vertex u, for each edge (u,v): dist[v] = min(dist[v], dist[u] + w(u,v)).</li>
+        </ol>
+        <p><strong>Correctness:</strong> When we process u in topological order, all vertices that can reach u have already been processed, so dist[u] is already correct (by induction). Hence updating v from u gives the correct shortest path.</p>
+        <p><strong>Complexity:</strong> Topological sort O(n+m) + one pass over all edges O(m) = O(n+m) total.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<a href="#top" class="back-to-top" title="Back to top">↑</a>
+
+<script>
+  // Smooth scroll for TOC links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ── THEME TOGGLE ──────────────────────────────────────────────
+  const root      = document.documentElement;
+  const btn       = document.getElementById('themeToggle');
+  const icon      = document.getElementById('themeIcon');
+  const label     = document.getElementById('themeLabel');
+
+  const DARK  = { theme: 'dark',  emoji: '🌙', text: 'Daylight' };
+  const LIGHT = { theme: 'light', emoji: '☀️', text: 'Dark'     };
+
+  function applyTheme(mode) {
+    const isDark = (mode === 'dark');
+    root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    icon.textContent  = isDark ? DARK.emoji  : LIGHT.emoji;
+    label.textContent = isDark ? DARK.text   : LIGHT.text;
+    try { localStorage.setItem('cs570-theme', mode); } catch(e) {}
+  }
+
+  // Restore saved preference, default to dark
+  const saved = (() => { try { return localStorage.getItem('cs570-theme'); } catch(e) { return null; } })();
+  applyTheme(saved === 'light' ? 'light' : 'dark');
+
+  btn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+</script>
+</body>
+</html>
