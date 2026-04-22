@@ -244,7 +244,7 @@ iframe.loading { opacity: 0; }
 <div class="topbar">
   <span class="topbar-logo">CS 448/548 · Study Hub</span>
   <div class="topbar-divider"></div>
-  <span class="lecture-count">9 modules | Slide images: place JPGs in images/sl17_24/</span>
+  <span class="lecture-count">9 modules</span>
 
   <div class="theme-toggle">
     <span class="theme-label" id="theme-label">DARK</span>
@@ -253,14 +253,6 @@ iframe.loading { opacity: 0; }
       <span class="icon icon-sun">☀️</span>
     </button>
   </div>
-</div>
-
-<!-- IMAGE PATH INSTRUCTIONS -->
-<div id="img-instructions" style="background:#1a2744;border-bottom:1px solid #2a3a5a;padding:8px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8ab4d8;display:flex;align-items:center;gap:12px;flex-shrink:0;">
-  <span style="color:#4f9ef8;font-weight:700;">&#128193; IMAGES</span>
-  <span>Place slide JPGs as <code style="background:#0d1525;padding:1px 6px;border-radius:3px;color:#a8c8f0;">images/sl17_24/001.jpg</code>
-  through <code style="background:#0d1525;padding:1px 6px;border-radius:3px;color:#a8c8f0;">233.jpg</code> alongside this HTML file to display slide thumbnails.</span>
-  <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:#5a7a9a;cursor:pointer;font-size:14px;">&#x2715;</button>
 </div>
 
 <!-- LECTURE NAV -->
@@ -921,42 +913,6 @@ const lectures = [
   .hl-blue { color: var(--accent); }
   .hl-green { color: var(--green); }
   .hl-red { color: var(--red); }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -1005,17 +961,6 @@ const lectures = [
 <div class="page">
 
 <!-- ══════════════════ SLIDE 1 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/001.jpg"
-    alt="Slide page 1"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>001.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s1" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 1</span>
@@ -1073,17 +1018,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 2 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/002.jpg"
-    alt="Slide page 2"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>002.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s2" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 2</span>
@@ -1212,17 +1146,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 3 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/003.jpg"
-    alt="Slide page 3"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>003.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s3" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 3</span>
@@ -1301,17 +1224,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDES 4–5 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/004.jpg"
-    alt="Slide page 4"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>004.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s4" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDES 4–5</span>
@@ -1418,17 +1330,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 7 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/007.jpg"
-    alt="Slide page 7"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>007.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s7" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 7</span>
@@ -1493,17 +1394,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 8 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/008.jpg"
-    alt="Slide page 8"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>008.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s8" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 8</span>
@@ -1551,17 +1441,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 9 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/009.jpg"
-    alt="Slide page 9"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>009.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s9" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 9</span>
@@ -1648,17 +1527,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 10 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/010.jpg"
-    alt="Slide page 10"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>010.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s10" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 10</span>
@@ -1713,17 +1581,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDES 11–12 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/011.jpg"
-    alt="Slide page 11"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>011.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s11" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDES 11–12</span>
@@ -1812,17 +1669,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDES 13–14 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/013.jpg"
-    alt="Slide page 13"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>013.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s13" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDES 13–14</span>
@@ -1919,17 +1765,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDES 16–20 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/016.jpg"
-    alt="Slide page 16"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>016.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s16" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDES 16–20</span>
@@ -2073,17 +1908,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 21 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/021.jpg"
-    alt="Slide page 21"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>021.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s21" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 21</span>
@@ -2152,17 +1976,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDES 22–23 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/022.jpg"
-    alt="Slide page 22"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>022.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s22" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDES 22–23</span>
@@ -2252,17 +2065,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 27 ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/027.jpg"
-    alt="Slide page 27"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>027.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s27" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDE 27</span>
@@ -2364,17 +2166,6 @@ const lectures = [
 </div>
 
 <!-- ══════════════════ SLIDE 24 / Summary ══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/028.jpg"
-    alt="Slide page 28"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>028.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s28" class="slide-block">
   <div class="slide-header">
     <span class="slide-num">SLIDES 24–28</span>
@@ -3213,42 +3004,6 @@ const lectures = [
   li { margin-bottom: 5px; }
   strong { color: #e8eaf0; }
   em { color: var(--accent); font-style: normal; }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -3285,17 +3040,6 @@ const lectures = [
 <!-- ══════════════════════════════════════════════════
      TOPIC 1 — INTRODUCTION & POLICY
 ══════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/032.jpg"
-    alt="Slide page 32"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>032.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header t1">
   <div class="topic-dot"></div>
   <h2>Topic 1 — What Is a Firewall? Policy, Requirements &amp; Actions</h2>
@@ -3490,17 +3234,6 @@ const lectures = [
 <!-- ══════════════════════════════════════════════════
      TOPIC 2 — FIREWALL TYPES
 ══════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/042.jpg"
-    alt="Slide page 42"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>042.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header t2">
   <div class="topic-dot"></div>
   <h2>Topic 2 — Types of Firewalls: Packet Filter, Stateful &amp; Application Proxy</h2>
@@ -3779,17 +3512,6 @@ const lectures = [
 <!-- ══════════════════════════════════════════════════
      TOPIC 3 — NETFILTER & IPTABLES
 ══════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/048.jpg"
-    alt="Slide page 48"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>048.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header t3">
   <div class="topic-dot"></div>
   <h2>Topic 3 — Netfilter Framework &amp; iptables in Linux</h2>
@@ -4048,17 +3770,6 @@ int setUpFilter(void) {
 <!-- ══════════════════════════════════════════════════
      TOPIC 4 — LIMITATIONS & EVASION
 ══════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/058.jpg"
-    alt="Slide page 58"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>058.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header t4">
   <div class="topic-dot"></div>
   <h2>Topic 4 — Firewall Limitations &amp; Evasion Techniques</h2>
@@ -4915,42 +4626,6 @@ sudo iptables -P FORWARD DROP</div>
     border-radius: 4px;
     margin-right: 6px;
   }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -5041,17 +4716,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ═══════════════════════════════════════════════════════ -->
 <!-- SLIDE 2: Data Link / MAC                                 -->
 <!-- ═══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/058.jpg"
-    alt="Slide page 58"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>058.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slide 4</div>
   <div class="slide-title">Data Link / Medium Access Control (MAC)</div>
@@ -5151,17 +4815,6 @@ sudo iptables -P FORWARD DROP</div>
   <h2>Topic: History of Wireless LAN Security</h2>
 </div>
 
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/059.jpg"
-    alt="Slide page 59"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>059.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slide 7</div>
   <div class="slide-title">History of Wireless LAN Security</div>
@@ -5208,17 +4861,6 @@ sudo iptables -P FORWARD DROP</div>
   <h2>Topic: WEP — Wired Equivalent Privacy</h2>
 </div>
 
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/060.jpg"
-    alt="Slide page 60"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>060.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slides 8–11</div>
   <div class="slide-title">WEP: Design, Authentication, Encapsulation & Problems</div>
@@ -5381,17 +5023,6 @@ sudo iptables -P FORWARD DROP</div>
   <h2>Topic: WPA, WPA2, WPA3 — Evolution of Wireless Security</h2>
 </div>
 
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/061.jpg"
-    alt="Slide page 61"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>061.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slides 12–15</div>
   <div class="slide-title">WPA, WPA2, RSN Architecture & Comparison</div>
@@ -5487,17 +5118,6 @@ sudo iptables -P FORWARD DROP</div>
   </div>
 </div>
 
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/062.jpg"
-    alt="Slide page 62"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>062.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slides 15 (cont.) & 18</div>
   <div class="slide-title">WPA2-PSK Weakness & WPA3 Fix</div>
@@ -5592,17 +5212,6 @@ sudo iptables -P FORWARD DROP</div>
   <h2>Topic: Network Access Control (NAC), 802.1X & IEEE 802.11i Phases</h2>
 </div>
 
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/063.jpg"
-    alt="Slide page 63"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>063.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slides 17–22 + 26</div>
   <div class="slide-title">NAC Overview, AAA Framework, 802.1X, and IEEE 802.11i Phases of Operation</div>
@@ -5756,17 +5365,6 @@ sudo iptables -P FORWARD DROP</div>
   <h2>Topic: EAP Framework — Methods, Protocol Exchanges & RADIUS</h2>
 </div>
 
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/064.jpg"
-    alt="Slide page 64"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>064.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block">
   <div class="slide-num">Slides 24–30 + 32–33</div>
   <div class="slide-title">Extensible Authentication Protocol (EAP) — Framework, Methods, Message Flow, EAP-TLS, EAP-PEAP</div>
@@ -6639,42 +6237,6 @@ sudo iptables -P FORWARD DROP</div>
     .golden-circle { grid-template-columns: 1fr; }
     .comp-grid { grid-template-columns: 1fr; }
   }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -6727,17 +6289,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 1: WIRELESS TECHNOLOGY OVERVIEW -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/101.jpg"
-    alt="Slide page 101"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>101.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t1">
   <span class="topic-num">SLIDE 1–2</span>
   <h2>Wireless Technologies Overview</h2>
@@ -6829,17 +6380,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 2: RADIO SPECTRUM -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/106.jpg"
-    alt="Slide page 106"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>106.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t2">
   <span class="topic-num">SLIDE 3</span>
   <h2>The Radio Spectrum</h2>
@@ -6937,17 +6477,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 3: 2.4 GHz ISM BAND DETAIL -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/111.jpg"
-    alt="Slide page 111"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>111.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t3">
   <span class="topic-num">SLIDES 4, 11, 35</span>
   <h2>The 2.4 GHz ISM Band in Detail</h2>
@@ -7043,17 +6572,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 4: CELLULAR NETWORKS 1G–5G -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/116.jpg"
-    alt="Slide page 116"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>116.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t4">
   <span class="topic-num">SLIDE 5</span>
   <h2>Cellular Networks — 1G through 5G</h2>
@@ -7151,17 +6669,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 5: 4G LTE -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/121.jpg"
-    alt="Slide page 121"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>121.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t5">
   <span class="topic-num">SLIDE 6</span>
   <h2>4G LTE — Long Term Evolution</h2>
@@ -7242,17 +6749,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 6 & 7: 5G + OFDM + MIMO -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/126.jpg"
-    alt="Slide page 126"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>126.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t6">
   <span class="topic-num">SLIDES 7–9</span>
   <h2>5G, OFDM, and MIMO</h2>
@@ -7349,17 +6845,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 8: Wi-Fi STANDARDS -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/131.jpg"
-    alt="Slide page 131"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>131.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t9">
   <span class="topic-num">SLIDE 10</span>
   <h2>Wi-Fi Standards Evolution</h2>
@@ -7437,17 +6922,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 9: BLUETOOTH -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t10">
   <span class="topic-num">SLIDES 12–13</span>
   <h2>Bluetooth</h2>
@@ -7542,17 +7016,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 10: ZIGBEE -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t11">
   <span class="topic-num">SLIDES 14–16</span>
   <h2>ZigBee (IEEE 802.15.4)</h2>
@@ -7650,17 +7113,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 11: SPREAD SPECTRUM -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t12">
   <span class="topic-num">SLIDE 17</span>
   <h2>Spread Spectrum Techniques</h2>
@@ -7751,17 +7203,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 12: NB-IoT -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t13">
   <span class="topic-num">SLIDES 18–21</span>
   <h2>Narrowband IoT (NB-IoT)</h2>
@@ -7855,17 +7296,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 13: LoRa / LoRaWAN -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t14">
   <span class="topic-num">SLIDES 22–29</span>
   <h2>LoRa and LoRaWAN</h2>
@@ -7982,17 +7412,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 14: RFID -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t15">
   <span class="topic-num">SLIDES 30–33</span>
   <h2>RFID — Radio-Frequency Identification</h2>
@@ -8094,17 +7513,6 @@ sudo iptables -P FORWARD DROP</div>
 <!-- ══════════════════════════════════════════════════════ -->
 <!-- TOPIC 15: IoT Requirements & Bandwidth Summary -->
 <!-- ══════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/135.jpg"
-    alt="Slide page 135"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-header" id="t16">
   <span class="topic-num">SLIDES 34–38</span>
   <h2>IoT Requirements, Bandwidth Summary, and Devices</h2>
@@ -8797,42 +8205,6 @@ sudo iptables -P FORWARD DROP</div>
   ul { padding-left: 1.5em; margin-bottom: 14px; }
   li { margin-bottom: 5px; color: var(--text2); font-size: .92em; }
   li strong { color: var(--text); }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -8858,17 +8230,6 @@ sudo iptables -P FORWARD DROP</div>
 <div class="page">
 
 <!-- ═══════════════════ KERBEROS ═══════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/136.jpg"
-    alt="Slide page 136"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>136.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <section class="section" id="kerberos">
   <div class="section-header">
     <div class="section-number">01</div>
@@ -10247,42 +9608,6 @@ function toggle(el) {
     .nav-bar { padding: 0 24px; }
     .hero h1 { font-size: 2em; }
   }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -10337,17 +9662,6 @@ function toggle(el) {
 </div>
 
 <!-- ════ TOPIC 1: TCP Protocol Overview ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/169.jpg"
-    alt="Slide page 169"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>169.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s1" class="slide-block">
 
   <div class="slide-card">
@@ -10439,17 +9753,6 @@ function toggle(el) {
 </div>
 
 <!-- ════ TOPIC 2: Data Transmission ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/170.jpg"
-    alt="Slide page 170"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>170.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s2" class="slide-block">
 
   <div class="slide-card green">
@@ -10520,17 +9823,6 @@ function toggle(el) {
 </div>
 
 <!-- ════ TOPIC 3: Client & Server ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/171.jpg"
-    alt="Slide page 171"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>171.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s3" class="slide-block">
 
   <div class="slide-card">
@@ -10597,17 +9889,6 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 </div>
 
 <!-- ════ TOPIC 4: 3-Way Handshake ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/172.jpg"
-    alt="Slide page 172"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>172.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s4" class="slide-block">
 
   <div class="slide-card blue">
@@ -10749,17 +10030,6 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 </div>
 
 <!-- ════ TOPIC 5: SYN Flooding ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/173.jpg"
-    alt="Slide page 173"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>173.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s5" class="slide-block">
 
   <div class="slide-card red">
@@ -10860,17 +10130,6 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 </div>
 
 <!-- ════ TOPIC 6: SYN Cookies ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/174.jpg"
-    alt="Slide page 174"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>174.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s6" class="slide-block">
 
   <div class="slide-card green">
@@ -10963,17 +10222,6 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 </div>
 
 <!-- ════ TOPIC 7: TCP Reset Attack ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/175.jpg"
-    alt="Slide page 175"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>175.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s7" class="slide-block">
 
   <div class="slide-card red">
@@ -11080,17 +10328,6 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 </div>
 
 <!-- ════ TOPIC 8: Session Hijacking ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/176.jpg"
-    alt="Slide page 176"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>176.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s8" class="slide-block">
 
   <div class="slide-card purple">
@@ -11140,17 +10377,6 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 </div>
 
 <!-- ════ TOPIC 9: Defenses ════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/177.jpg"
-    alt="Slide page 177"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>177.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div id="s9" class="slide-block">
 
   <div class="slide-card green">
@@ -11807,42 +11033,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
   }
 
   code { font-family: 'JetBrains Mono', monospace; font-size: .85em; color: var(--accent); }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -11885,17 +11075,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="page">
 
 <!-- ═══════════════════════ SLIDE 1 ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/193.jpg"
-    alt="Slide page 193"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>193.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s1">
   <div class="slide-label">Slide 1 of 21</div>
   <div class="slide-title">Why Wireless is Insecure?</div>
@@ -11985,17 +11164,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDE 2 ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/194.jpg"
-    alt="Slide page 194"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>194.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s2">
   <div class="slide-label">Slide 2 of 21</div>
   <div class="slide-title">History of Wireless LAN Security</div>
@@ -12084,17 +11252,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDE 3 ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/195.jpg"
-    alt="Slide page 195"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>195.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s3">
   <div class="slide-label">Slide 3 of 21</div>
   <div class="slide-title">WEP, WPA, WPA2, WPA3 — Comparison Table</div>
@@ -12173,17 +11330,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDES 4-6: NAC ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/196.jpg"
-    alt="Slide page 196"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>196.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s4">
   <div class="slide-label">Slides 4–6 of 21 (Topic: Network Access Control)</div>
   <div class="slide-title">Network Access Control (NAC) — Overview, Enforcement & Context</div>
@@ -12286,17 +11432,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDES 7-8: 802.1X ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/199.jpg"
-    alt="Slide page 199"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>199.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s7">
   <div class="slide-label">Slides 7–8 of 21 (Topic: IEEE 802.1X)</div>
   <div class="slide-title">IEEE 802.1X — Port-Based Network Access Control</div>
@@ -12400,17 +11535,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDES 9-10: 802.11i Phases + EAP ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/201.jpg"
-    alt="Slide page 201"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>201.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s9">
   <div class="slide-label">Slides 9–10 of 21 (Topic: 802.11i Phases of Operation & EAP Framework)</div>
   <div class="slide-title">IEEE 802.11i Phases of Operation &amp; EAP Framework</div>
@@ -12493,17 +11617,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDES 11-14: EAP Methods + Flows ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/203.jpg"
-    alt="Slide page 203"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>203.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s11">
   <div class="slide-label">Slides 11–14 of 21 (Topic: EAP Methods, Protocol Exchanges, EAP-TLS, EAP-PEAP)</div>
   <div class="slide-title">EAP Authentication Methods &amp; Protocol Flows</div>
@@ -12602,17 +11715,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <div class="topic-divider"></div>
 
 <!-- ═══════════════════════ SLIDES 15-17: 4G LTE AKA ═══════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/207.jpg"
-    alt="Slide page 207"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>207.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="slide-block" id="s15">
   <div class="slide-label">Slides 15–17 of 21 (Topic: 4G LTE Architecture, AKA, Key Derivation, 5G)</div>
   <div class="slide-title">4G LTE Architecture, AKA Authentication &amp; 5G Security Evolution</div>
@@ -13539,42 +12641,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
     border-top: 1px solid var(--border);
     margin: 48px 0;
   }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
@@ -13616,17 +12682,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 1 — Overview & Introduction -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/216.jpg"
-    alt="Slide page 216"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>216.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s1">
   <div class="td-line"></div>
   <div class="td-label td-dns">Topic 1 — Overview &amp; DNS Introduction</div>
@@ -13728,17 +12783,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 2 — DNS Hierarchy & Query Process -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/219.jpg"
-    alt="Slide page 219"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>219.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s4">
   <div class="td-line"></div>
   <div class="td-label td-dns">Topic 2 — DNS Hierarchy &amp; Query Process</div>
@@ -13826,17 +12870,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 3 — Iterative Resolution & dig -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/221.jpg"
-    alt="Slide page 221"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>221.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s6">
   <div class="td-line"></div>
   <div class="td-label td-dns">Topic 3 — Iterative Resolution, dig, &amp; Local DNS Files</div>
@@ -13994,17 +13027,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 4 — DNS Attack Categories -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/225.jpg"
-    alt="Slide page 225"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>225.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s10">
   <div class="td-line"></div>
   <div class="td-label td-attack">Topic 4 — DNS Attack Categories</div>
@@ -14065,17 +13087,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 5 — LAN Spoofing & Cache Poisoning -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/226.jpg"
-    alt="Slide page 226"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>226.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s11">
   <div class="td-line"></div>
   <div class="td-label td-attack">Topic 5 — Spoofing DNS Replies</div>
@@ -14146,17 +13157,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 6 — Remote Poisoning & DNS Packet -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/227.jpg"
-    alt="Slide page 227"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>227.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s12">
   <div class="td-line"></div>
   <div class="td-label td-attack">Topic 6 — Remote Cache Poisoning &amp; DNS Packet Structure</div>
@@ -14223,17 +13223,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 7 — The Kaminsky Attack -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/229.jpg"
-    alt="Slide page 229"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>229.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s14">
   <div class="td-line"></div>
   <div class="td-label td-attack">Topic 7 — The Kaminsky Attack</div>
@@ -14430,17 +13419,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 8 — Defenses -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/231.jpg"
-    alt="Slide page 231"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>231.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s16">
   <div class="td-line"></div>
   <div class="td-label td-defense">Topic 8 — Defenses Against Cache Poisoning</div>
@@ -14636,17 +13614,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- TOPIC 9 — DoS on DNS -->
 <!-- ════════════════════════════════════════════════════════ -->
-
-<div class="slide-image-wrapper">
-  <img
-    src="images/sl17_24/235.jpg"
-    alt="Slide page 235"
-    onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
-  />
-  <div class="img-fallback-msg">
-    📄 Image <code>235.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
-  </div>
-</div>
 <div class="topic-divider" id="s20">
   <div class="td-line"></div>
   <div class="td-label td-dos">Topic 9 — Denial of Service Attacks on DNS</div>
@@ -15356,42 +14323,6 @@ document.querySelectorAll('.panel-header').forEach(header => {
     line-height: 1.75;
   }
   .intro strong { color: var(--accent); }
-
-  /* --- SLIDE IMAGE WRAPPER (Master Prompt Sec 4) --- */
-  .slide-image-wrapper {
-    margin: 0 0 0 0;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    background: var(--surface2);
-    position: relative;
-  }
-  .slide-image-wrapper img {
-    width: 100%;
-    display: block;
-    object-fit: contain;
-    max-height: 540px;
-  }
-  .img-fallback-msg {
-    display: none;
-    padding: 16px 24px;
-    font-size: .82em;
-    color: var(--text2);
-    font-family: var(--mono);
-    background: var(--surface2);
-    border-top: 1px dashed var(--border);
-  }
-  .slide-image-wrapper.img-missing img               { display: none; }
-  .slide-image-wrapper.img-missing .img-fallback-msg { display: block; }
-
-  /* Image-to-slide-block seamless join */
-  .slide-image-wrapper + .slide-block,
-  .slide-image-wrapper + .slide-block > .slide-header {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-top: none;
-  }
 </style>
 </head>
 <body>
