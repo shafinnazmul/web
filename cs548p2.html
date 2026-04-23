@@ -67,6 +67,13 @@ body {
   top: 0;
 }
 
+.topbar { 
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  transform: translateY(-100%);
+  transition: transform 0.25s ease;
+}
+.topbar:hover, .topbar:focus-within { transform: translateY(0); }
+
 .topbar-logo {
   font-size: 13px;
   font-weight: 800;
@@ -152,6 +159,15 @@ body {
   scrollbar-width: thin;
   transition: background 0.25s, border-color 0.25s;
 }
+
+.nav-strip-wrapper { 
+  max-height: 0; overflow: hidden; 
+  transition: max-height 0.3s ease; 
+}
+.nav-strip-wrapper.expanded { max-height: 200px; }
+
+#img-instructions { display: none; }
+
 .nav-strip-wrapper::-webkit-scrollbar { height: 3px; }
 .nav-strip-wrapper::-webkit-scrollbar-track { background: transparent; }
 .nav-strip-wrapper::-webkit-scrollbar-thumb { background: var(--shell-border); border-radius: 3px; }
@@ -7440,12 +7456,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/137.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>137.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t10">
@@ -7545,12 +7561,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/138.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>138.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t11">
@@ -7653,12 +7669,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/139.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>139.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t12">
@@ -7754,12 +7770,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/140.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>140.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t13">
@@ -7858,12 +7874,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/141.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>141.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t14">
@@ -7985,12 +8001,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/142.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>142.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t15">
@@ -8097,12 +8113,12 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24/135.jpg"
+    src="images/sl17_24/136.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
+    📄 Image <code>136.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
 </div>
 <div class="topic-header" id="t16">
