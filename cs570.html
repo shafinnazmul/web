@@ -93,31 +93,69 @@
     font-family: 'IBM Plex Mono', monospace;
   }
 
-  /* TABLE OF CONTENTS */
+  /* TABLE OF CONTENTS — auto-hide on hover */
   .toc {
+    position: sticky;
+    top: 0;
+    z-index: 200;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin: 2rem auto;
-    max-width: 900px;
-    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    max-width: 100%;
+    padding: 0;
+    overflow: hidden;
+    /* collapsed height = just the header bar */
+    max-height: 44px;
+    transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1),
+                box-shadow 0.25s ease,
+                padding 0.25s ease;
+    box-shadow: none;
   }
 
-  .toc h2 {
+  .toc:hover {
+    max-height: 600px;   /* large enough to never clip */
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    padding-bottom: 1.25rem;
+  }
+
+  .toc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.5rem;
+    height: 44px;
+    cursor: default;
+    user-select: none;
+  }
+
+  .toc-header-label {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.9rem;
+    font-size: 0.78rem;
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.5rem;
+    flex: 1;
+  }
+
+  .toc-chevron {
+    font-size: 0.65rem;
+    color: var(--text-dimmer);
+    transition: transform 0.3s ease;
+    line-height: 1;
+  }
+
+  .toc:hover .toc-chevron { transform: rotate(180deg); }
+
+  .toc-body {
+    padding: 0 1.5rem 0;
+    border-top: 1px solid var(--border);
+    overflow: hidden;
   }
 
   .toc-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 0.3rem;
+    padding: 0.75rem 0 0;
   }
 
   .toc a {
@@ -130,6 +168,57 @@
   }
 
   .toc a:hover { color: var(--text); }
+
+  /* ── SLIDE GALLERY ────────────────────────────────── */
+  .slide-gallery {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 2px 12px;
+    margin-bottom: 0.65rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .slide-gallery::-webkit-scrollbar { height: 5px; }
+  .slide-gallery::-webkit-scrollbar-track { background: transparent; }
+  .slide-gallery::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .sg-slide {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .sg-slide img {
+    width: 130px;
+    height: 82px;
+    object-fit: contain;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: block;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+
+  .sg-slide img:hover {
+    border-color: var(--accent);
+    transform: scale(1.04);
+  }
+
+  .sg-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--text-dimmer);
+    letter-spacing: 0.04em;
+  }
+
+  [data-theme="light"] .sg-slide img { background: #e8e4dd; }
 
   /* MAIN CONTAINER */
   .container {
@@ -637,7 +726,11 @@
 
 <!-- TABLE OF CONTENTS -->
 <div class="toc" id="toc">
-  <h2>📚 Table of Contents</h2>
+  <div class="toc-header">
+    <span class="toc-header-label">📚 Table of Contents</span>
+    <span class="toc-chevron">▼</span>
+  </div>
+  <div class="toc-body">
   <div class="toc-grid">
     <a href="#topic1">1. Course Introduction &amp; Motivation</a>
     <a href="#topic2">2. Stable Matching Problem</a>
@@ -657,6 +750,7 @@
     <a href="#topic16">16. Divide &amp; Conquer: Integer Multiplication</a>
     <a href="#topic17">17. Intractability, NP &amp; Reductions</a>
   </div>
+  </div><!-- /toc-body -->
 </div>
 
 <div class="container">
@@ -670,6 +764,45 @@
     <h2 class="topic-title">Course Introduction &amp; Motivation</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/001.jpg" alt="Slide 1" loading="lazy"><span class="sg-num">001</span></div>
+        <div class="sg-slide"><img src="images/cs570/002.jpg" alt="Slide 2" loading="lazy"><span class="sg-num">002</span></div>
+        <div class="sg-slide"><img src="images/cs570/003.jpg" alt="Slide 3" loading="lazy"><span class="sg-num">003</span></div>
+        <div class="sg-slide"><img src="images/cs570/004.jpg" alt="Slide 4" loading="lazy"><span class="sg-num">004</span></div>
+        <div class="sg-slide"><img src="images/cs570/005.jpg" alt="Slide 5" loading="lazy"><span class="sg-num">005</span></div>
+        <div class="sg-slide"><img src="images/cs570/006.jpg" alt="Slide 6" loading="lazy"><span class="sg-num">006</span></div>
+        <div class="sg-slide"><img src="images/cs570/007.jpg" alt="Slide 7" loading="lazy"><span class="sg-num">007</span></div>
+        <div class="sg-slide"><img src="images/cs570/008.jpg" alt="Slide 8" loading="lazy"><span class="sg-num">008</span></div>
+        <div class="sg-slide"><img src="images/cs570/009.jpg" alt="Slide 9" loading="lazy"><span class="sg-num">009</span></div>
+        <div class="sg-slide"><img src="images/cs570/010.jpg" alt="Slide 10" loading="lazy"><span class="sg-num">010</span></div>
+        <div class="sg-slide"><img src="images/cs570/011.jpg" alt="Slide 11" loading="lazy"><span class="sg-num">011</span></div>
+        <div class="sg-slide"><img src="images/cs570/012.jpg" alt="Slide 12" loading="lazy"><span class="sg-num">012</span></div>
+        <div class="sg-slide"><img src="images/cs570/013.jpg" alt="Slide 13" loading="lazy"><span class="sg-num">013</span></div>
+        <div class="sg-slide"><img src="images/cs570/014.jpg" alt="Slide 14" loading="lazy"><span class="sg-num">014</span></div>
+        <div class="sg-slide"><img src="images/cs570/015.jpg" alt="Slide 15" loading="lazy"><span class="sg-num">015</span></div>
+        <div class="sg-slide"><img src="images/cs570/016.jpg" alt="Slide 16" loading="lazy"><span class="sg-num">016</span></div>
+        <div class="sg-slide"><img src="images/cs570/017.jpg" alt="Slide 17" loading="lazy"><span class="sg-num">017</span></div>
+        <div class="sg-slide"><img src="images/cs570/018.jpg" alt="Slide 18" loading="lazy"><span class="sg-num">018</span></div>
+        <div class="sg-slide"><img src="images/cs570/019.jpg" alt="Slide 19" loading="lazy"><span class="sg-num">019</span></div>
+        <div class="sg-slide"><img src="images/cs570/020.jpg" alt="Slide 20" loading="lazy"><span class="sg-num">020</span></div>
+        <div class="sg-slide"><img src="images/cs570/021.jpg" alt="Slide 21" loading="lazy"><span class="sg-num">021</span></div>
+        <div class="sg-slide"><img src="images/cs570/022.jpg" alt="Slide 22" loading="lazy"><span class="sg-num">022</span></div>
+        <div class="sg-slide"><img src="images/cs570/023.jpg" alt="Slide 23" loading="lazy"><span class="sg-num">023</span></div>
+        <div class="sg-slide"><img src="images/cs570/024.jpg" alt="Slide 24" loading="lazy"><span class="sg-num">024</span></div>
+        <div class="sg-slide"><img src="images/cs570/025.jpg" alt="Slide 25" loading="lazy"><span class="sg-num">025</span></div>
+        <div class="sg-slide"><img src="images/cs570/026.jpg" alt="Slide 26" loading="lazy"><span class="sg-num">026</span></div>
+        <div class="sg-slide"><img src="images/cs570/027.jpg" alt="Slide 27" loading="lazy"><span class="sg-num">027</span></div>
+        <div class="sg-slide"><img src="images/cs570/028.jpg" alt="Slide 28" loading="lazy"><span class="sg-num">028</span></div>
+        <div class="sg-slide"><img src="images/cs570/029.jpg" alt="Slide 29" loading="lazy"><span class="sg-num">029</span></div>
+        <div class="sg-slide"><img src="images/cs570/030.jpg" alt="Slide 30" loading="lazy"><span class="sg-num">030</span></div>
+        <div class="sg-slide"><img src="images/cs570/031.jpg" alt="Slide 31" loading="lazy"><span class="sg-num">031</span></div>
+        <div class="sg-slide"><img src="images/cs570/032.jpg" alt="Slide 32" loading="lazy"><span class="sg-num">032</span></div>
+        <div class="sg-slide"><img src="images/cs570/033.jpg" alt="Slide 33" loading="lazy"><span class="sg-num">033</span></div>
+        <div class="sg-slide"><img src="images/cs570/034.jpg" alt="Slide 34" loading="lazy"><span class="sg-num">034</span></div>
+        <div class="sg-slide"><img src="images/cs570/035.jpg" alt="Slide 35" loading="lazy"><span class="sg-num">035</span></div>
+        <div class="sg-slide"><img src="images/cs570/036.jpg" alt="Slide 36" loading="lazy"><span class="sg-num">036</span></div>
+        <div class="sg-slide"><img src="images/cs570/037.jpg" alt="Slide 37" loading="lazy"><span class="sg-num">037</span></div>
+      </div>
   <span class="lecture-label">Lectures 1–2 · Slides 1–21</span>
 
   <div class="slide-box" data-slide="Slides 1–21">
@@ -718,6 +851,24 @@
     <h2 class="topic-title">The Stable Matching Problem</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/022.jpg" alt="Slide 22" loading="lazy"><span class="sg-num">022</span></div>
+        <div class="sg-slide"><img src="images/cs570/023.jpg" alt="Slide 23" loading="lazy"><span class="sg-num">023</span></div>
+        <div class="sg-slide"><img src="images/cs570/024.jpg" alt="Slide 24" loading="lazy"><span class="sg-num">024</span></div>
+        <div class="sg-slide"><img src="images/cs570/025.jpg" alt="Slide 25" loading="lazy"><span class="sg-num">025</span></div>
+        <div class="sg-slide"><img src="images/cs570/026.jpg" alt="Slide 26" loading="lazy"><span class="sg-num">026</span></div>
+        <div class="sg-slide"><img src="images/cs570/027.jpg" alt="Slide 27" loading="lazy"><span class="sg-num">027</span></div>
+        <div class="sg-slide"><img src="images/cs570/028.jpg" alt="Slide 28" loading="lazy"><span class="sg-num">028</span></div>
+        <div class="sg-slide"><img src="images/cs570/029.jpg" alt="Slide 29" loading="lazy"><span class="sg-num">029</span></div>
+        <div class="sg-slide"><img src="images/cs570/030.jpg" alt="Slide 30" loading="lazy"><span class="sg-num">030</span></div>
+        <div class="sg-slide"><img src="images/cs570/031.jpg" alt="Slide 31" loading="lazy"><span class="sg-num">031</span></div>
+        <div class="sg-slide"><img src="images/cs570/032.jpg" alt="Slide 32" loading="lazy"><span class="sg-num">032</span></div>
+        <div class="sg-slide"><img src="images/cs570/033.jpg" alt="Slide 33" loading="lazy"><span class="sg-num">033</span></div>
+        <div class="sg-slide"><img src="images/cs570/034.jpg" alt="Slide 34" loading="lazy"><span class="sg-num">034</span></div>
+        <div class="sg-slide"><img src="images/cs570/035.jpg" alt="Slide 35" loading="lazy"><span class="sg-num">035</span></div>
+        <div class="sg-slide"><img src="images/cs570/036.jpg" alt="Slide 36" loading="lazy"><span class="sg-num">036</span></div>
+        <div class="sg-slide"><img src="images/cs570/037.jpg" alt="Slide 37" loading="lazy"><span class="sg-num">037</span></div>
+      </div>
   <span class="lecture-label">Lectures 2 · Slides 23–31</span>
 
   <div class="slide-box" data-slide="Slides 23–31">
@@ -806,6 +957,64 @@ Initialize: all students and advisors free
     <h2 class="topic-title">Algorithm Comparison &amp; Asymptotic Analysis</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/022.jpg" alt="Slide 22" loading="lazy"><span class="sg-num">022</span></div>
+        <div class="sg-slide"><img src="images/cs570/023.jpg" alt="Slide 23" loading="lazy"><span class="sg-num">023</span></div>
+        <div class="sg-slide"><img src="images/cs570/024.jpg" alt="Slide 24" loading="lazy"><span class="sg-num">024</span></div>
+        <div class="sg-slide"><img src="images/cs570/025.jpg" alt="Slide 25" loading="lazy"><span class="sg-num">025</span></div>
+        <div class="sg-slide"><img src="images/cs570/026.jpg" alt="Slide 26" loading="lazy"><span class="sg-num">026</span></div>
+        <div class="sg-slide"><img src="images/cs570/027.jpg" alt="Slide 27" loading="lazy"><span class="sg-num">027</span></div>
+        <div class="sg-slide"><img src="images/cs570/028.jpg" alt="Slide 28" loading="lazy"><span class="sg-num">028</span></div>
+        <div class="sg-slide"><img src="images/cs570/029.jpg" alt="Slide 29" loading="lazy"><span class="sg-num">029</span></div>
+        <div class="sg-slide"><img src="images/cs570/030.jpg" alt="Slide 30" loading="lazy"><span class="sg-num">030</span></div>
+        <div class="sg-slide"><img src="images/cs570/031.jpg" alt="Slide 31" loading="lazy"><span class="sg-num">031</span></div>
+        <div class="sg-slide"><img src="images/cs570/032.jpg" alt="Slide 32" loading="lazy"><span class="sg-num">032</span></div>
+        <div class="sg-slide"><img src="images/cs570/033.jpg" alt="Slide 33" loading="lazy"><span class="sg-num">033</span></div>
+        <div class="sg-slide"><img src="images/cs570/034.jpg" alt="Slide 34" loading="lazy"><span class="sg-num">034</span></div>
+        <div class="sg-slide"><img src="images/cs570/035.jpg" alt="Slide 35" loading="lazy"><span class="sg-num">035</span></div>
+        <div class="sg-slide"><img src="images/cs570/036.jpg" alt="Slide 36" loading="lazy"><span class="sg-num">036</span></div>
+        <div class="sg-slide"><img src="images/cs570/037.jpg" alt="Slide 37" loading="lazy"><span class="sg-num">037</span></div>
+        <div class="sg-slide"><img src="images/cs570/038.jpg" alt="Slide 38" loading="lazy"><span class="sg-num">038</span></div>
+        <div class="sg-slide"><img src="images/cs570/039.jpg" alt="Slide 39" loading="lazy"><span class="sg-num">039</span></div>
+        <div class="sg-slide"><img src="images/cs570/040.jpg" alt="Slide 40" loading="lazy"><span class="sg-num">040</span></div>
+        <div class="sg-slide"><img src="images/cs570/041.jpg" alt="Slide 41" loading="lazy"><span class="sg-num">041</span></div>
+        <div class="sg-slide"><img src="images/cs570/042.jpg" alt="Slide 42" loading="lazy"><span class="sg-num">042</span></div>
+        <div class="sg-slide"><img src="images/cs570/043.jpg" alt="Slide 43" loading="lazy"><span class="sg-num">043</span></div>
+        <div class="sg-slide"><img src="images/cs570/044.jpg" alt="Slide 44" loading="lazy"><span class="sg-num">044</span></div>
+        <div class="sg-slide"><img src="images/cs570/045.jpg" alt="Slide 45" loading="lazy"><span class="sg-num">045</span></div>
+        <div class="sg-slide"><img src="images/cs570/046.jpg" alt="Slide 46" loading="lazy"><span class="sg-num">046</span></div>
+        <div class="sg-slide"><img src="images/cs570/047.jpg" alt="Slide 47" loading="lazy"><span class="sg-num">047</span></div>
+        <div class="sg-slide"><img src="images/cs570/048.jpg" alt="Slide 48" loading="lazy"><span class="sg-num">048</span></div>
+        <div class="sg-slide"><img src="images/cs570/049.jpg" alt="Slide 49" loading="lazy"><span class="sg-num">049</span></div>
+        <div class="sg-slide"><img src="images/cs570/050.jpg" alt="Slide 50" loading="lazy"><span class="sg-num">050</span></div>
+        <div class="sg-slide"><img src="images/cs570/051.jpg" alt="Slide 51" loading="lazy"><span class="sg-num">051</span></div>
+        <div class="sg-slide"><img src="images/cs570/052.jpg" alt="Slide 52" loading="lazy"><span class="sg-num">052</span></div>
+        <div class="sg-slide"><img src="images/cs570/053.jpg" alt="Slide 53" loading="lazy"><span class="sg-num">053</span></div>
+        <div class="sg-slide"><img src="images/cs570/054.jpg" alt="Slide 54" loading="lazy"><span class="sg-num">054</span></div>
+        <div class="sg-slide"><img src="images/cs570/055.jpg" alt="Slide 55" loading="lazy"><span class="sg-num">055</span></div>
+        <div class="sg-slide"><img src="images/cs570/056.jpg" alt="Slide 56" loading="lazy"><span class="sg-num">056</span></div>
+        <div class="sg-slide"><img src="images/cs570/057.jpg" alt="Slide 57" loading="lazy"><span class="sg-num">057</span></div>
+        <div class="sg-slide"><img src="images/cs570/058.jpg" alt="Slide 58" loading="lazy"><span class="sg-num">058</span></div>
+        <div class="sg-slide"><img src="images/cs570/059.jpg" alt="Slide 59" loading="lazy"><span class="sg-num">059</span></div>
+        <div class="sg-slide"><img src="images/cs570/060.jpg" alt="Slide 60" loading="lazy"><span class="sg-num">060</span></div>
+        <div class="sg-slide"><img src="images/cs570/061.jpg" alt="Slide 61" loading="lazy"><span class="sg-num">061</span></div>
+        <div class="sg-slide"><img src="images/cs570/062.jpg" alt="Slide 62" loading="lazy"><span class="sg-num">062</span></div>
+        <div class="sg-slide"><img src="images/cs570/063.jpg" alt="Slide 63" loading="lazy"><span class="sg-num">063</span></div>
+        <div class="sg-slide"><img src="images/cs570/064.jpg" alt="Slide 64" loading="lazy"><span class="sg-num">064</span></div>
+        <div class="sg-slide"><img src="images/cs570/065.jpg" alt="Slide 65" loading="lazy"><span class="sg-num">065</span></div>
+        <div class="sg-slide"><img src="images/cs570/066.jpg" alt="Slide 66" loading="lazy"><span class="sg-num">066</span></div>
+        <div class="sg-slide"><img src="images/cs570/067.jpg" alt="Slide 67" loading="lazy"><span class="sg-num">067</span></div>
+        <div class="sg-slide"><img src="images/cs570/068.jpg" alt="Slide 68" loading="lazy"><span class="sg-num">068</span></div>
+        <div class="sg-slide"><img src="images/cs570/069.jpg" alt="Slide 69" loading="lazy"><span class="sg-num">069</span></div>
+        <div class="sg-slide"><img src="images/cs570/070.jpg" alt="Slide 70" loading="lazy"><span class="sg-num">070</span></div>
+        <div class="sg-slide"><img src="images/cs570/071.jpg" alt="Slide 71" loading="lazy"><span class="sg-num">071</span></div>
+        <div class="sg-slide"><img src="images/cs570/072.jpg" alt="Slide 72" loading="lazy"><span class="sg-num">072</span></div>
+        <div class="sg-slide"><img src="images/cs570/073.jpg" alt="Slide 73" loading="lazy"><span class="sg-num">073</span></div>
+        <div class="sg-slide"><img src="images/cs570/074.jpg" alt="Slide 74" loading="lazy"><span class="sg-num">074</span></div>
+        <div class="sg-slide"><img src="images/cs570/075.jpg" alt="Slide 75" loading="lazy"><span class="sg-num">075</span></div>
+        <div class="sg-slide"><img src="images/cs570/076.jpg" alt="Slide 76" loading="lazy"><span class="sg-num">076</span></div>
+        <div class="sg-slide"><img src="images/cs570/077.jpg" alt="Slide 77" loading="lazy"><span class="sg-num">077</span></div>
+      </div>
   <span class="lecture-label">Lectures 2–6 · Slides 32–77</span>
 
   <div class="slide-box" data-slide="Slides 32–37">
@@ -927,6 +1136,35 @@ Initialize: all students and advisors free
     <h2 class="topic-title">Asymptotic Analysis: Deeper Exercises &amp; Recurrences</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/051.jpg" alt="Slide 51" loading="lazy"><span class="sg-num">051</span></div>
+        <div class="sg-slide"><img src="images/cs570/052.jpg" alt="Slide 52" loading="lazy"><span class="sg-num">052</span></div>
+        <div class="sg-slide"><img src="images/cs570/053.jpg" alt="Slide 53" loading="lazy"><span class="sg-num">053</span></div>
+        <div class="sg-slide"><img src="images/cs570/054.jpg" alt="Slide 54" loading="lazy"><span class="sg-num">054</span></div>
+        <div class="sg-slide"><img src="images/cs570/055.jpg" alt="Slide 55" loading="lazy"><span class="sg-num">055</span></div>
+        <div class="sg-slide"><img src="images/cs570/056.jpg" alt="Slide 56" loading="lazy"><span class="sg-num">056</span></div>
+        <div class="sg-slide"><img src="images/cs570/057.jpg" alt="Slide 57" loading="lazy"><span class="sg-num">057</span></div>
+        <div class="sg-slide"><img src="images/cs570/058.jpg" alt="Slide 58" loading="lazy"><span class="sg-num">058</span></div>
+        <div class="sg-slide"><img src="images/cs570/059.jpg" alt="Slide 59" loading="lazy"><span class="sg-num">059</span></div>
+        <div class="sg-slide"><img src="images/cs570/060.jpg" alt="Slide 60" loading="lazy"><span class="sg-num">060</span></div>
+        <div class="sg-slide"><img src="images/cs570/061.jpg" alt="Slide 61" loading="lazy"><span class="sg-num">061</span></div>
+        <div class="sg-slide"><img src="images/cs570/062.jpg" alt="Slide 62" loading="lazy"><span class="sg-num">062</span></div>
+        <div class="sg-slide"><img src="images/cs570/063.jpg" alt="Slide 63" loading="lazy"><span class="sg-num">063</span></div>
+        <div class="sg-slide"><img src="images/cs570/064.jpg" alt="Slide 64" loading="lazy"><span class="sg-num">064</span></div>
+        <div class="sg-slide"><img src="images/cs570/065.jpg" alt="Slide 65" loading="lazy"><span class="sg-num">065</span></div>
+        <div class="sg-slide"><img src="images/cs570/066.jpg" alt="Slide 66" loading="lazy"><span class="sg-num">066</span></div>
+        <div class="sg-slide"><img src="images/cs570/067.jpg" alt="Slide 67" loading="lazy"><span class="sg-num">067</span></div>
+        <div class="sg-slide"><img src="images/cs570/068.jpg" alt="Slide 68" loading="lazy"><span class="sg-num">068</span></div>
+        <div class="sg-slide"><img src="images/cs570/069.jpg" alt="Slide 69" loading="lazy"><span class="sg-num">069</span></div>
+        <div class="sg-slide"><img src="images/cs570/070.jpg" alt="Slide 70" loading="lazy"><span class="sg-num">070</span></div>
+        <div class="sg-slide"><img src="images/cs570/071.jpg" alt="Slide 71" loading="lazy"><span class="sg-num">071</span></div>
+        <div class="sg-slide"><img src="images/cs570/072.jpg" alt="Slide 72" loading="lazy"><span class="sg-num">072</span></div>
+        <div class="sg-slide"><img src="images/cs570/073.jpg" alt="Slide 73" loading="lazy"><span class="sg-num">073</span></div>
+        <div class="sg-slide"><img src="images/cs570/074.jpg" alt="Slide 74" loading="lazy"><span class="sg-num">074</span></div>
+        <div class="sg-slide"><img src="images/cs570/075.jpg" alt="Slide 75" loading="lazy"><span class="sg-num">075</span></div>
+        <div class="sg-slide"><img src="images/cs570/076.jpg" alt="Slide 76" loading="lazy"><span class="sg-num">076</span></div>
+        <div class="sg-slide"><img src="images/cs570/077.jpg" alt="Slide 77" loading="lazy"><span class="sg-num">077</span></div>
+      </div>
   <span class="lecture-label">Lectures 5–6 · Slides 52–77 · K&amp;T Ch. 2, CLRS Ch. 3–4</span>
 
   <div class="slide-box" data-slide="Slides 52–55">
@@ -998,6 +1236,37 @@ Initialize: all students and advisors free
     <span class="topic-num">TOPIC 05</span>
     <h2 class="topic-title">Recurrences &amp; Recursive Algorithm Analysis</h2>
   </div>
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/056.jpg" alt="Slide 56" loading="lazy"><span class="sg-num">056</span></div>
+        <div class="sg-slide"><img src="images/cs570/057.jpg" alt="Slide 57" loading="lazy"><span class="sg-num">057</span></div>
+        <div class="sg-slide"><img src="images/cs570/058.jpg" alt="Slide 58" loading="lazy"><span class="sg-num">058</span></div>
+        <div class="sg-slide"><img src="images/cs570/059.jpg" alt="Slide 59" loading="lazy"><span class="sg-num">059</span></div>
+        <div class="sg-slide"><img src="images/cs570/060.jpg" alt="Slide 60" loading="lazy"><span class="sg-num">060</span></div>
+        <div class="sg-slide"><img src="images/cs570/061.jpg" alt="Slide 61" loading="lazy"><span class="sg-num">061</span></div>
+        <div class="sg-slide"><img src="images/cs570/062.jpg" alt="Slide 62" loading="lazy"><span class="sg-num">062</span></div>
+        <div class="sg-slide"><img src="images/cs570/063.jpg" alt="Slide 63" loading="lazy"><span class="sg-num">063</span></div>
+        <div class="sg-slide"><img src="images/cs570/064.jpg" alt="Slide 64" loading="lazy"><span class="sg-num">064</span></div>
+        <div class="sg-slide"><img src="images/cs570/065.jpg" alt="Slide 65" loading="lazy"><span class="sg-num">065</span></div>
+        <div class="sg-slide"><img src="images/cs570/066.jpg" alt="Slide 66" loading="lazy"><span class="sg-num">066</span></div>
+        <div class="sg-slide"><img src="images/cs570/067.jpg" alt="Slide 67" loading="lazy"><span class="sg-num">067</span></div>
+        <div class="sg-slide"><img src="images/cs570/068.jpg" alt="Slide 68" loading="lazy"><span class="sg-num">068</span></div>
+        <div class="sg-slide"><img src="images/cs570/069.jpg" alt="Slide 69" loading="lazy"><span class="sg-num">069</span></div>
+        <div class="sg-slide"><img src="images/cs570/070.jpg" alt="Slide 70" loading="lazy"><span class="sg-num">070</span></div>
+        <div class="sg-slide"><img src="images/cs570/071.jpg" alt="Slide 71" loading="lazy"><span class="sg-num">071</span></div>
+        <div class="sg-slide"><img src="images/cs570/072.jpg" alt="Slide 72" loading="lazy"><span class="sg-num">072</span></div>
+        <div class="sg-slide"><img src="images/cs570/073.jpg" alt="Slide 73" loading="lazy"><span class="sg-num">073</span></div>
+        <div class="sg-slide"><img src="images/cs570/074.jpg" alt="Slide 74" loading="lazy"><span class="sg-num">074</span></div>
+        <div class="sg-slide"><img src="images/cs570/075.jpg" alt="Slide 75" loading="lazy"><span class="sg-num">075</span></div>
+        <div class="sg-slide"><img src="images/cs570/076.jpg" alt="Slide 76" loading="lazy"><span class="sg-num">076</span></div>
+        <div class="sg-slide"><img src="images/cs570/077.jpg" alt="Slide 77" loading="lazy"><span class="sg-num">077</span></div>
+        <div class="sg-slide"><img src="images/cs570/078.jpg" alt="Slide 78" loading="lazy"><span class="sg-num">078</span></div>
+        <div class="sg-slide"><img src="images/cs570/079.jpg" alt="Slide 79" loading="lazy"><span class="sg-num">079</span></div>
+        <div class="sg-slide"><img src="images/cs570/080.jpg" alt="Slide 80" loading="lazy"><span class="sg-num">080</span></div>
+        <div class="sg-slide"><img src="images/cs570/081.jpg" alt="Slide 81" loading="lazy"><span class="sg-num">081</span></div>
+        <div class="sg-slide"><img src="images/cs570/082.jpg" alt="Slide 82" loading="lazy"><span class="sg-num">082</span></div>
+        <div class="sg-slide"><img src="images/cs570/083.jpg" alt="Slide 83" loading="lazy"><span class="sg-num">083</span></div>
+        <div class="sg-slide"><img src="images/cs570/084.jpg" alt="Slide 84" loading="lazy"><span class="sg-num">084</span></div>
+      </div>
   <span class="lecture-label">Lectures 6–7 · Slides 68–84 · CLRS Ch. 4, K&amp;T Ch. 5.1</span>
 
   <div class="slide-box" data-slide="Slides 70–77">
@@ -1073,6 +1342,40 @@ Initialize: all students and advisors free
     <h2 class="topic-title">Sorting Algorithms — Insertion Sort &amp; Foundations</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/085.jpg" alt="Slide 85" loading="lazy"><span class="sg-num">085</span></div>
+        <div class="sg-slide"><img src="images/cs570/086.jpg" alt="Slide 86" loading="lazy"><span class="sg-num">086</span></div>
+        <div class="sg-slide"><img src="images/cs570/087.jpg" alt="Slide 87" loading="lazy"><span class="sg-num">087</span></div>
+        <div class="sg-slide"><img src="images/cs570/088.jpg" alt="Slide 88" loading="lazy"><span class="sg-num">088</span></div>
+        <div class="sg-slide"><img src="images/cs570/089.jpg" alt="Slide 89" loading="lazy"><span class="sg-num">089</span></div>
+        <div class="sg-slide"><img src="images/cs570/090.jpg" alt="Slide 90" loading="lazy"><span class="sg-num">090</span></div>
+        <div class="sg-slide"><img src="images/cs570/091.jpg" alt="Slide 91" loading="lazy"><span class="sg-num">091</span></div>
+        <div class="sg-slide"><img src="images/cs570/092.jpg" alt="Slide 92" loading="lazy"><span class="sg-num">092</span></div>
+        <div class="sg-slide"><img src="images/cs570/093.jpg" alt="Slide 93" loading="lazy"><span class="sg-num">093</span></div>
+        <div class="sg-slide"><img src="images/cs570/094.jpg" alt="Slide 94" loading="lazy"><span class="sg-num">094</span></div>
+        <div class="sg-slide"><img src="images/cs570/095.jpg" alt="Slide 95" loading="lazy"><span class="sg-num">095</span></div>
+        <div class="sg-slide"><img src="images/cs570/096.jpg" alt="Slide 96" loading="lazy"><span class="sg-num">096</span></div>
+        <div class="sg-slide"><img src="images/cs570/097.jpg" alt="Slide 97" loading="lazy"><span class="sg-num">097</span></div>
+        <div class="sg-slide"><img src="images/cs570/098.jpg" alt="Slide 98" loading="lazy"><span class="sg-num">098</span></div>
+        <div class="sg-slide"><img src="images/cs570/099.jpg" alt="Slide 99" loading="lazy"><span class="sg-num">099</span></div>
+        <div class="sg-slide"><img src="images/cs570/100.jpg" alt="Slide 100" loading="lazy"><span class="sg-num">100</span></div>
+        <div class="sg-slide"><img src="images/cs570/101.jpg" alt="Slide 101" loading="lazy"><span class="sg-num">101</span></div>
+        <div class="sg-slide"><img src="images/cs570/102.jpg" alt="Slide 102" loading="lazy"><span class="sg-num">102</span></div>
+        <div class="sg-slide"><img src="images/cs570/103.jpg" alt="Slide 103" loading="lazy"><span class="sg-num">103</span></div>
+        <div class="sg-slide"><img src="images/cs570/104.jpg" alt="Slide 104" loading="lazy"><span class="sg-num">104</span></div>
+        <div class="sg-slide"><img src="images/cs570/105.jpg" alt="Slide 105" loading="lazy"><span class="sg-num">105</span></div>
+        <div class="sg-slide"><img src="images/cs570/106.jpg" alt="Slide 106" loading="lazy"><span class="sg-num">106</span></div>
+        <div class="sg-slide"><img src="images/cs570/107.jpg" alt="Slide 107" loading="lazy"><span class="sg-num">107</span></div>
+        <div class="sg-slide"><img src="images/cs570/108.jpg" alt="Slide 108" loading="lazy"><span class="sg-num">108</span></div>
+        <div class="sg-slide"><img src="images/cs570/109.jpg" alt="Slide 109" loading="lazy"><span class="sg-num">109</span></div>
+        <div class="sg-slide"><img src="images/cs570/110.jpg" alt="Slide 110" loading="lazy"><span class="sg-num">110</span></div>
+        <div class="sg-slide"><img src="images/cs570/111.jpg" alt="Slide 111" loading="lazy"><span class="sg-num">111</span></div>
+        <div class="sg-slide"><img src="images/cs570/112.jpg" alt="Slide 112" loading="lazy"><span class="sg-num">112</span></div>
+        <div class="sg-slide"><img src="images/cs570/113.jpg" alt="Slide 113" loading="lazy"><span class="sg-num">113</span></div>
+        <div class="sg-slide"><img src="images/cs570/114.jpg" alt="Slide 114" loading="lazy"><span class="sg-num">114</span></div>
+        <div class="sg-slide"><img src="images/cs570/115.jpg" alt="Slide 115" loading="lazy"><span class="sg-num">115</span></div>
+        <div class="sg-slide"><img src="images/cs570/116.jpg" alt="Slide 116" loading="lazy"><span class="sg-num">116</span></div>
+      </div>
   <span class="lecture-label">Lectures 8–10 · Slides 86–101 · CLRS Ch. 2, K&amp;T Ch. 2.1</span>
 
   <div class="slide-box" data-slide="Slides 87–91">
@@ -1124,6 +1427,49 @@ Initialize: all students and advisors free
     <h2 class="topic-title">Merge Sort &amp; Divide-and-Conquer</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/098.jpg" alt="Slide 98" loading="lazy"><span class="sg-num">098</span></div>
+        <div class="sg-slide"><img src="images/cs570/099.jpg" alt="Slide 99" loading="lazy"><span class="sg-num">099</span></div>
+        <div class="sg-slide"><img src="images/cs570/100.jpg" alt="Slide 100" loading="lazy"><span class="sg-num">100</span></div>
+        <div class="sg-slide"><img src="images/cs570/101.jpg" alt="Slide 101" loading="lazy"><span class="sg-num">101</span></div>
+        <div class="sg-slide"><img src="images/cs570/102.jpg" alt="Slide 102" loading="lazy"><span class="sg-num">102</span></div>
+        <div class="sg-slide"><img src="images/cs570/103.jpg" alt="Slide 103" loading="lazy"><span class="sg-num">103</span></div>
+        <div class="sg-slide"><img src="images/cs570/104.jpg" alt="Slide 104" loading="lazy"><span class="sg-num">104</span></div>
+        <div class="sg-slide"><img src="images/cs570/105.jpg" alt="Slide 105" loading="lazy"><span class="sg-num">105</span></div>
+        <div class="sg-slide"><img src="images/cs570/106.jpg" alt="Slide 106" loading="lazy"><span class="sg-num">106</span></div>
+        <div class="sg-slide"><img src="images/cs570/107.jpg" alt="Slide 107" loading="lazy"><span class="sg-num">107</span></div>
+        <div class="sg-slide"><img src="images/cs570/108.jpg" alt="Slide 108" loading="lazy"><span class="sg-num">108</span></div>
+        <div class="sg-slide"><img src="images/cs570/109.jpg" alt="Slide 109" loading="lazy"><span class="sg-num">109</span></div>
+        <div class="sg-slide"><img src="images/cs570/110.jpg" alt="Slide 110" loading="lazy"><span class="sg-num">110</span></div>
+        <div class="sg-slide"><img src="images/cs570/111.jpg" alt="Slide 111" loading="lazy"><span class="sg-num">111</span></div>
+        <div class="sg-slide"><img src="images/cs570/112.jpg" alt="Slide 112" loading="lazy"><span class="sg-num">112</span></div>
+        <div class="sg-slide"><img src="images/cs570/113.jpg" alt="Slide 113" loading="lazy"><span class="sg-num">113</span></div>
+        <div class="sg-slide"><img src="images/cs570/114.jpg" alt="Slide 114" loading="lazy"><span class="sg-num">114</span></div>
+        <div class="sg-slide"><img src="images/cs570/115.jpg" alt="Slide 115" loading="lazy"><span class="sg-num">115</span></div>
+        <div class="sg-slide"><img src="images/cs570/116.jpg" alt="Slide 116" loading="lazy"><span class="sg-num">116</span></div>
+        <div class="sg-slide"><img src="images/cs570/117.jpg" alt="Slide 117" loading="lazy"><span class="sg-num">117</span></div>
+        <div class="sg-slide"><img src="images/cs570/118.jpg" alt="Slide 118" loading="lazy"><span class="sg-num">118</span></div>
+        <div class="sg-slide"><img src="images/cs570/119.jpg" alt="Slide 119" loading="lazy"><span class="sg-num">119</span></div>
+        <div class="sg-slide"><img src="images/cs570/120.jpg" alt="Slide 120" loading="lazy"><span class="sg-num">120</span></div>
+        <div class="sg-slide"><img src="images/cs570/121.jpg" alt="Slide 121" loading="lazy"><span class="sg-num">121</span></div>
+        <div class="sg-slide"><img src="images/cs570/122.jpg" alt="Slide 122" loading="lazy"><span class="sg-num">122</span></div>
+        <div class="sg-slide"><img src="images/cs570/123.jpg" alt="Slide 123" loading="lazy"><span class="sg-num">123</span></div>
+        <div class="sg-slide"><img src="images/cs570/124.jpg" alt="Slide 124" loading="lazy"><span class="sg-num">124</span></div>
+        <div class="sg-slide"><img src="images/cs570/125.jpg" alt="Slide 125" loading="lazy"><span class="sg-num">125</span></div>
+        <div class="sg-slide"><img src="images/cs570/126.jpg" alt="Slide 126" loading="lazy"><span class="sg-num">126</span></div>
+        <div class="sg-slide"><img src="images/cs570/127.jpg" alt="Slide 127" loading="lazy"><span class="sg-num">127</span></div>
+        <div class="sg-slide"><img src="images/cs570/128.jpg" alt="Slide 128" loading="lazy"><span class="sg-num">128</span></div>
+        <div class="sg-slide"><img src="images/cs570/129.jpg" alt="Slide 129" loading="lazy"><span class="sg-num">129</span></div>
+        <div class="sg-slide"><img src="images/cs570/130.jpg" alt="Slide 130" loading="lazy"><span class="sg-num">130</span></div>
+        <div class="sg-slide"><img src="images/cs570/131.jpg" alt="Slide 131" loading="lazy"><span class="sg-num">131</span></div>
+        <div class="sg-slide"><img src="images/cs570/132.jpg" alt="Slide 132" loading="lazy"><span class="sg-num">132</span></div>
+        <div class="sg-slide"><img src="images/cs570/133.jpg" alt="Slide 133" loading="lazy"><span class="sg-num">133</span></div>
+        <div class="sg-slide"><img src="images/cs570/134.jpg" alt="Slide 134" loading="lazy"><span class="sg-num">134</span></div>
+        <div class="sg-slide"><img src="images/cs570/135.jpg" alt="Slide 135" loading="lazy"><span class="sg-num">135</span></div>
+        <div class="sg-slide"><img src="images/cs570/136.jpg" alt="Slide 136" loading="lazy"><span class="sg-num">136</span></div>
+        <div class="sg-slide"><img src="images/cs570/137.jpg" alt="Slide 137" loading="lazy"><span class="sg-num">137</span></div>
+        <div class="sg-slide"><img src="images/cs570/138.jpg" alt="Slide 138" loading="lazy"><span class="sg-num">138</span></div>
+      </div>
   <span class="lecture-label">Lectures 10–11 · Slides 102–137 · K&amp;T Ch. 5.1, CLRS Ch. 2.3, Ch. 4</span>
 
   <div class="slide-box" data-slide="Slides 102–116">
@@ -1229,6 +1575,30 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Quicksort — The Practical Champion</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/117.jpg" alt="Slide 117" loading="lazy"><span class="sg-num">117</span></div>
+        <div class="sg-slide"><img src="images/cs570/118.jpg" alt="Slide 118" loading="lazy"><span class="sg-num">118</span></div>
+        <div class="sg-slide"><img src="images/cs570/119.jpg" alt="Slide 119" loading="lazy"><span class="sg-num">119</span></div>
+        <div class="sg-slide"><img src="images/cs570/120.jpg" alt="Slide 120" loading="lazy"><span class="sg-num">120</span></div>
+        <div class="sg-slide"><img src="images/cs570/121.jpg" alt="Slide 121" loading="lazy"><span class="sg-num">121</span></div>
+        <div class="sg-slide"><img src="images/cs570/122.jpg" alt="Slide 122" loading="lazy"><span class="sg-num">122</span></div>
+        <div class="sg-slide"><img src="images/cs570/123.jpg" alt="Slide 123" loading="lazy"><span class="sg-num">123</span></div>
+        <div class="sg-slide"><img src="images/cs570/124.jpg" alt="Slide 124" loading="lazy"><span class="sg-num">124</span></div>
+        <div class="sg-slide"><img src="images/cs570/125.jpg" alt="Slide 125" loading="lazy"><span class="sg-num">125</span></div>
+        <div class="sg-slide"><img src="images/cs570/126.jpg" alt="Slide 126" loading="lazy"><span class="sg-num">126</span></div>
+        <div class="sg-slide"><img src="images/cs570/127.jpg" alt="Slide 127" loading="lazy"><span class="sg-num">127</span></div>
+        <div class="sg-slide"><img src="images/cs570/128.jpg" alt="Slide 128" loading="lazy"><span class="sg-num">128</span></div>
+        <div class="sg-slide"><img src="images/cs570/129.jpg" alt="Slide 129" loading="lazy"><span class="sg-num">129</span></div>
+        <div class="sg-slide"><img src="images/cs570/130.jpg" alt="Slide 130" loading="lazy"><span class="sg-num">130</span></div>
+        <div class="sg-slide"><img src="images/cs570/131.jpg" alt="Slide 131" loading="lazy"><span class="sg-num">131</span></div>
+        <div class="sg-slide"><img src="images/cs570/132.jpg" alt="Slide 132" loading="lazy"><span class="sg-num">132</span></div>
+        <div class="sg-slide"><img src="images/cs570/133.jpg" alt="Slide 133" loading="lazy"><span class="sg-num">133</span></div>
+        <div class="sg-slide"><img src="images/cs570/134.jpg" alt="Slide 134" loading="lazy"><span class="sg-num">134</span></div>
+        <div class="sg-slide"><img src="images/cs570/135.jpg" alt="Slide 135" loading="lazy"><span class="sg-num">135</span></div>
+        <div class="sg-slide"><img src="images/cs570/136.jpg" alt="Slide 136" loading="lazy"><span class="sg-num">136</span></div>
+        <div class="sg-slide"><img src="images/cs570/137.jpg" alt="Slide 137" loading="lazy"><span class="sg-num">137</span></div>
+        <div class="sg-slide"><img src="images/cs570/138.jpg" alt="Slide 138" loading="lazy"><span class="sg-num">138</span></div>
+      </div>
   <span class="lecture-label">Lectures 11 · Slides 121–137 · CLRS Ch. 7, K&amp;T Ch. 13.5</span>
 
   <div class="slide-box" data-slide="Slides 122–136">
@@ -1306,6 +1676,42 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Graph Theory Fundamentals</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/139.jpg" alt="Slide 139" loading="lazy"><span class="sg-num">139</span></div>
+        <div class="sg-slide"><img src="images/cs570/140.jpg" alt="Slide 140" loading="lazy"><span class="sg-num">140</span></div>
+        <div class="sg-slide"><img src="images/cs570/141.jpg" alt="Slide 141" loading="lazy"><span class="sg-num">141</span></div>
+        <div class="sg-slide"><img src="images/cs570/142.jpg" alt="Slide 142" loading="lazy"><span class="sg-num">142</span></div>
+        <div class="sg-slide"><img src="images/cs570/143.jpg" alt="Slide 143" loading="lazy"><span class="sg-num">143</span></div>
+        <div class="sg-slide"><img src="images/cs570/144.jpg" alt="Slide 144" loading="lazy"><span class="sg-num">144</span></div>
+        <div class="sg-slide"><img src="images/cs570/145.jpg" alt="Slide 145" loading="lazy"><span class="sg-num">145</span></div>
+        <div class="sg-slide"><img src="images/cs570/146.jpg" alt="Slide 146" loading="lazy"><span class="sg-num">146</span></div>
+        <div class="sg-slide"><img src="images/cs570/147.jpg" alt="Slide 147" loading="lazy"><span class="sg-num">147</span></div>
+        <div class="sg-slide"><img src="images/cs570/148.jpg" alt="Slide 148" loading="lazy"><span class="sg-num">148</span></div>
+        <div class="sg-slide"><img src="images/cs570/149.jpg" alt="Slide 149" loading="lazy"><span class="sg-num">149</span></div>
+        <div class="sg-slide"><img src="images/cs570/150.jpg" alt="Slide 150" loading="lazy"><span class="sg-num">150</span></div>
+        <div class="sg-slide"><img src="images/cs570/151.jpg" alt="Slide 151" loading="lazy"><span class="sg-num">151</span></div>
+        <div class="sg-slide"><img src="images/cs570/152.jpg" alt="Slide 152" loading="lazy"><span class="sg-num">152</span></div>
+        <div class="sg-slide"><img src="images/cs570/153.jpg" alt="Slide 153" loading="lazy"><span class="sg-num">153</span></div>
+        <div class="sg-slide"><img src="images/cs570/154.jpg" alt="Slide 154" loading="lazy"><span class="sg-num">154</span></div>
+        <div class="sg-slide"><img src="images/cs570/155.jpg" alt="Slide 155" loading="lazy"><span class="sg-num">155</span></div>
+        <div class="sg-slide"><img src="images/cs570/156.jpg" alt="Slide 156" loading="lazy"><span class="sg-num">156</span></div>
+        <div class="sg-slide"><img src="images/cs570/157.jpg" alt="Slide 157" loading="lazy"><span class="sg-num">157</span></div>
+        <div class="sg-slide"><img src="images/cs570/158.jpg" alt="Slide 158" loading="lazy"><span class="sg-num">158</span></div>
+        <div class="sg-slide"><img src="images/cs570/159.jpg" alt="Slide 159" loading="lazy"><span class="sg-num">159</span></div>
+        <div class="sg-slide"><img src="images/cs570/160.jpg" alt="Slide 160" loading="lazy"><span class="sg-num">160</span></div>
+        <div class="sg-slide"><img src="images/cs570/161.jpg" alt="Slide 161" loading="lazy"><span class="sg-num">161</span></div>
+        <div class="sg-slide"><img src="images/cs570/162.jpg" alt="Slide 162" loading="lazy"><span class="sg-num">162</span></div>
+        <div class="sg-slide"><img src="images/cs570/163.jpg" alt="Slide 163" loading="lazy"><span class="sg-num">163</span></div>
+        <div class="sg-slide"><img src="images/cs570/164.jpg" alt="Slide 164" loading="lazy"><span class="sg-num">164</span></div>
+        <div class="sg-slide"><img src="images/cs570/165.jpg" alt="Slide 165" loading="lazy"><span class="sg-num">165</span></div>
+        <div class="sg-slide"><img src="images/cs570/166.jpg" alt="Slide 166" loading="lazy"><span class="sg-num">166</span></div>
+        <div class="sg-slide"><img src="images/cs570/167.jpg" alt="Slide 167" loading="lazy"><span class="sg-num">167</span></div>
+        <div class="sg-slide"><img src="images/cs570/168.jpg" alt="Slide 168" loading="lazy"><span class="sg-num">168</span></div>
+        <div class="sg-slide"><img src="images/cs570/169.jpg" alt="Slide 169" loading="lazy"><span class="sg-num">169</span></div>
+        <div class="sg-slide"><img src="images/cs570/170.jpg" alt="Slide 170" loading="lazy"><span class="sg-num">170</span></div>
+        <div class="sg-slide"><img src="images/cs570/171.jpg" alt="Slide 171" loading="lazy"><span class="sg-num">171</span></div>
+        <div class="sg-slide"><img src="images/cs570/172.jpg" alt="Slide 172" loading="lazy"><span class="sg-num">172</span></div>
+      </div>
   <span class="lecture-label">Lectures 12 · Slides 138–151 · K&amp;T Ch. 3.1–3.3, CLRS Ch. 22</span>
 
   <div class="slide-box" data-slide="Slides 141–151">
@@ -1365,6 +1771,78 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Breadth-First Search (BFS)</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/139.jpg" alt="Slide 139" loading="lazy"><span class="sg-num">139</span></div>
+        <div class="sg-slide"><img src="images/cs570/140.jpg" alt="Slide 140" loading="lazy"><span class="sg-num">140</span></div>
+        <div class="sg-slide"><img src="images/cs570/141.jpg" alt="Slide 141" loading="lazy"><span class="sg-num">141</span></div>
+        <div class="sg-slide"><img src="images/cs570/142.jpg" alt="Slide 142" loading="lazy"><span class="sg-num">142</span></div>
+        <div class="sg-slide"><img src="images/cs570/143.jpg" alt="Slide 143" loading="lazy"><span class="sg-num">143</span></div>
+        <div class="sg-slide"><img src="images/cs570/144.jpg" alt="Slide 144" loading="lazy"><span class="sg-num">144</span></div>
+        <div class="sg-slide"><img src="images/cs570/145.jpg" alt="Slide 145" loading="lazy"><span class="sg-num">145</span></div>
+        <div class="sg-slide"><img src="images/cs570/146.jpg" alt="Slide 146" loading="lazy"><span class="sg-num">146</span></div>
+        <div class="sg-slide"><img src="images/cs570/147.jpg" alt="Slide 147" loading="lazy"><span class="sg-num">147</span></div>
+        <div class="sg-slide"><img src="images/cs570/148.jpg" alt="Slide 148" loading="lazy"><span class="sg-num">148</span></div>
+        <div class="sg-slide"><img src="images/cs570/149.jpg" alt="Slide 149" loading="lazy"><span class="sg-num">149</span></div>
+        <div class="sg-slide"><img src="images/cs570/150.jpg" alt="Slide 150" loading="lazy"><span class="sg-num">150</span></div>
+        <div class="sg-slide"><img src="images/cs570/151.jpg" alt="Slide 151" loading="lazy"><span class="sg-num">151</span></div>
+        <div class="sg-slide"><img src="images/cs570/152.jpg" alt="Slide 152" loading="lazy"><span class="sg-num">152</span></div>
+        <div class="sg-slide"><img src="images/cs570/153.jpg" alt="Slide 153" loading="lazy"><span class="sg-num">153</span></div>
+        <div class="sg-slide"><img src="images/cs570/154.jpg" alt="Slide 154" loading="lazy"><span class="sg-num">154</span></div>
+        <div class="sg-slide"><img src="images/cs570/155.jpg" alt="Slide 155" loading="lazy"><span class="sg-num">155</span></div>
+        <div class="sg-slide"><img src="images/cs570/156.jpg" alt="Slide 156" loading="lazy"><span class="sg-num">156</span></div>
+        <div class="sg-slide"><img src="images/cs570/157.jpg" alt="Slide 157" loading="lazy"><span class="sg-num">157</span></div>
+        <div class="sg-slide"><img src="images/cs570/158.jpg" alt="Slide 158" loading="lazy"><span class="sg-num">158</span></div>
+        <div class="sg-slide"><img src="images/cs570/159.jpg" alt="Slide 159" loading="lazy"><span class="sg-num">159</span></div>
+        <div class="sg-slide"><img src="images/cs570/160.jpg" alt="Slide 160" loading="lazy"><span class="sg-num">160</span></div>
+        <div class="sg-slide"><img src="images/cs570/161.jpg" alt="Slide 161" loading="lazy"><span class="sg-num">161</span></div>
+        <div class="sg-slide"><img src="images/cs570/162.jpg" alt="Slide 162" loading="lazy"><span class="sg-num">162</span></div>
+        <div class="sg-slide"><img src="images/cs570/163.jpg" alt="Slide 163" loading="lazy"><span class="sg-num">163</span></div>
+        <div class="sg-slide"><img src="images/cs570/164.jpg" alt="Slide 164" loading="lazy"><span class="sg-num">164</span></div>
+        <div class="sg-slide"><img src="images/cs570/165.jpg" alt="Slide 165" loading="lazy"><span class="sg-num">165</span></div>
+        <div class="sg-slide"><img src="images/cs570/166.jpg" alt="Slide 166" loading="lazy"><span class="sg-num">166</span></div>
+        <div class="sg-slide"><img src="images/cs570/167.jpg" alt="Slide 167" loading="lazy"><span class="sg-num">167</span></div>
+        <div class="sg-slide"><img src="images/cs570/168.jpg" alt="Slide 168" loading="lazy"><span class="sg-num">168</span></div>
+        <div class="sg-slide"><img src="images/cs570/169.jpg" alt="Slide 169" loading="lazy"><span class="sg-num">169</span></div>
+        <div class="sg-slide"><img src="images/cs570/170.jpg" alt="Slide 170" loading="lazy"><span class="sg-num">170</span></div>
+        <div class="sg-slide"><img src="images/cs570/171.jpg" alt="Slide 171" loading="lazy"><span class="sg-num">171</span></div>
+        <div class="sg-slide"><img src="images/cs570/172.jpg" alt="Slide 172" loading="lazy"><span class="sg-num">172</span></div>
+        <div class="sg-slide"><img src="images/cs570/173.jpg" alt="Slide 173" loading="lazy"><span class="sg-num">173</span></div>
+        <div class="sg-slide"><img src="images/cs570/174.jpg" alt="Slide 174" loading="lazy"><span class="sg-num">174</span></div>
+        <div class="sg-slide"><img src="images/cs570/175.jpg" alt="Slide 175" loading="lazy"><span class="sg-num">175</span></div>
+        <div class="sg-slide"><img src="images/cs570/176.jpg" alt="Slide 176" loading="lazy"><span class="sg-num">176</span></div>
+        <div class="sg-slide"><img src="images/cs570/177.jpg" alt="Slide 177" loading="lazy"><span class="sg-num">177</span></div>
+        <div class="sg-slide"><img src="images/cs570/178.jpg" alt="Slide 178" loading="lazy"><span class="sg-num">178</span></div>
+        <div class="sg-slide"><img src="images/cs570/179.jpg" alt="Slide 179" loading="lazy"><span class="sg-num">179</span></div>
+        <div class="sg-slide"><img src="images/cs570/180.jpg" alt="Slide 180" loading="lazy"><span class="sg-num">180</span></div>
+        <div class="sg-slide"><img src="images/cs570/181.jpg" alt="Slide 181" loading="lazy"><span class="sg-num">181</span></div>
+        <div class="sg-slide"><img src="images/cs570/182.jpg" alt="Slide 182" loading="lazy"><span class="sg-num">182</span></div>
+        <div class="sg-slide"><img src="images/cs570/183.jpg" alt="Slide 183" loading="lazy"><span class="sg-num">183</span></div>
+        <div class="sg-slide"><img src="images/cs570/184.jpg" alt="Slide 184" loading="lazy"><span class="sg-num">184</span></div>
+        <div class="sg-slide"><img src="images/cs570/185.jpg" alt="Slide 185" loading="lazy"><span class="sg-num">185</span></div>
+        <div class="sg-slide"><img src="images/cs570/186.jpg" alt="Slide 186" loading="lazy"><span class="sg-num">186</span></div>
+        <div class="sg-slide"><img src="images/cs570/187.jpg" alt="Slide 187" loading="lazy"><span class="sg-num">187</span></div>
+        <div class="sg-slide"><img src="images/cs570/188.jpg" alt="Slide 188" loading="lazy"><span class="sg-num">188</span></div>
+        <div class="sg-slide"><img src="images/cs570/189.jpg" alt="Slide 189" loading="lazy"><span class="sg-num">189</span></div>
+        <div class="sg-slide"><img src="images/cs570/190.jpg" alt="Slide 190" loading="lazy"><span class="sg-num">190</span></div>
+        <div class="sg-slide"><img src="images/cs570/191.jpg" alt="Slide 191" loading="lazy"><span class="sg-num">191</span></div>
+        <div class="sg-slide"><img src="images/cs570/192.jpg" alt="Slide 192" loading="lazy"><span class="sg-num">192</span></div>
+        <div class="sg-slide"><img src="images/cs570/193.jpg" alt="Slide 193" loading="lazy"><span class="sg-num">193</span></div>
+        <div class="sg-slide"><img src="images/cs570/194.jpg" alt="Slide 194" loading="lazy"><span class="sg-num">194</span></div>
+        <div class="sg-slide"><img src="images/cs570/195.jpg" alt="Slide 195" loading="lazy"><span class="sg-num">195</span></div>
+        <div class="sg-slide"><img src="images/cs570/196.jpg" alt="Slide 196" loading="lazy"><span class="sg-num">196</span></div>
+        <div class="sg-slide"><img src="images/cs570/197.jpg" alt="Slide 197" loading="lazy"><span class="sg-num">197</span></div>
+        <div class="sg-slide"><img src="images/cs570/198.jpg" alt="Slide 198" loading="lazy"><span class="sg-num">198</span></div>
+        <div class="sg-slide"><img src="images/cs570/199.jpg" alt="Slide 199" loading="lazy"><span class="sg-num">199</span></div>
+        <div class="sg-slide"><img src="images/cs570/200.jpg" alt="Slide 200" loading="lazy"><span class="sg-num">200</span></div>
+        <div class="sg-slide"><img src="images/cs570/201.jpg" alt="Slide 201" loading="lazy"><span class="sg-num">201</span></div>
+        <div class="sg-slide"><img src="images/cs570/202.jpg" alt="Slide 202" loading="lazy"><span class="sg-num">202</span></div>
+        <div class="sg-slide"><img src="images/cs570/203.jpg" alt="Slide 203" loading="lazy"><span class="sg-num">203</span></div>
+        <div class="sg-slide"><img src="images/cs570/204.jpg" alt="Slide 204" loading="lazy"><span class="sg-num">204</span></div>
+        <div class="sg-slide"><img src="images/cs570/205.jpg" alt="Slide 205" loading="lazy"><span class="sg-num">205</span></div>
+        <div class="sg-slide"><img src="images/cs570/206.jpg" alt="Slide 206" loading="lazy"><span class="sg-num">206</span></div>
+        <div class="sg-slide"><img src="images/cs570/207.jpg" alt="Slide 207" loading="lazy"><span class="sg-num">207</span></div>
+        <div class="sg-slide"><img src="images/cs570/208.jpg" alt="Slide 208" loading="lazy"><span class="sg-num">208</span></div>
+      </div>
   <span class="lecture-label">Lectures 12–14 · Slides 153–184 · K&amp;T Ch. 3.2, CLRS Ch. 22.2</span>
 
   <div class="slide-box" data-slide="Slides 153–172">
@@ -1446,6 +1924,79 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Depth-First Search (DFS) &amp; Applications</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/182.jpg" alt="Slide 182" loading="lazy"><span class="sg-num">182</span></div>
+        <div class="sg-slide"><img src="images/cs570/183.jpg" alt="Slide 183" loading="lazy"><span class="sg-num">183</span></div>
+        <div class="sg-slide"><img src="images/cs570/184.jpg" alt="Slide 184" loading="lazy"><span class="sg-num">184</span></div>
+        <div class="sg-slide"><img src="images/cs570/185.jpg" alt="Slide 185" loading="lazy"><span class="sg-num">185</span></div>
+        <div class="sg-slide"><img src="images/cs570/186.jpg" alt="Slide 186" loading="lazy"><span class="sg-num">186</span></div>
+        <div class="sg-slide"><img src="images/cs570/187.jpg" alt="Slide 187" loading="lazy"><span class="sg-num">187</span></div>
+        <div class="sg-slide"><img src="images/cs570/188.jpg" alt="Slide 188" loading="lazy"><span class="sg-num">188</span></div>
+        <div class="sg-slide"><img src="images/cs570/189.jpg" alt="Slide 189" loading="lazy"><span class="sg-num">189</span></div>
+        <div class="sg-slide"><img src="images/cs570/190.jpg" alt="Slide 190" loading="lazy"><span class="sg-num">190</span></div>
+        <div class="sg-slide"><img src="images/cs570/191.jpg" alt="Slide 191" loading="lazy"><span class="sg-num">191</span></div>
+        <div class="sg-slide"><img src="images/cs570/192.jpg" alt="Slide 192" loading="lazy"><span class="sg-num">192</span></div>
+        <div class="sg-slide"><img src="images/cs570/193.jpg" alt="Slide 193" loading="lazy"><span class="sg-num">193</span></div>
+        <div class="sg-slide"><img src="images/cs570/194.jpg" alt="Slide 194" loading="lazy"><span class="sg-num">194</span></div>
+        <div class="sg-slide"><img src="images/cs570/195.jpg" alt="Slide 195" loading="lazy"><span class="sg-num">195</span></div>
+        <div class="sg-slide"><img src="images/cs570/196.jpg" alt="Slide 196" loading="lazy"><span class="sg-num">196</span></div>
+        <div class="sg-slide"><img src="images/cs570/197.jpg" alt="Slide 197" loading="lazy"><span class="sg-num">197</span></div>
+        <div class="sg-slide"><img src="images/cs570/198.jpg" alt="Slide 198" loading="lazy"><span class="sg-num">198</span></div>
+        <div class="sg-slide"><img src="images/cs570/199.jpg" alt="Slide 199" loading="lazy"><span class="sg-num">199</span></div>
+        <div class="sg-slide"><img src="images/cs570/200.jpg" alt="Slide 200" loading="lazy"><span class="sg-num">200</span></div>
+        <div class="sg-slide"><img src="images/cs570/201.jpg" alt="Slide 201" loading="lazy"><span class="sg-num">201</span></div>
+        <div class="sg-slide"><img src="images/cs570/202.jpg" alt="Slide 202" loading="lazy"><span class="sg-num">202</span></div>
+        <div class="sg-slide"><img src="images/cs570/203.jpg" alt="Slide 203" loading="lazy"><span class="sg-num">203</span></div>
+        <div class="sg-slide"><img src="images/cs570/204.jpg" alt="Slide 204" loading="lazy"><span class="sg-num">204</span></div>
+        <div class="sg-slide"><img src="images/cs570/205.jpg" alt="Slide 205" loading="lazy"><span class="sg-num">205</span></div>
+        <div class="sg-slide"><img src="images/cs570/206.jpg" alt="Slide 206" loading="lazy"><span class="sg-num">206</span></div>
+        <div class="sg-slide"><img src="images/cs570/207.jpg" alt="Slide 207" loading="lazy"><span class="sg-num">207</span></div>
+        <div class="sg-slide"><img src="images/cs570/208.jpg" alt="Slide 208" loading="lazy"><span class="sg-num">208</span></div>
+        <div class="sg-slide"><img src="images/cs570/209.jpg" alt="Slide 209" loading="lazy"><span class="sg-num">209</span></div>
+        <div class="sg-slide"><img src="images/cs570/210.jpg" alt="Slide 210" loading="lazy"><span class="sg-num">210</span></div>
+        <div class="sg-slide"><img src="images/cs570/211.jpg" alt="Slide 211" loading="lazy"><span class="sg-num">211</span></div>
+        <div class="sg-slide"><img src="images/cs570/212.jpg" alt="Slide 212" loading="lazy"><span class="sg-num">212</span></div>
+        <div class="sg-slide"><img src="images/cs570/213.jpg" alt="Slide 213" loading="lazy"><span class="sg-num">213</span></div>
+        <div class="sg-slide"><img src="images/cs570/214.jpg" alt="Slide 214" loading="lazy"><span class="sg-num">214</span></div>
+        <div class="sg-slide"><img src="images/cs570/215.jpg" alt="Slide 215" loading="lazy"><span class="sg-num">215</span></div>
+        <div class="sg-slide"><img src="images/cs570/216.jpg" alt="Slide 216" loading="lazy"><span class="sg-num">216</span></div>
+        <div class="sg-slide"><img src="images/cs570/217.jpg" alt="Slide 217" loading="lazy"><span class="sg-num">217</span></div>
+        <div class="sg-slide"><img src="images/cs570/218.jpg" alt="Slide 218" loading="lazy"><span class="sg-num">218</span></div>
+        <div class="sg-slide"><img src="images/cs570/219.jpg" alt="Slide 219" loading="lazy"><span class="sg-num">219</span></div>
+        <div class="sg-slide"><img src="images/cs570/220.jpg" alt="Slide 220" loading="lazy"><span class="sg-num">220</span></div>
+        <div class="sg-slide"><img src="images/cs570/221.jpg" alt="Slide 221" loading="lazy"><span class="sg-num">221</span></div>
+        <div class="sg-slide"><img src="images/cs570/222.jpg" alt="Slide 222" loading="lazy"><span class="sg-num">222</span></div>
+        <div class="sg-slide"><img src="images/cs570/223.jpg" alt="Slide 223" loading="lazy"><span class="sg-num">223</span></div>
+        <div class="sg-slide"><img src="images/cs570/224.jpg" alt="Slide 224" loading="lazy"><span class="sg-num">224</span></div>
+        <div class="sg-slide"><img src="images/cs570/225.jpg" alt="Slide 225" loading="lazy"><span class="sg-num">225</span></div>
+        <div class="sg-slide"><img src="images/cs570/226.jpg" alt="Slide 226" loading="lazy"><span class="sg-num">226</span></div>
+        <div class="sg-slide"><img src="images/cs570/227.jpg" alt="Slide 227" loading="lazy"><span class="sg-num">227</span></div>
+        <div class="sg-slide"><img src="images/cs570/228.jpg" alt="Slide 228" loading="lazy"><span class="sg-num">228</span></div>
+        <div class="sg-slide"><img src="images/cs570/229.jpg" alt="Slide 229" loading="lazy"><span class="sg-num">229</span></div>
+        <div class="sg-slide"><img src="images/cs570/230.jpg" alt="Slide 230" loading="lazy"><span class="sg-num">230</span></div>
+        <div class="sg-slide"><img src="images/cs570/231.jpg" alt="Slide 231" loading="lazy"><span class="sg-num">231</span></div>
+        <div class="sg-slide"><img src="images/cs570/232.jpg" alt="Slide 232" loading="lazy"><span class="sg-num">232</span></div>
+        <div class="sg-slide"><img src="images/cs570/233.jpg" alt="Slide 233" loading="lazy"><span class="sg-num">233</span></div>
+        <div class="sg-slide"><img src="images/cs570/234.jpg" alt="Slide 234" loading="lazy"><span class="sg-num">234</span></div>
+        <div class="sg-slide"><img src="images/cs570/235.jpg" alt="Slide 235" loading="lazy"><span class="sg-num">235</span></div>
+        <div class="sg-slide"><img src="images/cs570/236.jpg" alt="Slide 236" loading="lazy"><span class="sg-num">236</span></div>
+        <div class="sg-slide"><img src="images/cs570/237.jpg" alt="Slide 237" loading="lazy"><span class="sg-num">237</span></div>
+        <div class="sg-slide"><img src="images/cs570/238.jpg" alt="Slide 238" loading="lazy"><span class="sg-num">238</span></div>
+        <div class="sg-slide"><img src="images/cs570/239.jpg" alt="Slide 239" loading="lazy"><span class="sg-num">239</span></div>
+        <div class="sg-slide"><img src="images/cs570/240.jpg" alt="Slide 240" loading="lazy"><span class="sg-num">240</span></div>
+        <div class="sg-slide"><img src="images/cs570/241.jpg" alt="Slide 241" loading="lazy"><span class="sg-num">241</span></div>
+        <div class="sg-slide"><img src="images/cs570/242.jpg" alt="Slide 242" loading="lazy"><span class="sg-num">242</span></div>
+        <div class="sg-slide"><img src="images/cs570/243.jpg" alt="Slide 243" loading="lazy"><span class="sg-num">243</span></div>
+        <div class="sg-slide"><img src="images/cs570/244.jpg" alt="Slide 244" loading="lazy"><span class="sg-num">244</span></div>
+        <div class="sg-slide"><img src="images/cs570/245.jpg" alt="Slide 245" loading="lazy"><span class="sg-num">245</span></div>
+        <div class="sg-slide"><img src="images/cs570/246.jpg" alt="Slide 246" loading="lazy"><span class="sg-num">246</span></div>
+        <div class="sg-slide"><img src="images/cs570/247.jpg" alt="Slide 247" loading="lazy"><span class="sg-num">247</span></div>
+        <div class="sg-slide"><img src="images/cs570/248.jpg" alt="Slide 248" loading="lazy"><span class="sg-num">248</span></div>
+        <div class="sg-slide"><img src="images/cs570/249.jpg" alt="Slide 249" loading="lazy"><span class="sg-num">249</span></div>
+        <div class="sg-slide"><img src="images/cs570/250.jpg" alt="Slide 250" loading="lazy"><span class="sg-num">250</span></div>
+        <div class="sg-slide"><img src="images/cs570/251.jpg" alt="Slide 251" loading="lazy"><span class="sg-num">251</span></div>
+        <div class="sg-slide"><img src="images/cs570/252.jpg" alt="Slide 252" loading="lazy"><span class="sg-num">252</span></div>
+      </div>
   <span class="lecture-label">Lectures 14–15 · Slides 185–221 · K&amp;T Ch. 3.3, 3.5–3.6, CLRS Ch. 22.3–22.5</span>
 
   <div class="slide-box" data-slide="Slides 186–213">
@@ -1527,6 +2078,81 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">DAGs &amp; Topological Ordering</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/209.jpg" alt="Slide 209" loading="lazy"><span class="sg-num">209</span></div>
+        <div class="sg-slide"><img src="images/cs570/210.jpg" alt="Slide 210" loading="lazy"><span class="sg-num">210</span></div>
+        <div class="sg-slide"><img src="images/cs570/211.jpg" alt="Slide 211" loading="lazy"><span class="sg-num">211</span></div>
+        <div class="sg-slide"><img src="images/cs570/212.jpg" alt="Slide 212" loading="lazy"><span class="sg-num">212</span></div>
+        <div class="sg-slide"><img src="images/cs570/213.jpg" alt="Slide 213" loading="lazy"><span class="sg-num">213</span></div>
+        <div class="sg-slide"><img src="images/cs570/214.jpg" alt="Slide 214" loading="lazy"><span class="sg-num">214</span></div>
+        <div class="sg-slide"><img src="images/cs570/215.jpg" alt="Slide 215" loading="lazy"><span class="sg-num">215</span></div>
+        <div class="sg-slide"><img src="images/cs570/216.jpg" alt="Slide 216" loading="lazy"><span class="sg-num">216</span></div>
+        <div class="sg-slide"><img src="images/cs570/217.jpg" alt="Slide 217" loading="lazy"><span class="sg-num">217</span></div>
+        <div class="sg-slide"><img src="images/cs570/218.jpg" alt="Slide 218" loading="lazy"><span class="sg-num">218</span></div>
+        <div class="sg-slide"><img src="images/cs570/219.jpg" alt="Slide 219" loading="lazy"><span class="sg-num">219</span></div>
+        <div class="sg-slide"><img src="images/cs570/220.jpg" alt="Slide 220" loading="lazy"><span class="sg-num">220</span></div>
+        <div class="sg-slide"><img src="images/cs570/221.jpg" alt="Slide 221" loading="lazy"><span class="sg-num">221</span></div>
+        <div class="sg-slide"><img src="images/cs570/222.jpg" alt="Slide 222" loading="lazy"><span class="sg-num">222</span></div>
+        <div class="sg-slide"><img src="images/cs570/223.jpg" alt="Slide 223" loading="lazy"><span class="sg-num">223</span></div>
+        <div class="sg-slide"><img src="images/cs570/224.jpg" alt="Slide 224" loading="lazy"><span class="sg-num">224</span></div>
+        <div class="sg-slide"><img src="images/cs570/225.jpg" alt="Slide 225" loading="lazy"><span class="sg-num">225</span></div>
+        <div class="sg-slide"><img src="images/cs570/226.jpg" alt="Slide 226" loading="lazy"><span class="sg-num">226</span></div>
+        <div class="sg-slide"><img src="images/cs570/227.jpg" alt="Slide 227" loading="lazy"><span class="sg-num">227</span></div>
+        <div class="sg-slide"><img src="images/cs570/228.jpg" alt="Slide 228" loading="lazy"><span class="sg-num">228</span></div>
+        <div class="sg-slide"><img src="images/cs570/229.jpg" alt="Slide 229" loading="lazy"><span class="sg-num">229</span></div>
+        <div class="sg-slide"><img src="images/cs570/230.jpg" alt="Slide 230" loading="lazy"><span class="sg-num">230</span></div>
+        <div class="sg-slide"><img src="images/cs570/231.jpg" alt="Slide 231" loading="lazy"><span class="sg-num">231</span></div>
+        <div class="sg-slide"><img src="images/cs570/232.jpg" alt="Slide 232" loading="lazy"><span class="sg-num">232</span></div>
+        <div class="sg-slide"><img src="images/cs570/233.jpg" alt="Slide 233" loading="lazy"><span class="sg-num">233</span></div>
+        <div class="sg-slide"><img src="images/cs570/234.jpg" alt="Slide 234" loading="lazy"><span class="sg-num">234</span></div>
+        <div class="sg-slide"><img src="images/cs570/235.jpg" alt="Slide 235" loading="lazy"><span class="sg-num">235</span></div>
+        <div class="sg-slide"><img src="images/cs570/236.jpg" alt="Slide 236" loading="lazy"><span class="sg-num">236</span></div>
+        <div class="sg-slide"><img src="images/cs570/237.jpg" alt="Slide 237" loading="lazy"><span class="sg-num">237</span></div>
+        <div class="sg-slide"><img src="images/cs570/238.jpg" alt="Slide 238" loading="lazy"><span class="sg-num">238</span></div>
+        <div class="sg-slide"><img src="images/cs570/239.jpg" alt="Slide 239" loading="lazy"><span class="sg-num">239</span></div>
+        <div class="sg-slide"><img src="images/cs570/240.jpg" alt="Slide 240" loading="lazy"><span class="sg-num">240</span></div>
+        <div class="sg-slide"><img src="images/cs570/241.jpg" alt="Slide 241" loading="lazy"><span class="sg-num">241</span></div>
+        <div class="sg-slide"><img src="images/cs570/242.jpg" alt="Slide 242" loading="lazy"><span class="sg-num">242</span></div>
+        <div class="sg-slide"><img src="images/cs570/243.jpg" alt="Slide 243" loading="lazy"><span class="sg-num">243</span></div>
+        <div class="sg-slide"><img src="images/cs570/244.jpg" alt="Slide 244" loading="lazy"><span class="sg-num">244</span></div>
+        <div class="sg-slide"><img src="images/cs570/245.jpg" alt="Slide 245" loading="lazy"><span class="sg-num">245</span></div>
+        <div class="sg-slide"><img src="images/cs570/246.jpg" alt="Slide 246" loading="lazy"><span class="sg-num">246</span></div>
+        <div class="sg-slide"><img src="images/cs570/247.jpg" alt="Slide 247" loading="lazy"><span class="sg-num">247</span></div>
+        <div class="sg-slide"><img src="images/cs570/248.jpg" alt="Slide 248" loading="lazy"><span class="sg-num">248</span></div>
+        <div class="sg-slide"><img src="images/cs570/249.jpg" alt="Slide 249" loading="lazy"><span class="sg-num">249</span></div>
+        <div class="sg-slide"><img src="images/cs570/250.jpg" alt="Slide 250" loading="lazy"><span class="sg-num">250</span></div>
+        <div class="sg-slide"><img src="images/cs570/251.jpg" alt="Slide 251" loading="lazy"><span class="sg-num">251</span></div>
+        <div class="sg-slide"><img src="images/cs570/252.jpg" alt="Slide 252" loading="lazy"><span class="sg-num">252</span></div>
+        <div class="sg-slide"><img src="images/cs570/253.jpg" alt="Slide 253" loading="lazy"><span class="sg-num">253</span></div>
+        <div class="sg-slide"><img src="images/cs570/254.jpg" alt="Slide 254" loading="lazy"><span class="sg-num">254</span></div>
+        <div class="sg-slide"><img src="images/cs570/255.jpg" alt="Slide 255" loading="lazy"><span class="sg-num">255</span></div>
+        <div class="sg-slide"><img src="images/cs570/256.jpg" alt="Slide 256" loading="lazy"><span class="sg-num">256</span></div>
+        <div class="sg-slide"><img src="images/cs570/257.jpg" alt="Slide 257" loading="lazy"><span class="sg-num">257</span></div>
+        <div class="sg-slide"><img src="images/cs570/258.jpg" alt="Slide 258" loading="lazy"><span class="sg-num">258</span></div>
+        <div class="sg-slide"><img src="images/cs570/259.jpg" alt="Slide 259" loading="lazy"><span class="sg-num">259</span></div>
+        <div class="sg-slide"><img src="images/cs570/260.jpg" alt="Slide 260" loading="lazy"><span class="sg-num">260</span></div>
+        <div class="sg-slide"><img src="images/cs570/261.jpg" alt="Slide 261" loading="lazy"><span class="sg-num">261</span></div>
+        <div class="sg-slide"><img src="images/cs570/262.jpg" alt="Slide 262" loading="lazy"><span class="sg-num">262</span></div>
+        <div class="sg-slide"><img src="images/cs570/263.jpg" alt="Slide 263" loading="lazy"><span class="sg-num">263</span></div>
+        <div class="sg-slide"><img src="images/cs570/264.jpg" alt="Slide 264" loading="lazy"><span class="sg-num">264</span></div>
+        <div class="sg-slide"><img src="images/cs570/265.jpg" alt="Slide 265" loading="lazy"><span class="sg-num">265</span></div>
+        <div class="sg-slide"><img src="images/cs570/266.jpg" alt="Slide 266" loading="lazy"><span class="sg-num">266</span></div>
+        <div class="sg-slide"><img src="images/cs570/267.jpg" alt="Slide 267" loading="lazy"><span class="sg-num">267</span></div>
+        <div class="sg-slide"><img src="images/cs570/268.jpg" alt="Slide 268" loading="lazy"><span class="sg-num">268</span></div>
+        <div class="sg-slide"><img src="images/cs570/269.jpg" alt="Slide 269" loading="lazy"><span class="sg-num">269</span></div>
+        <div class="sg-slide"><img src="images/cs570/270.jpg" alt="Slide 270" loading="lazy"><span class="sg-num">270</span></div>
+        <div class="sg-slide"><img src="images/cs570/271.jpg" alt="Slide 271" loading="lazy"><span class="sg-num">271</span></div>
+        <div class="sg-slide"><img src="images/cs570/272.jpg" alt="Slide 272" loading="lazy"><span class="sg-num">272</span></div>
+        <div class="sg-slide"><img src="images/cs570/273.jpg" alt="Slide 273" loading="lazy"><span class="sg-num">273</span></div>
+        <div class="sg-slide"><img src="images/cs570/274.jpg" alt="Slide 274" loading="lazy"><span class="sg-num">274</span></div>
+        <div class="sg-slide"><img src="images/cs570/275.jpg" alt="Slide 275" loading="lazy"><span class="sg-num">275</span></div>
+        <div class="sg-slide"><img src="images/cs570/276.jpg" alt="Slide 276" loading="lazy"><span class="sg-num">276</span></div>
+        <div class="sg-slide"><img src="images/cs570/277.jpg" alt="Slide 277" loading="lazy"><span class="sg-num">277</span></div>
+        <div class="sg-slide"><img src="images/cs570/278.jpg" alt="Slide 278" loading="lazy"><span class="sg-num">278</span></div>
+        <div class="sg-slide"><img src="images/cs570/279.jpg" alt="Slide 279" loading="lazy"><span class="sg-num">279</span></div>
+        <div class="sg-slide"><img src="images/cs570/280.jpg" alt="Slide 280" loading="lazy"><span class="sg-num">280</span></div>
+        <div class="sg-slide"><img src="images/cs570/281.jpg" alt="Slide 281" loading="lazy"><span class="sg-num">281</span></div>
+      </div>
   <span class="lecture-label">Lectures 15–17 · Slides 222–263 · K&amp;T Ch. 3.6, CLRS Ch. 22.4</span>
 
   <div class="slide-box" data-slide="Slides 222–247">
@@ -1606,6 +2232,47 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Dijkstra's Algorithm — Single Source Shortest Paths</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/260.jpg" alt="Slide 260" loading="lazy"><span class="sg-num">260</span></div>
+        <div class="sg-slide"><img src="images/cs570/261.jpg" alt="Slide 261" loading="lazy"><span class="sg-num">261</span></div>
+        <div class="sg-slide"><img src="images/cs570/262.jpg" alt="Slide 262" loading="lazy"><span class="sg-num">262</span></div>
+        <div class="sg-slide"><img src="images/cs570/263.jpg" alt="Slide 263" loading="lazy"><span class="sg-num">263</span></div>
+        <div class="sg-slide"><img src="images/cs570/264.jpg" alt="Slide 264" loading="lazy"><span class="sg-num">264</span></div>
+        <div class="sg-slide"><img src="images/cs570/265.jpg" alt="Slide 265" loading="lazy"><span class="sg-num">265</span></div>
+        <div class="sg-slide"><img src="images/cs570/266.jpg" alt="Slide 266" loading="lazy"><span class="sg-num">266</span></div>
+        <div class="sg-slide"><img src="images/cs570/267.jpg" alt="Slide 267" loading="lazy"><span class="sg-num">267</span></div>
+        <div class="sg-slide"><img src="images/cs570/268.jpg" alt="Slide 268" loading="lazy"><span class="sg-num">268</span></div>
+        <div class="sg-slide"><img src="images/cs570/269.jpg" alt="Slide 269" loading="lazy"><span class="sg-num">269</span></div>
+        <div class="sg-slide"><img src="images/cs570/270.jpg" alt="Slide 270" loading="lazy"><span class="sg-num">270</span></div>
+        <div class="sg-slide"><img src="images/cs570/271.jpg" alt="Slide 271" loading="lazy"><span class="sg-num">271</span></div>
+        <div class="sg-slide"><img src="images/cs570/272.jpg" alt="Slide 272" loading="lazy"><span class="sg-num">272</span></div>
+        <div class="sg-slide"><img src="images/cs570/273.jpg" alt="Slide 273" loading="lazy"><span class="sg-num">273</span></div>
+        <div class="sg-slide"><img src="images/cs570/274.jpg" alt="Slide 274" loading="lazy"><span class="sg-num">274</span></div>
+        <div class="sg-slide"><img src="images/cs570/275.jpg" alt="Slide 275" loading="lazy"><span class="sg-num">275</span></div>
+        <div class="sg-slide"><img src="images/cs570/276.jpg" alt="Slide 276" loading="lazy"><span class="sg-num">276</span></div>
+        <div class="sg-slide"><img src="images/cs570/277.jpg" alt="Slide 277" loading="lazy"><span class="sg-num">277</span></div>
+        <div class="sg-slide"><img src="images/cs570/278.jpg" alt="Slide 278" loading="lazy"><span class="sg-num">278</span></div>
+        <div class="sg-slide"><img src="images/cs570/279.jpg" alt="Slide 279" loading="lazy"><span class="sg-num">279</span></div>
+        <div class="sg-slide"><img src="images/cs570/280.jpg" alt="Slide 280" loading="lazy"><span class="sg-num">280</span></div>
+        <div class="sg-slide"><img src="images/cs570/281.jpg" alt="Slide 281" loading="lazy"><span class="sg-num">281</span></div>
+        <div class="sg-slide"><img src="images/cs570/282.jpg" alt="Slide 282" loading="lazy"><span class="sg-num">282</span></div>
+        <div class="sg-slide"><img src="images/cs570/283.jpg" alt="Slide 283" loading="lazy"><span class="sg-num">283</span></div>
+        <div class="sg-slide"><img src="images/cs570/284.jpg" alt="Slide 284" loading="lazy"><span class="sg-num">284</span></div>
+        <div class="sg-slide"><img src="images/cs570/285.jpg" alt="Slide 285" loading="lazy"><span class="sg-num">285</span></div>
+        <div class="sg-slide"><img src="images/cs570/286.jpg" alt="Slide 286" loading="lazy"><span class="sg-num">286</span></div>
+        <div class="sg-slide"><img src="images/cs570/287.jpg" alt="Slide 287" loading="lazy"><span class="sg-num">287</span></div>
+        <div class="sg-slide"><img src="images/cs570/288.jpg" alt="Slide 288" loading="lazy"><span class="sg-num">288</span></div>
+        <div class="sg-slide"><img src="images/cs570/289.jpg" alt="Slide 289" loading="lazy"><span class="sg-num">289</span></div>
+        <div class="sg-slide"><img src="images/cs570/290.jpg" alt="Slide 290" loading="lazy"><span class="sg-num">290</span></div>
+        <div class="sg-slide"><img src="images/cs570/291.jpg" alt="Slide 291" loading="lazy"><span class="sg-num">291</span></div>
+        <div class="sg-slide"><img src="images/cs570/292.jpg" alt="Slide 292" loading="lazy"><span class="sg-num">292</span></div>
+        <div class="sg-slide"><img src="images/cs570/293.jpg" alt="Slide 293" loading="lazy"><span class="sg-num">293</span></div>
+        <div class="sg-slide"><img src="images/cs570/294.jpg" alt="Slide 294" loading="lazy"><span class="sg-num">294</span></div>
+        <div class="sg-slide"><img src="images/cs570/295.jpg" alt="Slide 295" loading="lazy"><span class="sg-num">295</span></div>
+        <div class="sg-slide"><img src="images/cs570/296.jpg" alt="Slide 296" loading="lazy"><span class="sg-num">296</span></div>
+        <div class="sg-slide"><img src="images/cs570/297.jpg" alt="Slide 297" loading="lazy"><span class="sg-num">297</span></div>
+        <div class="sg-slide"><img src="images/cs570/298.jpg" alt="Slide 298" loading="lazy"><span class="sg-num">298</span></div>
+      </div>
   <span class="lecture-label">Lectures 17–18 · Slides 264–291 · K&amp;T Ch. 4.4, CLRS Ch. 24.3</span>
 
   <div class="slide-box" data-slide="Slides 276–286">
@@ -1691,6 +2358,60 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Bellman-Ford Algorithm — Handling Negative Weights</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/282.jpg" alt="Slide 282" loading="lazy"><span class="sg-num">282</span></div>
+        <div class="sg-slide"><img src="images/cs570/283.jpg" alt="Slide 283" loading="lazy"><span class="sg-num">283</span></div>
+        <div class="sg-slide"><img src="images/cs570/284.jpg" alt="Slide 284" loading="lazy"><span class="sg-num">284</span></div>
+        <div class="sg-slide"><img src="images/cs570/285.jpg" alt="Slide 285" loading="lazy"><span class="sg-num">285</span></div>
+        <div class="sg-slide"><img src="images/cs570/286.jpg" alt="Slide 286" loading="lazy"><span class="sg-num">286</span></div>
+        <div class="sg-slide"><img src="images/cs570/287.jpg" alt="Slide 287" loading="lazy"><span class="sg-num">287</span></div>
+        <div class="sg-slide"><img src="images/cs570/288.jpg" alt="Slide 288" loading="lazy"><span class="sg-num">288</span></div>
+        <div class="sg-slide"><img src="images/cs570/289.jpg" alt="Slide 289" loading="lazy"><span class="sg-num">289</span></div>
+        <div class="sg-slide"><img src="images/cs570/290.jpg" alt="Slide 290" loading="lazy"><span class="sg-num">290</span></div>
+        <div class="sg-slide"><img src="images/cs570/291.jpg" alt="Slide 291" loading="lazy"><span class="sg-num">291</span></div>
+        <div class="sg-slide"><img src="images/cs570/292.jpg" alt="Slide 292" loading="lazy"><span class="sg-num">292</span></div>
+        <div class="sg-slide"><img src="images/cs570/293.jpg" alt="Slide 293" loading="lazy"><span class="sg-num">293</span></div>
+        <div class="sg-slide"><img src="images/cs570/294.jpg" alt="Slide 294" loading="lazy"><span class="sg-num">294</span></div>
+        <div class="sg-slide"><img src="images/cs570/295.jpg" alt="Slide 295" loading="lazy"><span class="sg-num">295</span></div>
+        <div class="sg-slide"><img src="images/cs570/296.jpg" alt="Slide 296" loading="lazy"><span class="sg-num">296</span></div>
+        <div class="sg-slide"><img src="images/cs570/297.jpg" alt="Slide 297" loading="lazy"><span class="sg-num">297</span></div>
+        <div class="sg-slide"><img src="images/cs570/298.jpg" alt="Slide 298" loading="lazy"><span class="sg-num">298</span></div>
+        <div class="sg-slide"><img src="images/cs570/299.jpg" alt="Slide 299" loading="lazy"><span class="sg-num">299</span></div>
+        <div class="sg-slide"><img src="images/cs570/300.jpg" alt="Slide 300" loading="lazy"><span class="sg-num">300</span></div>
+        <div class="sg-slide"><img src="images/cs570/301.jpg" alt="Slide 301" loading="lazy"><span class="sg-num">301</span></div>
+        <div class="sg-slide"><img src="images/cs570/302.jpg" alt="Slide 302" loading="lazy"><span class="sg-num">302</span></div>
+        <div class="sg-slide"><img src="images/cs570/303.jpg" alt="Slide 303" loading="lazy"><span class="sg-num">303</span></div>
+        <div class="sg-slide"><img src="images/cs570/304.jpg" alt="Slide 304" loading="lazy"><span class="sg-num">304</span></div>
+        <div class="sg-slide"><img src="images/cs570/305.jpg" alt="Slide 305" loading="lazy"><span class="sg-num">305</span></div>
+        <div class="sg-slide"><img src="images/cs570/306.jpg" alt="Slide 306" loading="lazy"><span class="sg-num">306</span></div>
+        <div class="sg-slide"><img src="images/cs570/307.jpg" alt="Slide 307" loading="lazy"><span class="sg-num">307</span></div>
+        <div class="sg-slide"><img src="images/cs570/308.jpg" alt="Slide 308" loading="lazy"><span class="sg-num">308</span></div>
+        <div class="sg-slide"><img src="images/cs570/309.jpg" alt="Slide 309" loading="lazy"><span class="sg-num">309</span></div>
+        <div class="sg-slide"><img src="images/cs570/310.jpg" alt="Slide 310" loading="lazy"><span class="sg-num">310</span></div>
+        <div class="sg-slide"><img src="images/cs570/311.jpg" alt="Slide 311" loading="lazy"><span class="sg-num">311</span></div>
+        <div class="sg-slide"><img src="images/cs570/312.jpg" alt="Slide 312" loading="lazy"><span class="sg-num">312</span></div>
+        <div class="sg-slide"><img src="images/cs570/313.jpg" alt="Slide 313" loading="lazy"><span class="sg-num">313</span></div>
+        <div class="sg-slide"><img src="images/cs570/314.jpg" alt="Slide 314" loading="lazy"><span class="sg-num">314</span></div>
+        <div class="sg-slide"><img src="images/cs570/315.jpg" alt="Slide 315" loading="lazy"><span class="sg-num">315</span></div>
+        <div class="sg-slide"><img src="images/cs570/316.jpg" alt="Slide 316" loading="lazy"><span class="sg-num">316</span></div>
+        <div class="sg-slide"><img src="images/cs570/317.jpg" alt="Slide 317" loading="lazy"><span class="sg-num">317</span></div>
+        <div class="sg-slide"><img src="images/cs570/318.jpg" alt="Slide 318" loading="lazy"><span class="sg-num">318</span></div>
+        <div class="sg-slide"><img src="images/cs570/319.jpg" alt="Slide 319" loading="lazy"><span class="sg-num">319</span></div>
+        <div class="sg-slide"><img src="images/cs570/320.jpg" alt="Slide 320" loading="lazy"><span class="sg-num">320</span></div>
+        <div class="sg-slide"><img src="images/cs570/321.jpg" alt="Slide 321" loading="lazy"><span class="sg-num">321</span></div>
+        <div class="sg-slide"><img src="images/cs570/322.jpg" alt="Slide 322" loading="lazy"><span class="sg-num">322</span></div>
+        <div class="sg-slide"><img src="images/cs570/323.jpg" alt="Slide 323" loading="lazy"><span class="sg-num">323</span></div>
+        <div class="sg-slide"><img src="images/cs570/324.jpg" alt="Slide 324" loading="lazy"><span class="sg-num">324</span></div>
+        <div class="sg-slide"><img src="images/cs570/325.jpg" alt="Slide 325" loading="lazy"><span class="sg-num">325</span></div>
+        <div class="sg-slide"><img src="images/cs570/326.jpg" alt="Slide 326" loading="lazy"><span class="sg-num">326</span></div>
+        <div class="sg-slide"><img src="images/cs570/327.jpg" alt="Slide 327" loading="lazy"><span class="sg-num">327</span></div>
+        <div class="sg-slide"><img src="images/cs570/328.jpg" alt="Slide 328" loading="lazy"><span class="sg-num">328</span></div>
+        <div class="sg-slide"><img src="images/cs570/329.jpg" alt="Slide 329" loading="lazy"><span class="sg-num">329</span></div>
+        <div class="sg-slide"><img src="images/cs570/330.jpg" alt="Slide 330" loading="lazy"><span class="sg-num">330</span></div>
+        <div class="sg-slide"><img src="images/cs570/331.jpg" alt="Slide 331" loading="lazy"><span class="sg-num">331</span></div>
+        <div class="sg-slide"><img src="images/cs570/332.jpg" alt="Slide 332" loading="lazy"><span class="sg-num">332</span></div>
+        <div class="sg-slide"><img src="images/cs570/333.jpg" alt="Slide 333" loading="lazy"><span class="sg-num">333</span></div>
+      </div>
   <span class="lecture-label">Lectures 18–21 · Slides 288–322 · K&amp;T Ch. 6.8, CLRS Ch. 24.1</span>
 
   <div class="slide-box" data-slide="Slides 313–321">
@@ -1775,6 +2496,41 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Floyd-Warshall — All-Pairs Shortest Paths</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/312.jpg" alt="Slide 312" loading="lazy"><span class="sg-num">312</span></div>
+        <div class="sg-slide"><img src="images/cs570/313.jpg" alt="Slide 313" loading="lazy"><span class="sg-num">313</span></div>
+        <div class="sg-slide"><img src="images/cs570/314.jpg" alt="Slide 314" loading="lazy"><span class="sg-num">314</span></div>
+        <div class="sg-slide"><img src="images/cs570/315.jpg" alt="Slide 315" loading="lazy"><span class="sg-num">315</span></div>
+        <div class="sg-slide"><img src="images/cs570/316.jpg" alt="Slide 316" loading="lazy"><span class="sg-num">316</span></div>
+        <div class="sg-slide"><img src="images/cs570/317.jpg" alt="Slide 317" loading="lazy"><span class="sg-num">317</span></div>
+        <div class="sg-slide"><img src="images/cs570/318.jpg" alt="Slide 318" loading="lazy"><span class="sg-num">318</span></div>
+        <div class="sg-slide"><img src="images/cs570/319.jpg" alt="Slide 319" loading="lazy"><span class="sg-num">319</span></div>
+        <div class="sg-slide"><img src="images/cs570/320.jpg" alt="Slide 320" loading="lazy"><span class="sg-num">320</span></div>
+        <div class="sg-slide"><img src="images/cs570/321.jpg" alt="Slide 321" loading="lazy"><span class="sg-num">321</span></div>
+        <div class="sg-slide"><img src="images/cs570/322.jpg" alt="Slide 322" loading="lazy"><span class="sg-num">322</span></div>
+        <div class="sg-slide"><img src="images/cs570/323.jpg" alt="Slide 323" loading="lazy"><span class="sg-num">323</span></div>
+        <div class="sg-slide"><img src="images/cs570/324.jpg" alt="Slide 324" loading="lazy"><span class="sg-num">324</span></div>
+        <div class="sg-slide"><img src="images/cs570/325.jpg" alt="Slide 325" loading="lazy"><span class="sg-num">325</span></div>
+        <div class="sg-slide"><img src="images/cs570/326.jpg" alt="Slide 326" loading="lazy"><span class="sg-num">326</span></div>
+        <div class="sg-slide"><img src="images/cs570/327.jpg" alt="Slide 327" loading="lazy"><span class="sg-num">327</span></div>
+        <div class="sg-slide"><img src="images/cs570/328.jpg" alt="Slide 328" loading="lazy"><span class="sg-num">328</span></div>
+        <div class="sg-slide"><img src="images/cs570/329.jpg" alt="Slide 329" loading="lazy"><span class="sg-num">329</span></div>
+        <div class="sg-slide"><img src="images/cs570/330.jpg" alt="Slide 330" loading="lazy"><span class="sg-num">330</span></div>
+        <div class="sg-slide"><img src="images/cs570/331.jpg" alt="Slide 331" loading="lazy"><span class="sg-num">331</span></div>
+        <div class="sg-slide"><img src="images/cs570/332.jpg" alt="Slide 332" loading="lazy"><span class="sg-num">332</span></div>
+        <div class="sg-slide"><img src="images/cs570/333.jpg" alt="Slide 333" loading="lazy"><span class="sg-num">333</span></div>
+        <div class="sg-slide"><img src="images/cs570/334.jpg" alt="Slide 334" loading="lazy"><span class="sg-num">334</span></div>
+        <div class="sg-slide"><img src="images/cs570/335.jpg" alt="Slide 335" loading="lazy"><span class="sg-num">335</span></div>
+        <div class="sg-slide"><img src="images/cs570/336.jpg" alt="Slide 336" loading="lazy"><span class="sg-num">336</span></div>
+        <div class="sg-slide"><img src="images/cs570/337.jpg" alt="Slide 337" loading="lazy"><span class="sg-num">337</span></div>
+        <div class="sg-slide"><img src="images/cs570/338.jpg" alt="Slide 338" loading="lazy"><span class="sg-num">338</span></div>
+        <div class="sg-slide"><img src="images/cs570/339.jpg" alt="Slide 339" loading="lazy"><span class="sg-num">339</span></div>
+        <div class="sg-slide"><img src="images/cs570/340.jpg" alt="Slide 340" loading="lazy"><span class="sg-num">340</span></div>
+        <div class="sg-slide"><img src="images/cs570/341.jpg" alt="Slide 341" loading="lazy"><span class="sg-num">341</span></div>
+        <div class="sg-slide"><img src="images/cs570/342.jpg" alt="Slide 342" loading="lazy"><span class="sg-num">342</span></div>
+        <div class="sg-slide"><img src="images/cs570/343.jpg" alt="Slide 343" loading="lazy"><span class="sg-num">343</span></div>
+        <div class="sg-slide"><img src="images/cs570/344.jpg" alt="Slide 344" loading="lazy"><span class="sg-num">344</span></div>
+      </div>
   <span class="lecture-label">Lectures 21–22 · Slides 323–342 · CLRS Ch. 25.2, K&amp;T Ch. 6.10</span>
 
   <div class="slide-box" data-slide="Slides 331–342">
@@ -1853,6 +2609,24 @@ At j = log n: T(n) = n·T(1) + n·log n = n + n log n = O(n log n)
     <h2 class="topic-title">Integer Multiplication &amp; Karatsuba's Algorithm</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/345.jpg" alt="Slide 345" loading="lazy"><span class="sg-num">345</span></div>
+        <div class="sg-slide"><img src="images/cs570/346.jpg" alt="Slide 346" loading="lazy"><span class="sg-num">346</span></div>
+        <div class="sg-slide"><img src="images/cs570/347.jpg" alt="Slide 347" loading="lazy"><span class="sg-num">347</span></div>
+        <div class="sg-slide"><img src="images/cs570/348.jpg" alt="Slide 348" loading="lazy"><span class="sg-num">348</span></div>
+        <div class="sg-slide"><img src="images/cs570/349.jpg" alt="Slide 349" loading="lazy"><span class="sg-num">349</span></div>
+        <div class="sg-slide"><img src="images/cs570/350.jpg" alt="Slide 350" loading="lazy"><span class="sg-num">350</span></div>
+        <div class="sg-slide"><img src="images/cs570/351.jpg" alt="Slide 351" loading="lazy"><span class="sg-num">351</span></div>
+        <div class="sg-slide"><img src="images/cs570/352.jpg" alt="Slide 352" loading="lazy"><span class="sg-num">352</span></div>
+        <div class="sg-slide"><img src="images/cs570/353.jpg" alt="Slide 353" loading="lazy"><span class="sg-num">353</span></div>
+        <div class="sg-slide"><img src="images/cs570/354.jpg" alt="Slide 354" loading="lazy"><span class="sg-num">354</span></div>
+        <div class="sg-slide"><img src="images/cs570/355.jpg" alt="Slide 355" loading="lazy"><span class="sg-num">355</span></div>
+        <div class="sg-slide"><img src="images/cs570/356.jpg" alt="Slide 356" loading="lazy"><span class="sg-num">356</span></div>
+        <div class="sg-slide"><img src="images/cs570/357.jpg" alt="Slide 357" loading="lazy"><span class="sg-num">357</span></div>
+        <div class="sg-slide"><img src="images/cs570/358.jpg" alt="Slide 358" loading="lazy"><span class="sg-num">358</span></div>
+        <div class="sg-slide"><img src="images/cs570/359.jpg" alt="Slide 359" loading="lazy"><span class="sg-num">359</span></div>
+        <div class="sg-slide"><img src="images/cs570/360.jpg" alt="Slide 360" loading="lazy"><span class="sg-num">360</span></div>
+      </div>
   <span class="lecture-label">Lectures 23 · Slides 348–360 · K&amp;T Ch. 5.5, CLRS Ch. 30 (related)</span>
 
   <div class="slide-box" data-slide="Slides 349–359">
@@ -1935,6 +2709,32 @@ T(n) = 3T(n/2) + Θ(n)
     <h2 class="topic-title">Computational Intractability, NP, &amp; Polynomial Reductions</h2>
   </div>
 
+  <div class="slide-gallery">
+        <div class="sg-slide"><img src="images/cs570/367.jpg" alt="Slide 367" loading="lazy"><span class="sg-num">367</span></div>
+        <div class="sg-slide"><img src="images/cs570/368.jpg" alt="Slide 368" loading="lazy"><span class="sg-num">368</span></div>
+        <div class="sg-slide"><img src="images/cs570/369.jpg" alt="Slide 369" loading="lazy"><span class="sg-num">369</span></div>
+        <div class="sg-slide"><img src="images/cs570/370.jpg" alt="Slide 370" loading="lazy"><span class="sg-num">370</span></div>
+        <div class="sg-slide"><img src="images/cs570/371.jpg" alt="Slide 371" loading="lazy"><span class="sg-num">371</span></div>
+        <div class="sg-slide"><img src="images/cs570/372.jpg" alt="Slide 372" loading="lazy"><span class="sg-num">372</span></div>
+        <div class="sg-slide"><img src="images/cs570/373.jpg" alt="Slide 373" loading="lazy"><span class="sg-num">373</span></div>
+        <div class="sg-slide"><img src="images/cs570/374.jpg" alt="Slide 374" loading="lazy"><span class="sg-num">374</span></div>
+        <div class="sg-slide"><img src="images/cs570/375.jpg" alt="Slide 375" loading="lazy"><span class="sg-num">375</span></div>
+        <div class="sg-slide"><img src="images/cs570/376.jpg" alt="Slide 376" loading="lazy"><span class="sg-num">376</span></div>
+        <div class="sg-slide"><img src="images/cs570/377.jpg" alt="Slide 377" loading="lazy"><span class="sg-num">377</span></div>
+        <div class="sg-slide"><img src="images/cs570/378.jpg" alt="Slide 378" loading="lazy"><span class="sg-num">378</span></div>
+        <div class="sg-slide"><img src="images/cs570/379.jpg" alt="Slide 379" loading="lazy"><span class="sg-num">379</span></div>
+        <div class="sg-slide"><img src="images/cs570/380.jpg" alt="Slide 380" loading="lazy"><span class="sg-num">380</span></div>
+        <div class="sg-slide"><img src="images/cs570/381.jpg" alt="Slide 381" loading="lazy"><span class="sg-num">381</span></div>
+        <div class="sg-slide"><img src="images/cs570/382.jpg" alt="Slide 382" loading="lazy"><span class="sg-num">382</span></div>
+        <div class="sg-slide"><img src="images/cs570/383.jpg" alt="Slide 383" loading="lazy"><span class="sg-num">383</span></div>
+        <div class="sg-slide"><img src="images/cs570/384.jpg" alt="Slide 384" loading="lazy"><span class="sg-num">384</span></div>
+        <div class="sg-slide"><img src="images/cs570/385.jpg" alt="Slide 385" loading="lazy"><span class="sg-num">385</span></div>
+        <div class="sg-slide"><img src="images/cs570/386.jpg" alt="Slide 386" loading="lazy"><span class="sg-num">386</span></div>
+        <div class="sg-slide"><img src="images/cs570/387.jpg" alt="Slide 387" loading="lazy"><span class="sg-num">387</span></div>
+        <div class="sg-slide"><img src="images/cs570/388.jpg" alt="Slide 388" loading="lazy"><span class="sg-num">388</span></div>
+        <div class="sg-slide"><img src="images/cs570/389.jpg" alt="Slide 389" loading="lazy"><span class="sg-num">389</span></div>
+        <div class="sg-slide"><img src="images/cs570/390.jpg" alt="Slide 390" loading="lazy"><span class="sg-num">390</span></div>
+      </div>
   <span class="lecture-label">Lectures 25–27 · Slides 373–389 · K&amp;T Ch. 8.1–8.4, CLRS Ch. 34</span>
 
   <div class="slide-box" data-slide="Slides 373–389">
