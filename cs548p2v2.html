@@ -61,23 +61,18 @@ body {
   gap: 16px;
   height: 52px;
   flex-shrink: 0;
-  z-index: 201;
-  transition: background 0.25s, border-color 0.25s, transform 0.3s ease;
-  position: fixed;
+  z-index: 200;
+  transition: background 0.25s, border-color 0.25s;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
-  transform: translateY(-100%);
 }
-.topbar.nav-visible { transform: translateY(0); }
 
-/* Invisible 8px strip at top edge that triggers the nav */
-#nav-hover-trigger {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 8px;
-  z-index: 300;
+.topbar { 
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  transform: translateY(-100%);
+  transition: transform 0.25s ease;
 }
+.topbar:hover, .topbar:focus-within { transform: translateY(0); }
 
 .topbar-logo {
   font-size: 13px;
@@ -162,21 +157,17 @@ body {
   flex-shrink: 0;
   overflow-x: auto;
   scrollbar-width: thin;
-  transition: background 0.25s, border-color 0.25s, max-height 0.3s ease, opacity 0.3s ease;
-  position: fixed;
-  top: 52px;
-  left: 0;
-  width: 100%;
-  z-index: 200;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
+  transition: background 0.25s, border-color 0.25s;
 }
-.nav-strip-wrapper.nav-visible {
-  max-height: 60px;
-  overflow: visible;
-  opacity: 1;
+
+.nav-strip-wrapper { 
+  max-height: 0; overflow: hidden; 
+  transition: max-height 0.3s ease; 
 }
+.nav-strip-wrapper.expanded { max-height: 200px; }
+
+#img-instructions { display: none; }
+
 .nav-strip-wrapper::-webkit-scrollbar { height: 3px; }
 .nav-strip-wrapper::-webkit-scrollbar-track { background: transparent; }
 .nav-strip-wrapper::-webkit-scrollbar-thumb { background: var(--shell-border); border-radius: 3px; }
@@ -218,8 +209,6 @@ body {
   flex: 1;
   overflow: hidden;
   position: relative;
-  /* topbar (52px) + nav (44px) are fixed; give iframe full viewport height */
-  height: 100vh;
 }
 
 iframe {
@@ -263,29 +252,15 @@ iframe.loading { opacity: 0; }
   font-size: 12px;
   color: var(--shell-text2);
 }
-
-/* ── SLIDE IMAGE CAPTION ── */
-.slide-img-caption {
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  color: var(--shell-text2);
-  padding: 4px 0 8px;
-  opacity: 0.75;
-  letter-spacing: 0.02em;
-}
 </style>
 </head>
 <body data-theme-init="dark">
-
-<!-- HOVER TRIGGER ZONE -->
-<div id="nav-hover-trigger"></div>
 
 <!-- TOP BAR -->
 <div class="topbar">
   <span class="topbar-logo">CS 448/548 · Study Hub</span>
   <div class="topbar-divider"></div>
-  <span class="lecture-count">9 modules | Slide images: place JPGs in images/sl17_24v2/</span>
+  <span class="lecture-count">9 modules | Slide images: place JPGs in images/sl17_24/</span>
 
   <div class="theme-toggle">
     <span class="theme-label" id="theme-label">DARK</span>
@@ -297,9 +272,9 @@ iframe.loading { opacity: 0; }
 </div>
 
 <!-- IMAGE PATH INSTRUCTIONS -->
-<div id="img-instructions" style="background:#1a2744;border-bottom:1px solid #2a3a5a;padding:8px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8ab4d8;display:none;align-items:center;gap:12px;flex-shrink:0;">
+<div id="img-instructions" style="background:#1a2744;border-bottom:1px solid #2a3a5a;padding:8px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8ab4d8;display:flex;align-items:center;gap:12px;flex-shrink:0;">
   <span style="color:#4f9ef8;font-weight:700;">&#128193; IMAGES</span>
-  <span>Place slide JPGs as <code style="background:#0d1525;padding:1px 6px;border-radius:3px;color:#a8c8f0;">images/sl17_24v2/001.jpg</code>
+  <span>Place slide JPGs as <code style="background:#0d1525;padding:1px 6px;border-radius:3px;color:#a8c8f0;">images/sl17_24/001.jpg</code>
   through <code style="background:#0d1525;padding:1px 6px;border-radius:3px;color:#a8c8f0;">233.jpg</code> alongside this HTML file to display slide thumbnails.</span>
   <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;color:#5a7a9a;cursor:pointer;font-size:14px;">&#x2715;</button>
 </div>
@@ -1049,14 +1024,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/001.jpg"
+    src="images/sl17_24/001.jpg"
     alt="Slide page 1"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>001.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>001.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/001.jpg</div>
 </div>
 <div id="s1" class="slide-block">
   <div class="slide-header">
@@ -1118,14 +1092,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/002.jpg"
+    src="images/sl17_24/002.jpg"
     alt="Slide page 2"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>002.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>002.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/002.jpg</div>
 </div>
 <div id="s2" class="slide-block">
   <div class="slide-header">
@@ -1258,14 +1231,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/003.jpg"
+    src="images/sl17_24/003.jpg"
     alt="Slide page 3"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>003.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>003.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/003.jpg</div>
 </div>
 <div id="s3" class="slide-block">
   <div class="slide-header">
@@ -1348,14 +1320,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/004.jpg"
+    src="images/sl17_24/004.jpg"
     alt="Slide page 4"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>004.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>004.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/004.jpg</div>
 </div>
 <div id="s4" class="slide-block">
   <div class="slide-header">
@@ -1466,14 +1437,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/005.jpg"
+    src="images/sl17_24/007.jpg"
     alt="Slide page 7"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>005.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>007.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/005.jpg</div>
 </div>
 <div id="s7" class="slide-block">
   <div class="slide-header">
@@ -1542,14 +1512,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/006.jpg"
+    src="images/sl17_24/008.jpg"
     alt="Slide page 8"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>006.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>008.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/006.jpg</div>
 </div>
 <div id="s8" class="slide-block">
   <div class="slide-header">
@@ -1601,14 +1570,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/007.jpg"
+    src="images/sl17_24/009.jpg"
     alt="Slide page 9"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>007.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>009.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/007.jpg</div>
 </div>
 <div id="s9" class="slide-block">
   <div class="slide-header">
@@ -1699,14 +1667,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/008.jpg"
+    src="images/sl17_24/010.jpg"
     alt="Slide page 10"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>008.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>010.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/008.jpg</div>
 </div>
 <div id="s10" class="slide-block">
   <div class="slide-header">
@@ -1765,14 +1732,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/009.jpg"
+    src="images/sl17_24/011.jpg"
     alt="Slide page 11"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>009.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>011.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/009.jpg</div>
 </div>
 <div id="s11" class="slide-block">
   <div class="slide-header">
@@ -1865,14 +1831,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/010.jpg"
+    src="images/sl17_24/013.jpg"
     alt="Slide page 13"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>010.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>013.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/010.jpg</div>
 </div>
 <div id="s13" class="slide-block">
   <div class="slide-header">
@@ -1973,14 +1938,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/011.jpg"
+    src="images/sl17_24/016.jpg"
     alt="Slide page 16"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>011.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>016.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/011.jpg</div>
 </div>
 <div id="s16" class="slide-block">
   <div class="slide-header">
@@ -2128,14 +2092,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/012.jpg"
+    src="images/sl17_24/021.jpg"
     alt="Slide page 21"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>012.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>021.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/012.jpg</div>
 </div>
 <div id="s21" class="slide-block">
   <div class="slide-header">
@@ -2208,14 +2171,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/013.jpg"
+    src="images/sl17_24/022.jpg"
     alt="Slide page 22"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>013.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>022.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/013.jpg</div>
 </div>
 <div id="s22" class="slide-block">
   <div class="slide-header">
@@ -2309,14 +2271,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/014.jpg"
+    src="images/sl17_24/027.jpg"
     alt="Slide page 27"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>014.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>027.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/014.jpg</div>
 </div>
 <div id="s27" class="slide-block">
   <div class="slide-header">
@@ -2422,14 +2383,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/015.jpg"
+    src="images/sl17_24/028.jpg"
     alt="Slide page 28"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>015.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>028.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/015.jpg</div>
 </div>
 <div id="s28" class="slide-block">
   <div class="slide-header">
@@ -3344,14 +3304,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/029.jpg"
+    src="images/sl17_24/032.jpg"
     alt="Slide page 32"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>029.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>032.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/029.jpg</div>
 </div>
 <div class="topic-header t1">
   <div class="topic-dot"></div>
@@ -3550,14 +3509,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/030.jpg"
+    src="images/sl17_24/042.jpg"
     alt="Slide page 42"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>030.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>042.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/030.jpg</div>
 </div>
 <div class="topic-header t2">
   <div class="topic-dot"></div>
@@ -3840,14 +3798,13 @@ const lectures = [
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/031.jpg"
+    src="images/sl17_24/048.jpg"
     alt="Slide page 48"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>031.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>048.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/031.jpg</div>
 </div>
 <div class="topic-header t3">
   <div class="topic-dot"></div>
@@ -4110,14 +4067,13 @@ int setUpFilter(void) {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/032.jpg"
+    src="images/sl17_24/058.jpg"
     alt="Slide page 58"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>032.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>058.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/032.jpg</div>
 </div>
 <div class="topic-header t4">
   <div class="topic-dot"></div>
@@ -5104,14 +5060,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/067.jpg"
+    src="images/sl17_24/058.jpg"
     alt="Slide page 58"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>067.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>058.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/067.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slide 4</div>
@@ -5215,14 +5170,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/068.jpg"
+    src="images/sl17_24/059.jpg"
     alt="Slide page 59"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>068.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>059.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/068.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slide 7</div>
@@ -5273,14 +5227,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/069.jpg"
+    src="images/sl17_24/060.jpg"
     alt="Slide page 60"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>069.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>060.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/069.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slides 8–11</div>
@@ -5447,14 +5400,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/070.jpg"
+    src="images/sl17_24/061.jpg"
     alt="Slide page 61"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>070.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>061.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/070.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slides 12–15</div>
@@ -5554,14 +5506,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/071.jpg"
+    src="images/sl17_24/062.jpg"
     alt="Slide page 62"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>071.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>062.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/071.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slides 15 (cont.) & 18</div>
@@ -5660,14 +5611,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/072.jpg"
+    src="images/sl17_24/063.jpg"
     alt="Slide page 63"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>072.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>063.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/072.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slides 17–22 + 26</div>
@@ -5825,14 +5775,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/073.jpg"
+    src="images/sl17_24/064.jpg"
     alt="Slide page 64"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>073.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>064.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/073.jpg</div>
 </div>
 <div class="slide-block">
   <div class="slide-num">Slides 24–30 + 32–33</div>
@@ -6797,14 +6746,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/097.jpg"
+    src="images/sl17_24/101.jpg"
     alt="Slide page 101"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>097.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>101.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/097.jpg</div>
 </div>
 <div class="topic-header" id="t1">
   <span class="topic-num">SLIDE 1–2</span>
@@ -6900,14 +6848,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/098.jpg"
+    src="images/sl17_24/106.jpg"
     alt="Slide page 106"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>098.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>106.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/098.jpg</div>
 </div>
 <div class="topic-header" id="t2">
   <span class="topic-num">SLIDE 3</span>
@@ -7009,14 +6956,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/099.jpg"
+    src="images/sl17_24/111.jpg"
     alt="Slide page 111"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>099.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>111.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/099.jpg</div>
 </div>
 <div class="topic-header" id="t3">
   <span class="topic-num">SLIDES 4, 11, 35</span>
@@ -7116,14 +7062,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/100.jpg"
+    src="images/sl17_24/116.jpg"
     alt="Slide page 116"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>100.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>116.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/100.jpg</div>
 </div>
 <div class="topic-header" id="t4">
   <span class="topic-num">SLIDE 5</span>
@@ -7225,14 +7170,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/101.jpg"
+    src="images/sl17_24/121.jpg"
     alt="Slide page 121"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>101.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>121.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/101.jpg</div>
 </div>
 <div class="topic-header" id="t5">
   <span class="topic-num">SLIDE 6</span>
@@ -7317,14 +7261,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/102.jpg"
+    src="images/sl17_24/126.jpg"
     alt="Slide page 126"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>102.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>126.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/102.jpg</div>
 </div>
 <div class="topic-header" id="t6">
   <span class="topic-num">SLIDES 7–9</span>
@@ -7425,14 +7368,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/103.jpg"
+    src="images/sl17_24/131.jpg"
     alt="Slide page 131"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>103.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>131.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/103.jpg</div>
 </div>
 <div class="topic-header" id="t9">
   <span class="topic-num">SLIDE 10</span>
@@ -7514,14 +7456,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/104.jpg"
+    src="images/sl17_24/137.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>104.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>137.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/104.jpg</div>
 </div>
 <div class="topic-header" id="t10">
   <span class="topic-num">SLIDES 12–13</span>
@@ -7620,14 +7561,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/105.jpg"
+    src="images/sl17_24/138.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>105.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>138.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/105.jpg</div>
 </div>
 <div class="topic-header" id="t11">
   <span class="topic-num">SLIDES 14–16</span>
@@ -7729,14 +7669,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/106.jpg"
+    src="images/sl17_24/139.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>106.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>139.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/106.jpg</div>
 </div>
 <div class="topic-header" id="t12">
   <span class="topic-num">SLIDE 17</span>
@@ -7831,14 +7770,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/107.jpg"
+    src="images/sl17_24/140.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>107.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>140.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/107.jpg</div>
 </div>
 <div class="topic-header" id="t13">
   <span class="topic-num">SLIDES 18–21</span>
@@ -7936,14 +7874,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/108.jpg"
+    src="images/sl17_24/141.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>108.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>141.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/108.jpg</div>
 </div>
 <div class="topic-header" id="t14">
   <span class="topic-num">SLIDES 22–29</span>
@@ -8064,14 +8001,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/109.jpg"
+    src="images/sl17_24/142.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>109.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>142.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/109.jpg</div>
 </div>
 <div class="topic-header" id="t15">
   <span class="topic-num">SLIDES 30–33</span>
@@ -8177,14 +8113,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/110.jpg"
+    src="images/sl17_24/136.jpg"
     alt="Slide page 135"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>110.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>136.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/110.jpg</div>
 </div>
 <div class="topic-header" id="t16">
   <span class="topic-num">SLIDES 34–38</span>
@@ -8942,14 +8877,13 @@ sudo iptables -P FORWARD DROP</div>
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/135.jpg"
+    src="images/sl17_24/136.jpg"
     alt="Slide page 136"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>135.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>136.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/135.jpg</div>
 </div>
 <section class="section" id="kerberos">
   <div class="section-header">
@@ -10422,14 +10356,13 @@ function toggle(el) {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/173.jpg"
+    src="images/sl17_24/169.jpg"
     alt="Slide page 169"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>173.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>169.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/173.jpg</div>
 </div>
 <div id="s1" class="slide-block">
 
@@ -10525,14 +10458,13 @@ function toggle(el) {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/174.jpg"
+    src="images/sl17_24/170.jpg"
     alt="Slide page 170"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>174.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>170.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/174.jpg</div>
 </div>
 <div id="s2" class="slide-block">
 
@@ -10607,14 +10539,13 @@ function toggle(el) {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/175.jpg"
+    src="images/sl17_24/171.jpg"
     alt="Slide page 171"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>175.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>171.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/175.jpg</div>
 </div>
 <div id="s3" class="slide-block">
 
@@ -10685,14 +10616,13 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/176.jpg"
+    src="images/sl17_24/172.jpg"
     alt="Slide page 172"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>176.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>172.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/176.jpg</div>
 </div>
 <div id="s4" class="slide-block">
 
@@ -10838,14 +10768,13 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/177.jpg"
+    src="images/sl17_24/173.jpg"
     alt="Slide page 173"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>177.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>173.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/177.jpg</div>
 </div>
 <div id="s5" class="slide-block">
 
@@ -10950,14 +10879,13 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/178.jpg"
+    src="images/sl17_24/174.jpg"
     alt="Slide page 174"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>178.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>174.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/178.jpg</div>
 </div>
 <div id="s6" class="slide-block">
 
@@ -11054,14 +10982,13 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/179.jpg"
+    src="images/sl17_24/175.jpg"
     alt="Slide page 175"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>179.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>175.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/179.jpg</div>
 </div>
 <div id="s7" class="slide-block">
 
@@ -11172,14 +11099,13 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/180.jpg"
+    src="images/sl17_24/176.jpg"
     alt="Slide page 176"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>180.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>176.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/180.jpg</div>
 </div>
 <div id="s8" class="slide-block">
 
@@ -11233,14 +11159,13 @@ newsockfd = <span class="fn">accept</span>(sockfd, ...);            <span class=
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/181.jpg"
+    src="images/sl17_24/177.jpg"
     alt="Slide page 177"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>181.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>177.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/181.jpg</div>
 </div>
 <div id="s9" class="slide-block">
 
@@ -11979,14 +11904,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/190.jpg"
+    src="images/sl17_24/193.jpg"
     alt="Slide page 193"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>190.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>193.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/190.jpg</div>
 </div>
 <div class="slide-block" id="s1">
   <div class="slide-label">Slide 1 of 21</div>
@@ -12080,14 +12004,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/191.jpg"
+    src="images/sl17_24/194.jpg"
     alt="Slide page 194"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>191.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>194.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/191.jpg</div>
 </div>
 <div class="slide-block" id="s2">
   <div class="slide-label">Slide 2 of 21</div>
@@ -12180,14 +12103,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/192.jpg"
+    src="images/sl17_24/195.jpg"
     alt="Slide page 195"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>192.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>195.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/192.jpg</div>
 </div>
 <div class="slide-block" id="s3">
   <div class="slide-label">Slide 3 of 21</div>
@@ -12270,14 +12192,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/193.jpg"
+    src="images/sl17_24/196.jpg"
     alt="Slide page 196"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>193.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>196.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/193.jpg</div>
 </div>
 <div class="slide-block" id="s4">
   <div class="slide-label">Slides 4–6 of 21 (Topic: Network Access Control)</div>
@@ -12384,14 +12305,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/194.jpg"
+    src="images/sl17_24/199.jpg"
     alt="Slide page 199"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>194.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>199.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/194.jpg</div>
 </div>
 <div class="slide-block" id="s7">
   <div class="slide-label">Slides 7–8 of 21 (Topic: IEEE 802.1X)</div>
@@ -12499,14 +12419,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/195.jpg"
+    src="images/sl17_24/201.jpg"
     alt="Slide page 201"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>195.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>201.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/195.jpg</div>
 </div>
 <div class="slide-block" id="s9">
   <div class="slide-label">Slides 9–10 of 21 (Topic: 802.11i Phases of Operation & EAP Framework)</div>
@@ -12593,14 +12512,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/196.jpg"
+    src="images/sl17_24/203.jpg"
     alt="Slide page 203"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>196.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>203.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/196.jpg</div>
 </div>
 <div class="slide-block" id="s11">
   <div class="slide-label">Slides 11–14 of 21 (Topic: EAP Methods, Protocol Exchanges, EAP-TLS, EAP-PEAP)</div>
@@ -12703,14 +12621,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/197.jpg"
+    src="images/sl17_24/207.jpg"
     alt="Slide page 207"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>197.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>207.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/197.jpg</div>
 </div>
 <div class="slide-block" id="s15">
   <div class="slide-label">Slides 15–17 of 21 (Topic: 4G LTE Architecture, AKA, Key Derivation, 5G)</div>
@@ -13718,14 +13635,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/211.jpg"
+    src="images/sl17_24/216.jpg"
     alt="Slide page 216"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>211.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>216.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/211.jpg</div>
 </div>
 <div class="topic-divider" id="s1">
   <div class="td-line"></div>
@@ -13831,14 +13747,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/212.jpg"
+    src="images/sl17_24/219.jpg"
     alt="Slide page 219"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>212.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>219.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/212.jpg</div>
 </div>
 <div class="topic-divider" id="s4">
   <div class="td-line"></div>
@@ -13930,14 +13845,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/213.jpg"
+    src="images/sl17_24/221.jpg"
     alt="Slide page 221"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>213.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>221.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/213.jpg</div>
 </div>
 <div class="topic-divider" id="s6">
   <div class="td-line"></div>
@@ -14099,14 +14013,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/214.jpg"
+    src="images/sl17_24/225.jpg"
     alt="Slide page 225"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>214.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>225.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/214.jpg</div>
 </div>
 <div class="topic-divider" id="s10">
   <div class="td-line"></div>
@@ -14171,14 +14084,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/215.jpg"
+    src="images/sl17_24/226.jpg"
     alt="Slide page 226"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>215.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>226.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/215.jpg</div>
 </div>
 <div class="topic-divider" id="s11">
   <div class="td-line"></div>
@@ -14253,14 +14165,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/216.jpg"
+    src="images/sl17_24/227.jpg"
     alt="Slide page 227"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>216.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>227.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/216.jpg</div>
 </div>
 <div class="topic-divider" id="s12">
   <div class="td-line"></div>
@@ -14331,14 +14242,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/217.jpg"
+    src="images/sl17_24/229.jpg"
     alt="Slide page 229"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>217.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>229.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/217.jpg</div>
 </div>
 <div class="topic-divider" id="s14">
   <div class="td-line"></div>
@@ -14539,14 +14449,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/218.jpg"
+    src="images/sl17_24/231.jpg"
     alt="Slide page 231"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>218.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>231.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/218.jpg</div>
 </div>
 <div class="topic-divider" id="s16">
   <div class="td-line"></div>
@@ -14746,14 +14655,13 @@ document.querySelectorAll('.panel-header').forEach(header => {
 
 <div class="slide-image-wrapper">
   <img
-    src="images/sl17_24v2/219.jpg"
+    src="images/sl17_24/235.jpg"
     alt="Slide page 235"
     onerror="this.closest('.slide-image-wrapper').classList.add('img-missing')"
   />
   <div class="img-fallback-msg">
-    📄 Image <code>219.jpg</code> not found. Place it in <code>images/sl17_24v2/</code> to display.
+    📄 Image <code>235.jpg</code> not found. Place it in <code>images/sl17_24/</code> to display.
   </div>
-<div class="slide-img-caption">images/sl17_24v2/219.jpg</div>
 </div>
 <div class="topic-divider" id="s20">
   <div class="td-line"></div>
@@ -16287,33 +16195,6 @@ function init() {
 }
 
 init();
-
-// ─── AUTO-HIDE NAV ────────────────────────────────────────────────────────────
-(function() {
-  const trigger   = document.getElementById('nav-hover-trigger');
-  const topbar    = document.querySelector('.topbar');
-  const navWrap   = document.querySelector('.nav-strip-wrapper');
-  let hideTimer   = null;
-
-  function showNav() {
-    clearTimeout(hideTimer);
-    topbar.classList.add('nav-visible');
-    navWrap.classList.add('nav-visible');
-  }
-  function scheduleHide() {
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      topbar.classList.remove('nav-visible');
-      navWrap.classList.remove('nav-visible');
-    }, 600); // hide 600ms after mouse leaves
-  }
-
-  trigger.addEventListener('mouseenter', showNav);
-  topbar.addEventListener('mouseenter', showNav);
-  topbar.addEventListener('mouseleave', scheduleHide);
-  navWrap.addEventListener('mouseenter', showNav);
-  navWrap.addEventListener('mouseleave', scheduleHide);
-})();
 </script>
 </body>
 </html>
