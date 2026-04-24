@@ -1,0 +1,2551 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 Final Exam · Topic 7: Firewalls (Stateless, Stateful, Application/Proxy)</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE & TYPOGRAPHY — DARK MODE (default)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+
+    --topic-accent: #ab47bc;  /* Orchid — Topic 7 accent (firewalls = gatekeeping) */
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+
+    --topic-accent: #6a1b9a;  /* Deeper orchid for light mode contrast */
+
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(106,27,154,0.06), rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(106,27,154,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(106,27,154,0.06), rgba(26,95,224,0.06)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .misconception { background: #eef1f7; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  /* ================================================================
+     THEME TOGGLE — FIXED IN THE TOP BAR
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+  [data-theme="light"] .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;  /* make room for the top bar */
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono {
+    font-family: 'Consolas', 'Courier New', 'Menlo', monospace;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 {
+    font-size: 2.1em;
+    margin: 0 0 8px 0;
+    color: #fff;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 1.55em;
+    color: var(--topic-accent);
+    margin: 36px 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.2em;
+    color: #fff;
+    margin: 26px 0 10px 0;
+  }
+  h4 {
+    font-size: 1em;
+    color: var(--text-dim);
+    margin: 18px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 0.82em;
+  }
+
+  p { margin: 8px 0 12px 0; }
+
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     STICKY NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }  /* 44px top bar + 52px nav */
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar {
+      top: 44px;  /* sit below the top bar */
+      width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main {
+    max-width: 1100px;
+    padding: 40px 48px 80px 48px;
+  }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta {
+    color: var(--text-faint);
+    font-size: 0.9em;
+    margin-top: 6px;
+  }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(171,71,188,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER (2a, 2b, 2c, 2d)
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title {
+    font-size: 1.12em;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .signal-moderate { color: var(--yellow); }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & TOPIC CONTAINERS
+     ================================================================ */
+  section.topic {
+    border-left: 3px solid var(--topic-accent);
+    padding-left: 22px;
+    margin-bottom: 40px;
+  }
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+    width: 230px;
+  }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  /* ================================================================
+     ASCII DIAGRAM / FLOW BOX
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f0;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head {
+    color: var(--topic-accent);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .step .step-detail {
+    margin-top: 6px;
+    font-size: 0.93em;
+    color: var(--text-dim);
+  }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 110px; }
+
+  /* Myth / reality blocks */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+  .misconception .trap { color: var(--orange); font-weight: 600; }
+
+  /* ================================================================
+     QUESTION BLOCKS (Section 4)
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options {
+    margin: 4px 0 6px 0;
+    padding-left: 26px;
+  }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content {
+    padding: 8px 0 4px 0;
+    font-size: 0.95em;
+  }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+
+  /* ================================================================
+     CHEAT SHEET (Section 5)
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(171,71,188,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 {
+    color: var(--gold);
+    font-size: 0.82em;
+    margin-top: 14px;
+  }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,152,0,0.05);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-accent);
+    background: rgba(171,71,188,0.05);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,82,82,0.05);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">📔 Topic 7</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 Concept Overview</a>
+  <a href="#section-2">§2 How Each Firewall Works</a>
+  <a href="#section-2a" class="sub">→ 2a · Stateless (Packet)</a>
+  <a href="#section-2b" class="sub">→ 2b · Stateful</a>
+  <a href="#section-2c" class="sub">→ 2c · Application/Proxy</a>
+  <a href="#section-2d" class="sub">→ 2d · Netfilter/iptables &amp; Evasion</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ</a>
+  <a href="#section-4-tf" class="sub">→ True/False</a>
+  <a href="#section-4-sa" class="sub">→ Short Answer</a>
+  <a href="#section-4-fib" class="sub">→ Fill in Blank</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<!-- ── Fixed top bar with theme toggle ── -->
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 448/548 · Final Exam · <strong>Topic 7 · Firewalls</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 7: Firewalls</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">Stateless Packet Filter · Stateful · Application/Proxy · Netfilter/iptables</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 448/548 Network Security &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Lina Pu &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final — April 27, 2026 · 120 min · Closed-book<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lectures_all_merged_compressed.pdf</span> (601 slides)<br>
+    <strong>Signal:</strong> <span class="signal-strong">🟠 STRONG (re-tested from midterm)</span> — Instructor named the three firewall types explicitly in her review
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">Why this topic matters for your exam</strong><br>
+  From <span class="mono">scriptMidtermReview-cs548.txt</span>, the instructor gave a crisp one-paragraph directive that frames every exam question on this topic:<br>
+  <em>"For firewall, we introduced three types of firewall — stateless, stateful, and application or proxy-based firewall. You need to know the features of each firewall, and how it is implemented."</em><br><br>
+  <strong>Translation:</strong> expect a comparison-style MCQ or short-answer asking you to identify which firewall type does what, which OSI layers each inspects, and what each misses. You should also recognize <strong>iptables/Netfilter</strong> rules by sight, since the instructor walked through lab-style examples in class. Lastly, know the defensive pair <strong>ingress vs egress filtering</strong> — she called this out by name when discussing IP-spoofing defense in the final review: <em>"Defense against IP address spoofing is packet filtering — include the ingress, egress filtering. Egress filtering will be more efficient, basically for ISP."</em><br><br>
+  <strong>Firewall also appears in Topic 2's cross-topic table</strong> as one of four NAC enforcement methods (alongside 802.1X, DHCP, VLAN) — so the topic bleeds into integration questions about network access control and the IP-spoofing defense stack.
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 7 is a <strong>4-sub-topic cluster</strong> contained entirely in <em>Lecture 16 part 2</em>
+  (pp. 397-434). Unlike the multi-lecture topics, firewalls are concentrated in 38 slides — which
+  means every slide carries significant weight. Pay special attention to the three-type comparison
+  and the iptables worked example.
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Foundations — What Firewalls Are <span class="pdf-ref">📄 pp. 397-404</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Definition: choke point of control and monitoring</td><td>p. 400</td></tr>
+    <tr><td>Four core requirements (all traffic passes through, only authorized, immune to penetration, perimeter defence)</td><td>pp. 400-401</td></tr>
+    <tr><td>Firewall policy types: user · service · direction control</td><td>p. 402</td></tr>
+    <tr><td>Firewall actions: Accept · Deny · Reject (with ICMP)</td><td>p. 403</td></tr>
+    <tr><td>Ingress vs Egress filtering ⭐ (appears in Topic 2 defenses too)</td><td>p. 403</td></tr>
+    <tr><td>Three-way classification (Packet Filter · Stateful · Application/Proxy)</td><td>p. 404</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2a · Stateless (Packet-Filter) Firewall <span class="pdf-ref">📄 pp. 405, 408, 410-412, 415-418</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Definition &amp; "stateless" property</td><td>p. 405</td></tr>
+    <tr><td>Packet-header fields inspected (IP src/dst, protocol, port, TCP flags, ICMP type)</td><td>p. 408</td></tr>
+    <tr><td>Port-based filtering examples (DNS 53, Telnet 23, HTTP 80)</td><td>p. 408</td></tr>
+    <tr><td>Limitations — cannot match return packets to outgoing flow</td><td>p. 420</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2b · Stateful Firewall <span class="pdf-ref">📄 pp. 406, 414, 419-421</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Definition &amp; connection-state tracking</td><td>pp. 406, 419</td></tr>
+    <tr><td>Connection state table</td><td>pp. 406, 419</td></tr>
+    <tr><td>Match return packets to outgoing flow</td><td>p. 420</td></tr>
+    <tr><td>Stateful-filtering example (SYN, SYN-ACK, ACK tracking)</td><td>p. 421</td></tr>
+    <tr><td>iptables conntrack extension for stateful rules</td><td>p. 414</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2c · Application / Proxy Firewall <span class="pdf-ref">📄 pp. 407, 422-425</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Definition — proxy impersonates recipient</td><td>pp. 407, 422</td></tr>
+    <tr><td>Two-connection model (client ↔ proxy ↔ destination)</td><td>pp. 407, 422</td></tr>
+    <tr><td>Application-layer inspection (full access to protocol)</td><td>p. 423</td></tr>
+    <tr><td>Separate proxy needed per service (WAF, SMTP, DNS)</td><td>p. 423</td></tr>
+    <tr><td>Architecture: daemon spawns proxy on detection</td><td>p. 424</td></tr>
+    <tr><td>Web proxy for evading egress filtering</td><td>p. 425</td></tr>
+    <tr><td>Anonymizing proxy — hides real source IP</td><td>p. 425</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2d · Netfilter / iptables &amp; Evasion <span class="pdf-ref">📄 pp. 409-418, 426-433</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Netfilter hooks framework — how packet-filter firewalls are built in Linux</td><td>p. 409</td></tr>
+    <tr><td>LKM (Loadable Kernel Module) callback registration</td><td>p. 409</td></tr>
+    <tr><td>Simple packet-filter implementation (block port 23)</td><td>pp. 410-412</td></tr>
+    <tr><td>iptables in Linux — Xtables kernel + userspace tool</td><td>p. 413</td></tr>
+    <tr><td>iptables hierarchical rule structure</td><td>p. 413</td></tr>
+    <tr><td>iptables extensions: conntrack (stateful), owner (per-UID)</td><td>p. 414</td></tr>
+    <tr><td>Building a simple iptables firewall (flush, default policy, rules)</td><td>pp. 415-417</td></tr>
+    <tr><td>Default-DROP policy + explicit allow rules</td><td>pp. 416-417</td></tr>
+    <tr><td>Testing a firewall (wget success, telnet blocked)</td><td>p. 418</td></tr>
+    <tr><td>Firewalls aren't perfect — insider threats, encrypted payloads</td><td>p. 426</td></tr>
+    <tr><td>Evasion techniques — SSH tunneling, dynamic port forwarding, VPN</td><td>p. 427</td></tr>
+    <tr><td>SSH tunneling evasion scenarios (home↔apollo↔work, work↔home)</td><td>pp. 428-431</td></tr>
+    <tr><td>Dynamic port forwarding (SOCKS proxy)</td><td>pp. 432-433</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: CONCEPT OVERVIEW
+     ============================================================ -->
+<h2 id="section-1">§1 — Concept Overview</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 397-434 (one concentrated lecture on firewalls as a whole)</div>
+
+<div class="section-block">
+
+<h3>1.1 The Problem This Solves <span class="pdf-ref">📄 pp. 400-401</span></h3>
+<p>
+  Any organization with a network faces a fundamental asymmetry: <em>inside</em> the network,
+  machines have higher trust — they reach sensitive file servers, printers, databases;
+  <em>outside</em> the network, machines have unknown trust — they could be adversaries or benign
+  Internet services. <strong>Firewalls</strong> are the traffic police at the border, deciding which
+  packets cross and which are turned away <span class="pdf-ref">📄 p. 400</span>. They are a
+  <em>choke point of control and monitoring</em> that enforces a security policy on every packet
+  entering or leaving, so that <em>only authorized traffic is allowed</em> and abnormal patterns
+  can trigger alarms <span class="pdf-ref">📄 pp. 400-401</span>.
+</p>
+
+<h3>1.2 The Core Idea — Classification by What Context They Inspect <span class="pdf-ref">📄 pp. 404-407</span></h3>
+<p>
+  The instructor's three-way classification <span class="pdf-ref">📄 p. 404</span> hinges on
+  <em>how much context the firewall retains per packet</em>:
+</p>
+<ul class="plain">
+  <li><strong>Stateless (Packet Filter)</strong> — evaluates each packet <em>in isolation</em>, only examining network- and transport-layer headers (IP src/dst, port, protocol, TCP flags). No memory of prior packets. Fast, simple, but cannot tell whether a packet belongs to a legitimate established connection. <span class="pdf-ref">📄 pp. 405, 408</span></li>
+  <li><strong>Stateful</strong> — maintains a <em>connection state table</em> that tracks every TCP/UDP flow in progress. Allows return packets only if they belong to an established outgoing session. Smarter than stateless but still operates at the transport layer. <span class="pdf-ref">📄 pp. 406, 420-421</span></li>
+  <li><strong>Application / Proxy</strong> — terminates the client's connection at the firewall, opens a <em>new</em> connection to the destination, and inspects payload at the <em>application layer</em> (understands HTTP URLs, SMTP envelopes, FTP commands). Deepest inspection but requires a separate proxy per protocol and adds latency. <span class="pdf-ref">📄 pp. 407, 422-425</span></li>
+</ul>
+<p>
+  Choice among the three is a tradeoff: <em>stateless</em> wins on speed and simplicity;
+  <em>stateful</em> balances speed against correctness (no bogus "reply" packets); <em>proxy</em>
+  wins on inspection depth but costs latency, breaks end-to-end connectivity, and needs a separate
+  implementation per application protocol.
+</p>
+
+<h3>1.3 Analogy — A Building Security Staff With Three Levels of Vetting <span class="pdf-ref">📄 pp. 405-407, 422</span></h3>
+<p>Think of three different security guards at the door of a corporate building:</p>
+<ul class="plain">
+  <li><strong>The checklist guard (stateless)</strong> — holds a simple list of rules: "no visitors after 8 PM; no one with a red badge; no one carrying boxes." Looks at each arrival <em>independently</em>, applies the rules, doesn't remember who just left or who is expected back. Fast but gullible — if a visitor left at lunch and returns after 8 PM, the guard has no way to know they should be re-admitted. <span class="pdf-ref">📄 p. 405</span></li>
+  <li><strong>The logbook guard (stateful)</strong> — keeps a log of every person who entered, their expected return, and what they're doing. When someone returns, the guard checks the logbook to verify they were originally signed in. Catches impersonators (someone trying to enter claiming to be returning) but doesn't know what's in their briefcase. <span class="pdf-ref">📄 pp. 406, 421</span></li>
+  <li><strong>The front-desk concierge (proxy)</strong> — meets every visitor, asks their business, and then <em>personally carries the message</em> to the intended recipient. The visitor never actually enters the building; the concierge does. Can refuse inappropriate requests ("you can't ask the CEO that") but is slow, needs to be fluent in every topic guests might bring up, and imposes itself on every conversation. <span class="pdf-ref">📄 pp. 407, 422</span></li>
+</ul>
+<p>
+  In this analogy, <strong>iptables</strong> is the guard's rulebook — a prioritized sequence of
+  rules arranged in chains (INPUT, OUTPUT, FORWARD), each with a default action if no rule matches
+  <span class="pdf-ref">📄 p. 413</span>. <strong>Netfilter</strong> is the set of "hooks" in the
+  Linux kernel where the guard sits — fixed points in every packet's journey where the rules get
+  checked <span class="pdf-ref">📄 p. 409</span>. An <strong>evading visitor</strong> who sneaks
+  past via a hidden passage corresponds to <strong>SSH tunneling or VPN</strong> — the firewall
+  only sees encrypted tunnel traffic and cannot inspect what's inside <span class="pdf-ref">📄 pp. 427, 429</span>.
+</p>
+
+<h3>1.4 Technical Definition <span class="pdf-ref">📄 pp. 400-401, 404</span></h3>
+<p>
+  A <strong>firewall</strong> is a system — hardware, software, or a combination — placed at the
+  boundary between two networks of different trust levels, enforcing a security policy by permitting
+  or denying traffic flow based on source/destination addresses, transport-layer ports and flags,
+  connection state, and/or application-layer content
+  <span class="pdf-ref">📄 p. 400</span>. It must itself be <em>immune to penetration</em> (hardened
+  OS, minimal attack surface) and must be positioned so that all traffic between the protected
+  zones is forced to pass through it — otherwise packets can bypass the policy
+  <span class="pdf-ref">📄 p. 401</span>. Firewalls are conventionally classified by
+  <em>operational mode</em>: packet-filter / stateless (layer-3/4, per-packet), stateful
+  (layer-3/4 plus connection-state table), and application-layer / proxy (layer-7 with full payload
+  inspection via a protocol-aware intermediary) <span class="pdf-ref">📄 p. 404</span>.
+</p>
+
+<h3>1.5 Key Terms &amp; Definitions</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th style="width:20%">Term</th>
+      <th style="width:38%">Plain-English Definition</th>
+      <th style="width:30%">Why It Matters for the Exam</th>
+      <th style="width:12%">📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Firewall</strong></td>
+      <td>A choke point at the boundary between trust zones that inspects traffic and permits or denies it according to a policy.</td>
+      <td>Four requirements from slide 401 — all traffic passes through, only authorized allowed, itself immune to penetration, perimeter defence.</td>
+      <td><span class="pdf-ref">📄 pp. 400-401</span></td>
+    </tr>
+    <tr>
+      <td><strong>Perimeter defence</strong></td>
+      <td>The security model where the strongest controls sit at the network edge and internal traffic is assumed more trusted.</td>
+      <td>Note: not sufficient against insider threats (slide 426).</td>
+      <td><span class="pdf-ref">📄 pp. 400, 426</span></td>
+    </tr>
+    <tr>
+      <td><strong>Packet filter / Stateless firewall</strong> <span class="exam-star">⭐</span></td>
+      <td>Evaluates each packet independently using only header fields (IP, port, protocol, flags). No memory between packets.</td>
+      <td>One of the three types the instructor named by name. Know what fields it <em>can</em> and <em>cannot</em> see.</td>
+      <td><span class="pdf-ref">📄 pp. 405, 408</span></td>
+    </tr>
+    <tr>
+      <td><strong>Stateful firewall</strong> <span class="exam-star">⭐</span></td>
+      <td>Maintains a connection state table so return packets are only allowed if they match an established outgoing session.</td>
+      <td>Second of the three types. Its defining feature is the state table — know what's tracked.</td>
+      <td><span class="pdf-ref">📄 pp. 406, 419-421</span></td>
+    </tr>
+    <tr>
+      <td><strong>Application / Proxy firewall</strong> <span class="exam-star">⭐</span></td>
+      <td>Terminates client connection at the firewall, opens a new one to the destination, and inspects traffic at the application layer (HTTP URLs, SMTP headers, etc.).</td>
+      <td>Third of the three types. Know the two-connection model and "separate proxy per service" requirement.</td>
+      <td><span class="pdf-ref">📄 pp. 407, 422-424</span></td>
+    </tr>
+    <tr>
+      <td><strong>Connection state table</strong></td>
+      <td>In-memory structure tracking every active TCP/UDP flow's five-tuple and state (NEW, ESTABLISHED, RELATED, CLOSED).</td>
+      <td>The distinguishing data structure of stateful firewalls.</td>
+      <td><span class="pdf-ref">📄 pp. 406, 419</span></td>
+    </tr>
+    <tr>
+      <td><strong>Ingress filtering</strong> <span class="exam-star">⭐</span></td>
+      <td>Inspects <em>incoming</em> traffic at a network edge to drop packets that don't belong (e.g., packets with internal source IPs arriving from outside).</td>
+      <td>Paired with egress on slide 403 and named in the Topic 2 IP-spoofing defense list.</td>
+      <td><span class="pdf-ref">📄 p. 403</span></td>
+    </tr>
+    <tr>
+      <td><strong>Egress filtering</strong> <span class="exam-star">⭐</span></td>
+      <td>Inspects <em>outgoing</em> traffic to block users inside from reaching disallowed destinations (e.g., social media at school) or to prevent spoofed-source IPs leaving.</td>
+      <td>Instructor called out egress filtering as "more efficient" for IP-spoofing defense at ISPs.</td>
+      <td><span class="pdf-ref">📄 p. 403</span></td>
+    </tr>
+    <tr>
+      <td><strong>Firewall action: Accept</strong></td>
+      <td>Packet is allowed through.</td>
+      <td>One of three actions in iptables / every firewall syntax.</td>
+      <td><span class="pdf-ref">📄 p. 403</span></td>
+    </tr>
+    <tr>
+      <td><strong>Firewall action: Deny / Drop</strong></td>
+      <td>Packet is silently discarded — sender gets no reply.</td>
+      <td>Default DROP is the "default-deny" baseline for secure configs.</td>
+      <td><span class="pdf-ref">📄 pp. 403, 417</span></td>
+    </tr>
+    <tr>
+      <td><strong>Firewall action: Reject</strong></td>
+      <td>Packet is dropped AND an ICMP message informs the sender.</td>
+      <td>Differs from Deny in being observable — tradeoff on information leakage vs usability.</td>
+      <td><span class="pdf-ref">📄 p. 403</span></td>
+    </tr>
+    <tr>
+      <td><strong>Firewall policy types</strong></td>
+      <td>User control (per role) · Service control (per protocol/port) · Direction control (inbound vs outbound).</td>
+      <td>Three dimensions of policy specification — slide 402.</td>
+      <td><span class="pdf-ref">📄 p. 402</span></td>
+    </tr>
+    <tr>
+      <td><strong>Netfilter</strong> <span class="exam-star">⭐</span></td>
+      <td>The Linux kernel framework providing "hooks" at specific points in the packet path where filtering modules can register callbacks.</td>
+      <td>The underlying mechanism behind iptables. Know hooks are registered via LKMs.</td>
+      <td><span class="pdf-ref">📄 p. 409</span></td>
+    </tr>
+    <tr>
+      <td><strong>iptables</strong> <span class="exam-star">⭐</span></td>
+      <td>Linux user-space tool that configures Netfilter rules in a hierarchical structure of chains (INPUT, OUTPUT, FORWARD) and tables (filter, nat, mangle).</td>
+      <td>Instructor walked through a worked iptables example; be able to read a rule.</td>
+      <td><span class="pdf-ref">📄 pp. 413-417</span></td>
+    </tr>
+    <tr>
+      <td><strong>Xtables</strong></td>
+      <td>The kernel-side portion of iptables. "iptables" informally refers to both Xtables (kernel) and the iptables userspace program together.</td>
+      <td>Minor detail but appears on slide 413.</td>
+      <td><span class="pdf-ref">📄 p. 413</span></td>
+    </tr>
+    <tr>
+      <td><strong>conntrack</strong></td>
+      <td>iptables extension module that tracks connection state — lets you write stateful rules like "allow RELATED,ESTABLISHED".</td>
+      <td>The mechanism that turns stateless iptables into a stateful firewall.</td>
+      <td><span class="pdf-ref">📄 p. 414</span></td>
+    </tr>
+    <tr>
+      <td><strong>owner extension</strong></td>
+      <td>iptables module that matches packets by their originating UID/GID (e.g., "block telnet from user alice"). Only works on OUTPUT chain.</td>
+      <td>Useful example of extending packet filters beyond header fields.</td>
+      <td><span class="pdf-ref">📄 p. 414</span></td>
+    </tr>
+    <tr>
+      <td><strong>INPUT / OUTPUT / FORWARD chains</strong></td>
+      <td>iptables built-in chains — INPUT filters packets destined for the local host; OUTPUT filters packets originating locally; FORWARD filters transit packets for a machine acting as a router.</td>
+      <td>Basic vocabulary for reading iptables rules.</td>
+      <td><span class="pdf-ref">📄 pp. 415-417</span></td>
+    </tr>
+    <tr>
+      <td><strong>Default-DROP policy</strong></td>
+      <td>Baseline iptables configuration where every chain's default is DROP; only explicit ACCEPT rules permit traffic.</td>
+      <td>The "whitelist" approach. Instructor's worked example uses this.</td>
+      <td><span class="pdf-ref">📄 pp. 415, 417</span></td>
+    </tr>
+    <tr>
+      <td><strong>WAF (Web Application Firewall)</strong></td>
+      <td>Application-layer firewall specialized for HTTP/HTTPS — understands URLs, headers, cookies; can block SQL injection, XSS patterns.</td>
+      <td>Named example on slide 423 of proxy firewalls.</td>
+      <td><span class="pdf-ref">📄 p. 423</span></td>
+    </tr>
+    <tr>
+      <td><strong>Web proxy</strong></td>
+      <td>An application-level intermediary that terminates HTTP on behalf of the client. Can be used to evade egress filtering (firewall sees proxy as destination, not the real target).</td>
+      <td>Bridges Topics 7 firewall material with firewall evasion.</td>
+      <td><span class="pdf-ref">📄 p. 425</span></td>
+    </tr>
+    <tr>
+      <td><strong>Anonymizing proxy</strong></td>
+      <td>A web proxy used to hide the origin IP from the destination server.</td>
+      <td>Side concept — complements web-proxy evasion.</td>
+      <td><span class="pdf-ref">📄 p. 425</span></td>
+    </tr>
+    <tr>
+      <td><strong>SSH tunneling</strong></td>
+      <td>Creating an encrypted SSH tunnel through which arbitrary TCP traffic is forwarded, letting it bypass firewall rules that would block the original protocol.</td>
+      <td>Canonical firewall-evasion technique; two lecture scenarios show both directions.</td>
+      <td><span class="pdf-ref">📄 pp. 427-431</span></td>
+    </tr>
+    <tr>
+      <td><strong>Dynamic port forwarding / SOCKS</strong></td>
+      <td>SSH feature that creates a SOCKS proxy on localhost; applications configured to use that proxy tunnel all their traffic through SSH.</td>
+      <td>More general than static tunnels — single SSH session handles many destinations.</td>
+      <td><span class="pdf-ref">📄 pp. 432-433</span></td>
+    </tr>
+    <tr>
+      <td><strong>VPN as firewall evasion</strong></td>
+      <td>VPN tunnels encrypt everything inside; firewall sees only opaque VPN traffic and cannot filter by content or destination.</td>
+      <td>Bridges Topic 7 with Topic 6 (VPN). Slide 427 names this explicitly.</td>
+      <td><span class="pdf-ref">📄 p. 427</span></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 2: HOW EACH FIREWALL TYPE WORKS
+     ============================================================ -->
+<h2 id="section-2">§2 — How Each Firewall Works (Step-by-Step)</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 404-433 (three types + iptables worked example + evasion)</div>
+
+<div class="section-block">
+
+<p>
+  Each of the four sub-topics below follows the same structure:
+  <strong>(1) mechanism</strong> — what the firewall inspects and decides,
+  <strong>(2) rule syntax / configuration</strong> — how it is actually written or built,
+  <strong>(3) limitations / what it misses</strong>. This matches the instructor's test pattern
+  of "features + how implemented" verbatim.
+</p>
+
+<!-- ================= 2a STATELESS (PACKET FILTER) ================= -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span><span class="title">Stateless (Packet-Filter) Firewall</span>
+  <span class="pages">📄 pp. 405, 408, 410-412 · Lecture 16 part 2</span>
+</div>
+
+<h3>① Mechanism — Per-Packet Header Inspection <span class="pdf-ref">📄 pp. 405, 408</span></h3>
+<p>
+  A stateless firewall looks at each packet <em>in complete isolation</em> — it does not remember
+  anything about past packets. For each packet, it extracts a small set of header fields and
+  consults a rule list. If a rule matches, the associated action (ACCEPT, DROP, REJECT) is applied;
+  otherwise a default policy applies.
+</p>
+
+<pre class="diagram">
+ Stateless Packet-Filter Firewall           <span class="pdf-ref">📄 pp. 405, 408</span>
+
+   Packet arrives at interface
+             │
+             ▼
+   ┌────────────────────────────────────┐
+   │ Extract header fields:             │
+   │   - IP source address              │
+   │   - IP destination address         │
+   │   - Protocol (TCP/UDP/ICMP/…)      │
+   │   - TCP/UDP source port            │
+   │   - TCP/UDP destination port       │
+   │   - TCP flags (SYN/ACK/FIN/RST/…)  │
+   │   - ICMP message type              │
+   └────────────────┬───────────────────┘
+                    │
+                    ▼
+   ┌────────────────────────────────────┐
+   │ Match against rule list (sequential)│
+   │   rule 1:  match fields → ACCEPT   │
+   │   rule 2:  match fields → DROP     │
+   │   rule 3:  match fields → REJECT   │
+   │     ...                            │
+   │   default policy (if no match)     │
+   └────────────────┬───────────────────┘
+                    │
+         ┌──────────┼──────────┐
+         ▼          ▼          ▼
+      ACCEPT      DROP      REJECT
+     (forward)  (silent)  (ICMP reply)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 403, 405, 408</span></div>
+
+<h3>② Concrete Example — Port-Based Rules <span class="pdf-ref">📄 p. 408</span></h3>
+<p>The instructor gave two canonical examples on slide 408:</p>
+<div class="step">
+  <div class="step-head">Rule: "No incoming port 53 packets except from known trusted servers" <span class="pdf-ref">📄 p. 408</span></div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> DNS uses UDP/TCP port 53. Restricting incoming port-53
+    traffic to a whitelist of trusted resolvers prevents attackers from injecting DNS replies (see
+    Topic 2, DNS attacks).<br>
+    <strong class="lbl">iptables form:</strong><br>
+    <code>iptables -A INPUT -p udp --dport 53 ! -s &lt;trusted-IP&gt; -j DROP</code>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Rule: "Block all incoming TCP packets with port 23 (Telnet)" <span class="pdf-ref">📄 p. 408</span></div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Telnet is cleartext — credentials travel in plaintext and
+    are trivially sniffable. Firewalls routinely block port 23 unconditionally, forcing users toward
+    SSH (port 22) instead.<br>
+    <strong class="lbl">iptables form:</strong><br>
+    <code>iptables -A INPUT -p tcp --dport 23 -j DROP</code>
+  </div>
+</div>
+
+<h3>③ What Stateless Firewalls Cannot Do <span class="pdf-ref">📄 p. 420</span></h3>
+<p>
+  The central limitation: they cannot correlate a "reply" packet to an outgoing flow. If an internal
+  host opens a TCP connection to an external web server, the server's reply comes back with source
+  port 80 — but the stateless firewall has no record of the outbound request. To let replies
+  through, administrators must open broad inbound port ranges, enlarging the attack surface.
+  <span class="pdf-ref">📄 p. 420</span> The instructor: <em>"Traditional packet filters do not
+  examine transport-layer context — i.e., matching return packets with outgoing flow."</em>
+</p>
+
+<!-- ================= 2b STATEFUL ================= -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span><span class="title">Stateful Firewall</span>
+  <span class="pages">📄 pp. 406, 419-421 · Lecture 16 part 2</span>
+</div>
+
+<h3>① Mechanism — Connection State Tracking <span class="pdf-ref">📄 pp. 406, 419</span></h3>
+<p>
+  A stateful firewall maintains a <strong>connection state table</strong>: an in-memory record of
+  every TCP/UDP flow that is currently "open" according to observed traffic. For each incoming
+  packet, the firewall checks whether it belongs to an already-established connection; if yes, the
+  packet is allowed through automatically without re-matching the rule list. New connection attempts
+  still traverse the rule list. <span class="pdf-ref">📄 pp. 406, 419</span>
+</p>
+
+<pre class="diagram">
+ Stateful Firewall with Connection State Table    <span class="pdf-ref">📄 pp. 406, 419-421</span>
+
+   Outbound SYN (internal → external)
+   ──────────────────────────────────►
+                    │
+                    ▼
+   ┌─────────────────────────────────────────────┐
+   │  CONNECTION STATE TABLE                     │
+   │  ──────────────────────────────────────────│
+   │  SRC IP     DST IP     SP    DP    STATE    │
+   │  10.0.0.5   8.8.8.8    51234 443   NEW      │  ← added on outbound SYN
+   │  10.0.0.5   8.8.8.8    51234 443   ESTAB.   │  ← after ACK completes 3-way hs
+   │  ...                                        │
+   └─────────────────────────────────────────────┘
+
+   Inbound SYN-ACK (external → internal)
+   ◄──────────────────────────────────
+                    │
+                    ▼
+   Lookup: does a row match (dst=10.0.0.5, src=8.8.8.8, sp=443, dp=51234)?
+         ┌────────── YES ──────────┐       ┌─── NO ───┐
+         ▼                         ▼       ▼          ▼
+    ALLOW (matches ESTAB or NEW)          Apply rule list
+                                          as a fresh packet
+                                          (usually DROP for
+                                           unsolicited SYN-ACK)
+
+   State transitions tracked by TCP flags:
+      SYN              → NEW
+      SYN-ACK (reply)  → SYN_RECV or part of NEW
+      ACK              → ESTABLISHED
+      FIN / RST        → CLOSING / CLOSED
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 406, 419-421</span></div>
+
+<h3>② Concrete Example — The "Allow Return Traffic" Rule <span class="pdf-ref">📄 pp. 414, 421</span></h3>
+<p>
+  On Linux, iptables becomes stateful via the <strong>conntrack</strong> extension:
+</p>
+<pre class="diagram">
+ iptables stateful rules  <span class="pdf-ref">📄 p. 414</span>
+
+   # 1. Allow NEW outgoing connections
+   iptables -A OUTPUT -m conntrack --ctstate NEW -j ACCEPT
+
+   # 2. Allow incoming packets only if they belong to
+   #    an ESTABLISHED or RELATED connection
+   iptables -A INPUT -m conntrack \
+            --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+   # 3. Everything else: DROP
+   iptables -P INPUT DROP
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 414</span></div>
+
+<h3>③ What Stateful Firewalls Add — and What They Still Miss</h3>
+<p>
+  <strong>Adds:</strong> Can detect <em>bogus "out-of-context" packets</em> — e.g., an inbound
+  SYN-ACK with no matching outbound SYN must be a spoofed or stale packet and is dropped
+  <span class="pdf-ref">📄 p. 420</span>. Can safely permit replies without opening broad inbound
+  port ranges. Dramatically improves security-per-rule.<br><br>
+  <strong>Still misses:</strong> Cannot see inside packet <em>payloads</em>. If an HTTP request
+  contains a SQL injection attack, a stateful firewall happily forwards it because at layer-4
+  everything looks like a legitimate TCP segment. That's what application/proxy firewalls fix.
+</p>
+
+<!-- ================= 2c APPLICATION / PROXY ================= -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span><span class="title">Application / Proxy Firewall</span>
+  <span class="pages">📄 pp. 407, 422-425 · Lecture 16 part 2</span>
+</div>
+
+<h3>① Mechanism — The Two-Connection Model <span class="pdf-ref">📄 pp. 407, 422</span></h3>
+<p>
+  Unlike packet-filter firewalls (which forward the same packet through), an
+  application/proxy firewall <strong>terminates the client's connection at the proxy</strong>,
+  inspects the full application-layer message, and <em>opens a new connection</em> from the proxy
+  to the destination server. The two connections are cryptographically and logically independent —
+  the server never talks directly to the client. <span class="pdf-ref">📄 pp. 407, 422</span>
+</p>
+
+<pre class="diagram">
+ Application / Proxy Firewall (two-connection model)   <span class="pdf-ref">📄 pp. 407, 422-424</span>
+
+   Client                      Proxy Firewall                  Destination
+   ──────                   ─────────────────                    Server
+                                                                 ──────────
+
+   ═══════════════════════►  (HTTP request)
+   Connection #1 — client to proxy
+                            ┌──────────────┐
+                            │ Inspect at   │
+                            │ application  │
+                            │ layer:       │
+                            │  - URL path  │
+                            │  - Method    │
+                            │  - Headers   │
+                            │  - Body      │
+                            └──────┬───────┘
+                                   │ if allowed:
+                                   │ open NEW connection
+                                   ▼
+                            ═════════════════════►  (proxied HTTP request)
+                            Connection #2 — proxy to destination
+
+                            ◄═════════════════════  (HTTP response)
+                            ┌──────────────┐
+                            │ Inspect      │
+                            │ response     │
+                            │ (optional)   │
+                            └──────┬───────┘
+                                   │
+   ◄═══════════════════════        │
+   (proxied HTTP response)
+
+   Key property: client NEVER talks directly to destination.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 407, 422</span></div>
+
+<h3>② Architecture — Daemon-Per-Protocol Model <span class="pdf-ref">📄 pp. 423-424</span></h3>
+<p>
+  Because each application protocol has its own syntax and semantics, proxy firewalls need a
+  <em>separate proxy implementation per protocol</em>:
+</p>
+<pre class="diagram">
+ Application-Firewall Architecture         <span class="pdf-ref">📄 p. 424</span>
+
+    Network Connection arrives
+              │
+              ▼
+    ┌──────────────────────────┐
+    │   Dispatcher / Daemon    │  ← detects protocol by port or handshake
+    └────────┬─────────────────┘
+             │
+    ┌────────┴─────────────────┐
+    ▼        ▼        ▼        ▼
+  Web       SMTP     FTP      DNS
+  daemon    daemon   daemon   daemon
+    │        │        │        │
+    ▼        ▼        ▼        ▼
+  Web       SMTP     FTP      DNS
+  proxy     proxy    proxy    proxy       ← spawned on detection
+
+   Named examples: WAF (Web Application Firewall for HTTP/HTTPS),
+   SMTP proxy (E-Mail Firewall), DNS proxy.
+   Custom / nonstandard services are generally not supported.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 423-424</span></div>
+
+<h3>③ Power &amp; Tradeoffs <span class="pdf-ref">📄 pp. 423, 425, 426</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Power</th><th>Tradeoff</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Full access to application-layer content — can block specific URL paths, reject malformed requests, enforce protocol correctness</td>
+      <td>Requires a dedicated proxy per protocol; novel/custom services aren't supported</td>
+    </tr>
+    <tr>
+      <td>Can sanitize attacks at the payload level (SQL injection, XSS patterns in a WAF)</td>
+      <td>Adds latency — every connection traverses two TCP handshakes</td>
+    </tr>
+    <tr>
+      <td>Hides internal server from direct contact — the proxy is the only reachable endpoint</td>
+      <td>Breaks true end-to-end encryption: proxy must decrypt TLS to inspect payload (TLS termination)</td>
+    </tr>
+    <tr>
+      <td>Logs entire application-layer interactions for forensics</td>
+      <td>Needs more compute and memory per connection; harder to scale</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  The slide 425 note about <strong>web proxies doubling as egress-evasion tools</strong> is a key
+  exam hook: <em>"If a firewall conducts packet filtering based on destination address, we can
+  evade this firewall by browsing the Internet using web proxy. The destination address will be
+  modified to the proxy server which defeats the packet filtering rules."</em> This bridges
+  application-layer firewall concepts with the evasion material in §2d.
+  <span class="pdf-ref">📄 p. 425</span>
+</p>
+
+<!-- ================= 2d NETFILTER / IPTABLES + EVASION ================= -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span><span class="title">Netfilter / iptables &amp; Firewall Evasion</span>
+  <span class="pages">📄 pp. 409-418, 426-433 · Lecture 16 part 2</span>
+</div>
+
+<h3>The Netfilter Framework <span class="pdf-ref">📄 p. 409</span></h3>
+<p>
+  Netfilter is the Linux kernel's <em>packet-processing framework</em>. Every packet traversing the
+  network stack passes through a series of named "hook points" (e.g., <code>NF_IP_PRE_ROUTING</code>,
+  <code>NF_IP_LOCAL_IN</code>). Kernel modules — typically loaded as LKMs — register callback
+  functions at one or more of these hooks. When a packet reaches a hook, each registered callback
+  inspects or modifies it, and returns a verdict (<code>NF_ACCEPT</code>, <code>NF_DROP</code>,
+  <code>NF_STOLEN</code>, etc.) <span class="pdf-ref">📄 p. 409</span>.
+</p>
+
+<div class="step">
+  <div class="step-head">Slide 410-412: Building a simple firewall with Netfilter <span class="pdf-ref">📄 pp. 410-412</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What the LKM does:</strong><br>
+    <ol>
+      <li>Registers a hook at <code>NF_IP_LOCAL_IN</code> (incoming traffic destined for this host)</li>
+      <li>Callback receives the full packet (<code>struct sk_buff</code>) with all headers accessible</li>
+      <li>Hardcoded logic: if the destination TCP port is 23 (Telnet), return <code>NF_DROP</code>; else return <code>NF_ACCEPT</code></li>
+    </ol>
+    This is fundamentally the same pattern iptables uses under the hood, but hardcoded in C rather than
+    configured via rule syntax. <span class="pdf-ref">📄 pp. 410-412</span>
+  </div>
+</div>
+
+<h3>iptables — User-Space Configuration of Netfilter <span class="pdf-ref">📄 pp. 413-417</span></h3>
+<p>
+  <strong>iptables</strong> is the Linux userspace tool that writes rules into the Netfilter-based
+  <em>Xtables</em> kernel module. Rules are organized hierarchically:
+</p>
+<ul class="plain">
+  <li><strong>Tables</strong> (filter, nat, mangle, raw) — categorize rules by purpose; <em>filter</em> is the firewall table</li>
+  <li><strong>Chains</strong> (INPUT, OUTPUT, FORWARD, PREROUTING, POSTROUTING) — correspond to Netfilter hook points</li>
+  <li><strong>Rules</strong> — match conditions + action target; evaluated top-to-bottom per chain</li>
+  <li><strong>Default policy</strong> — action applied if no rule matches; typically DROP for secure configs</li>
+</ul>
+
+<h3>Worked Example — Building a Default-Deny Firewall <span class="pdf-ref">📄 pp. 415-418</span></h3>
+
+<pre class="diagram">
+ iptables worked example from lecture       <span class="pdf-ref">📄 pp. 415-418</span>
+
+ # Step 1: Flush all existing rules (clean slate)              <span class="pdf-ref">📄 p. 415</span>
+ iptables -F
+ iptables -X
+
+ # Step 2: Temporarily set default policy to ACCEPT
+ #         (so we don't lock ourselves out while editing)
+ iptables -P INPUT  ACCEPT
+ iptables -P OUTPUT ACCEPT
+
+ # Step 3: Allow TCP traffic to SSH (22) and HTTP (80) on INPUT   <span class="pdf-ref">📄 p. 416</span>
+ iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+ # Step 4: Allow all outgoing TCP traffic
+ iptables -A OUTPUT -p tcp -j ACCEPT
+
+ # Step 5: Allow DNS queries (outgoing) and replies (incoming)    <span class="pdf-ref">📄 p. 417</span>
+ iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+ iptables -A INPUT  -p udp --sport 53 -j ACCEPT
+
+ # Step 6: Switch default policy to DROP
+ #         (now only explicitly-allowed traffic passes)
+ iptables -P INPUT DROP
+ iptables -P OUTPUT DROP
+
+ # Test:  wget http://example.com   → succeeds (port 80 allowed)   <span class="pdf-ref">📄 p. 418</span>
+ #        telnet example.com 23     → fails (port 23 not allowed)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 415-418</span></div>
+
+<h3>iptables Extensions — conntrack &amp; owner <span class="pdf-ref">📄 p. 414</span></h3>
+
+<div class="step">
+  <div class="step-head">conntrack: Makes iptables stateful <span class="pdf-ref">📄 p. 414</span></div>
+  <div class="step-detail">
+    <code>iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</code><br>
+    This single rule lets iptables behave statefully — return traffic for already-initiated outbound
+    connections is allowed without opening inbound port ranges. The connection state table is
+    maintained in the kernel by <code>nf_conntrack</code>.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">owner: Per-user filtering (OUTPUT chain only) <span class="pdf-ref">📄 p. 414</span></div>
+  <div class="step-detail">
+    Can match packets by the UID/GID of the process that generated them. Example: prevent user
+    <code>alice</code> from sending Telnet packets:<br>
+    <code>iptables -A OUTPUT -p tcp --dport 23 -m owner --uid-owner alice -j DROP</code><br>
+    <strong class="lbl">Limitation:</strong> only works on OUTPUT (outgoing) — incoming packets
+    have no notion of UID at the network layer. <span class="pdf-ref">📄 p. 414</span>
+  </div>
+</div>
+
+<h3>Firewall Evasion — The Key Techniques <span class="pdf-ref">📄 pp. 426-433</span></h3>
+
+<p>
+  <strong>Firewalls aren't perfect.</strong> <span class="pdf-ref">📄 p. 426</span> They are
+  useless against insiders ("evildoer exists on inside; malicious code executes internally") and
+  cannot inspect encrypted traffic in general. The main evasion techniques exploit encryption as a
+  shield:
+</p>
+
+<div class="step">
+  <div class="step-head">① SSH Tunneling <span class="pdf-ref">📄 pp. 427-431</span></div>
+  <div class="step-detail">
+    <strong class="lbl">Scenario A (slide 428):</strong> From home, you want to Telnet to
+    <code>work</code>. Company firewall blocks incoming Telnet but allows SSH to <code>apollo</code>.
+    Solution: <code>ssh -L 8000:work:23 user@apollo</code>. This opens an SSH tunnel from home's
+    port 8000 through apollo to work's port 23. Then <code>telnet localhost 8000</code> works —
+    the firewall only sees SSH traffic between home and apollo.<br>
+    <strong class="lbl">Scenario B (slide 431):</strong> From work, you want to reach Facebook
+    (blocked by company firewall). Solution: <code>ssh -L 8000:facebook.com:443 user@home</code>.
+    Tunnel forwards your HTTPS requests through home to Facebook. The firewall only sees SSH traffic
+    between work and home.<br>
+    <strong class="lbl">Why it works:</strong> SSH traffic is encrypted; the firewall cannot see the
+    inner payload. It knows SSH is happening; it cannot know Telnet/Facebook is inside.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Dynamic Port Forwarding / SOCKS <span class="pdf-ref">📄 pp. 432-433</span></div>
+  <div class="step-detail">
+    <code>ssh -D 9000 user@home</code> opens a dynamic port-forwarding tunnel (a SOCKS proxy on
+    localhost:9000). Any application configured to use this SOCKS proxy (browser, curl, etc.) has
+    all its traffic forwarded through home. Unlike static SSH tunneling, this works for
+    <em>arbitrary</em> destinations without pre-configuring a forward per destination.
+    <span class="pdf-ref">📄 pp. 432-433</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">③ VPN as Firewall Evasion <span class="pdf-ref">📄 p. 427</span></div>
+  <div class="step-detail">
+    A VPN tunnel between a computer inside the firewall and another outside encrypts everything
+    passing through. The firewall cannot inspect the encrypted traffic and therefore cannot filter
+    by destination or content. The exam connection here: this is the same tunneling principle IPsec
+    provides in Topic 6. <span class="pdf-ref">📄 p. 427</span>
+  </div>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Cross-topic integration hook</strong>
+  Firewall evasion via encryption is the mirror image of why firewalls add deep packet inspection:
+  defenders want to look inside; attackers use encryption to prevent it. This tension appears in
+  the TLS-inspection debate for WAFs, in enterprise MITM proxies that deliberately break TLS, and
+  in the fact that every one of Topic 6's VPNs (IPsec, TLS-based VPN) is also an egress-filter
+  bypass mechanism. <span class="pdf-ref">📄 pp. 425, 427, 434</span>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 397-434 (signal sources: scriptMidtermReview-cs548.txt, scriptFinalExamReview-cs548.txt)</div>
+
+<div class="section-block">
+
+<h3>3.1 — What Exams Typically Test On This Topic</h3>
+<p>
+  The instructor's review-script quotes for firewalls are brief but laser-focused. Expect these
+  patterns:
+</p>
+<ol>
+  <li>
+    <strong>"Name the three types of firewall and describe the features of each."</strong> Direct
+    instructor quote: <em>"We introduced three types of firewall — stateless, stateful, and
+    application or proxy-based firewall. You need to know the features of each firewall, and how
+    it is implemented."</em> Almost certain short-answer question.
+    <span class="pdf-ref">📄 p. 404</span>
+  </li>
+  <li>
+    <strong>"Given a packet's fields, predict whether a stateless firewall lets it through."</strong>
+    You'll be given a rule list and a packet tuple (src, dst, port, flags) and asked to trace the
+    match. Read slides 408 + 415-418 until the pattern feels automatic.
+    <span class="pdf-ref">📄 pp. 408, 415-418</span>
+  </li>
+  <li>
+    <strong>"Distinguish ingress from egress filtering."</strong> The instructor emphasized egress
+    filtering at ISPs as the <em>more effective</em> IP-spoofing defense. Key exam phrasing:
+    ingress filters incoming traffic; egress filters outgoing. <span class="pdf-ref">📄 p. 403</span>
+  </li>
+  <li>
+    <strong>"Why does stateful outperform stateless?"</strong> The answer is connection-state
+    tracking — stateful can reject packets that don't match an established session, whereas
+    stateless must rely on static rules that force broad port openings for return traffic.
+    <span class="pdf-ref">📄 pp. 420-421</span>
+  </li>
+  <li>
+    <strong>"When must you use an application/proxy firewall?"</strong> When you need to filter on
+    content within the payload — URL paths, SQL injection patterns, email headers. Stateless and
+    stateful cannot see past layer 4. <span class="pdf-ref">📄 p. 423</span>
+  </li>
+  <li>
+    <strong>"Read this iptables command."</strong> The instructor walked through the worked example
+    explicitly. Expect an MCQ where the stem is an iptables rule and the options are "which traffic
+    does this permit/block?" <span class="pdf-ref">📄 pp. 415-418</span>
+  </li>
+  <li>
+    <strong>"How does SSH tunneling evade a firewall?"</strong> Because SSH traffic is encrypted,
+    the firewall cannot see the inner payload and cannot filter on what's tunneled inside. Expect
+    this as a short-answer or as an MCQ distractor.
+    <span class="pdf-ref">📄 pp. 427-431</span>
+  </li>
+  <li>
+    <strong>"What are the limits of firewalls?"</strong> They fail against insider threats, cannot
+    inspect encrypted payloads, and cannot block all malware transmission. Slide 426 lists these
+    explicitly. <span class="pdf-ref">📄 p. 426</span>
+  </li>
+  <li>
+    <strong>Cross-topic integration question.</strong> Firewalls appear in Topic 2's IP-spoofing
+    defense list and in Topic 1's NAC enforcement list. A likely challenge question: "Which
+    enforcement methods form the network access control stack?" — answer includes firewalls
+    alongside 802.1X, DHCP management, and VLAN segmentation.
+    <span class="pdf-ref">📄 pp. 403, 452, 512, 563</span>
+  </li>
+</ol>
+
+<h3>3.2 — Common Misconceptions &amp; Traps</h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "Stateless means the firewall does not maintain <em>any</em>
+    state — not even its rule list."</p>
+  <p><span class="reality">✅ REALITY:</span> "Stateless" refers specifically to <em>connection
+    state</em> — the firewall does not track which TCP/UDP flows are currently active. It still
+    maintains its configured rule list (a static configuration, not per-connection state). The
+    opposite of "stateless" is "stateful," which adds a per-connection tracking table.
+    <span class="pdf-ref">📄 pp. 405-406</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> MCQ option "stateless firewalls have no rules" — FALSE.
+    They have rules but no per-flow memory.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "A stateful firewall inspects the application payload and
+    can block SQL injection attacks."</p>
+  <p><span class="reality">✅ REALITY:</span> Stateful firewalls operate at layers 3–4 only. They
+    add connection-state tracking to packet filtering but do <em>not</em> look inside the TCP
+    payload at application data. To block SQL injection or inspect HTTP URLs, you need an
+    <strong>application/proxy firewall</strong> (specifically a WAF for HTTP).
+    <span class="pdf-ref">📄 pp. 406, 423</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "Which firewall type can block malicious URL patterns?"
+    → Only application/proxy, not stateful.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "Application/proxy firewalls work transparently — the client
+    connects directly to the destination."</p>
+  <p><span class="reality">✅ REALITY:</span> The defining feature of proxy firewalls is that the
+    client's connection <em>terminates at the proxy</em>, and the proxy opens a <em>new</em>
+    connection to the destination. There are always two separate TCP connections, and the proxy
+    impersonates the destination to the client. <span class="pdf-ref">📄 pp. 407, 422</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "A proxy firewall forwards the original packets unchanged
+    to the destination." — FALSE. It creates a fresh connection.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "Ingress and egress filtering are the same thing viewed from
+    different sides."</p>
+  <p><span class="reality">✅ REALITY:</span> They're structurally different defenses at different
+    points. <strong>Ingress filtering</strong> inspects incoming traffic at your network edge to
+    drop packets that don't belong (e.g., arriving with internal source IPs). <strong>Egress
+    filtering</strong> inspects <em>outgoing</em> traffic to prevent spoofed packets from leaving
+    your network or to block users from reaching disallowed destinations. The instructor
+    specifically emphasized egress filtering at ISPs as more effective against IP spoofing because
+    it stops spoofed packets at the source. <span class="pdf-ref">📄 pp. 403, 512</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "Which is more effective against IP spoofing: ingress
+    or egress?" → Egress (per instructor's direct quote).</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "A properly configured firewall prevents all attacks on
+    the network."</p>
+  <p><span class="reality">✅ REALITY:</span> Slide 426 explicitly names the three fundamental
+    blind spots: <em>"(1) Useless against attacks from the inside — evildoer exists on inside;
+    malicious code is executed on an internal machine. (2) Organizations with greater insider threat
+    — banks and military. (3) Cannot protect against transfer of all virus-infected programs or
+    files — because of huge range of O/S and file types."</em> Additionally, encrypted payloads
+    (SSH tunnels, VPN, HTTPS) are opaque to layer-3/4 firewalls.
+    <span class="pdf-ref">📄 pp. 426-427</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> T/F: "A firewall alone is sufficient network security."
+    — FALSE. Defense-in-depth is required.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "The iptables default policy should always be ACCEPT for
+    usability."</p>
+  <p><span class="reality">✅ REALITY:</span> Secure configurations use <strong>default DROP</strong>
+    with explicit ACCEPT rules for the specific traffic you need to allow. This is a "whitelist"
+    (default-deny) model — by far the safer stance. The instructor's own worked example switches
+    from ACCEPT (during editing) to DROP (for production) specifically to illustrate this.
+    <span class="pdf-ref">📄 pp. 415, 417</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "Which default policy reflects a least-privilege stance?"
+    → DROP, not ACCEPT.</p>
+</div>
+
+<h3>3.3 — Compare &amp; Contrast: The Three Firewall Types</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Stateless (Packet Filter)</th>
+      <th>Stateful</th>
+      <th>Application / Proxy</th>
+      <th>📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OSI layer inspected</td>
+      <td>Layer 3 (IP) + Layer 4 (TCP/UDP headers)</td>
+      <td>Layer 3 + Layer 4 + connection state</td>
+      <td>Up to Layer 7 (application payload)</td>
+      <td><span class="pdf-ref">📄 pp. 405, 406, 407</span></td>
+    </tr>
+    <tr>
+      <td>Remembers past packets?</td>
+      <td>No</td>
+      <td>Yes (connection state table)</td>
+      <td>Yes (full application session)</td>
+      <td><span class="pdf-ref">📄 pp. 405, 406, 419</span></td>
+    </tr>
+    <tr>
+      <td>Matches return packets to outgoing flow?</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Yes (proxy handles both directions)</td>
+      <td><span class="pdf-ref">📄 p. 420</span></td>
+    </tr>
+    <tr>
+      <td>Inspects payload content?</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td><span class="pdf-ref">📄 pp. 405, 407, 423</span></td>
+    </tr>
+    <tr>
+      <td>Breaks end-to-end connectivity?</td>
+      <td>No (forwards packets)</td>
+      <td>No (forwards packets)</td>
+      <td>Yes (two-connection model)</td>
+      <td><span class="pdf-ref">📄 pp. 407, 422</span></td>
+    </tr>
+    <tr>
+      <td>Needs one implementation per protocol?</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes (WAF, SMTP proxy, DNS proxy, …)</td>
+      <td><span class="pdf-ref">📄 p. 423</span></td>
+    </tr>
+    <tr>
+      <td>Performance</td>
+      <td>Fastest</td>
+      <td>Fast</td>
+      <td>Slowest (app-layer parsing)</td>
+      <td><span class="pdf-ref">📄 pp. 405, 406, 423</span></td>
+    </tr>
+    <tr>
+      <td>Typical deployment</td>
+      <td>High-throughput edge routers</td>
+      <td>Enterprise perimeter</td>
+      <td>Web application firewalls, email gateways</td>
+      <td><span class="pdf-ref">📄 pp. 405, 406, 423</span></td>
+    </tr>
+    <tr>
+      <td>Linux implementation</td>
+      <td>iptables (base)</td>
+      <td>iptables + conntrack</td>
+      <td>Separate proxy software (Squid, ModSecurity, …)</td>
+      <td><span class="pdf-ref">📄 pp. 413, 414</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.4 — Compare &amp; Contrast: Ingress vs Egress Filtering <span class="pdf-ref">📄 p. 403</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Dimension</th><th>Ingress Filtering</th><th>Egress Filtering</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Direction</td>
+      <td>Inspects incoming traffic</td>
+      <td>Inspects outgoing traffic</td>
+    </tr>
+    <tr>
+      <td>Typical purpose</td>
+      <td>Protect internal network from outside attacks (drop packets claiming internal source)</td>
+      <td>Prevent internal users from reaching disallowed destinations; stop outbound IP spoofing</td>
+    </tr>
+    <tr>
+      <td>Example (school)</td>
+      <td>Block inbound Telnet, scan-source IPs</td>
+      <td>Block outbound traffic to social-media sites</td>
+    </tr>
+    <tr>
+      <td>Example (ISP, IP-spoofing defense)</td>
+      <td>Less effective — packet already on the Internet</td>
+      <td>⭐ Most effective — stops spoofed-source packets from leaving the customer network</td>
+    </tr>
+    <tr>
+      <td>Layer of deployment</td>
+      <td>At recipient's network edge</td>
+      <td>At sender's ISP or network edge</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.5 — Memory Aids</h3>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Three Firewall Types" = SSA (Stateless · Stateful · Application)</strong>
+  Layer by layer, each adds one capability: <strong>S</strong>tateless = headers only,
+  <strong>S</strong>tateful = headers + connection state, <strong>A</strong>pplication = everything
+  including payload. "<em>See Stateless Arrivals</em>" — stateless sees only what arrives, stateful
+  sees the conversation, application sees the content.
+  <span class="pdf-ref">📄 p. 404</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Three Firewall Actions" = ADR (Accept · Deny · Reject)</strong>
+  <strong>A</strong>ccept passes through. <strong>D</strong>eny drops silently. <strong>R</strong>eject
+  drops and sends an ICMP reply. Think of the difference between "ignoring a knock" (Deny) and
+  "shouting back 'go away'" (Reject). <span class="pdf-ref">📄 p. 403</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Ingress vs Egress" = "In vs Exit"</strong>
+  <strong>In</strong>gress starts with "in" = incoming. E<strong>x</strong>it/<strong>E</strong>gress
+  = outgoing. Ingress protects <em>you</em> from incoming threats; egress stops <em>your users</em>
+  from reaching things (or stops <em>your spoofed packets</em> from leaving, per the IP-spoofing
+  defense). <span class="pdf-ref">📄 p. 403</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "iptables build steps" = FLARS (Flush · Log · Allow · Restrict · Set-default)</strong>
+  <strong>F</strong>lush existing rules → temporarily <strong>L</strong>eave default at ACCEPT →
+  add <strong>A</strong>llow rules for required ports → add <strong>R</strong>estrictive rules →
+  <strong>S</strong>et default to DROP. Mirrors the worked example on slides 415-417.
+  <span class="pdf-ref">📄 pp. 415-417</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Four Firewall Requirements" = TAIP</strong>
+  <strong>T</strong>raffic must pass through firewall · only <strong>A</strong>uthorized traffic
+  allowed · firewall itself <strong>I</strong>mmune to penetration · <strong>P</strong>erimeter
+  defence. <span class="pdf-ref">📄 pp. 400-401</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Three Firewall Blind Spots"</strong>
+  <strong>Insiders · Encrypted tunnels · Malware in files.</strong> An attacker who is already
+  inside, who uses SSH/VPN tunneling, or who smuggles malware inside a legitimate file transfer
+  bypasses the firewall entirely. This is why firewalls are necessary but not sufficient.
+  <span class="pdf-ref">📄 pp. 426-427</span>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 4: FOLLOW-UP QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Follow-up Questions</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 397-434 (questions span all four sub-topics)</div>
+
+<div class="section-block">
+
+<p style="color: var(--text-dim); font-size: 0.94em;">
+  13 questions · 3 difficulty levels · 4 formats · every stem &amp; answer tagged to the source slide.
+  Click <strong style="color: var(--green);">▶ Show Answer</strong> to reveal each explanation.
+</p>
+
+<!-- =========================== PART A: MCQ =========================== -->
+<h3 id="section-4-mcq">Part A — Multiple Choice (4 questions: 1 BEG, 1 INT, 2 ADV)</h3>
+
+<!-- Q1 BEG MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 p. 404</span>
+  </div>
+  <p class="question-stem"><strong>Q1.</strong> The instructor classified firewalls into three types
+    based on mode of operation. Which of the following is the correct set?</p>
+  <ol class="mcq-options" type="A">
+    <li>Hardware, software, and cloud firewalls.</li>
+    <li>Packet-filter (stateless), stateful, and application/proxy firewalls.</li>
+    <li>Perimeter, internal, and honeypot firewalls.</li>
+    <li>Inbound, outbound, and bidirectional firewalls.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) Stateless · Stateful · Application/Proxy.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Slide 404 lists these three types verbatim:
+          <em>"Depending on the mode of operation, there are three types of firewalls: Packet Filter
+          Firewall, Stateful Firewall, Application/Proxy Firewall."</em>
+          <span class="pdf-ref">📄 p. 404</span></li>
+        <li><strong>Why A is wrong:</strong> Hardware vs software is a deployment distinction,
+          not an operational-mode classification.</li>
+        <li><strong>Why C is wrong:</strong> These terms describe placement or role, not
+          classification by operation.</li>
+        <li><strong>Why D is wrong:</strong> Inbound/outbound are filter directions (see ingress vs
+          egress on slide 403), not firewall types.</li>
+        <li><strong>Exam Tip:</strong> If you see "three types of firewall" on the exam, the answer
+          is always Stateless · Stateful · Application/Proxy. The instructor explicitly said:
+          "You need to know the features of each firewall, and how it is implemented."</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 INT MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 406, 414, 420</span>
+  </div>
+  <p class="question-stem"><strong>Q2.</strong> What specific capability does a stateful firewall
+    have that a purely stateless (packet-filter) firewall lacks?</p>
+  <ol class="mcq-options" type="A">
+    <li>The ability to inspect the application-layer payload for malicious content like SQL injection.</li>
+    <li>The ability to maintain a connection state table and match return packets to previously-established outgoing connections.</li>
+    <li>The ability to decrypt TLS traffic and enforce certificate policies.</li>
+    <li>The ability to implement anonymizing proxies to hide internal IP addresses.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) Connection state tracking.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Slide 406 states verbatim: <em>"Tracks the state of
+          traffic by monitoring all the connection interactions until it is closed. Connection
+          state table is maintained to understand the context of packets."</em> And slide 420:
+          <em>"Traditional packet filters do not examine transport-layer context — i.e., matching
+          return packets with outgoing flow. Stateful packet filters address this need."</em>
+          <span class="pdf-ref">📄 pp. 406, 420</span></li>
+        <li><strong>Why A is wrong:</strong> Payload inspection is the defining feature of
+          <em>application/proxy</em> firewalls, not stateful. Stateful firewalls operate at layers 3-4 only. <span class="pdf-ref">📄 pp. 407, 423</span></li>
+        <li><strong>Why C is wrong:</strong> Decryption and certificate policy require an
+          application-layer proxy (specifically a TLS-terminating WAF). Stateful firewalls cannot
+          see inside encrypted traffic.</li>
+        <li><strong>Why D is wrong:</strong> Anonymizing proxies are an application-layer construct
+          described on slide 425, not a stateful-firewall feature.</li>
+        <li><strong>Exam Tip:</strong> The distinguishing question "what does stateful add?" always
+          has the same answer: <em>connection state tracking</em>.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 ADV MCQ (multi-answer) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ · multi-answer</span>
+    <span class="pdf-ref">📄 pp. 426-427</span>
+  </div>
+  <p class="question-stem"><strong>Q3.</strong> Select <em>all</em> limitations of firewalls that
+    slide 426/427 explicitly identified.</p>
+  <ol class="mcq-options" type="A">
+    <li>Firewalls are useless against attacks originating from inside the network.</li>
+    <li>Firewalls cannot protect against the transfer of all virus-infected programs or files.</li>
+    <li>Organizations with greater insider threats (banks, military) must not rely solely on firewalls.</li>
+    <li>Firewalls cannot inspect the contents of encrypted traffic tunneled via SSH or VPN.</li>
+    <li>Firewalls introduce cryptographic key-management complexity that can itself be a vulnerability.</li>
+    <li>Firewalls are incompatible with stateful protocols like TCP and must be disabled for normal operation.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answers:</strong> A, B, C, D.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why A is correct:</strong> Slide 426 verbatim: <em>"Useless against attacks from
+          the inside — evildoer exists on inside; malicious code is executed on an internal
+          machine."</em> <span class="pdf-ref">📄 p. 426</span></li>
+        <li><strong>Why B is correct:</strong> Slide 426 verbatim: <em>"Cannot protect against
+          transfer of all virus-infected programs or files — because of huge range of O/S &amp; file
+          types."</em> <span class="pdf-ref">📄 p. 426</span></li>
+        <li><strong>Why C is correct:</strong> Slide 426 verbatim: <em>"Organizations with greater
+          insider threat — banks and military."</em> <span class="pdf-ref">📄 p. 426</span></li>
+        <li><strong>Why D is correct:</strong> Slide 427 says VPN tunnels are encrypted so firewalls
+          cannot see inside them. The same property makes SSH tunneling effective.
+          <span class="pdf-ref">📄 pp. 427, 429</span></li>
+        <li><strong>Why E is wrong:</strong> Firewalls generally don't perform cryptographic
+          operations — that's a feature of VPN gateways or TLS-terminating proxies. Not a named
+          limitation on slide 426.</li>
+        <li><strong>Why F is wrong:</strong> Firewalls are designed for TCP networks; they are
+          fully compatible and in fact benefit from TCP's stateful nature (the basis of stateful
+          firewalls).</li>
+        <li><strong>Exam Tip:</strong> Memorize the three explicit limits on slide 426 — they
+          appear on both exams and quizzes.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 ADV MCQ (cross-topic challenge) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 403, 452, 512, 563</span>
+  </div>
+  <p class="question-stem"><strong>Q4.</strong> In the final-exam review, the instructor enumerated
+    <em>four</em> network-access-control enforcement methods that together form the defense stack
+    for campus-style networks. Firewalls are one of them. Which of the following is the correct
+    complete set?</p>
+  <ol class="mcq-options" type="A">
+    <li>IEEE 802.1X · Firewall · DHCP management · VLAN (network segmentation)</li>
+    <li>IPsec · TLS · SSH · HTTPS</li>
+    <li>AES-GCM · HMAC · RSA · ECDSA</li>
+    <li>Kerberos · OAuth · OpenID Connect · SAML</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> A) 802.1X · Firewall · DHCP · VLAN.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why A is correct:</strong> The Topic 1 (Wireless) slides 452/563 list these four
+          methods together as the NAC enforcement stack. The instructor's verbatim framing:
+          <em>"To extend this — what network-access methods have we introduced in the whole class?
+          Besides 802.1X, we also introduced the firewall, the DHCP management, and network
+          segmentation."</em> <span class="pdf-ref">📄 pp. 452, 563</span></li>
+        <li><strong>Why B is wrong:</strong> These are <em>secure communication</em> protocols —
+          they protect data in transit, not control who gets onto the network.</li>
+        <li><strong>Why C is wrong:</strong> These are cryptographic primitives (Topic 3), not NAC
+          methods.</li>
+        <li><strong>Why D is wrong:</strong> These are user-authentication protocols (Topic 5),
+          not network access control. The difference: user authentication proves
+          <em>who</em> you are; network access control decides whether your packets can enter the
+          network at all.</li>
+        <li><strong>Exam Tip:</strong> This is a near-certain cross-topic challenge question
+          linking Topic 7 (Firewalls) and Topic 1 (Wireless NAC). Know the four enforcement methods
+          as one coherent set.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART B: TRUE/FALSE =========================== -->
+<h3 id="section-4-tf">Part B — True/False (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q5 BEG TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 p. 403</span>
+  </div>
+  <p class="question-stem"><strong>Q5. Statement:</strong> A firewall action of "Reject" is
+    functionally identical to "Deny" — both silently discard the packet without any notification
+    to the sender.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>Slide 403 distinguishes them clearly: <strong>Deny</strong> is <em>not permitted to enter
+        the other side of firewall</em> (silent drop), while <strong>Reject</strong> is
+        <em>similar to "Deny", but tells the source about this decision through ICMP packet</em>.
+        The observable difference matters for debugging (Reject tells the sender the packet was
+        dropped) but also for information disclosure (Reject confirms the firewall is active, which
+        a stealthy deployment might prefer to hide with silent Drop).
+        <span class="pdf-ref">📄 p. 403</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 INT TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 407, 422</span>
+  </div>
+  <p class="question-stem"><strong>Q6. Statement:</strong> In an application/proxy firewall
+    deployment, a single TCP connection carries traffic from the client, through the proxy, to the
+    destination server — the proxy simply forwards the packets without terminating the connection.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>The defining feature of a proxy firewall is precisely the opposite. Slide 407 states:
+        <em>"The client's connection terminates at the proxy and a separate connection is initiated
+        from the proxy to the destination host."</em> There are <strong>two</strong> independent
+        TCP connections: connection #1 between client and proxy, connection #2 between proxy and
+        destination. The proxy acts as an <em>intermediary impersonating the intended recipient</em>
+        to the client. This is what enables full application-layer inspection (the proxy fully
+        reassembles and parses the message) and also what makes proxy firewalls incompatible with
+        end-to-end TLS without deliberate TLS termination. <span class="pdf-ref">📄 pp. 407, 422</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 ADV TF (subtle) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · subtle</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 427-431</span>
+  </div>
+  <p class="question-stem"><strong>Q7. Statement:</strong> SSH tunneling evades a firewall because
+    the SSH protocol is not listed in any standard port-filtering rules, making SSH traffic
+    invisible to firewalls.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>SSH uses a well-known port (22) and is <em>fully visible</em> to the firewall — the
+        firewall can see that SSH traffic is occurring and could block it outright if configured
+        to do so. The evasion works because SSH traffic is <strong>encrypted</strong>: the firewall
+        sees SSH packets but cannot inspect their <em>contents</em>. If an administrator has
+        permitted SSH (as in the lecture's scenario A: "the company's firewall does allow SSH
+        traffic to reach its internal machine 'apollo'" <span class="pdf-ref">📄 p. 428</span>),
+        then arbitrary TCP traffic tunneled inside SSH becomes opaque. The fix is to disallow SSH
+        or to inspect traffic at the endpoints — not to try to "see" SSH at layers 3-4.
+        <span class="pdf-ref">📄 pp. 427-431</span></p>
+      <p><em>Subtle trap:</em> encryption is the mechanism, not "invisibility to port filtering."
+        The firewall knows SSH is happening; it just can't see what's inside.</p>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART C: SHORT ANSWER =========================== -->
+<h3 id="section-4-sa">Part C — Short Answer (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q8 BEG SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 404-407</span>
+  </div>
+  <p class="question-stem"><strong>Q8.</strong> Name the three types of firewall classified by mode
+    of operation and, in one sentence each, state the distinguishing feature of each type.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ul class="plain">
+        <li><strong>Stateless / Packet-Filter Firewall</strong> — evaluates each packet independently
+          using only network- and transport-layer header fields (IP addresses, ports, protocols,
+          TCP flags); maintains no memory between packets. <span class="pdf-ref">📄 pp. 405, 408</span></li>
+        <li><strong>Stateful Firewall</strong> — maintains a connection state table that tracks
+          active TCP/UDP flows, so return packets are permitted only if they belong to an
+          established outgoing session. <span class="pdf-ref">📄 pp. 406, 419-420</span></li>
+        <li><strong>Application / Proxy Firewall</strong> — terminates the client's connection,
+          opens a new connection to the destination, and inspects traffic at the application layer
+          (full payload); requires a separate proxy implementation for each protocol (WAF, SMTP proxy,
+          etc.). <span class="pdf-ref">📄 pp. 407, 422-423</span></li>
+      </ul>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ All three types named with correct spelling <span class="pdf-ref">📄 p. 404</span></li>
+        <li>☐ Stateless identified by "no memory between packets" / "headers only" <span class="pdf-ref">📄 p. 405</span></li>
+        <li>☐ Stateful identified by "connection state table" / "return packet matching" <span class="pdf-ref">📄 p. 406</span></li>
+        <li>☐ Application/Proxy identified by "terminates connection + two-connection model" / "application-layer inspection" <span class="pdf-ref">📄 p. 407</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 INT SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 415-418</span>
+  </div>
+  <p class="question-stem"><strong>Q9.</strong> You need to configure an iptables firewall on a
+    server that should only accept incoming SSH (port 22) and HTTP (port 80), plus let normal
+    outbound TCP traffic flow. Outline the five key steps you would execute, in order, and explain
+    why the default policy change is the <em>final</em> step.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ol>
+        <li><strong>Flush existing rules</strong> with <code>iptables -F</code> to start from a
+          clean slate. <span class="pdf-ref">📄 p. 415</span></li>
+        <li><strong>Temporarily set default policy to ACCEPT</strong> on INPUT and OUTPUT chains
+          so that editing doesn't accidentally lock you out of the server.
+          <span class="pdf-ref">📄 p. 415</span></li>
+        <li><strong>Add explicit ACCEPT rules</strong> for the required traffic:
+          <code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code> and
+          <code>iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code> for SSH and HTTP;
+          <code>iptables -A OUTPUT -p tcp -j ACCEPT</code> for outgoing.
+          <span class="pdf-ref">📄 p. 416</span></li>
+        <li><strong>Add any additional allow rules</strong> for protocols like DNS that the server
+          needs to function (outgoing UDP/53 and incoming replies).
+          <span class="pdf-ref">📄 p. 417</span></li>
+        <li><strong>Finally, switch default policy to DROP</strong> with
+          <code>iptables -P INPUT DROP</code> and <code>iptables -P OUTPUT DROP</code> — only now
+          does the firewall become "default-deny" and only explicitly-allowed traffic flows.
+          <span class="pdf-ref">📄 p. 417</span></li>
+      </ol>
+      <p>The default policy change is last because if it were first, the administrator would be
+        immediately disconnected (every SSH packet including the existing session's replies would
+        be dropped before any ACCEPT rule was in place). The ACCEPT-then-DROP sequence is the safe
+        configuration pattern. <span class="pdf-ref">📄 pp. 415-417</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Steps in correct order: flush → set ACCEPT default → add rules → set DROP default <span class="pdf-ref">📄 pp. 415-417</span></li>
+        <li>☐ Explicitly permits ports 22 (SSH) and 80 (HTTP) on INPUT <span class="pdf-ref">📄 p. 416</span></li>
+        <li>☐ Permits outbound TCP <span class="pdf-ref">📄 p. 416</span></li>
+        <li>☐ Explains that DROP-last prevents self-lockout <span class="pdf-ref">📄 p. 417</span></li>
+        <li>☐ Bonus: identifies this as a "default-deny" / whitelist approach</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 ADV SA (cross-topic integration) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 403, 425, 427 &nbsp;+&nbsp; pp. 370-371 (Topic 6) · p. 512 (Topic 2)</span>
+  </div>
+  <p class="question-stem"><strong>Q10.</strong> Describe the fundamental tension between
+    <strong>firewall effectiveness</strong> and <strong>encryption</strong>. Cover: (1) why
+    firewalls are limited against encrypted traffic, (2) how users exploit this to evade firewalls
+    (name at least two techniques), and (3) how this tension relates to the IP-spoofing defense
+    stack the instructor discussed in the final review (ingress/egress filtering, IPsec).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <p><strong>(1) Why firewalls are limited against encrypted traffic.</strong> Stateless and
+        stateful firewalls inspect only headers (IP, ports, TCP flags), and even application/proxy
+        firewalls need to parse application-layer content to make decisions. When traffic is
+        end-to-end encrypted (TLS, SSH, IPsec tunnels, VPN), the firewall sees only an opaque
+        encrypted stream. It can observe <em>that</em> SSH or HTTPS is happening and to whom, but
+        not <em>what</em> is being transmitted. Application/proxy firewalls can address this only
+        by terminating TLS at the proxy — breaking end-to-end encryption, which conflicts with
+        confidentiality goals. <span class="pdf-ref">📄 pp. 407, 423, 427</span></p>
+      <p><strong>(2) Firewall evasion via encryption.</strong> The lecture covered three main
+        techniques: (a) <em>SSH tunneling</em> — forward arbitrary TCP traffic through an allowed
+        SSH connection (e.g., telnet localhost:8000 → ssh tunnel → telnet real-destination:23),
+        where the firewall sees only the SSH exterior. <span class="pdf-ref">📄 pp. 428-431</span>
+        (b) <em>Dynamic port forwarding</em> — create a SOCKS proxy over SSH so any application can
+        tunnel through. <span class="pdf-ref">📄 pp. 432-433</span>
+        (c) <em>VPN</em> — establish an encrypted tunnel (IPsec or TLS-based) between an internal
+        and external machine; firewalls cannot filter the opaque VPN payload.
+        <span class="pdf-ref">📄 p. 427</span> A fourth related technique is using a
+        <em>web proxy</em> as the apparent destination, which defeats destination-based egress
+        filtering. <span class="pdf-ref">📄 p. 425</span></p>
+      <p><strong>(3) Relation to IP-spoofing defense.</strong> Packet filtering at network edges —
+        specifically <em>ingress</em> and especially <em>egress</em> filtering — is one of the
+        instructor's named defenses against IP spoofing <span class="pdf-ref">📄 pp. 403, 512</span>.
+        These filters work by inspecting source/destination IP addresses, which are visible in the
+        IP header even when the payload is encrypted. This is why layer-3 filtering remains
+        effective against spoofing despite encryption: the attacker cannot encrypt the outer IP
+        header or the packet would not route. IPsec in <em>transport</em> mode similarly leaves the
+        outer IP addresses visible, allowing ingress/egress filtering to remain effective;
+        <em>tunnel</em> mode encrypts the inner IP, providing limited traffic-flow confidentiality
+        at the cost of making spoofing detection harder at inner endpoints.
+        <span class="pdf-ref">📄 pp. 370-371, 403, 512</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Identifies header-only inspection as firewall limit <span class="pdf-ref">📄 pp. 405, 406</span></li>
+        <li>☐ Names SSH tunneling and VPN as evasion techniques <span class="pdf-ref">📄 pp. 427, 429</span></li>
+        <li>☐ Notes ingress/egress filtering works on IP headers, which remain visible <span class="pdf-ref">📄 pp. 403, 512</span></li>
+        <li>☐ Addresses the tension between end-to-end encryption and deep inspection <span class="pdf-ref">📄 pp. 423, 427</span></li>
+        <li>☐ Bonus: mentions web proxy as destination-filter evasion <span class="pdf-ref">📄 p. 425</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART D: FILL IN THE BLANK =========================== -->
+<h3 id="section-4-fib">Part D — Fill in the Blank (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q11 BEG FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 p. 403</span>
+  </div>
+  <p class="question-stem"><strong>Q11.</strong> Packet filtering at network boundaries comes in
+    two directional flavors: ____________ filtering inspects incoming traffic to safeguard an
+    internal network from outside attacks, while ____________ filtering inspects outgoing traffic
+    (for example, to prevent spoofed-source packets from leaving an ISP's network).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>Ingress</strong>; (2) <strong>Egress</strong>.</p>
+      <p><strong>📝 Why:</strong> Slide 403 defines both terms verbatim: <em>"Ingress filtering:
+        inspects the incoming traffic to safeguard an internal network and prevent attacks from
+        outside. Egress filtering: inspects the outgoing network traffic."</em> In the final-exam
+        review the instructor additionally flagged egress filtering at ISPs as the most effective
+        defense against IP spoofing, because it stops spoofed packets at the source network.
+        <span class="pdf-ref">📄 pp. 403, 512</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 INT FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 409, 413-414</span>
+  </div>
+  <p class="question-stem"><strong>Q12.</strong> In Linux, ____________ is the kernel-level
+    framework providing packet-processing "hooks" where filtering modules can register callback
+    functions; ____________ is the user-space command-line tool that configures these rules; and
+    the ____________ extension module is what turns iptables from a purely stateless filter into
+    one that can track connection state.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>Netfilter</strong>; (2) <strong>iptables</strong>;
+        (3) <strong>conntrack</strong>.</p>
+      <p><strong>📝 Why:</strong> Slide 409 introduces Netfilter as the hook framework in the Linux
+        packet-processing path; slide 413 describes iptables as the userspace tool that configures
+        rules in the kernel-side Xtables; and slide 414 explicitly names conntrack as the extension
+        <em>"to specify rules based on connections to build stateful firewalls."</em>
+        <span class="pdf-ref">📄 pp. 409, 413, 414</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 ADV FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 432-433</span>
+  </div>
+  <p class="question-stem"><strong>Q13.</strong> SSH supports ____________ port forwarding (the
+    <code>-D</code> option), which creates a ____________ proxy on the local machine. Any client
+    application that supports this proxy type can then route arbitrary TCP traffic through the SSH
+    tunnel to bypass firewall filtering.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>Dynamic</strong>; (2) <strong>SOCKS</strong>.</p>
+      <p><strong>📝 Why:</strong> Slide 432: <em>"This command establishes an ssh tunnel between
+        localhost (port 9000) and the machine 'home'. Here we do not specify the destination for
+        the port forwarding... We configure the browser in such a way that all the requests should
+        go through localhost:9000, treating it as a proxy. Dynamic port forwarding that we set up
+        using ssh is a SOCKS proxy."</em> Slide 433 adds: <em>"The client software must have a
+        native SOCKS support to use SOCKS proxies."</em> Unlike static SSH tunneling (which
+        hard-codes a single destination per tunnel), dynamic port forwarding lets one SSH session
+        service connections to <em>many</em> destinations — perfect for bypassing egress filtering.
+        <span class="pdf-ref">📄 pp. 432-433</span></p>
+    </div>
+  </details>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Summary · Exam Cheat Sheet</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 397-434 (condensed view of the entire firewall lecture)</div>
+
+<div class="cheat-sheet">
+
+  <h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+  <p class="oneliner">
+    Firewalls are <em>choke points</em> at the boundary between trust zones, classified by
+    how much context they retain per packet — <strong>stateless</strong> (headers only),
+    <strong>stateful</strong> (connection-state table), and <strong>application/proxy</strong>
+    (two-connection model with full payload inspection) — configured in Linux via
+    <strong>Netfilter + iptables</strong> and evaded via <strong>encrypted tunnels</strong>
+    (SSH, VPN).
+    <span class="pdf-ref">📄 pp. 400, 404, 409, 427</span>
+  </p>
+
+  <h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+  <ol>
+    <li>
+      <strong>The three firewall types and their distinguishing features.</strong> Stateless =
+      headers only, independent per packet; Stateful = connection-state table for return-packet
+      matching; Application/Proxy = two-connection model with application-layer inspection. The
+      instructor said explicitly: <em>"You need to know the features of each firewall, and how it
+      is implemented."</em> <span class="pdf-ref">📄 pp. 404-407</span>
+    </li>
+    <li>
+      <strong>iptables worked example and rule anatomy.</strong> Be able to read a rule like
+      <code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code> and predict its effect. Know the
+      INPUT / OUTPUT / FORWARD chains and the default-DROP-with-explicit-ACCEPT pattern.
+      <span class="pdf-ref">📄 pp. 413-418</span>
+    </li>
+    <li>
+      <strong>Ingress vs Egress filtering and their role in IP-spoofing defense.</strong> Ingress
+      inspects incoming, egress inspects outgoing; egress at ISPs is the most effective IP-spoofing
+      defense because it stops spoofed packets at the source. This connects Topic 7 to Topic 2.
+      <span class="pdf-ref">📄 pp. 403, 512</span>
+    </li>
+  </ol>
+
+  <h4>THE ONE-PAGE FIREWALL TYPE MATRIX:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Layer(s)</th>
+        <th>State?</th>
+        <th>Payload?</th>
+        <th>Sample rule / behavior</th>
+        <th>📄 Page</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Stateless (Packet Filter)</td>
+        <td>L3 + L4 headers</td>
+        <td>No</td>
+        <td>No</td>
+        <td>"Block TCP port 23"</td>
+        <td><span class="pdf-ref">📄 pp. 405, 408</span></td>
+      </tr>
+      <tr>
+        <td>Stateful</td>
+        <td>L3 + L4 + state table</td>
+        <td>Yes</td>
+        <td>No</td>
+        <td>"Allow ESTABLISHED/RELATED; DROP NEW"</td>
+        <td><span class="pdf-ref">📄 pp. 406, 419-421</span></td>
+      </tr>
+      <tr>
+        <td>Application / Proxy</td>
+        <td>Up to L7</td>
+        <td>Yes (full session)</td>
+        <td>Yes</td>
+        <td>WAF blocks SQL-injection URL patterns</td>
+        <td><span class="pdf-ref">📄 pp. 407, 422-423</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>THE IPTABLES WORKED-EXAMPLE SKELETON:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr><th>Step</th><th>Command</th><th>Purpose</th><th>📄 Page</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><code>iptables -F</code></td>
+        <td>Flush existing rules — start fresh</td>
+        <td><span class="pdf-ref">📄 p. 415</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><code>iptables -P INPUT ACCEPT</code></td>
+        <td>Temporary — prevent self-lockout during editing</td>
+        <td><span class="pdf-ref">📄 p. 415</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><code>iptables -A INPUT -p tcp --dport 22 -j ACCEPT</code></td>
+        <td>Allow SSH</td>
+        <td><span class="pdf-ref">📄 p. 416</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><code>iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code></td>
+        <td>Allow HTTP</td>
+        <td><span class="pdf-ref">📄 p. 416</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><code>iptables -A OUTPUT -p tcp -j ACCEPT</code></td>
+        <td>Allow outbound TCP</td>
+        <td><span class="pdf-ref">📄 p. 416</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><code>iptables -A OUTPUT -p udp --dport 53 -j ACCEPT</code></td>
+        <td>Allow DNS queries</td>
+        <td><span class="pdf-ref">📄 p. 417</span></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><code>iptables -A INPUT -p udp --sport 53 -j ACCEPT</code></td>
+        <td>Allow DNS replies</td>
+        <td><span class="pdf-ref">📄 p. 417</span></td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><code>iptables -P INPUT DROP</code></td>
+        <td>Default-deny finalized — firewall is now active</td>
+        <td><span class="pdf-ref">📄 p. 417</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE:</h4>
+  <p>
+    Confusing <strong>stateful</strong> with <strong>application/proxy</strong>. Both retain
+    per-connection memory, but stateful firewalls operate at layers 3-4 only (tracking TCP/UDP
+    flows via their 5-tuple + state) and <em>do not inspect payload</em>. Application/proxy
+    firewalls go further — they terminate the connection, parse the application-layer protocol,
+    and can block content-based attacks (SQL injection, malicious URLs). If the question involves
+    "inspecting payload" or "blocking URL patterns," the answer is always Application/Proxy, not
+    Stateful. <span class="pdf-ref">📄 pp. 406-407, 423</span>
+  </p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+  <p class="remember">
+    "Three firewall types = SSA (Stateless · Stateful · Application). Stateless sees arrivals;
+    stateful sees conversations; application sees content. Netfilter hooks + iptables rules.
+    Egress beats ingress for IP-spoofing defense. Encryption defeats deep inspection."
+    <span class="pdf-ref">📄 pp. 404, 409, 413, 403, 427</span>
+  </p>
+
+  <h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS TOPIC IN THE PDF:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr><th>If you want to review...</th><th>Go to Lecture PDF page(s)...</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Firewall definition (choke point, 4 requirements)</td><td><span class="pdf-ref">📄 pp. 400-401</span></td></tr>
+      <tr><td>Firewall policy types (user · service · direction)</td><td><span class="pdf-ref">📄 p. 402</span></td></tr>
+      <tr><td>Firewall actions (Accept · Deny · Reject) + Ingress/Egress</td><td><span class="pdf-ref">📄 p. 403</span></td></tr>
+      <tr><td>Three-type classification overview</td><td><span class="pdf-ref">📄 p. 404</span></td></tr>
+      <tr><td>Stateless / packet-filter firewall definition</td><td><span class="pdf-ref">📄 p. 405</span></td></tr>
+      <tr><td>Stateful firewall definition</td><td><span class="pdf-ref">📄 pp. 406, 419-420</span></td></tr>
+      <tr><td>Application / proxy firewall definition</td><td><span class="pdf-ref">📄 pp. 407, 422</span></td></tr>
+      <tr><td>Packet-filter fields (IP/port/protocol/flags) + port examples</td><td><span class="pdf-ref">📄 p. 408</span></td></tr>
+      <tr><td>Netfilter framework &amp; hooks</td><td><span class="pdf-ref">📄 p. 409</span></td></tr>
+      <tr><td>Simple Netfilter-based packet filter (C code)</td><td><span class="pdf-ref">📄 pp. 410-412</span></td></tr>
+      <tr><td>iptables overview (Xtables kernel + userspace)</td><td><span class="pdf-ref">📄 p. 413</span></td></tr>
+      <tr><td>iptables extensions (conntrack, owner)</td><td><span class="pdf-ref">📄 p. 414</span></td></tr>
+      <tr><td>Building a simple iptables firewall (flush → rules → default DROP)</td><td><span class="pdf-ref">📄 pp. 415-417</span></td></tr>
+      <tr><td>Testing a firewall (wget/telnet)</td><td><span class="pdf-ref">📄 p. 418</span></td></tr>
+      <tr><td>Stateful packet filters vs traditional</td><td><span class="pdf-ref">📄 p. 420</span></td></tr>
+      <tr><td>Stateful filtering connection tracking example</td><td><span class="pdf-ref">📄 p. 421</span></td></tr>
+      <tr><td>Application-level filtering (WAF, SMTP proxy, DNS proxy)</td><td><span class="pdf-ref">📄 p. 423</span></td></tr>
+      <tr><td>Application-firewall architecture (daemon + proxies)</td><td><span class="pdf-ref">📄 p. 424</span></td></tr>
+      <tr><td>Web proxy for evading egress filtering + anonymizing proxy</td><td><span class="pdf-ref">📄 p. 425</span></td></tr>
+      <tr><td>Firewalls aren't perfect (3 limitations)</td><td><span class="pdf-ref">📄 p. 426</span></td></tr>
+      <tr><td>Evading firewalls overview (SSH tunneling, dynamic forward, VPN)</td><td><span class="pdf-ref">📄 p. 427</span></td></tr>
+      <tr><td>SSH tunneling scenarios (home↔apollo↔work, work↔home)</td><td><span class="pdf-ref">📄 pp. 428-431</span></td></tr>
+      <tr><td>Dynamic port forwarding / SOCKS proxy</td><td><span class="pdf-ref">📄 pp. 432-433</span></td></tr>
+      <tr><td>Firewall lecture summary</td><td><span class="pdf-ref">📄 p. 434</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top: 22px;">15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM)</h4>
+  <ol>
+    <li>Recite the three firewall types (stateless · stateful · application/proxy) and one defining feature of each <span class="pdf-ref">📄 p. 404</span>.</li>
+    <li>Redraw the stateful-firewall state-table diagram on scratch paper <span class="pdf-ref">📄 p. 421</span>.</li>
+    <li>Recite the three firewall actions (Accept · Deny · Reject) and what distinguishes Deny from Reject (ICMP reply) <span class="pdf-ref">📄 p. 403</span>.</li>
+    <li>Recite "Ingress = in; Egress = out; Egress beats Ingress for IP-spoofing defense" <span class="pdf-ref">📄 pp. 403, 512</span>.</li>
+    <li>Write out the 8-step iptables worked example in your own words <span class="pdf-ref">📄 pp. 415-417</span>.</li>
+    <li>Say aloud: "Stateful tracks connections; Application inspects content" <span class="pdf-ref">📄 pp. 406, 423</span>.</li>
+    <li>Say aloud: "SSH tunneling evades firewalls because encryption hides the payload, not because SSH is invisible" <span class="pdf-ref">📄 pp. 427-431</span>.</li>
+    <li>Recite the three firewall blind spots: insiders · encrypted tunnels · malware in files <span class="pdf-ref">📄 p. 426</span>.</li>
+  </ol>
+
+</div>
+
+<!-- ============================================================
+     END OF TOPIC 7
+     ============================================================ -->
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This study guide covers <strong>only Topic 7</strong> as listed in <span class="mono">appendix_finalexam.md</span>.
+  Previous guides cover Topic 1 (Wireless / Link-Layer Security), Topic 2 (Common Network Attacks),
+  Topic 3 (Cryptography Foundations), and Topic 5 (User Authentication). Remaining topics —
+  TLS/HTTPS/SSH and IPsec &amp; VPN — can be prepared as separate study guides using the same
+  master-prompt template.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs548-theme';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
