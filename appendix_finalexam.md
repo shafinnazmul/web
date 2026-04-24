@@ -3,6 +3,10 @@
 **Course:** CS 448/548 Network Security (Spring 2026, Dr. Lina Pu)
 **Exam:** Final — April 27, 2026 · 8:00-10:00 AM · Closed-book · 120 minutes
 **Master Reference:** `00_Lectures_all_merged_compressed.pdf` (601 slides)
+[00_Lectures_all_merged_compressed.pdf](./00_Lectures_all_merged_compressed.pdf)
+
+
+00_Lectures_all_merged_compressed.pdf
 
 > ### How to read this appendix
 >

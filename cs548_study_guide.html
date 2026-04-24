@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 — Network Security: Final Exam Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0d0f14;
+    --bg-surface: #13161e;
+    --bg-card: #181c26;
+    --bg-hover: #1e2233;
+    --border: #2a2f42;
+    --border-accent: #3a4060;
+    --text-primary: #e8ecf5;
+    --text-secondary: #8a91ab;
+    --text-muted: #545a72;
+    --accent-red: #ff4d6d;
+    --accent-orange: #ff8c42;
+    --accent-yellow: #f5c842;
+    --accent-blue: #4d8fff;
+    --accent-teal: #3dd6c0;
+    --accent-purple: #a06af8;
+    --tag-bg: #1e2640;
+    --tag-border: #3a4a80;
+    --mono-bg: #0a0c12;
+    --badge-explicit: rgba(255,77,109,0.15);
+    --badge-strong: rgba(255,140,66,0.15);
+    --badge-moderate: rgba(245,200,66,0.12);
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --toggle-bg: #1e2233;
+    --toggle-knob: #4d8fff;
+    --header-gradient: linear-gradient(135deg, #1a1f30 0%, #0d0f14 100%);
+    --star-color: #f5c842;
+  }
+  :root[data-theme="light"] {
+    --bg: #f0f2f8;
+    --bg-surface: #ffffff;
+    --bg-card: #f7f8fc;
+    --bg-hover: #eef0f9;
+    --border: #d4d8eb;
+    --border-accent: #b0b8d8;
+    --text-primary: #1a1e30;
+    --text-secondary: #4a5070;
+    --text-muted: #8890b0;
+    --accent-red: #d42050;
+    --accent-orange: #d4620a;
+    --accent-yellow: #b58800;
+    --accent-blue: #1a5fd4;
+    --accent-teal: #0a9e8a;
+    --accent-purple: #6a3ed4;
+    --tag-bg: #eef0fa;
+    --tag-border: #c0caec;
+    --mono-bg: #e8eaf4;
+    --badge-explicit: rgba(212,32,80,0.1);
+    --badge-strong: rgba(212,98,10,0.1);
+    --badge-moderate: rgba(181,136,0,0.1);
+    --shadow: 0 4px 24px rgba(0,0,40,0.1);
+    --toggle-bg: #d4d8eb;
+    --toggle-knob: #1a5fd4;
+    --header-gradient: linear-gradient(135deg, #e4e8f8 0%, #f0f2f8 100%);
+    --star-color: #b58800;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.7;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 2rem;
+    box-shadow: var(--shadow);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .topbar-title {
+    font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .topbar-title strong { color: var(--accent-blue); }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    user-select: none;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+  }
+  .toggle-track {
+    width: 42px;
+    height: 22px;
+    background: var(--toggle-bg);
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.3s;
+    border: 1px solid var(--border);
+  }
+  .toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: var(--toggle-knob);
+    border-radius: 50%;
+    transition: transform 0.3s, background 0.3s;
+  }
+  [data-theme="light"] .toggle-knob { transform: translateX(20px); }
+  .icon { font-size: 0.9rem; }
+
+  /* ── MAIN LAYOUT ── */
+  .wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    background: var(--header-gradient);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.2rem 2.5rem 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+    opacity: 0.12;
+    pointer-events: none;
+  }
+  .page-header .course-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    padding: 0.25rem 0.7rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.9rem;
+  }
+  .page-header h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+  }
+  .page-header h1 span { color: var(--accent-red); }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .meta-item { display: flex; align-items: center; gap: 0.35rem; }
+  .meta-item strong { color: var(--text-secondary); }
+
+  /* ── CALLOUT BOX ── */
+  .callout {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-blue);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .callout strong { color: var(--text-primary); }
+
+  /* ── SECTION (TOP-LEVEL H2) ── */
+  .section-block {
+    margin-bottom: 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.2s;
+  }
+  .section-block:hover { box-shadow: var(--shadow); border-color: var(--border-accent); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    background: var(--bg-surface);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    list-style: none;
+    gap: 1rem;
+  }
+  .section-header:hover { background: var(--bg-hover); }
+  .section-header::-webkit-details-marker { display: none; }
+
+  .section-title-row { display: flex; align-items: center; gap: 0.8rem; flex: 1; min-width: 0; }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent-blue);
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    white-space: nowrap;
+  }
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .chevron {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  details[open] > .section-header .chevron { transform: rotate(90deg); }
+
+  .section-body {
+    padding: 0 1.5rem 1.5rem;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+
+  /* ── SUB-SECTION (H3) inside body ── */
+  .sub-details {
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .sub-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.1rem;
+    background: var(--bg-surface);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    list-style: none;
+    gap: 0.75rem;
+  }
+  .sub-header:hover { background: var(--bg-hover); }
+  .sub-header::-webkit-details-marker { display: none; }
+  .sub-title { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); flex: 1; }
+  .sub-body {
+    padding: 0.75rem 1.1rem 1rem;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── H4+ inside sub-sections ── */
+  .sub-sub-details {
+    margin-top: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sub-sub-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.9rem;
+    background: var(--bg-surface);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    gap: 0.6rem;
+    transition: background 0.2s;
+  }
+  .sub-sub-header:hover { background: var(--bg-hover); }
+  .sub-sub-header::-webkit-details-marker { display: none; }
+  .sub-sub-title { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); flex: 1; }
+  .sub-sub-body {
+    padding: 0.65rem 0.9rem 0.85rem;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── TYPOGRAPHY ── */
+  p { font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.75rem; }
+  p:first-child { margin-top: 0.5rem; }
+  strong { color: var(--text-primary); font-weight: 600; }
+  em { color: var(--accent-teal); font-style: italic; }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+  /* ── BADGE SIGNALS ── */
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.64rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .badge-explicit { background: var(--badge-explicit); color: var(--accent-red); border: 1px solid rgba(255,77,109,0.3); }
+  .badge-strong   { background: var(--badge-strong);   color: var(--accent-orange); border: 1px solid rgba(255,140,66,0.3); }
+  .badge-moderate { background: var(--badge-moderate); color: var(--accent-yellow); border: 1px solid rgba(245,200,66,0.25); }
+
+  .star { color: var(--star-color); font-size: 0.85em; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin-top: 0.75rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  th {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid var(--border);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg-hover); }
+  td strong { color: var(--text-primary); }
+
+  /* ── CODE / MONO BLOCKS ── */
+  pre {
+    background: var(--mono-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    overflow-x: auto;
+    margin-top: 0.75rem;
+    line-height: 1.65;
+    white-space: pre;
+    transition: background 0.3s;
+  }
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8em;
+    background: var(--mono-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    color: var(--accent-teal);
+  }
+
+  /* ── LISTS ── */
+  ul, ol {
+    padding-left: 1.4rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+  li { margin-bottom: 0.3rem; }
+
+  /* ── BLOCKQUOTE ── */
+  blockquote {
+    border-left: 3px solid var(--accent-teal);
+    margin: 0.75rem 0;
+    padding: 0.6rem 1rem;
+    background: var(--mono-bg);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  /* ── WARN CALLOUT ── */
+  .warn {
+    background: var(--badge-moderate);
+    border: 1px solid rgba(245,200,66,0.25);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.8rem;
+    color: var(--accent-yellow);
+    margin-top: 0.75rem;
+  }
+
+  /* ── EXPAND ALL BTN ── */
+  .controls {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .btn:hover { background: var(--bg-hover); border-color: var(--border-accent); color: var(--text-primary); }
+  .btn-primary { border-color: var(--tag-border); color: var(--accent-blue); }
+
+  /* ── TOC ── */
+  .toc-list { list-style: none; padding: 0; margin-top: 0.5rem; }
+  .toc-list li { border-bottom: 1px solid var(--border); }
+  .toc-list li:last-child { border-bottom: none; }
+  .toc-list a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    transition: color 0.15s;
+  }
+  .toc-list a:hover { color: var(--accent-blue); text-decoration: none; }
+  .toc-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-muted); width: 1.8rem; flex-shrink: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .wrapper { padding: 1.5rem 1rem 3rem; }
+    .page-header { padding: 1.5rem 1.25rem 1.25rem; }
+    .page-header h1 { font-size: 1.35rem; }
+    .section-header { padding: 0.9rem 1rem; }
+    .section-body { padding: 0 1rem 1.2rem; }
+    table { font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="topbar-title"><strong>CS 448/548</strong> · Network Security · Final Exam Study Guide</div>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+    <span class="icon" id="theme-icon">☀️</span>
+    <div class="toggle-track"><div class="toggle-knob"></div></div>
+    <span id="theme-label">LIGHT</span>
+  </button>
+</nav>
+
+<div class="wrapper">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="course-badge">Spring 2026 · Dr. Lina Pu</div>
+    <h1>CS 448/548 — Network Security<br><span>Final Exam Study Appendix</span></h1>
+    <div class="meta-row">
+      <div class="meta-item">📅 <strong>Exam:</strong> April 27, 2026</div>
+      <div class="meta-item">⏰ <strong>Time:</strong> 8:00–10:00 AM · 120 min</div>
+      <div class="meta-item">📕 <strong>Format:</strong> Closed-book</div>
+      <div class="meta-item">📄 <strong>Slides:</strong> 601 pages</div>
+    </div>
+  </div>
+
+  <!-- HOW TO READ CALLOUT -->
+  <div class="callout">
+    <strong>How to read this guide:</strong> Page numbers refer to slide positions (1–601) in <code>00_Lectures_all_merged_compressed.pdf</code>. Signal badges: <span class="badge badge-explicit">🔴 EXPLICIT</span> = instructor said it's on the exam; <span class="badge badge-strong">🟠 STRONG</span> = heavily emphasized; <span class="badge badge-moderate">🟡 MODERATE</span> = implied or once mentioned. <span class="star">⭐</span> = appears in both lectures <em>and</em> past exams.
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn btn-primary" onclick="expandAll()">▶ Expand All</button>
+    <button class="btn" onclick="collapseAll()">▼ Collapse All</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 1 — EXAM STRATEGY SUMMARY
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-block">
+    <details id="s1">
+      <summary class="section-header">
+        <div class="section-title-row">
+          <span class="section-num">01</span>
+          <span class="section-title">Exam Strategy Summary</span>
+        </div>
+        <span class="chevron">▶</span>
+      </summary>
+      <div class="section-body">
+        <p>The instructor stated verbatim in the final-exam review script:</p>
+        <blockquote>"Our final will be comprehensive... the midterm only covers partial of the chapters... today's lecture, I will mainly cover the materials not tested in the midterm exam."</blockquote>
+
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <span class="sub-title">Study Prioritization Buckets</span>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Bucket</th><th>Content</th><th>Source</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>A — NEW (highest yield)</strong></td><td>Link-layer/wireless + TCP, IP, ARP, DNS attacks</td><td>Final Exam Review script; never tested before</td></tr>
+                    <tr><td><strong>B — Midterm (re-tested)</strong></td><td>Crypto, TLS, User Auth, IPsec, VPN, Firewalls</td><td>Midterm Review + past exams</td></tr>
+                    <tr><td><strong>C — Integration / challenge</strong></td><td>Combining across topics (e.g., wireless + TLS + certs)</td><td>Final Review script explicitly calls these out</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <span class="sub-title">Question Format Distribution</span>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <p>Final exam will have <strong>~2× the questions of the midterm</strong>: True/False, Single-answer MCQ, Multiple-answer MCQ, Short Answer, and <strong>Challenge questions</strong> (multi-topic). The instructor recommended <strong>bullet-style answers</strong> on short-answer questions for clarity and partial credit.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 2 — MASTER LECTURE-TO-PAGE MAP
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-block">
+    <details id="s2">
+      <summary class="section-header">
+        <div class="section-title-row">
+          <span class="section-num">02</span>
+          <span class="section-title">Master Lecture-to-Page Map</span>
+        </div>
+        <span class="chevron">▶</span>
+      </summary>
+      <div class="section-body">
+        <p>Physical mapping of the 601-slide PDF to the 22 lectures. Use for coarse-grained navigation.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>PDF Pages</th><th>Lecture</th><th>Title</th><th>Coverage</th></tr></thead>
+            <tbody>
+              <tr><td>1–27</td><td>L1</td><td>Syllabus &amp; Introduction</td><td>—</td></tr>
+              <tr><td>28–53</td><td>L2</td><td>Introduction to Internet &amp; Network Security</td><td>Midterm</td></tr>
+              <tr><td>54–82</td><td>L3</td><td>Cryptography Primitives (Symmetric)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>83–115</td><td>L4 pt.1</td><td>Asymmetric Cryptography</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>116–134</td><td>L4 pt.2</td><td>Asymmetric Cryptography (continued)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>135–162</td><td>L5</td><td>Asymmetric Cryptography &amp; Secure Hash</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>163–181</td><td>L6</td><td>Message Authentication (MAC, HMAC, AES-GCM)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>182–206</td><td>L7</td><td>Review of Part I (crypto review)</td><td>Midterm</td></tr>
+              <tr><td>207–233</td><td>L8</td><td>Web Browsing Security (TLS)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>234–245</td><td>L9</td><td>HTTPS</td><td>Midterm</td></tr>
+              <tr><td>246–258</td><td>L10</td><td>SSH</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>259–291</td><td>L11</td><td>User Authentication (Part 1)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>292–342</td><td>L12</td><td>User Authentication Pt. 2 — <strong>Kerberos</strong></td><td>Midterm <span class="star">⭐⭐</span></td></tr>
+              <tr><td>343–354</td><td>L13</td><td>User Authentication (Part 3)</td><td>Midterm</td></tr>
+              <tr><td>355–368</td><td>L14</td><td>IP Security (Part 1)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>369–396</td><td>L16 pt.1</td><td>IP Security (Part 2)</td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>397–434</td><td>L16 pt.2</td><td><strong>Firewalls</strong></td><td>Midterm <span class="star">⭐</span></td></tr>
+              <tr><td>435–464</td><td>L17</td><td>Wireless Security (intro)</td><td><strong style="color:var(--accent-red)">FINAL 🔴</strong></td></tr>
+              <tr><td>465–502</td><td>L19 pt.1</td><td>IoT Wireless Technologies</td><td>Midterm (light)</td></tr>
+              <tr><td>503–540</td><td>L19 pt.2</td><td><strong>IP Attacks &amp; ARP Attacks</strong></td><td><strong style="color:var(--accent-red)">FINAL 🔴</strong></td></tr>
+              <tr><td>541–557</td><td>L20 pt.1</td><td><strong>TCP Attacks</strong></td><td><strong style="color:var(--accent-red)">FINAL 🔴</strong></td></tr>
+              <tr><td>558–578</td><td>L20 pt.2</td><td><strong>Wireless Security (WPA/802.1X/EAP) + Cellular</strong></td><td><strong style="color:var(--accent-red)">FINAL 🔴</strong></td></tr>
+              <tr><td>579–601</td><td>L22</td><td><strong>DNS Attacks</strong></td><td><strong style="color:var(--accent-red)">FINAL 🔴</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="warn">⚠️ No L15, L18, or L21 in the deck — those slots were used for quizzes/labs. All 601 slides map cleanly to the table above.</div>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 3 — TOPIC INDEX
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-block">
+    <details id="s3">
+      <summary class="section-header">
+        <div class="section-title-row">
+          <span class="section-num">03</span>
+          <span class="section-title">Topic Index — Exam Priority Order</span>
+        </div>
+        <span class="chevron">▶</span>
+      </summary>
+      <div class="section-body">
+        <p>Ranked from highest to lowest expected exam weight based on signal analysis.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Topic</th><th>Signal</th><th>Why High Priority</th><th>Key Pages</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Wireless / Link-Layer Security</strong> (WPA2, 802.1X, EAP)</td><td><span class="badge badge-explicit">🔴 EXPLICIT</span></td><td>Entire new chapter; instructor dedicated most of Final Review to it</td><td>pp. 435–464, 558–578</td></tr>
+              <tr><td>2</td><td><strong>TCP Attacks</strong> (SYN flood, Reset, Session Hijack)</td><td><span class="badge badge-explicit">🔴 EXPLICIT</span></td><td>Named by name; SYN cookies emphasized</td><td>pp. 541–557</td></tr>
+              <tr><td>3</td><td><strong>DNS Attacks</strong> (spoofing, Kaminsky, DNSSEC)</td><td><span class="badge badge-explicit">🔴 EXPLICIT</span></td><td>Entire dedicated lecture; detailed attack flow walked through</td><td>pp. 579–601</td></tr>
+              <tr><td>4</td><td><strong>IP / Network-Layer Attacks</strong> (spoofing, DDoS, ICMP)</td><td><span class="badge badge-explicit">🔴 EXPLICIT</span></td><td>Called out with defenses (ingress/egress filtering)</td><td>pp. 503–540</td></tr>
+              <tr><td>5</td><td><strong>ARP Spoofing &amp; MITM</strong></td><td><span class="badge badge-explicit">🔴 EXPLICIT</span></td><td>Part of "common attacks" enumeration; link-layer focus</td><td>pp. 531–538</td></tr>
+              <tr><td>6</td><td><strong>Kerberos</strong> (AS/TGS, tickets, authenticator)</td><td><span class="badge badge-strong">🟠 STRONG</span></td><td>Heavily emphasized in both midterm reviews; likely re-tested</td><td>pp. 294–342</td></tr>
+              <tr><td>7</td><td><strong>TLS Handshake &amp; Record Layer</strong></td><td><span class="badge badge-strong">🟠 STRONG</span></td><td>Midterm staple; instructor emphasized handshake steps</td><td>pp. 207–233</td></tr>
+              <tr><td>8</td><td><strong>Cryptography Foundations</strong> (sym, asym, hash, AES-GCM)</td><td><span class="badge badge-strong">🟠 STRONG</span></td><td>Fundamental building block for everything else</td><td>pp. 54–181</td></tr>
+              <tr><td>9</td><td><strong>IPsec / VPN</strong> (AH vs ESP, transport vs tunnel)</td><td><span class="badge badge-strong">🟠 STRONG</span></td><td>Named as re-tested in Final Review script</td><td>pp. 355–396</td></tr>
+              <tr><td>10</td><td><strong>Firewalls</strong> (stateless, stateful, application/proxy)</td><td><span class="badge badge-strong">🟠 STRONG</span></td><td>Named as re-tested; iptables in lab</td><td>pp. 397–434</td></tr>
+              <tr><td>11</td><td><strong>SSH &amp; HTTPS</strong></td><td><span class="badge badge-moderate">🟡 MODERATE</span></td><td>Map to TLS principles</td><td>pp. 234–258</td></tr>
+              <tr><td>12</td><td><strong>OpenID Connect &amp; OAuth</strong></td><td><span class="badge badge-moderate">🟡 MODERATE</span></td><td>"Know services each protocol provides"</td><td>pp. 271–291</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 4 — DETAILED TOPIC MAPS
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-block">
+    <details id="s4">
+      <summary class="section-header">
+        <div class="section-title-row">
+          <span class="section-num">04</span>
+          <span class="section-title">Detailed Topic Maps</span>
+        </div>
+        <span class="chevron">▶</span>
+      </summary>
+      <div class="section-body">
+
+        <!-- TOPIC 1 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-explicit">🔴 EXPLICIT</span>
+                <span class="sub-title">Topic 1 — Wireless / Link-Layer Security (WPA2, 802.1X, EAP)</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"What will be tested, additionally include the link layer security, which is about the network access control... the encryption solutions... the security suite... the key management... the encryption, and also the access control, so and also the EAP framework..."</blockquote>
+              <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+Why wireless is insecure (broadcast, mobility, etc.)     │  p. 559
+Wireless security services overview                      │  pp. 441, 560
+WEP / WPA / WPA2 / WPA3 history &amp; comparison             │  pp. 442-448, 561
+WEP vulnerabilities                                      │  pp. 441-446
+WPA2 personal (Pre-Shared Key / PSK)                     │  pp. 448-449, 561, 570
+WPA2 enterprise (802.1X / EAP)                           │  pp. 448, 451-456, 561-567
+CCMP / AES-CCMP                                          │  p. 446
+TKIP                                                     │  pp. 448, 561
+AES-GCM for link-layer encryption                        │  p. 446
+Encryption vs Message Authentication on link layer       │  pp. 446-448
+802.1X Network Access Control framework                  │  pp. 451-456, 561-567
+Controlled vs Uncontrolled port concept                  │  pp. 455, 566
+Access Point (AP) role                                   │  pp. 439-442, 455-456
+Authentication Server (AS / RADIUS)                      │  pp. 455-456, 566-567
+SSID broadcasting / hiding                               │  p. 439
+Probe request / Probe response                           │  pp. 513, 515
+Association request / response                           │  pp. 439-440, 450
+Full 802.11 message flow (probe → auth → association)    │  pp. 439-442, 450
+EAP framework                                            │  pp. 451-452, 458-461, 561-572
+EAP method: EAP-TLS (mutual cert auth)                   │  pp. 459, 570, 578
+EAP method: EAP-TTLS / PEAP (server cert + user/pass)    │  pp. 459, 570, 578
+EDU-ROAM example (AS chaining across institutions)       │  pp. 571-572
+VLAN / Network Segmentation (defense context)            │  pp. 362, 393, 452, 563
+DHCP as network-access control                           │  pp. 361, 452, 563, 587
+Cellular (4G/5G) architecture [LIGHT, may skip]          │  pp. 575-578</pre>
+              <div class="warn">🔗 <strong>Challenge-question hook:</strong> "When you read this diagram, you need to think about the TLS... and also think about the TLS part when we introduced the server certificate." → <strong>Wireless + TLS + certificates</strong> is a likely combined question.</div>
+            </div>
+          </details>
+        </div>
+
+        <!-- TOPIC 2 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-explicit">🔴 EXPLICIT</span>
+                <span class="sub-title">Topic 2 — Common Network Attacks (TCP / IP / ARP / DNS)</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"Additional material chapter is the common network attacks. We introduced from top to bottom: TCP attacks, network layer attacks, link layer attacks, and DNS attacks... For every attack you must know: (1) the attack mechanism, (2) the conditions required (local vs remote), (3) the defense / countermeasure."</blockquote>
+
+              <!-- 2a -->
+              <div class="sub-sub-details">
+                <details>
+                  <summary class="sub-sub-header">
+                    <span class="sub-sub-title">2a — TCP Attacks</span>
+                    <span class="chevron">▶</span>
+                  </summary>
+                  <div class="sub-sub-body">
+                    <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+TCP 3-way handshake (background)                         │  pp. 547-548
+SYN flooding attack                                      │  pp. 542, 549, 557
+SYN cookies (defense)                                    │  pp. 550-551
+TCP Reset attack                                         │  pp. 542, 552-554, 557
+Preconditions: source/dest IP+port, valid seq number     │  pp. 552-554
+Local vs remote attacker difficulty                      │  pp. 552-554
+TCP Session Hijacking                                    │  pp. 542, 555-556, 557
+Defense: randomize ISN, randomize source port            │  pp. 551, 554
+Defense: IPsec encryption to neutralize transport attacks│  pp. 370-371
+Summary slide                                            │  p. 557</pre>
+                  </div>
+                </details>
+              </div>
+
+              <!-- 2b -->
+              <div class="sub-sub-details">
+                <details>
+                  <summary class="sub-sub-header">
+                    <span class="sub-sub-title">2b — IP / Network-Layer Attacks</span>
+                    <span class="chevron">▶</span>
+                  </summary>
+                  <div class="sub-sub-body">
+                    <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+IP address spoofing (mechanism)                          │  pp. 505-512
+IP spoofing as vehicle for DDoS                          │  pp. 511-512, 521
+DDoS / DoS attacks (overview)                            │  pp. 511, 521-527
+Defense: ingress / egress packet filtering               │  pp. 403, 425, 512
+Defense: randomize TCP sequence number                   │  p. 512
+ICMP Echo scan / ping scan                               │  pp. 505-506
+ICMP Destination Unreachable attack                      │  pp. 505-506, 519-523, 528
+Network segmentation as ICMP-scan defense                │  pp. 362, 393
+Reconnaissance / port scanning (context)                 │  p. 520</pre>
+                  </div>
+                </details>
+              </div>
+
+              <!-- 2c -->
+              <div class="sub-sub-details">
+                <details>
+                  <summary class="sub-sub-header">
+                    <span class="sub-sub-title">2c — ARP (Link-Layer) Attacks</span>
+                    <span class="chevron">▶</span>
+                  </summary>
+                  <div class="sub-sub-body">
+                    <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+ARP purpose: IP ↔ MAC address translation                │  pp. 531-535
+ARP cache / ARP table                                    │  pp. 531-535
+ARP spoofing mechanism                                   │  pp. 505, 507, 531-538
+ARP → Man-in-the-middle attack                           │  pp. 537-538
+Why ARP attacks persist (cache caching effect)           │  pp. 531-535</pre>
+                  </div>
+                </details>
+              </div>
+
+              <!-- 2d -->
+              <div class="sub-sub-details">
+                <details>
+                  <summary class="sub-sub-header">
+                    <span class="sub-sub-title">2d — DNS Attacks (Lecture 22, pp. 579–601)</span>
+                    <span class="chevron">▶</span>
+                  </summary>
+                  <div class="sub-sub-body">
+                    <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+DNS overview                                             │  pp. 580-581
+DNS domain hierarchy (root, TLD, authoritative)          │  pp. 582, 584, 597
+DNS query process (recursive vs iterative)               │  pp. 583-586
+Local DNS files / hosts file                             │  p. 587
+DNS attacks overview                                     │  p. 588
+DNS spoofing — LAN (local attacker)                      │  p. 589
+Remote DNS Cache Poisoning                               │  pp. 590-591
+DNS Packet structure (transaction ID, port)              │  pp. 590-591
+Kaminsky attack (mechanism + sample)                     │  pp. 592-593
+Defense — Protect DNS Cache Poisoning (overview)         │  p. 594
+DNSSEC (digital-signature-based protection)              │  pp. 595, 597
+DNS over TLS/SSL                                         │  p. 596
+DNSSEC vs TLS/SSL (chain-of-trust comparison)            │  p. 597
+DoS on DNS servers                                       │  pp. 598-601
+DoS on root servers                                      │  p. 599
+DoS on TLD servers                                       │  p. 600
+DoS on authoritative / nameservers of a zone             │  p. 601</pre>
+                  </div>
+                </details>
+              </div>
+
+            </div>
+          </details>
+        </div>
+
+        <!-- TOPIC 3 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-strong">🟠 STRONG</span>
+                <span class="sub-title">Topic 3 — Cryptography Foundations (Symmetric, Asymmetric, Hash)</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"Topics... crypto, the first part, basically the symmetric, asymmetric, secure hash... AES in block mode, stream mode, message integrity, message authentication, AES GCM mode."</blockquote>
+              <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+Security objectives (C-I-A &amp; related)                    │  pp. 30-31, 40
+Symmetric vs Asymmetric cipher overview                  │  pp. 41, 136
+Cryptography taxonomy summary                            │  pp. 115, 134
+DES / 3DES                                               │  pp. 41, 53, 55
+AES (overview, key sizes)                                │  pp. 63-68, 77, 81-82
+Block cipher concept                                     │  pp. 41, 49-52, 70-76
+Stream cipher concept                                    │  pp. 41, 49, 77-82
+Block mode: ECB                                          │  pp. 70-72, 75
+Block mode: CBC                                          │  pp. 70, 73-76
+Counter (CTR) mode / Stream server mode                  │  pp. 70, 77, 82, 170, 181
+Initialization Vector (IV)                               │  pp. 76, 158, 165, 231, 232
+Asymmetric: RSA                                          │  pp. 83-95, 98-101
+Asymmetric: Diffie-Hellman (DH / DHE / ECDHE)            │  pp. 84, 94-98, 101-103, 113-115, 122-123
+Elliptic Curve Cryptography (ECC)                        │  pp. 94, 101, 115, 134, 137, 144, 152
+Ephemeral keys                                           │  pp. 101, 122-123, 192, 231, 449
+Public-key certificate                                   │  pp. 104, 128, 145, 193, 262-263, 327
+X.509 certificate                                        │  pp. 128, 145, 344, 396
+Certificate Authority (CA) &amp; chain of trust              │  pp. 106, 110, 130-131, 151, 230, 240-244
+Secure hash (SHA family)                                 │  pp. 135-137, 152-157, 160
+Hash properties                                          │  pp. 152-157
+Digital signature                                        │  pp. 94, 102-104, 110, 114, 120, 126-128
+Message Authentication Code (MAC / HMAC)                 │  pp. 172, 174, 177-180, 201
+AES-GCM mode (encryption + MAC together) ⭐              │  pp. 181, 189, 202, 392
+Review summary (Part I)                                  │  pp. 182-206</pre>
+              <div class="warn">💡 <strong>Integration note:</strong> AES-GCM appears across TLS (p. 181), IPsec (p. 392), and wireless (p. 446) — a classic challenge-question integration point.</div>
+            </div>
+          </details>
+        </div>
+
+        <!-- TOPIC 4 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-strong">🟠 STRONG</span>
+                <span class="sub-title">Topic 4 — TLS / HTTPS / SSH</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"TLS... you need to know how TLS is implemented, what security services are provided, the handshakes, different steps, purpose of each step, HTTPS is HTTP over TLS, SSH security services implementation..."</blockquote>
+              <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+TLS protocol stack (handshake + record layer)            │  pp. 215, 227-228, 238
+TLS security services                                    │  pp. 215, 238
+TLS Handshake Protocol (overview)                        │  pp. 215, 226-229, 233
+ClientHello                                              │  pp. 230, 232, 237, 240
+ServerHello                                              │  pp. 221-223, 230, 232, 237, 240
+Server Certificate (step 5)                              │  pp. 230, 240
+Key exchange in TLS (ECDHE)                              │  pp. 230, 240-241
+Cipher suite negotiation                                 │  pp. 230, 240
+Handshake Finished (MAC over handshake)                  │  pp. 227-228
+TLS Record Layer (encryption + MAC)                      │  pp. 215, 227-228, 238, 241
+What TLS encrypts vs leaves in plaintext (IP/TCP)        │  pp. 227-228, 238
+HTTPS = HTTP over TLS (port 443)                         │  pp. 224-226, 233
+SSH overview                                             │  pp. 246-258
+SSH handshake (TLS-similar)                              │  pp. 248-253, 256-257
+SSH known-hosts (public key saved locally)               │  pp. 248-253
+SSH as example challenge question (protocol mapping)     │  pp. 248-253</pre>
+            </div>
+          </details>
+        </div>
+
+        <!-- TOPIC 5 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-strong">🟠 STRONG</span>
+                <span class="sub-title">Topic 5 — User Authentication (Kerberos, OpenID/OAuth, Passwords)</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"For Kerberos, you will need to understand why we have AS, TGS, service-server separate... what are long-term keys, what are short-term keys... ticket, authenticator, purpose of the authenticator, mutual authentication..."</blockquote>
+              <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+Authentication vs Authorization                          │  pp. 262-265, 271
+Password-based authentication                            │  pp. 269, 279, 286
+Two-factor authentication                                │  pp. 267, 271, 294, 297, 344
+Public-key authentication                                │  pp. 265-271
+OpenID Connect (ID token / SSO)                          │  pp. 271-291
+OAuth 2.0 (access token)                                 │  pp. 271-291
+OpenID vs OAuth difference                               │  pp. 271-291
+Single Sign-On (SSO)                                     │  pp. 272-285
+Kerberos overview (symmetric-only)                       │  pp. 294, 298-299
+Kerberos AS (Authentication Server)                      │  pp. 303-310, 325
+Kerberos TGS (Ticket Granting Server)                    │  pp. 302-308, 316-326
+Kerberos V (Service Server)                              │  pp. 303-310
+Why AS / TGS / V are separated                           │  pp. 302-310
+Long-term keys (K_C, K_TGS, K_V)                         │  pp. 306-310
+Short-term / session keys (K_C,TGS; K_C,V)               │  pp. 306-310
+Ticket (what's inside, encrypted by which key)           │  pp. 310, 319-322
+Authenticator (purpose, mutual auth)                     │  pp. 310, 319-322, 348
+Implicit vs Explicit authentication                      │  pp. 319-322
+Kerberos realm                                           │  pp. 312, 325, 350
+KDC                                                      │  pp. 302-310, 345
+Simplified Kerberos-based auth (with security flaws)     │  pp. 313-342
+Summary table of Kerberos messages                       │  pp. 310, 318, 348</pre>
+              <div class="warn">⚠️ Instructor's hint: "Given a key, you will need to know: is this a long-term key or a session key? For each piece of key, who knows this key, who doesn't know this key?" — expect key-identification questions.</div>
+            </div>
+          </details>
+        </div>
+
+        <!-- TOPIC 6 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-strong">🟠 STRONG</span>
+                <span class="sub-title">Topic 6 — IPsec and VPN</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"You need to understand what security services provided by IPsec... the two different modes: transport mode and tunnel mode... Transport mode: IP addresses are NOT encrypted. Tunnel mode: inner IP is encrypted."</blockquote>
+              <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+IPsec overview &amp; security services                       │  pp. 370-372, 386-389
+IPsec benefits vs TLS (Layer 3, transparent to apps)     │  pp. 370-373
+IPsec applications (VPN, branch office, remote access)   │  pp. 371, 389-391
+IPsec AH (Authentication Header) — auth only             │  pp. 375, 378-389
+IPsec ESP (Encapsulating Security Payload) — enc + MAC   │  pp. 375-389
+Security Association (SA)                                │  pp. 375-381, 387-389
+Security Association Database / SPI                      │  pp. 375-381, 395
+Security Policy Database                                 │  pp. 375-381
+Transport mode (IP header visible)                       │  pp. 384, 386-388
+Tunnel mode (inner IP encrypted → traffic-flow conf.)    │  pp. 371, 387-388
+Anti-replay (sequence number)                            │  pp. 378-381, 395
+Data origin authentication                               │  pp. 175, 370, 379-381, 451
+Limited traffic flow confidentiality                     │  pp. 370-371, 387-388
+Key exchange in IPsec (IKE / DHE)                        │  pp. 386-389
+AES-GCM in IPsec                                         │  p. 392
+VPN overview                                             │  pp. 356-357, 368-374, 389-391
+VPN implementations (TLS-based, IPsec-based)             │  pp. 389-391, 427</pre>
+            </div>
+          </details>
+        </div>
+
+        <!-- TOPIC 7 -->
+        <div class="sub-details">
+          <details>
+            <summary class="sub-header">
+              <div style="display:flex;align-items:center;gap:0.6rem;flex:1">
+                <span class="badge badge-strong">🟠 STRONG</span>
+                <span class="sub-title">Topic 7 — Firewalls</span>
+              </div>
+              <span class="chevron">▶</span>
+            </summary>
+            <div class="sub-body">
+              <blockquote>"Three types of firewall — stateless, stateful, and application / proxy-based firewall. You need to know the features of each firewall, and how it is implemented."</blockquote>
+              <pre>Sub-topic / Concept                                      │  Page(s)
+──────────────────────────────────────────────────────── │ ──────────────
+What is a firewall                                       │  pp. 397-402
+Firewall outline                                         │  p. 398
+Stateless (packet-filter) firewall                       │  pp. 405, 531
+Stateful firewall                                        │  pp. 404, 406, 414, 419-421, 434
+Application / Proxy firewall                             │  pp. 404, 407, 422-425, 432, 434
+Building a simple firewall with Netfilter                │  pp. 409-411
+iptables in Linux                                        │  pp. 398, 409, 411, 413-414, 434
+Ingress / Egress filtering                               │  pp. 403, 425, 512
+Evading firewalls                                        │  pp. 398, 429-434</pre>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 5 — CROSS-TOPIC THEMES
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-block">
+    <details id="s5">
+      <summary class="section-header">
+        <div class="section-title-row">
+          <span class="section-num">05</span>
+          <span class="section-title">Cross-Topic Themes &amp; Integration Points</span>
+        </div>
+        <span class="chevron">▶</span>
+      </summary>
+      <div class="section-body">
+        <p>Most likely <strong>challenge-question</strong> / multi-topic integration hooks. The instructor explicitly said challenge questions "test multiple combined related techniques."</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Integration Theme</th><th>Topics Combined</th><th>Anchor Pages</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Wireless-EAP-TLS challenge</strong> — map 802.1X/EAP-TLS onto TLS handshake &amp; public-key certificates</td><td>Wireless + TLS + Crypto-certs</td><td>pp. 451–460, 227–230, 128–145</td></tr>
+              <tr><td>2</td><td><strong>"Defense stack" question</strong> — given an attack, name the countermeasure at each layer</td><td>All attacks + TLS + IPsec + WPA2</td><td>pp. 505–540, 370–395, 558–578</td></tr>
+              <tr><td>3</td><td><strong>Kerberos key-identification</strong> — given a key, identify long-term vs session, and which entities know it</td><td>Crypto (symmetric) + Kerberos</td><td>pp. 306–322</td></tr>
+              <tr><td>4</td><td><strong>TLS vs IPsec vs DNSSEC</strong> — chain-of-trust comparison (CA hierarchy vs DNS zone hierarchy)</td><td>TLS + IPsec + DNS Attacks</td><td>pp. 240–244, 595–597</td></tr>
+              <tr><td>5</td><td><strong>AES-GCM everywhere</strong> — identify the same primitive across TLS record layer, IPsec ESP, WPA2 CCMP/GCM</td><td>Crypto + TLS + IPsec + Wireless</td><td>pp. 181, 392, 446</td></tr>
+              <tr><td>6</td><td><strong>Local vs Remote attacker difficulty</strong> — why spoofing/hijacking is harder remotely (random ISN, random port, random DNS transaction ID)</td><td>TCP + IP + DNS attacks</td><td>pp. 552–554, 512, 590–592</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 6 — SUPPLEMENTARY RESOURCE MAP
+  ══════════════════════════════════════════════════════════ -->
+  <div class="section-block">
+    <details id="s6">
+      <summary class="section-header">
+        <div class="section-title-row">
+          <span class="section-num">06</span>
+          <span class="section-title">Supplementary Resource Map</span>
+        </div>
+        <span class="chevron">▶</span>
+      </summary>
+      <div class="section-body">
+        <p>Not used for primary page-referencing (master PDF is authoritative) but provide cross-verification and practice questions.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>File</th><th>Role</th></tr></thead>
+            <tbody>
+              <tr><td><code>MergeResult_L02_05.docx</code></td><td>Text narrative for crypto lectures (Topic 3).</td></tr>
+              <tr><td><code>MergeResult_L06_10.docx</code></td><td>Text narrative for MAC, TLS, HTTPS, SSH (Topic 4, part of Topic 3).</td></tr>
+              <tr><td><code>MergeResult_L11-15.docx</code></td><td>Text narrative for user authentication &amp; IPsec (Topics 5, 6).</td></tr>
+              <tr><td><code>cs548p2.html</code></td><td>HTML narrative for Lectures 16–24 — firewalls, wireless, IoT, attacks, DNS. <strong>Highest supplementary value for the final.</strong></td></tr>
+              <tr><td><code>kerberos_workflow.html</code></td><td>Kerberos message-exchange walkthrough (Topic 5).</td></tr>
+              <tr><td><code>scriptFinalExamReview-cs548.txt</code></td><td><span class="badge badge-explicit">🔴 PRIMARY</span> Final exam signal source.</td></tr>
+              <tr><td><code>scriptMidtermReview-cs548.txt</code></td><td><span class="badge badge-strong">🟠 STRONG</span> Midterm re-tested material signals.</td></tr>
+              <tr><td><code>scriptMidTermSolution-cs548.txt</code></td><td><span class="badge badge-moderate">🟡</span> Reveals what students struggled with.</td></tr>
+              <tr><td><code>00_26_exam_Quiz1_5_merged.pdf</code></td><td>Past quiz questions — question-format practice.</td></tr>
+              <tr><td><code>33_exam_exam_solution_01_miderm_2026.pdf</code></td><td>Midterm 2026 solution (most recent instructor-written answers).</td></tr>
+              <tr><td><code>midterm_exam_spring2025.pdf</code></td><td>Prior-year midterm (question-style reference).</td></tr>
+              <tr><td><code>exam_solutions_2022.pdf</code></td><td>Older prior exam (lower priority).</td></tr>
+              <tr><td><code>31_exam_exam_review_01_midterm_2026.pdf</code></td><td>Midterm review slides (2026 version).</td></tr>
+              <tr><td><code>32_exam_exam_review_02_final2026.pdf</code></td><td><strong>Final review slides (2026)</strong> — matches <code>scriptFinalExamReview-cs548.txt</code>.</td></tr>
+              <tr><td><code>32_exam_exam_review_02_final2025.pdf</code></td><td>Prior-year final review (cross-reference only).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+    document.getElementById('theme-label').textContent = isDark ? 'DARK' : 'LIGHT';
+  }
+
+  function expandAll() {
+    document.querySelectorAll('details').forEach(d => d.open = true);
+  }
+
+  function collapseAll() {
+    document.querySelectorAll('details').forEach(d => d.open = false);
+  }
+
+  // Initialize icon state (dark mode = show sun to switch to light)
+  document.getElementById('theme-icon').textContent = '☀️';
+  document.getElementById('theme-label').textContent = 'LIGHT';
+</script>
+</body>
+</html>
