@@ -121,6 +121,8 @@ Each topic block below is formatted for direct use when building the Section-1-t
 
 ### Topic 1 — Wireless / Link-Layer Security (WPA2, 802.1X, EAP)
 
+[Wireless / Link-Layer Security (WPA2, 802.1X, EAP)](./study_guide_topic1_wireless_security.html)
+
 > **Signal: 🔴 EXPLICIT.** From `scriptFinalExamReview-cs548.txt`:
 > *"What will be tested, additionally include the link layer security, which is about the network access control... we introduced the encryption solutions... the security suite... the key management... the encryption, and also the access control, so and also the EAP framework..."*
 

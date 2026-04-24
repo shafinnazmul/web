@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 Final Exam · Topic 1: Wireless / Link-Layer Security</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE & TYPOGRAPHY — DARK MODE (default)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+
+    --topic-accent: #00bcd4;
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+
+    --topic-accent: #0097a7;
+
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(0,151,167,0.06), rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(0,151,167,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(0,151,167,0.06), rgba(26,95,224,0.06)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .misconception { background: #eef1f7; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  /* ================================================================
+     THEME TOGGLE BUTTON (fixed in sidebar)
+     ================================================================ */
+  .theme-toggle-wrap {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+  [data-theme="light"] .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono {
+    font-family: 'Consolas', 'Courier New', 'Menlo', monospace;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 {
+    font-size: 2.1em;
+    margin: 0 0 8px 0;
+    color: #fff;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 1.55em;
+    color: var(--topic-accent);
+    margin: 36px 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.2em;
+    color: #fff;
+    margin: 26px 0 10px 0;
+  }
+  h4 {
+    font-size: 1em;
+    color: var(--text-dim);
+    margin: 18px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 0.82em;
+  }
+
+  p { margin: 8px 0 12px 0; }
+
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     STICKY NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 52px; }
+    nav.sidebar {
+      width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main {
+    max-width: 1100px;
+    padding: 40px 48px 80px 48px;
+  }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta {
+    color: var(--text-faint);
+    font-size: 0.9em;
+    margin-top: 6px;
+  }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(0,188,212,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE (CRITICAL — used hundreds of times)
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .signal-moderate { color: var(--yellow); }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & TOPIC CONTAINERS
+     ================================================================ */
+  section.topic {
+    border-left: 3px solid var(--topic-accent);
+    padding-left: 22px;
+    margin-bottom: 40px;
+  }
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+  }
+
+  /* Section pages-coverage header */
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TOPIC PAGE INDEX TABLE
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+    width: 230px;
+  }
+
+  /* Generic tables (key-terms, compare-contrast) */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  /* ================================================================
+     ASCII DIAGRAM / FLOW BOX
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f0;
+    margin: 14px 0;
+  }
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .step .step-head {
+    color: var(--topic-accent);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .step .step-detail {
+    margin-top: 6px;
+    font-size: 0.93em;
+    color: var(--text-dim);
+  }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 90px; }
+
+  /* Myth / reality blocks */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+  .misconception .trap { color: var(--orange); font-weight: 600; }
+
+  /* ================================================================
+     QUESTION BLOCKS (Section 4)
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options {
+    margin: 4px 0 6px 0;
+    padding-left: 26px;
+  }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content {
+    padding: 8px 0 4px 0;
+    font-size: 0.95em;
+  }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+
+  /* ================================================================
+     CHEAT SHEET (Section 5)
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(255,152,0,0.03));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+  }
+  .cheat-sheet h4 {
+    color: var(--gold);
+    font-size: 0.82em;
+    margin-top: 14px;
+  }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: #fff; }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,152,0,0.05);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-accent);
+    background: rgba(0,188,212,0.05);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,82,82,0.05);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">📘 Topic 1</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 Concept Overview</a>
+  <a href="#section-2">§2 How It Works</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+  <hr>
+  <a href="#section-4" class="sub">→ MCQ</a>
+  <a href="#section-4-tf" class="sub">→ True/False</a>
+  <a href="#section-4-sa" class="sub">→ Short Answer</a>
+  <a href="#section-4-fib" class="sub">→ Fill in Blank</a>
+
+  <!-- ── Theme toggle ── -->
+  <div class="theme-toggle-wrap">
+    <span class="theme-toggle-label">THEME</span>
+    <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme">
+      <span class="theme-opt active" id="optDark">🌙</span>
+      <span class="theme-opt" id="optLight">☀️</span>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 1: Wireless / Link-Layer Security</h1>
+  <div class="meta">
+    <strong>Course:</strong> CS 448/548 Network Security &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Lina Pu &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final — April 27, 2026 · 120 min · Closed-book<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lectures_all_merged_compressed.pdf</span> (601 slides)<br>
+    <strong>Signal:</strong> <span class="signal-explicit">🔴 EXPLICIT</span> — Instructor's #1 named new-material topic for the final
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">Why this topic matters for your exam</strong><br>
+  In <span class="mono">scriptFinalExamReview-cs548.txt</span>, the instructor devoted the <em>largest</em>
+  single block of the review to this topic. She said verbatim:
+  <em>"What will be tested, additionally include the link layer security, which is about the network access
+  control... we introduced the encryption solutions... the security suite... the key management... the
+  encryption, and also the access control, and also the EAP framework."</em>
+  Expect True/False, Multiple Choice, Multi-answer, Short Answer, and at least one Challenge question
+  that <strong>integrates wireless with TLS and public-key certificates</strong> (she explicitly flagged
+  this as "a good example of what the challenge question in wireless security can be tested").
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Every sub-topic below points to the exact slide number(s) in
+  <span class="mono">00_Lectures_all_merged_compressed.pdf</span>.
+  Lecture 17 (pp. 435-464) covers the introduction; Lecture 20 pt. 2 (pp. 558-578)
+  covers the full WPA/802.1X/EAP flow.
+</p>
+
+<table class="page-index">
+  <thead>
+    <tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Why wireless is insecure (broadcast, mobility, resources, accessibility)</td><td>p. 559</td></tr>
+    <tr><td>Data-link / MAC layer context (Wi-Fi, Ethernet, LTE)</td><td>p. 438</td></tr>
+    <tr><td>Wi-Fi operation &amp; 802.11 services (Association, Disassociation, Re-association)</td><td>pp. 439-440</td></tr>
+    <tr><td>History of wireless LAN security (Open → WEP → WPA → WPA2 → WPA3)</td><td>pp. 441, 560</td></tr>
+    <tr><td>WEP — design, authentication, encapsulation, problems</td><td>pp. 442-445</td></tr>
+    <tr><td>WPA — TKIP, MIC, sequence numbers (software patch on WEP hardware)</td><td>p. 446</td></tr>
+    <tr><td>WPA2 / 802.11i / RSN — AES-CCMP (hardware replacement)</td><td>p. 446</td></tr>
+    <tr><td>WEP/WPA/WPA2/WPA3 comparison table (encryption + user auth)</td><td>pp. 448, 561</td></tr>
+    <tr><td>WPA2-PSK weaknesses (session key derivable, shared PSK, public Wi-Fi)</td><td>p. 449</td></tr>
+    <tr><td>WPA3-PSK — SAE handshake, ephemeral DH, forward secrecy</td><td>p. 449</td></tr>
+    <tr><td>Security services on Wi-Fi (encryption, origin auth, key mgmt, user auth)</td><td>p. 451</td></tr>
+    <tr><td>Network Access Control (NAC) — umbrella definition</td><td>pp. 453, 564</td></tr>
+    <tr><td>Network access enforcement methods (802.1X, Firewall, DHCP, VLAN)</td><td>pp. 452, 563</td></tr>
+    <tr><td>AAA framework (Authentication, Authorization, Accounting)</td><td>pp. 454, 565</td></tr>
+    <tr><td>NAC components: Supplicant, Authenticator, Authentication Server</td><td>pp. 454, 565</td></tr>
+    <tr><td>802.1X — framework for IEEE 802 networks</td><td>pp. 455, 566</td></tr>
+    <tr><td>Controlled port vs Uncontrolled port</td><td>pp. 455, 566</td></tr>
+    <tr><td>802.1X authentication-method independence</td><td>pp. 456, 567</td></tr>
+    <tr><td>IEEE 802.11i Phases of Operation (Discovery → Auth → Key Mgmt → Data)</td><td>pp. 457, 568</td></tr>
+    <tr><td>EAP — framework for encapsulating auth methods</td><td>pp. 458, 569</td></tr>
+    <tr><td>EAP methods (EAP-TLS, EAP-TTLS, EAP-GPSK, EAP-IKEv2, LEAP, EAP-AKA)</td><td>pp. 459, 570</td></tr>
+    <tr><td>EAP protocol exchanges &amp; RADIUS</td><td>pp. 460, 571</td></tr>
+    <tr><td>EAP message format (Code, Identifier, Length, Type, Data)</td><td>pp. 460-461, 571-572</td></tr>
+    <tr><td>EAP message flow diagram (Supplicant ↔ AP ↔ AS)</td><td>pp. 461, 572</td></tr>
+    <tr><td>eduroam example (remote vs local authentication server)</td><td>pp. 571-572</td></tr>
+    <tr><td>SSID broadcasting / probe request / probe response</td><td>pp. 439, 513, 515</td></tr>
+    <tr><td>Access Point (AP) role</td><td>pp. 439-442, 455-456</td></tr>
+    <tr><td>Authentication Server (AS / RADIUS)</td><td>pp. 455-456, 566-567</td></tr>
+    <tr><td>VLAN / Network Segmentation</td><td>pp. 362, 393, 452, 563</td></tr>
+    <tr><td>DHCP as NAC enforcement &amp; DHCP snooping</td><td>pp. 361, 452, 563, 587</td></tr>
+    <tr><td>AES-GCM / AES-CTR for link-layer encryption</td><td>p. 446</td></tr>
+    <tr><td>Pre-shared Key (PSK) model</td><td>pp. 448-449, 459, 561, 570</td></tr>
+    <tr><td>Cellular (4G/5G) architecture — <em>light touch, not emphasized</em></td><td>pp. 575-578</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: CONCEPT OVERVIEW
+     ============================================================ -->
+<h2 id="section-1">§1 — Concept Overview</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 435-464, 558-578 (also see pp. 362, 393, 513, 515 for supporting context)</div>
+
+<div class="section-block">
+
+<h3>1.1 The Problem This Solves <span class="pdf-ref">📄 p. 559</span></h3>
+<p>
+  Wireless networks send every frame as a radio broadcast — anyone with a Wi-Fi card in range can
+  listen, inject, or jam. On top of that, mobile devices leave the building, may be lost or stolen,
+  and often have limited battery and CPU for heavy cryptography <span class="pdf-ref">📄 p. 559</span>.
+  Wireless / link-layer security exists to make the <em>first hop</em> (laptop ↔ access point)
+  confidential, authenticated, and resistant to replay — before the packet ever reaches an IP router.
+</p>
+
+<h3>1.2 The Core Idea <span class="pdf-ref">📄 pp. 441, 560</span></h3>
+<p>
+  Link-layer security wraps every Wi-Fi frame in two protections: <strong>encryption</strong> so
+  nobody nearby can read it, and a <strong>Message Integrity / Authentication Code</strong> so
+  nobody can forge or replay it <span class="pdf-ref">📄 p. 446</span>. But encryption alone is
+  not enough — the access point must also <strong>decide who is allowed on the network</strong>.
+  That second job is called <em>Network Access Control (NAC)</em>, and on Wi-Fi it is implemented by
+  the <strong>802.1X</strong> framework using <strong>EAP</strong> messages to talk to a separate
+  <strong>authentication server</strong> <span class="pdf-ref">📄 pp. 451-456, 562-567</span>.
+</p>
+
+<h3>1.3 Analogy — The Nightclub with a Back-Office Guest List <span class="pdf-ref">📄 pp. 454-456, 565-567</span></h3>
+<p>Think of WPA2-Enterprise as a nightclub door:</p>
+<ul class="plain">
+  <li><strong>You</strong> (the laptop) = the <em>Supplicant</em> <span class="pdf-ref">📄 pp. 454, 565</span></li>
+  <li><strong>The bouncer</strong> (the Wi-Fi access point) = the <em>Authenticator</em> — he does not know who is on tonight's guest list; he only relays messages <span class="pdf-ref">📄 pp. 455, 566</span></li>
+  <li><strong>The guest-list manager in the back office</strong> (RADIUS / AS) = the <em>Authentication Server</em> — he is the one who actually checks your credentials <span class="pdf-ref">📄 pp. 454, 565</span></li>
+  <li><strong>The front-door intercom</strong> = the <em>uncontrolled port</em> (always open, but only passes authentication messages) <span class="pdf-ref">📄 pp. 455, 566</span></li>
+  <li><strong>The main entrance</strong> = the <em>controlled port</em> (stays locked until the back office says "approved") <span class="pdf-ref">📄 pp. 455, 566</span></li>
+  <li><strong>The style of ID check</strong> (passport? fingerprint? invite code?) = an <em>EAP method</em>. The bouncer does not care which — he just forwards it to the manager <span class="pdf-ref">📄 pp. 458-459, 569-570</span></li>
+</ul>
+<p>
+  This mapping is why <strong>changing the authentication method</strong> (password → certificate → token)
+  requires <em>no hardware change</em> at the access point — only the client software and the RADIUS server
+  need updates <span class="pdf-ref">📄 pp. 456, 567</span>.
+</p>
+
+<h3>1.4 Technical Definition <span class="pdf-ref">📄 pp. 441, 446, 448, 561</span></h3>
+<p>
+  <strong>Wireless link-layer security</strong> is a family of protocols that operate at <strong>Layer 2
+  (Data Link)</strong> of the TCP/IP stack to provide confidentiality, integrity, origin authentication,
+  and access control between a wireless station (STA) and an access point (AP)
+  <span class="pdf-ref">📄 p. 437</span>. The current standard, <strong>WPA2</strong>
+  (formally <em>IEEE 802.11i — Robust Security Network, RSN</em>, 2004) specifies <strong>AES in Counter
+  Mode with CBC-MAC Protocol (AES-CCMP)</strong> for encryption + integrity
+  <span class="pdf-ref">📄 p. 446</span>. User authentication comes in two flavors:
+  <strong>WPA2-Personal</strong> uses a shared <strong>Pre-Shared Key (PSK)</strong>, and
+  <strong>WPA2-Enterprise</strong> uses <strong>802.1X</strong> with <strong>EAP</strong> to authenticate
+  each user individually against a back-end <strong>RADIUS</strong> authentication server
+  <span class="pdf-ref">📄 pp. 448, 561</span>.
+</p>
+
+<h3>1.5 Key Terms &amp; Definitions</h3>
+<table class="data">
+  <thead>
+    <tr>
+      <th style="width:20%">Term</th>
+      <th style="width:38%">Plain-English Definition</th>
+      <th style="width:30%">Why It Matters for the Exam</th>
+      <th style="width:12%">📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SSID</strong></td>
+      <td>The public "name" of a Wi-Fi network, broadcast in beacons (e.g., "eduroam"). Broadcasting is <em>optional</em>; a station can also actively probe for a named SSID.</td>
+      <td>Instructor called out that SSID broadcasting is optional and that stations can still join via probe.</td>
+      <td><span class="pdf-ref">📄 p. 439</span></td>
+    </tr>
+    <tr>
+      <td><strong>STA / Supplicant</strong></td>
+      <td>The wireless station trying to connect — your laptop, phone, or IoT device. In 802.1X terminology, also called the <em>Supplicant</em>.</td>
+      <td>The "Supplicant" is one of the three named 802.1X components — memorize all three.</td>
+      <td><span class="pdf-ref">📄 pp. 454, 565</span></td>
+    </tr>
+    <tr>
+      <td><strong>Access Point (AP) / Authenticator</strong></td>
+      <td>The Wi-Fi radio the station talks to. In 802.1X, called the <em>Authenticator</em>; it <em>relays</em> EAP messages but does not decide authentication by itself.</td>
+      <td>Common exam trap: "Who makes the authentication decision?" — it is <em>not</em> the AP.</td>
+      <td><span class="pdf-ref">📄 pp. 439, 455, 566</span></td>
+    </tr>
+    <tr>
+      <td><strong>Authentication Server (AS) / RADIUS</strong></td>
+      <td>A back-end server (RADIUS protocol) that actually verifies credentials against a user database and issues an "accept" or "reject." Can be local to the campus or reached remotely (e.g., home institution for eduroam).</td>
+      <td>The AS is the decision-maker; the AP only forwards. Instructor used the eduroam example explicitly.</td>
+      <td><span class="pdf-ref">📄 pp. 454, 460, 565, 571</span></td>
+    </tr>
+    <tr>
+      <td><strong>Uncontrolled Port</strong></td>
+      <td>Logical port on the AP that is <em>always open</em> but only carries authentication (EAP) traffic.</td>
+      <td>Before login you can <em>only</em> talk to the AS via this port — expect a True/False on this.</td>
+      <td><span class="pdf-ref">📄 pp. 455, 566</span></td>
+    </tr>
+    <tr>
+      <td><strong>Controlled Port</strong></td>
+      <td>Logical port on the AP that stays <em>blocked</em> until 802.1X authentication succeeds; then it opens and carries normal data traffic.</td>
+      <td>Controlled = <em>data</em>. Unlocked only after the AS says "Accept."</td>
+      <td><span class="pdf-ref">📄 pp. 455, 566</span></td>
+    </tr>
+    <tr>
+      <td><strong>WEP</strong> <span class="signal-moderate">🟡</span></td>
+      <td>Wired Equivalent Privacy (1999). First Wi-Fi encryption standard; uses RC4 + 24-bit IV + shared key. Fundamentally broken since 2001.</td>
+      <td>Know the <em>problems</em> (short IV, no mutual auth, no replay protection, weak CRC-32 ICV).</td>
+      <td><span class="pdf-ref">📄 pp. 442-445</span></td>
+    </tr>
+    <tr>
+      <td><strong>WPA</strong></td>
+      <td>Wi-Fi Protected Access (2003). A software patch on WEP hardware using TKIP (key mixing + counter + RC4) plus a 64-bit Message Integrity Check called "Michael."</td>
+      <td>Key exam fact: WPA was deployable <em>without hardware replacement</em>; WPA2 was not.</td>
+      <td><span class="pdf-ref">📄 pp. 446, 448, 561</span></td>
+    </tr>
+    <tr>
+      <td><strong>WPA2 / RSN / 802.11i</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Final 802.11i standard (2004). Uses <strong>AES-CCMP</strong> (AES in Counter Mode for encryption + CBC-MAC for integrity). Requires hardware replacement. Comes in Personal (PSK) and Enterprise (802.1X/EAP) variants.</td>
+      <td>This is the current-day standard and the heart of the topic — expect MCQ on modes and user-auth flavors.</td>
+      <td><span class="pdf-ref">📄 pp. 446, 448, 561</span></td>
+    </tr>
+    <tr>
+      <td><strong>WPA3</strong></td>
+      <td>2018 successor to WPA2. Replaces the PSK handshake with <em>SAE</em> (Simultaneous Authentication of Equals — a Diffie-Hellman-based password-authenticated key exchange), giving <strong>forward secrecy</strong>.</td>
+      <td>Key exam fact per slide: WPA3-PSK fixes WPA2-PSK's "session key is fully derivable from PSK + nonce" weakness.</td>
+      <td><span class="pdf-ref">📄 pp. 441, 449, 560</span></td>
+    </tr>
+    <tr>
+      <td><strong>PSK (Pre-Shared Key)</strong></td>
+      <td>A single password/passphrase shared by every user of the network. Used in WPA-Personal / WPA2-Personal / WPA3-Personal.</td>
+      <td>Vulnerability: all users share the same key, so a malicious user on the same LAN can decrypt others' traffic if the session key is derivable.</td>
+      <td><span class="pdf-ref">📄 pp. 448, 449, 459, 561, 570</span></td>
+    </tr>
+    <tr>
+      <td><strong>802.1X</strong> <span class="signal-explicit">🔴</span></td>
+      <td>IEEE standard for port-based Network Access Control. Defines how EAP messages flow between Supplicant, Authenticator, and Authentication Server — and gates the "controlled port" on the AP.</td>
+      <td>This is <em>the</em> named topic in the final review script. Know its 3 components by heart.</td>
+      <td><span class="pdf-ref">📄 pp. 451, 455, 456, 562, 566, 567</span></td>
+    </tr>
+    <tr>
+      <td><strong>EAP</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Extensible Authentication Protocol — a <em>framework</em> (not a single protocol) that encapsulates any authentication method between client and AS.</td>
+      <td>Know that EAP is an <em>envelope</em>, not a specific method. "EAP itself doesn't authenticate — the <em>method</em> inside does."</td>
+      <td><span class="pdf-ref">📄 pp. 458, 569</span></td>
+    </tr>
+    <tr>
+      <td><strong>EAP-TLS</strong></td>
+      <td>EAP method that embeds a full TLS handshake in EAP. Requires <em>both</em> client <em>and</em> server X.509 certificates → mutual public-key authentication.</td>
+      <td>Instructor said: "You need to know TLS requires <em>both</em> client and server public-key certificates."</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570</span></td>
+    </tr>
+    <tr>
+      <td><strong>EAP-TTLS</strong></td>
+      <td>Tunneled TLS. Only the <em>server</em> has a certificate; the client authenticates with username/password (or similar) inside the TLS tunnel.</td>
+      <td>Instructor explicitly contrasted TTLS vs TLS: "that is one difference between TLS versus tunneled TLS."</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570</span></td>
+    </tr>
+    <tr>
+      <td><strong>RADIUS</strong></td>
+      <td>Remote Authentication Dial-In User Service. The protocol the AP uses to <em>talk</em> to the authentication server. EAP messages ride inside RADIUS Access-Request / Access-Accept packets.</td>
+      <td>Know that the EAP payload crosses two legs: client↔AP (EAPOL) and AP↔AS (RADIUS).</td>
+      <td><span class="pdf-ref">📄 pp. 460, 571</span></td>
+    </tr>
+    <tr>
+      <td><strong>AAA</strong></td>
+      <td>Authentication (<em>who are you?</em>), Authorization (<em>what may you do?</em>), Accounting (<em>keep track of usage</em>) — the three-part framework NAC implements.</td>
+      <td>Short-answer goldmine. Memorize all three A's with their one-sentence meanings.</td>
+      <td><span class="pdf-ref">📄 pp. 454, 565</span></td>
+    </tr>
+    <tr>
+      <td><strong>NAC</strong></td>
+      <td>Network Access Control — the umbrella concept of authenticating users, deciding what they may access, and even checking device health before admission.</td>
+      <td>Instructor emphasized NAC is "umbrella" — 802.1X is one of <em>several</em> enforcement methods (plus Firewall, DHCP, VLAN).</td>
+      <td><span class="pdf-ref">📄 pp. 451, 453, 562, 564</span></td>
+    </tr>
+    <tr>
+      <td><strong>VLAN Segmentation</strong></td>
+      <td>Logically slicing one physical LAN into many virtual LANs so that users/devices in one VLAN cannot see traffic in another.</td>
+      <td>Instructor tied this to the smart-manufacturing example: IT VLAN must be isolated from OT VLAN.</td>
+      <td><span class="pdf-ref">📄 pp. 362, 393, 452, 563</span></td>
+    </tr>
+    <tr>
+      <td><strong>AES-CCMP</strong></td>
+      <td>AES in Counter mode with CBC-MAC Protocol. Counter mode provides confidentiality; CBC-MAC provides integrity. Standard WPA2 link-layer cipher.</td>
+      <td>Parallel to AES-GCM at higher layers. Know that counter mode alone ≠ integrity.</td>
+      <td><span class="pdf-ref">📄 p. 446</span></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<!-- /section-block -->
+
+<!-- ============================================================
+     SECTION 2: HOW IT WORKS — STEP BY STEP
+     ============================================================ -->
+<h2 id="section-2">§2 — How It Works (Step-by-Step)</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 439-440, 455-461, 566-572 (also see pp. 446-449 for crypto mechanics)</div>
+
+<div class="section-block">
+
+<h3>2.1 — The Full 802.11i Phases of Operation</h3>
+<p>
+  A complete WPA2-Enterprise connection has <strong>six distinct phases</strong> in order
+  <span class="pdf-ref">📄 pp. 457, 568</span>. Know them in sequence — a common exam question
+  is "which phase does X happen in?"
+</p>
+
+<pre class="diagram">
+  ┌──────────────┐    ┌─────────────────┐    ┌──────────────────────┐
+  │  Supplicant  │    │  Authenticator  │    │ Authentication Server│
+  │   (Laptop)   │    │   (AP / Router) │    │   (RADIUS / AS)      │
+  └──────┬───────┘    └────────┬────────┘    └──────────┬───────────┘
+         │                     │                         │
+   [1] Discovery              │                         │
+         │   Beacon (SSID,    │                         │
+         │   security params) │                         │
+         │ <──────────────────│                         │
+         │   Probe Request    │                         │
+         │───────────────────>│                         │
+         │   Probe Response   │                         │
+         │ <──────────────────│                         │
+         │                     │                         │
+   [2] Open Authentication (formality — null auth)      │
+         │  Auth Req / Resp   │                         │
+         │<──────────────────>│                         │
+         │                     │                         │
+   [3] Association            │                         │
+         │  Assoc Req (ciphers)→                        │
+         │  Assoc Resp ←──────│    ⛔ controlled port    │
+         │                     │    still BLOCKED        │
+         │                     │                         │
+   [4] 802.1X / EAP Authentication                      │
+         │  EAP-Req Identity  │                         │
+         │<───────────────────│                         │
+         │  EAP-Resp Identity │   RADIUS Access-Req     │
+         │───────────────────>│────────────────────────>│
+         │                     │                         │
+         │ ⇐ multiple EAP round-trips (method-specific) ⇒│
+         │                     │                         │
+         │                     │   RADIUS Access-Accept  │
+         │                     │   + keying material (MSK)│
+         │                     │<────────────────────────│
+         │  EAP-Success        │                         │
+         │<───────────────────│                         │
+         │                     │                         │
+   [5] Key Management (4-message EAPOL-Key handshake)   │
+         │<──────EAPOL-Key 1─>│                         │
+         │<──────EAPOL-Key 2─>│                         │
+         │<──────EAPOL-Key 3─>│   (derive PTK; GTK)     │
+         │<──────EAPOL-Key 4─>│                         │
+         │                     │  ✅ controlled port OPENS│
+         │                     │                         │
+   [6] Protected Data Transfer                          │
+         │<═══AES-CCMP data══>│                         │
+         │                     │                         │
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 439-440, 457, 460-461, 566-568, 571-572</span></div>
+
+<h3>2.2 — Phase-by-Phase Annotation</h3>
+
+<div class="step">
+  <div class="step-head">Phase 1 — Discovery <span class="pdf-ref">📄 pp. 439-440</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> The AP periodically broadcasts a <em>beacon</em> containing
+    its SSID and advertised security parameters (supported ciphers, auth methods). Stations passively
+    listen, measure signal strength, and choose an AP.<br>
+    <strong class="lbl">Technical:</strong> If SSID is hidden, the station can send an active
+    <em>Probe Request</em>; any AP with that SSID replies with a <em>Probe Response</em>
+    <span class="pdf-ref">📄 pp. 513, 515</span>. The instructor explicitly noted:
+    <em>"SSID broadcasting is optional — if no SSID broadcasting, the station can also send out probe
+    requests and get the response."</em><br>
+    <strong class="lbl">Example:</strong> Your laptop sees "eduroam" in its Wi-Fi list because the
+    campus AP broadcast a beacon every ~100 ms.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 2 — Open ("Null") Authentication <span class="pdf-ref">📄 pp. 440, 442-443</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> A formality exchange of two frames (Auth Request,
+    Auth Response) used for legacy reasons. In WPA2 this provides <em>no</em> real security — the
+    genuine authentication occurs in Phase 4.<br>
+    <strong class="lbl">Technical:</strong> Historically, WEP performed <em>Shared-Key</em>
+    authentication here using an RC4 challenge-response <span class="pdf-ref">📄 p. 443</span>; WPA2
+    replaces that with an empty Open exchange because the real work moves to EAP.<br>
+    <strong class="lbl">Example:</strong> In Wireshark you will still see "Authentication" frames with
+    status "Successful" — but no cryptographic check actually happened.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 3 — Association <span class="pdf-ref">📄 pp. 439-440</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> The station sends an <em>Association Request</em> with
+    its desired cipher suite and auth method; the AP confirms in an <em>Association Response</em>.
+    The station is now "associated" but data is <strong>still blocked</strong> — the 802.1X
+    controlled port is closed.<br>
+    <strong class="lbl">Technical:</strong> This is when security parameters are negotiated so both
+    ends agree on WPA2-CCMP, WPA2-TKIP, etc. If parameters mismatch, the AP rejects the association.<br>
+    <strong class="lbl">Example:</strong> Your phone tells the AP "I support AES-CCMP"; the AP replies
+    "agreed, AES-CCMP it is." Any application packet sent now would be dropped at the controlled port.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 4 — 802.1X / EAP Authentication <span class="pdf-ref">📄 pp. 455-456, 460-461, 566-567, 571-572</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> The AP sends an <em>EAP-Request/Identity</em> over the
+    uncontrolled port; the supplicant responds with its identity; the AP tunnels the EAP payload inside
+    a <em>RADIUS Access-Request</em> to the authentication server. Many round-trips follow, driven by
+    the chosen EAP method (EAP-TLS runs a whole TLS handshake here; EAP-TTLS / PEAP run TLS then
+    inner password auth).<br>
+    <strong class="lbl">Technical:</strong> Two <em>different</em> encapsulations are used in sequence:
+    <em>EAPOL</em> (EAP over LAN) from client to AP, and <em>RADIUS</em> from AP to AS
+    <span class="pdf-ref">📄 p. 460</span>. The AP never inspects the inner EAP payload — it just
+    relays. On success, the AS sends an <em>Access-Accept</em> with keying material (the <em>Master
+    Session Key</em>, MSK).<br>
+    <strong class="lbl">Example — eduroam:</strong> A UA student visiting Georgia Tech opens Wi-Fi.
+    Georgia Tech's RADIUS does <em>not</em> have their myBama password, so it forwards the request
+    over the eduroam federation to UA's RADIUS, which verifies and returns Accept. This is exactly
+    what the instructor described: <em>"it will be forwarded to myBama authentication server, so they
+    verify your identity."</em> <span class="pdf-ref">📄 pp. 571-572</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 5 — Key Management (4-way handshake) <span class="pdf-ref">📄 pp. 457, 568</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> Four EAPOL-Key messages are exchanged between the
+    supplicant and the authenticator. They prove both sides possess the same master key (PMK, derived
+    from the MSK) and derive a fresh per-session Pairwise Transient Key (PTK) plus a Group Temporal
+    Key (GTK) for broadcast/multicast traffic.<br>
+    <strong class="lbl">Technical:</strong> After message 3 is confirmed, the authenticator opens the
+    <em>controlled port</em>. No actual user data has flowed yet.<br>
+    <strong class="lbl">Example:</strong> This handshake is what the famous <em>KRACK</em> (Key
+    Reinstallation) attack targeted in 2017 <span class="pdf-ref">📄 p. 450</span>.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 6 — Protected Data Transfer <span class="pdf-ref">📄 p. 446</span></div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> Every subsequent Wi-Fi frame is encrypted under the PTK
+    using <strong>AES-CCMP</strong> (AES Counter mode + CBC-MAC). You now have web access.<br>
+    <strong class="lbl">Technical:</strong> CCMP provides confidentiality via counter mode and
+    integrity via CBC-MAC — an analog of the AES-GCM mode used at higher layers. Instructor's note:
+    <em>"counter mode plus message authentication code gives us the AES GCM mode. Basically, the AES
+    GCM mode is the most commonly used solution that provides encryption and message authentication for
+    the link-layer communication."</em><br>
+    <strong class="lbl">Example:</strong> When you open HTTPS, you now have <em>two</em> layers of
+    encryption: AES-CCMP at Layer 2 (covers the whole frame including IP/TCP headers within the Wi-Fi
+    segment) and TLS at Layer 5 (covers the HTTP payload end-to-end).
+  </div>
+</div>
+
+<h3>2.3 — The Two Personalities of WPA2</h3>
+
+<p>
+  The entire flow above describes <strong>WPA2-Enterprise</strong>. <strong>WPA2-Personal</strong>
+  skips Phase 4 entirely — instead of contacting a RADIUS server, both sides simply derive the PMK
+  from the pre-shared passphrase and go straight to the 4-way handshake
+  <span class="pdf-ref">📄 pp. 448-449, 561</span>.
+</p>
+
+<pre class="diagram">
+ WPA2-PERSONAL (PSK)                    WPA2-ENTERPRISE (802.1X / EAP)
+ ──────────────────────                 ──────────────────────────────
+
+   1 Discovery                             1 Discovery
+   2 Open Auth                             2 Open Auth
+   3 Association                           3 Association
+   4 (skipped)                             4 EAP / 802.1X via RADIUS
+     ↓ PMK = PBKDF2(passphrase)              ↓ PMK = derived from MSK
+   5 4-way handshake                       5 4-way handshake
+   6 AES-CCMP data                         6 AES-CCMP data
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 448-449, 451, 561-562</span></div>
+
+<h3>2.4 — How EAP Sits Inside the Flow</h3>
+
+<p>
+  EAP is not <em>one</em> protocol — it is a message envelope that can carry many different
+  authentication methods <span class="pdf-ref">📄 pp. 458, 569</span>. The message format is fixed:
+</p>
+
+<pre class="diagram">
+ EAP Message Format (<span class="pdf-ref">📄 pp. 460-461, 571-572</span>):
+
+   ┌──────┬────────────┬────────┬──────┬─────────────────────┐
+   │ Code │ Identifier │ Length │ Type │        Data         │
+   │  8b  │     8b     │  16b   │  8b  │       variable       │
+   └──────┴────────────┴────────┴──────┴─────────────────────┘
+
+   Code values:  01 = Request   02 = Response
+                 03 = Success   04 = Failure
+
+   Type values:  identifies the inner authentication method
+                 (e.g. EAP-TLS, EAP-TTLS, EAP-GPSK, EAP-AKA)
+</pre>
+
+<p>
+  The same framing travels over both legs — on the wireless leg (Supplicant ↔ AP) it is wrapped in
+  EAPOL; on the wired leg (AP ↔ RADIUS server) it is wrapped in RADIUS attributes. The AP is a
+  "pass-through" — it does <em>not</em> understand the inner Type
+  <span class="pdf-ref">📄 pp. 460, 571</span>.
+</p>
+
+<h3>2.5 — EAP Method Comparison <span class="pdf-ref">📄 pp. 459, 570</span></h3>
+<p>
+  The instructor said explicitly: <em>"you don't really need to remember all those, but you only need
+  to know we have different kinds of authentication methods. But one thing I want to point out is TLS
+  requires both client and server public-key certificates, but the tunnel TLS only requires
+  server-side public key certificate — that is one difference."</em>
+</p>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>EAP Method</th>
+      <th>Client cert?</th>
+      <th>Server cert?</th>
+      <th>Inner credential</th>
+      <th>Typical deployment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>EAP-TLS</strong></td>
+      <td>✅ Yes (requires PKI for every user)</td>
+      <td>✅ Yes</td>
+      <td>None — the certificates do everything</td>
+      <td>High-security enterprise, some IoT</td>
+    </tr>
+    <tr>
+      <td><strong>EAP-TTLS</strong></td>
+      <td>❌ No</td>
+      <td>✅ Yes</td>
+      <td>Username/password inside the TLS tunnel</td>
+      <td>Eduroam, most campus Wi-Fi</td>
+    </tr>
+    <tr>
+      <td><strong>EAP-GPSK</strong></td>
+      <td>❌ No (PSK)</td>
+      <td>❌ No (PSK)</td>
+      <td>Pre-shared key, mutual</td>
+      <td>IoT devices</td>
+    </tr>
+    <tr>
+      <td><strong>EAP-IKEv2</strong></td>
+      <td>Optional</td>
+      <td>Optional</td>
+      <td>IKEv2 key exchange (various)</td>
+      <td>VPN-heavy environments</td>
+    </tr>
+    <tr>
+      <td><strong>LEAP</strong></td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>MS-CHAP (weak)</td>
+      <td>Deprecated — do not use</td>
+    </tr>
+    <tr>
+      <td><strong>EAP-AKA</strong></td>
+      <td>✅ (SIM)</td>
+      <td>✅ (HSS)</td>
+      <td>SIM-based challenge-response</td>
+      <td>3G/4G cellular</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.6 — The AP's "Two Ports" Visualized <span class="pdf-ref">📄 pp. 455, 566</span></h3>
+
+<pre class="diagram">
+                               ┌────────────────────────────┐
+                               │    ACCESS POINT (802.1X)   │
+                               │                            │
+   Supplicant ──EAP/EAPOL────> │ [UNCONTROLLED PORT] ──────>│──RADIUS──> Auth Server
+   (laptop)                    │    always open,            │
+                               │    auth traffic only       │
+                               │                            │
+                               │ [ CONTROLLED PORT  ]       │
+                               │    ⛔ blocked until         │──> LAN / Internet
+                               │    Access-Accept arrives;  │
+                               │    ✅ open afterwards       │
+                               └────────────────────────────┘
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 455, 566</span></div>
+
+<p>
+  The elegance of this design: only the <em>authentication method</em> changes when upgrading from
+  password to certificate — the AP firmware never needs to change because the AP never inspects the
+  EAP payload <span class="pdf-ref">📄 pp. 456, 567</span>.
+</p>
+
+<h3>2.7 — Placing Wi-Fi Among Other NAC Methods <span class="pdf-ref">📄 pp. 452, 563</span></h3>
+
+<p>
+  The instructor explicitly enumerated <em>all</em> network access enforcement methods covered in
+  the course as a coherent set:
+</p>
+<ul class="plain">
+  <li><strong>802.1X / EAP</strong> — port-based access control at the Wi-Fi / Ethernet edge <span class="pdf-ref">📄 pp. 452, 563</span></li>
+  <li><strong>Firewall</strong> — traffic filtering between inside and outside <span class="pdf-ref">📄 pp. 397-434</span></li>
+  <li><strong>DHCP management</strong> — if no IP is assigned, no access; DHCP snooping prevents rogue servers <span class="pdf-ref">📄 pp. 452, 563, 587</span></li>
+  <li><strong>VLAN / Network segmentation</strong> — isolate tenants or zones logically (e.g., IT vs smart-manufacturing OT) <span class="pdf-ref">📄 pp. 362, 393, 452, 563</span></li>
+</ul>
+<div class="callout">
+  <strong class="lbl">Instructor's explicit framing</strong>
+  <em>"To extend this — what network access methods have we introduced in the whole class? Besides
+  802.1X, we also introduced the firewall, the DHCP management, and network segmentation."</em>
+  Expect a multi-answer MCQ asking "select all that are NAC enforcement methods."
+</div>
+
+</div>
+<!-- /section-block -->
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 441-464, 559-578 (signal sources: scriptFinalExamReview-cs548.txt, scriptMidtermReview-cs548.txt)</div>
+
+<div class="section-block">
+
+<h3>3.1 — What Exams Typically Test On This Topic</h3>
+<p>
+  Based on the instructor's spoken exam review plus the format of the midterm 2025/2026 papers and
+  Quizzes 1–5, the most likely question patterns are:
+</p>
+<ol>
+  <li>
+    <strong>Identify the three 802.1X components</strong> and who plays each role in a concrete
+    scenario (laptop, AP, RADIUS). Exams ask this because the Supplicant / Authenticator / AS
+    distinction is the topic's backbone. <span class="pdf-ref">📄 pp. 454-456, 565-567</span>
+  </li>
+  <li>
+    <strong>Which port is open / blocked, and when?</strong> (Uncontrolled port always open for
+    EAP; controlled port blocked until Access-Accept.) Exams love this because it is a one-sentence
+    factual check that catches students who only skimmed. <span class="pdf-ref">📄 pp. 455, 566</span>
+  </li>
+  <li>
+    <strong>Personal vs Enterprise encryption/auth table.</strong> Given a cell of the WEP/WPA/WPA2
+    matrix, fill in the blank. <span class="pdf-ref">📄 pp. 448, 561</span>
+  </li>
+  <li>
+    <strong>EAP-TLS vs EAP-TTLS difference.</strong> The instructor called this out by name — expect
+    a True/False or single-word fill-in. <span class="pdf-ref">📄 pp. 459, 570</span>
+  </li>
+  <li>
+    <strong>Challenge question integrating wireless + TLS + public-key certificates.</strong> The
+    instructor said: <em>"this is a good example of what the challenge question in wireless security
+    can be tested — it requires you to link different components."</em>
+    <span class="pdf-ref">📄 pp. 459, 570</span>
+  </li>
+  <li>
+    <strong>List all NAC enforcement methods.</strong> Short-answer test of whether you remember all
+    four (802.1X, Firewall, DHCP, VLAN). <span class="pdf-ref">📄 pp. 452, 563</span>
+  </li>
+  <li>
+    <strong>"Why is wireless insecure?"</strong> A direct short-answer based on the four bullet points
+    from slide 559 (broadcast, mobility, limited resources, accessibility).
+    <span class="pdf-ref">📄 p. 559</span>
+  </li>
+</ol>
+
+<h3>3.2 — Common Misconceptions &amp; Traps</h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "The Access Point authenticates the user."</p>
+  <p><span class="reality">✅ REALITY:</span> In 802.1X, the AP (Authenticator) only <em>relays</em>
+    EAP messages. The <strong>Authentication Server</strong> (RADIUS) actually validates credentials
+    and issues Accept/Reject. <span class="pdf-ref">📄 pp. 454-456, 565-567</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> MCQ with "Which device decides if the user is legitimate?"
+    and one of the options is "Access Point." It is not the AP.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "WPA3 is just a rebrand of WPA2."</p>
+  <p><span class="reality">✅ REALITY:</span> WPA3-Personal replaces the WPA2 4-way handshake with
+    <strong>SAE</strong> (Dragonfly, a DH-like ephemeral key exchange), giving forward secrecy.
+    In WPA2-PSK the session key is <em>fully derivable</em> from the PSK plus the handshake nonces,
+    so a malicious co-tenant on the same LAN can decrypt your traffic.
+    <span class="pdf-ref">📄 p. 449</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "What security property does WPA3-Personal add?" — answer:
+    forward secrecy (session keys no longer derivable from the PSK alone).</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "EAP is an authentication protocol."</p>
+  <p><span class="reality">✅ REALITY:</span> EAP is a <strong>framework</strong> — a message envelope.
+    The actual authentication is performed by the inner <em>method</em> named in the Type field
+    (EAP-TLS, EAP-TTLS, EAP-GPSK, …). <span class="pdf-ref">📄 pp. 458, 569</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> True/False "EAP specifies a single authentication
+    algorithm." Answer: False — it is a generic container.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "Once 802.11 Association completes, the device can send data."</p>
+  <p><span class="reality">✅ REALITY:</span> Association only negotiates capabilities. The
+    <em>controlled port</em> remains blocked until Phase 4 (EAP) succeeds and Phase 5 (4-way handshake)
+    derives the PTK. <span class="pdf-ref">📄 pp. 455-457, 566-568</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "After Association, the station can immediately send HTTP
+    traffic." — False; EAP + key management must complete first.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "WPA-Personal and WPA-Enterprise differ in encryption algorithm."</p>
+  <p><span class="reality">✅ REALITY:</span> They differ in <strong>user authentication</strong>, not
+    encryption. Both use the same cipher within a given WPA version (e.g., WPA2-Personal and
+    WPA2-Enterprise both use AES-CCMP). Personal = PSK; Enterprise = 802.1X/EAP.
+    <span class="pdf-ref">📄 pp. 448, 561</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Matching-table questions that swap the "Encryption" and
+    "User Auth" columns. Always identify which column you are filling in.</p>
+</div>
+
+<h3>3.3 — Compare &amp; Contrast: WEP vs WPA vs WPA2 vs WPA3</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>WEP (1999)</th>
+      <th>WPA (2003)</th>
+      <th>WPA2 / 802.11i (2004)</th>
+      <th>WPA3 (2018)</th>
+      <th>📄 Pages</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Cipher</td>
+      <td>RC4 stream cipher</td>
+      <td>TKIP (RC4 + key mixing)</td>
+      <td><strong>AES-CCMP</strong> (AES counter + CBC-MAC)</td>
+      <td>AES-CCMP / AES-GCMP</td>
+      <td><span class="pdf-ref">📄 pp. 442, 446, 448, 561</span></td>
+    </tr>
+    <tr>
+      <td>Integrity</td>
+      <td>CRC-32 (not cryptographic)</td>
+      <td>64-bit MIC ("Michael")</td>
+      <td>CBC-MAC</td>
+      <td>CBC-MAC / GCM auth tag</td>
+      <td><span class="pdf-ref">📄 pp. 445, 446</span></td>
+    </tr>
+    <tr>
+      <td>Personal auth</td>
+      <td>Shared Key (single)</td>
+      <td>PSK</td>
+      <td>PSK</td>
+      <td>SAE (DH-based, forward secrecy)</td>
+      <td><span class="pdf-ref">📄 pp. 442, 448, 449, 561</span></td>
+    </tr>
+    <tr>
+      <td>Enterprise auth</td>
+      <td>— (none)</td>
+      <td>802.1X / EAP</td>
+      <td>802.1X / EAP</td>
+      <td>802.1X / EAP</td>
+      <td><span class="pdf-ref">📄 pp. 448, 561</span></td>
+    </tr>
+    <tr>
+      <td>Replay protection</td>
+      <td>None</td>
+      <td>Sequence numbers</td>
+      <td>Per-packet counter (in CCMP)</td>
+      <td>Per-packet counter</td>
+      <td><span class="pdf-ref">📄 pp. 445, 446</span></td>
+    </tr>
+    <tr>
+      <td>Hardware change required?</td>
+      <td>—</td>
+      <td><strong>No</strong> (software patch on WEP hardware)</td>
+      <td><strong>Yes</strong> (new chipset for AES)</td>
+      <td>Depends on chipset support</td>
+      <td><span class="pdf-ref">📄 p. 446</span></td>
+    </tr>
+    <tr>
+      <td>Forward secrecy?</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No (PSK-derived PTK is fixed per session)</td>
+      <td><strong>Yes</strong> (via ephemeral SAE)</td>
+      <td><span class="pdf-ref">📄 p. 449</span></td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>Broken since 2001</td>
+      <td>Deprecated (TKIP weaknesses)</td>
+      <td>Industry standard (with KRACK-mitigated drivers)</td>
+      <td>Gradual rollout</td>
+      <td><span class="pdf-ref">📄 pp. 441, 450, 560</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.4 — Compare &amp; Contrast: EAP-TLS vs EAP-TTLS</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>EAP-TLS</th>
+      <th>EAP-TTLS</th>
+      <th>📄 Pages</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Server certificate required?</td>
+      <td>✅ Yes</td>
+      <td>✅ Yes</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570</span></td>
+    </tr>
+    <tr>
+      <td>Client certificate required?</td>
+      <td>✅ Yes (every user must have one)</td>
+      <td>❌ No (client uses username/password inside TLS tunnel)</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570</span></td>
+    </tr>
+    <tr>
+      <td>Mutual authentication?</td>
+      <td>✅ Yes (both via X.509 certs)</td>
+      <td>✅ Yes (server via cert, client via tunneled inner auth)</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570</span></td>
+    </tr>
+    <tr>
+      <td>PKI deployment burden</td>
+      <td>High (issue cert to every user)</td>
+      <td>Low (only AS needs a cert)</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570</span></td>
+    </tr>
+    <tr>
+      <td>Typical use case</td>
+      <td>High-security enterprise, managed IoT</td>
+      <td>Eduroam, most campus and corporate Wi-Fi</td>
+      <td><span class="pdf-ref">📄 pp. 459, 570-572</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.5 — Memory Aids</h3>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Six Phases of 802.11i" = D-O-A-E-K-D</strong>
+  <strong>D</strong>iscovery → <strong>O</strong>pen auth → <strong>A</strong>ssociation →
+  <strong>E</strong>AP authentication → <strong>K</strong>ey mgmt (4-way) → <strong>D</strong>ata.
+  Remember as <em>"Dogs Often Ask Every Kind of Dinner."</em>
+  <span class="pdf-ref">📄 pp. 457, 568</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "SAA" for 802.1X components</strong>
+  <strong>S</strong>upplicant (you) → <strong>A</strong>uthenticator (AP, the dumb relay) →
+  <strong>A</strong>uthentication server (RADIUS, the brain). "<em>Supplicant Asks, Authenticator
+  Announces, AS Approves.</em>"
+  <span class="pdf-ref">📄 pp. 454-456, 565-567</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "TTLS is 1 cert, TLS is 2 certs"</strong>
+  The extra <em>T</em> in TTLS ("Tunneled") means the second cert is <em>replaced</em> by a tunnel —
+  so only the server needs a cert. EAP-TLS = 2 certs; EAP-TTLS = 1 cert.
+  <span class="pdf-ref">📄 pp. 459, 570</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "AAA = Authentication, Authorization, Accounting"</strong>
+  Think <em>"Who are you? What can you do? What did you do?"</em>
+  <span class="pdf-ref">📄 pp. 454, 565</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "PSK is derivable, SAE is ephemeral"</strong>
+  WPA2-PSK: attacker who knows the PSK + records the handshake can decrypt everything.
+  WPA3-SAE: ephemeral DH means past traffic stays private even if PSK leaks later.
+  <span class="pdf-ref">📄 p. 449</span>
+</div>
+
+</div>
+<!-- /section-block -->
+
+<!-- ============================================================
+     SECTION 4: FOLLOW-UP QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Follow-up Questions</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 435-464, 558-578 (questions drawn from every sub-topic)</div>
+
+<div class="section-block">
+
+<p style="color: var(--text-dim); font-size: 0.94em;">
+  13 questions · 3 difficulty levels · 4 formats · every stem &amp; answer tagged to the source slide.
+  Click <strong style="color: var(--green);">▶ Show Answer</strong> to reveal each explanation.
+</p>
+
+<!-- =========================== PART A: MCQ =========================== -->
+<h3 id="section-4-mcq">Part A — Multiple Choice (4 questions: 1 BEG, 1 INT, 2 ADV)</h3>
+
+<!-- Q1 BEG MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 p. 559</span>
+  </div>
+  <p class="question-stem"><strong>Q1.</strong> Which of the following is <em>not</em> one of the four reasons
+    the instructor gave for why wireless networks are inherently more vulnerable than wired networks?</p>
+  <ol class="mcq-options" type="A">
+    <li>The radio channel is a broadcast medium that any receiver nearby can listen to.</li>
+    <li>Portable devices are mobile and may be left unattended or stolen.</li>
+    <li>Wireless devices use faster CPUs, enabling attackers to run heavy cryptanalysis in real time.</li>
+    <li>The medium is accessible from locations the owner does not physically control.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> C) Wireless devices use faster CPUs…</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why C is correct (i.e., is the false statement):</strong> Slide 559 lists <em>limited</em>
+          memory and processing resources as a reason wireless is insecure, not <em>faster</em> CPUs.
+          <span class="pdf-ref">📄 p. 559</span></li>
+        <li><strong>Why A is wrong (= true):</strong> "Channel: Broadcast ⇒ Eavesdropping, Jamming, Active
+          attacks on protocols" is the first bullet. <span class="pdf-ref">📄 p. 559</span></li>
+        <li><strong>Why B is wrong (= true):</strong> "Mobility: Portable devices ⇒ Not physically
+          secured" is the second bullet. <span class="pdf-ref">📄 p. 559</span></li>
+        <li><strong>Why D is wrong (= true):</strong> "Accessibility: May be left unattended" is the
+          fourth bullet. <span class="pdf-ref">📄 p. 559</span></li>
+        <li><strong>Exam Tip:</strong> For "select the false statement" questions, always scan for
+          the sign flip (limited ↔ unlimited, more ↔ less).</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 INT MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 455-456, 566-567</span>
+  </div>
+  <p class="question-stem"><strong>Q2.</strong> In a WPA2-Enterprise deployment, <em>which</em> entity
+    makes the decision to accept or reject a user's credentials?</p>
+  <ol class="mcq-options" type="A">
+    <li>The Supplicant (user's laptop).</li>
+    <li>The Authenticator (the wireless access point).</li>
+    <li>The Authentication Server (RADIUS).</li>
+    <li>The DHCP server on the local subnet.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> C) The Authentication Server (RADIUS).</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why C is correct:</strong> The AS is the entity that holds the user database and
+          runs the inner EAP method to verify credentials; the AP only <em>relays</em> EAP messages
+          in and out of EAPOL / RADIUS envelopes. <span class="pdf-ref">📄 pp. 455-456, 566-567</span></li>
+        <li><strong>Why A is wrong:</strong> The Supplicant is the <em>subject</em> being authenticated,
+          not the decider. <span class="pdf-ref">📄 pp. 454, 565</span></li>
+        <li><strong>Why B is wrong:</strong> The AP is a pass-through "Authenticator" — it is explicitly
+          designed <em>not</em> to understand the inner EAP method, so it cannot make the decision.
+          <span class="pdf-ref">📄 pp. 456, 567</span></li>
+        <li><strong>Why D is wrong:</strong> DHCP comes <em>after</em> authentication (it is a separate
+          NAC enforcement method that assigns IPs once you are allowed on the network).
+          <span class="pdf-ref">📄 pp. 452, 563</span></li>
+        <li><strong>Exam Tip:</strong> Remember the nightclub analogy — the bouncer (AP) does not run
+          the guest list, the back-office manager (RADIUS) does.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 ADV MCQ (multi-answer edge case) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ · multi-answer</span>
+    <span class="pdf-ref">📄 pp. 452, 563</span>
+  </div>
+  <p class="question-stem"><strong>Q3.</strong> Select <em>all</em> that are network access enforcement
+    methods introduced in this course as part of the NAC umbrella.</p>
+  <ol class="mcq-options" type="A">
+    <li>IEEE 802.1X on Wi-Fi / Ethernet.</li>
+    <li>Firewall packet filtering at the enterprise edge.</li>
+    <li>DHCP management (including DHCP snooping).</li>
+    <li>Network segmentation via VLANs.</li>
+    <li>TLS certificate pinning on the client side.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answers:</strong> A, B, C, D.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why A is correct:</strong> 802.1X is the quintessential port-based NAC method and
+          is listed first on slide 452/563. <span class="pdf-ref">📄 pp. 452, 563</span></li>
+        <li><strong>Why B is correct:</strong> "Firewall: allow or deny network traffic between an
+          enterprise host and an external user" is explicitly listed as a NAC enforcement method.
+          <span class="pdf-ref">📄 pp. 452, 563</span></li>
+        <li><strong>Why C is correct:</strong> "DHCP Management … NAC enforcement occurs at the IP
+          layer based on subnet and IP assignment" is also on the enumeration.
+          <span class="pdf-ref">📄 pp. 452, 563</span></li>
+        <li><strong>Why D is correct:</strong> "Network Segmentation (VLANs)" is the fourth bullet.
+          <span class="pdf-ref">📄 pp. 452, 563</span></li>
+        <li><strong>Why E is wrong:</strong> Certificate pinning is a TLS / application-layer measure
+          that protects against rogue CAs — it is not a NAC enforcement method in the course's taxonomy.
+          <span class="pdf-ref">📄 pp. 240-244</span></li>
+        <li><strong>Exam Tip:</strong> On multi-answer MCQs, write out the four bullets you know from
+          a slide <em>before</em> reading the options — this prevents the tempting "distractor" from
+          pulling you off.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 ADV MCQ (integration / challenge) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 459, 570</span>
+  </div>
+  <p class="question-stem"><strong>Q4.</strong> You deploy <strong>EAP-TTLS</strong> on a campus
+    eduroam network. Which statement most accurately describes the <em>certificate</em> requirements
+    for this deployment?</p>
+  <ol class="mcq-options" type="A">
+    <li>Both every user device and the authentication server must have a valid X.509 certificate.</li>
+    <li>Only the authentication server must have a valid X.509 certificate; user devices authenticate with
+      username/password carried inside the TLS tunnel.</li>
+    <li>Only user devices must have certificates; the AS relies on a pre-shared key.</li>
+    <li>Certificates are not used at all; authentication is done via Diffie-Hellman SAE.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) Only the AS has a certificate; clients authenticate via
+        inner password inside the TLS tunnel.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Slide 459/570 specifies EAP-TTLS as <em>"only the server
+          has a certificate to authenticate itself to the client. A secure connection (the 'tunnel') is
+          established with secret keys."</em> Inside that tunnel, the client presents username/password.
+          This is why the instructor said it is the practical choice for consumer/guest/eduroam networks.
+          <span class="pdf-ref">📄 pp. 459, 570</span></li>
+        <li><strong>Why A is wrong:</strong> That is EAP-<em>TLS</em> (both sides have certs), not
+          EAP-TTLS. <span class="pdf-ref">📄 pp. 459, 570</span></li>
+        <li><strong>Why C is wrong:</strong> That is EAP-GPSK (Generalized Pre-Shared Key), not TTLS.
+          <span class="pdf-ref">📄 pp. 459, 570</span></li>
+        <li><strong>Why D is wrong:</strong> SAE is the WPA3-<em>Personal</em> handshake, not an EAP
+          method. <span class="pdf-ref">📄 p. 449</span></li>
+        <li><strong>Exam Tip:</strong> The extra <em>T</em> ("Tunneled") in TTLS literally means the
+          second certificate is <em>replaced</em> by a tunnel. Count the T's = count the certs.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART B: TRUE/FALSE =========================== -->
+<h3 id="section-4-tf">Part B — True/False (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q5 BEG TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 455, 566</span>
+  </div>
+  <p class="question-stem"><strong>Q5. Statement:</strong> In an 802.1X deployment, the <em>controlled
+    port</em> on the AP is open by default and becomes blocked only after authentication fails.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>It is exactly the opposite. The <em>controlled port</em> starts <strong>blocked</strong> and
+        only <strong>opens</strong> after the RADIUS server returns Access-Accept and the 4-way
+        handshake completes. The <em>uncontrolled port</em> is the one that is always open — and only
+        for EAP/auth traffic. To make the statement true it would need to read: <em>"the controlled
+        port is blocked by default and becomes open only after authentication succeeds."</em>
+        <span class="pdf-ref">📄 pp. 455, 566</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 INT TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 448, 561</span>
+  </div>
+  <p class="question-stem"><strong>Q6. Statement:</strong> WPA2-Personal and WPA2-Enterprise use
+    different <em>encryption</em> algorithms — AES-CCMP for Enterprise and TKIP for Personal.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>Within a single WPA version, Personal and Enterprise use the <em>same</em> encryption
+        algorithm. In WPA2, both use <strong>AES-CCMP</strong> (more specifically, AES in Counter mode
+        with CBC-MAC). The difference between Personal and Enterprise lies entirely in <em>user
+        authentication</em>: Personal uses PSK; Enterprise uses 802.1X/EAP.
+        <span class="pdf-ref">📄 pp. 448, 561</span>
+        TKIP is the WPA-<em>1</em> (2003) cipher, not WPA2.
+        <span class="pdf-ref">📄 p. 446</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 ADV TF (subtle technical error / edge case) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · subtle error</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 p. 449</span>
+  </div>
+  <p class="question-stem"><strong>Q7. Statement:</strong> In a WPA2-Personal (PSK) network used at a
+    public hotel, an attacker sitting in the same Wi-Fi network can decrypt another victim's TLS-free
+    HTTP traffic because the PTK is derivable from the PSK and the handshake nonces — even without
+    breaking any cryptographic primitive.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: TRUE.</strong></p>
+      <p>Slide 449 states this weakness explicitly: <em>"session key fully derivable — PSK + nonce from
+        handshake. Vulnerable in public Wi-Fi: in hotel or conference site scenario, all users share
+        the same PSK (password). If your application data is not encrypted (without TLS), attacker in
+        the same LAN can extract sensitive data."</em> This is precisely why WPA3-Personal's
+        <strong>SAE</strong> handshake — which uses an ephemeral Diffie-Hellman exchange so the session
+        key is no longer purely derivable from the password — provides <em>forward secrecy</em>.
+        <span class="pdf-ref">📄 p. 449</span>
+        The statement is subtle because it sounds like cryptography is broken, but actually no primitive
+        is "broken" — the derivation itself is designed to be reversible given inputs the attacker can
+        observe.</p>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART C: SHORT ANSWER =========================== -->
+<h3 id="section-4-sa">Part C — Short Answer (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q8 BEG SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 454, 565</span>
+  </div>
+  <p class="question-stem"><strong>Q8.</strong> Name the three components of the 802.1X framework and
+    describe the role of each in one sentence.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ul class="plain">
+        <li><strong>Supplicant</strong> — the client device (laptop, phone) that is requesting network
+          access; it originates EAP Identity/Response messages.</li>
+        <li><strong>Authenticator</strong> — the network edge device (Wi-Fi access point or wired
+          switch port); it relays EAP messages between the Supplicant (over EAPOL) and the
+          Authentication Server (over RADIUS), and it enforces the controlled/uncontrolled port split.</li>
+        <li><strong>Authentication Server</strong> — the back-end service (typically RADIUS) that holds
+          the user database, runs the actual authentication logic (EAP method), and returns Accept or
+          Reject with keying material.</li>
+      </ul>
+      <p><span class="pdf-ref">📄 pp. 454, 565</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ All three names correctly spelled and in correct role <span class="pdf-ref">📄 pp. 454, 565</span></li>
+        <li>☐ States that the Authenticator <em>relays only</em> (does not decide) <span class="pdf-ref">📄 pp. 455-456, 566-567</span></li>
+        <li>☐ States that the Authentication Server is the decision-maker <span class="pdf-ref">📄 pp. 454, 565</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 INT SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 457, 568</span>
+  </div>
+  <p class="question-stem"><strong>Q9.</strong> List, in order, the six phases of 802.11i operation,
+    and state in one clause what the main purpose of each phase is.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ol>
+        <li><strong>Discovery</strong> — the station finds nearby APs via beacons or probe requests and
+          learns their security parameters. <span class="pdf-ref">📄 pp. 439-440</span></li>
+        <li><strong>Open authentication</strong> — a legacy null-authentication frame exchange; no real
+          security check happens here in WPA2. <span class="pdf-ref">📄 p. 443</span></li>
+        <li><strong>Association</strong> — the station and AP agree on a cipher suite and auth method;
+          station is now associated but the controlled port is still blocked. <span class="pdf-ref">📄 pp. 439-440</span></li>
+        <li><strong>802.1X / EAP authentication</strong> — the supplicant proves its identity to the
+          authentication server via the AP; on success the AS returns keying material (MSK).
+          <span class="pdf-ref">📄 pp. 455-456, 460, 566-567, 571</span></li>
+        <li><strong>Key management (4-way handshake)</strong> — the supplicant and AP derive the PTK
+          and install the GTK; the controlled port opens. <span class="pdf-ref">📄 pp. 457, 568</span></li>
+        <li><strong>Protected data transfer</strong> — all subsequent frames are encrypted and
+          integrity-protected by AES-CCMP. <span class="pdf-ref">📄 p. 446</span></li>
+      </ol>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Six phases named in the correct order <span class="pdf-ref">📄 pp. 457, 568</span></li>
+        <li>☐ States that controlled port opens <em>between</em> Phase 5 and Phase 6 <span class="pdf-ref">📄 pp. 455, 566</span></li>
+        <li>☐ Explicitly mentions AES-CCMP for Phase 6 <span class="pdf-ref">📄 p. 446</span></li>
+        <li>☐ Uses the bullet-layout the instructor requested in the final review script</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 ADV SA (challenge — integrates wireless + TLS + certs) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 459, 570 &nbsp;+&nbsp; pp. 227-230 (TLS)</span>
+  </div>
+  <p class="question-stem"><strong>Q10.</strong> Explain how EAP-TLS (used inside WPA2-Enterprise)
+    reuses the TLS handshake mechanism from Topic 4. Specifically: what message in the TLS handshake
+    authenticates the server to the client, and why does EAP-TLS require <em>mutual</em> authentication
+    rather than just server authentication like HTTPS?</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <p>EAP-TLS embeds a complete TLS handshake inside EAP messages. The server authenticates itself to
+        the supplicant by sending its <strong>Server Certificate</strong> (step 5a of the TLS handshake
+        <span class="pdf-ref">📄 pp. 230, 240</span>), which the supplicant validates against a trusted
+        CA just as in HTTPS <span class="pdf-ref">📄 pp. 104, 128, 145</span>. However, unlike HTTPS —
+        where the client typically authenticates via an application-layer password over the already-
+        encrypted tunnel — in EAP-TLS the <em>network itself</em> must decide whether to admit this
+        device to the LAN before any higher-layer protocol exists. Therefore the supplicant must present
+        its own <strong>Client Certificate</strong> so the authentication server can verify the device's
+        identity cryptographically during the same handshake. The final TLS master secret is then used
+        to derive the Pairwise Master Key (PMK) that feeds into the 802.11i 4-way handshake.
+        <span class="pdf-ref">📄 pp. 459, 570</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Identifies Server Certificate as the TLS message that authenticates the server <span class="pdf-ref">📄 pp. 230, 240</span></li>
+        <li>☐ Identifies Client Certificate (mutual auth) as the reason EAP-TLS differs from HTTPS <span class="pdf-ref">📄 pp. 459, 570</span></li>
+        <li>☐ Explains <em>why</em> mutual auth is needed (network-layer admission before apps can run) <span class="pdf-ref">📄 pp. 451-456</span></li>
+        <li>☐ Bonus: mentions the TLS master secret feeding into the 802.11i PMK / 4-way handshake <span class="pdf-ref">📄 pp. 457, 568</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART D: FILL IN THE BLANK =========================== -->
+<h3 id="section-4-fib">Part D — Fill in the Blank (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q11 BEG FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 454, 565</span>
+  </div>
+  <p class="question-stem"><strong>Q11.</strong> The three pillars of the AAA framework used in
+    Network Access Control are ____________, ____________, and ____________.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer:</strong> Authentication, Authorization, Accounting.</p>
+      <p><strong>📝 Why:</strong> Slide 454/565 defines AAA as the three NAC pillars:
+        Authentication ("Is the user legit?"), Authorization ("What is he allowed to do?"),
+        Accounting ("Keep track of usage"). <span class="pdf-ref">📄 pp. 454, 565</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 INT FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 448, 561</span>
+  </div>
+  <p class="question-stem"><strong>Q12.</strong> In the WEP/WPA/WPA2/WPA3 table, WPA2-Personal uses
+    ____________ for encryption and ____________ for user authentication.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> <strong>AES-CTR</strong> (AES Counter Mode, i.e., AES-CCMP)
+        for encryption; <strong>PSK</strong> (Pre-Shared Key) for user authentication.</p>
+      <p><strong>📝 Why:</strong> The table on slide 448/561 reads "WPA2-Personal | AES-CTR | PSK."
+        Note that the same row in WPA2-<em>Enterprise</em> swaps PSK for 802.1X/EAP while keeping
+        AES-CTR identical. <span class="pdf-ref">📄 pp. 448, 561</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 ADV FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 460-461, 571-572</span>
+  </div>
+  <p class="question-stem"><strong>Q13.</strong> In a WPA2-Enterprise deployment, EAP messages travel
+    between the supplicant and the access point encapsulated in ____________, and between the access
+    point and the authentication server encapsulated in ____________.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> <strong>EAPOL</strong> (EAP over LAN); <strong>RADIUS</strong>
+        (specifically inside RADIUS Access-Request / Access-Challenge / Access-Accept messages).</p>
+      <p><strong>📝 Why:</strong> Slide 460/571 labels the two legs of the EAP transport: the wireless
+        leg uses EAPOL; the wired leg from AP to AS uses RADIUS (Remote Authentication Dial-In User
+        Service). The AP is the bridge that translates between the two encapsulations without ever
+        inspecting the inner EAP Type. <span class="pdf-ref">📄 pp. 460-461, 571-572</span></p>
+    </div>
+  </details>
+</div>
+
+</div>
+<!-- /section-block -->
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Summary · Exam Cheat Sheet</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 435-464, 558-578 (highest-density review of the entire topic)</div>
+
+<div class="cheat-sheet">
+
+  <h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+  <p class="oneliner">
+    Wireless link-layer security uses <strong>WPA2</strong>'s AES-CCMP to encrypt every Wi-Fi frame
+    and uses <strong>802.1X</strong> with an <strong>EAP</strong> method to decide <em>who is
+    allowed on the network</em> via a back-end RADIUS authentication server.
+    <span class="pdf-ref">📄 pp. 446, 448, 451-456, 561-567</span>
+  </p>
+
+  <h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+  <ol>
+    <li>
+      <strong>The three 802.1X components</strong> and the <em>controlled vs uncontrolled port</em>
+      rule: Supplicant → Authenticator (AP, <em>relay only</em>) → Authentication Server (RADIUS,
+      <em>the decider</em>). Uncontrolled port is always open (auth traffic); controlled port is
+      blocked until Access-Accept + 4-way handshake complete.
+      <span class="pdf-ref">📄 pp. 454-456, 565-567</span>
+    </li>
+    <li>
+      <strong>The WEP / WPA / WPA2 / WPA3 matrix</strong> of (Encryption × User Authentication), and
+      the fact that <em>Personal and Enterprise differ in user auth, not in encryption</em>.
+      WPA2-Personal = AES-CCMP + PSK; WPA2-Enterprise = AES-CCMP + 802.1X/EAP.
+      <span class="pdf-ref">📄 pp. 448, 561</span>
+    </li>
+    <li>
+      <strong>EAP-TLS vs EAP-TTLS.</strong> EAP-TLS = both client <em>and</em> server certificates
+      (mutual public-key auth). EAP-TTLS = <em>only server</em> certificate + a TLS tunnel inside
+      which the client sends username/password. This is the challenge-question integration point with
+      Topic 4 (TLS). <span class="pdf-ref">📄 pp. 459, 570</span>
+    </li>
+  </ol>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE:</h4>
+  <p>
+    Confusing the <strong>Authenticator</strong> (AP — a dumb relay) with the
+    <strong>Authentication Server</strong> (RADIUS — the decider). The AP never inspects the inner
+    EAP payload; the authentication method lives entirely between the supplicant and the AS. This is
+    why you can upgrade from password to certificate authentication without touching the AP hardware.
+    <span class="pdf-ref">📄 pp. 455-456, 566-567</span>
+  </p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+  <p class="remember">
+    "Supplicant asks, Authenticator announces, AS approves — and the controlled port stays locked
+    until the AS says yes." <span class="pdf-ref">📄 pp. 454-456, 565-567</span>
+  </p>
+
+  <h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS TOPIC IN THE PDF:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr><th>If you want to review...</th><th>Go to Lecture PDF page(s)...</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Why wireless is inherently insecure (4 bullets)</td><td><span class="pdf-ref">📄 p. 559</span></td></tr>
+      <tr><td>The full WEP/WPA/WPA2/WPA3 history &amp; comparison</td><td><span class="pdf-ref">📄 pp. 441, 560</span></td></tr>
+      <tr><td>The WEP/WPA/WPA2 matrix table</td><td><span class="pdf-ref">📄 pp. 448, 561</span></td></tr>
+      <tr><td>WPA2-PSK weakness &amp; WPA3-SAE solution</td><td><span class="pdf-ref">📄 p. 449</span></td></tr>
+      <tr><td>NAC umbrella definition + AAA framework</td><td><span class="pdf-ref">📄 pp. 453-454, 564-565</span></td></tr>
+      <tr><td>All four NAC enforcement methods enumerated</td><td><span class="pdf-ref">📄 pp. 452, 563</span></td></tr>
+      <tr><td>The 3 components of 802.1X</td><td><span class="pdf-ref">📄 pp. 454, 565</span></td></tr>
+      <tr><td>Controlled vs uncontrolled port explanation</td><td><span class="pdf-ref">📄 pp. 455, 566</span></td></tr>
+      <tr><td>The 6-phase 802.11i operation diagram</td><td><span class="pdf-ref">📄 pp. 457, 568</span></td></tr>
+      <tr><td>EAP framework definition</td><td><span class="pdf-ref">📄 pp. 458, 569</span></td></tr>
+      <tr><td>EAP methods list (TLS, TTLS, GPSK, IKEv2, LEAP, AKA)</td><td><span class="pdf-ref">📄 pp. 459, 570</span></td></tr>
+      <tr><td>EAP message format (Code/Identifier/Length/Type/Data)</td><td><span class="pdf-ref">📄 pp. 460-461, 571-572</span></td></tr>
+      <tr><td>EAP protocol exchanges &amp; RADIUS</td><td><span class="pdf-ref">📄 pp. 460, 571</span></td></tr>
+      <tr><td>Wi-Fi operation + 802.11 services (association, probe)</td><td><span class="pdf-ref">📄 pp. 439-440</span></td></tr>
+      <tr><td>AES-CCMP explanation (counter mode + CBC-MAC)</td><td><span class="pdf-ref">📄 p. 446</span></td></tr>
+      <tr><td>VLAN / Network segmentation as NAC</td><td><span class="pdf-ref">📄 pp. 362, 393, 452, 563</span></td></tr>
+      <tr><td>The challenge-question hook (wireless ⊕ TLS ⊕ certs)</td><td><span class="pdf-ref">📄 pp. 459, 570 + pp. 227-230</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top: 22px;">15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM)</h4>
+  <ol>
+    <li>Read the 4 bullets on <span class="pdf-ref">📄 p. 559</span> (why wireless is insecure).</li>
+    <li>Memorize the WEP/WPA/WPA2/WPA3 table on <span class="pdf-ref">📄 pp. 448, 561</span>.</li>
+    <li>Draw the AP with 2 ports on scratch paper <span class="pdf-ref">📄 pp. 455, 566</span>.</li>
+    <li>Write out the 6 phases of 802.11i as D-O-A-E-K-D <span class="pdf-ref">📄 pp. 457, 568</span>.</li>
+    <li>Write "EAP-TLS = 2 certs, EAP-TTLS = 1 cert + tunnel" at the top of your page <span class="pdf-ref">📄 pp. 459, 570</span>.</li>
+    <li>State to yourself out loud: "The AP is a relay; the AS is the decider." <span class="pdf-ref">📄 pp. 455-456, 566-567</span></li>
+  </ol>
+
+</div>
+
+<!-- ============================================================
+     END OF TOPIC 1
+     ============================================================ -->
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This study guide covers <strong>only Topic 1</strong> as listed in <span class="mono">appendix_finalexam.md</span>.
+  The remaining topics (Common Network Attacks, Crypto, TLS/HTTPS/SSH, User Authentication, IPsec &amp;
+  VPN, Firewalls) are prepared as separate study guides using the same master-prompt template.
+</div>
+
+<script>
+  (function () {
+    /* ── Persist user preference across page loads ── */
+    var STORAGE_KEY = 'cs548-theme';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    /* On first load, honour any saved preference */
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    /* Called by the pill click */
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
