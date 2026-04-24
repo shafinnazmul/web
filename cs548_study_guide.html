@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -105,7 +105,6 @@
     align-items: center;
     gap: 0.6rem;
     cursor: pointer;
-    user-select: none;
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -226,7 +225,6 @@
     padding: 1.1rem 1.5rem;
     background: var(--bg-surface);
     cursor: pointer;
-    user-select: none;
     transition: background 0.2s;
     list-style: none;
     gap: 1rem;
@@ -280,7 +278,6 @@
     padding: 0.75rem 1.1rem;
     background: var(--bg-surface);
     cursor: pointer;
-    user-select: none;
     transition: background 0.2s;
     list-style: none;
     gap: 0.75rem;
@@ -308,7 +305,6 @@
     padding: 0.6rem 0.9rem;
     background: var(--bg-surface);
     cursor: pointer;
-    user-select: none;
     list-style: none;
     gap: 0.6rem;
     transition: background 0.2s;
@@ -1118,9 +1114,9 @@ Evading firewalls                                        │  pp. 398, 429-434</
     document.querySelectorAll('details').forEach(d => d.open = false);
   }
 
-  // Initialize icon state (dark mode = show sun to switch to light)
-  document.getElementById('theme-icon').textContent = '☀️';
-  document.getElementById('theme-label').textContent = 'LIGHT';
+  // Initialize icon state (light mode = show moon to switch to dark)
+  document.getElementById('theme-icon').textContent = '🌙';
+  document.getElementById('theme-label').textContent = 'DARK';
 </script>
 </body>
 </html>
