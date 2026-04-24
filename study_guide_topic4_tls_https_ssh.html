@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 Final Exam · Topic 4: TLS / HTTPS / SSH</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE & TYPOGRAPHY — DARK MODE (default)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+
+    --topic-accent: #7c4dff;  /* Indigo-violet — Topic 4 (secure sessions / handshakes) */
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+
+    --topic-accent: #5e35b1;  /* Deeper violet for light-mode contrast */
+
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(94,53,177,0.06), rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(94,53,177,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(94,53,177,0.06), rgba(26,95,224,0.06)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .misconception { background: #eef1f7; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  /* ================================================================
+     THEME TOGGLE — FIXED IN THE TOP BAR
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+  [data-theme="light"] .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono {
+    font-family: 'Consolas', 'Courier New', 'Menlo', monospace;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 {
+    font-size: 2.1em;
+    margin: 0 0 8px 0;
+    color: #fff;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 1.55em;
+    color: var(--topic-accent);
+    margin: 36px 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.2em;
+    color: #fff;
+    margin: 26px 0 10px 0;
+  }
+  h4 {
+    font-size: 0.82em;
+    color: var(--text-dim);
+    margin: 18px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     STICKY NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar {
+      top: 44px;
+      width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER & HEADER
+     ================================================================ */
+  main {
+    max-width: 1100px;
+    padding: 40px 48px 80px 48px;
+  }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta {
+    color: var(--text-faint);
+    font-size: 0.9em;
+    margin-top: 6px;
+  }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(124,77,255,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title {
+    font-size: 1.12em;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .signal-moderate { color: var(--yellow); }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & CONTAINERS
+     ================================================================ */
+  section.topic {
+    border-left: 3px solid var(--topic-accent);
+    padding-left: 22px;
+    margin-bottom: 40px;
+  }
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index, table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th, table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td, table.data td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even), table.data tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+    width: 230px;
+  }
+
+  /* ================================================================
+     ASCII DIAGRAM / STEPS
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f0;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head {
+    color: var(--topic-accent);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .step .step-detail {
+    margin-top: 6px;
+    font-size: 0.93em;
+    color: var(--text-dim);
+  }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 110px; }
+
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+  .misconception .trap { color: var(--orange); font-weight: 600; }
+
+  /* ================================================================
+     QUESTION BLOCKS
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options {
+    margin: 4px 0 6px 0;
+    padding-left: 26px;
+  }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content {
+    padding: 8px 0 4px 0;
+    font-size: 0.95em;
+  }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+
+  /* ================================================================
+     CHEAT SHEET
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(124,77,255,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 {
+    color: var(--gold);
+    font-size: 0.82em;
+    margin-top: 14px;
+  }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,152,0,0.05);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-accent);
+    background: rgba(124,77,255,0.05);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,82,82,0.05);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">🔐 Topic 4</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#signal-map">🎯 Exam Signals</a>
+  <hr>
+  <a href="#st-tls">4A · TLS</a>
+  <a href="#tls-s1" class="sub">→ §1 Overview</a>
+  <a href="#tls-s2" class="sub">→ §2 Handshake</a>
+  <a href="#tls-s3" class="sub">→ §3 Exam Intel</a>
+  <a href="#tls-s4" class="sub">→ §4 Questions</a>
+  <a href="#tls-s5" class="sub">→ §5 Cheat Sheet</a>
+  <a href="#st-https">4B · HTTPS</a>
+  <a href="#https-s1" class="sub">→ §1 Overview</a>
+  <a href="#https-s2" class="sub">→ §2 Connection</a>
+  <a href="#https-s3" class="sub">→ §3 Exam Intel</a>
+  <a href="#https-s4" class="sub">→ §4 Questions</a>
+  <a href="#https-s5" class="sub">→ §5 Cheat Sheet</a>
+  <a href="#st-ssh">4C · SSH</a>
+  <a href="#ssh-s1" class="sub">→ §1 Overview</a>
+  <a href="#ssh-s2" class="sub">→ §2 Handshake</a>
+  <a href="#ssh-s3" class="sub">→ §3 Exam Intel</a>
+  <a href="#ssh-s4" class="sub">→ §4 Questions</a>
+  <a href="#ssh-s5" class="sub">→ §5 Cheat Sheet</a>
+  <hr>
+  <a href="#synthesis">🧩 Cross-Protocol Synthesis</a>
+</nav>
+
+<!-- ── Fixed top bar with theme toggle ── -->
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 448/548 · Final Exam · <strong>Topic 4 · TLS / HTTPS / SSH</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 4: TLS / HTTPS / SSH</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">Secure Sessions &middot; Handshakes &middot; Record Protocols</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 448/548 Network Security &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Lina Pu &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final — April 27, 2026 · 120 min · Closed-book<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lectures_all_merged_compressed.pdf</span> (601 slides)<br>
+    <strong>Signal:</strong> <span class="signal-strong">🟠 STRONG (re-tested from midterm)</span> — Used as the reference protocol for wireless, VPN, and DNS-chain-of-trust challenge questions.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">Why this topic matters for your exam</strong><br>
+  From <span class="mono">scriptMidtermReview-cs548.txt</span>:
+  <em>"TLS... you need to know how TLS is implemented, what security services are provided, the handshakes, different steps, purpose of each step, HTTPS is HTTP over TLS, SSH security services implementation..."</em><br><br>
+  TLS is the <strong>reference architecture</strong> the rest of the final compares against: wireless security (EAP-TLS, p. 459), DNS security (TLS vs DNSSEC chain-of-trust, p. 597), VPN (TLS-based VPN, pp. 389–391), and IPsec (Layer-3 alternative to TLS, pp. 370–373). The instructor has explicitly flagged a <em>"Wireless + TLS + certificates"</em> integration question and a <em>"TLS vs IPsec vs DNSSEC chain-of-trust"</em> question as likely. Understanding the 7-step TLS 1.2 handshake end-to-end is therefore the single highest-leverage piece of exam prep.<br><br>
+  <strong>Her stated test philosophy:</strong> <em>"the purpose of this class is to make sure you understand"</em> — questions ask you to explain <em>why</em> each step exists (why a nonce? why ECDHE over RSA? why encrypt after the Finished message?) rather than memorise bytes.
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 4 is a <strong>3-sub-topic cluster</strong> spanning <em>three lectures</em>: Lecture 8 (TLS, pp. 207–233),
+  Lecture 9 (HTTPS, pp. 234–245), Lecture 10 (SSH, pp. 246–258).
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">4A · TLS &nbsp;<span class="pdf-ref">📄 pp. 207–233</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>TLS protocol stack (handshake + record layer)</td><td>pp. 215, 227–228, 238</td></tr>
+    <tr><td>TLS 4 components (Handshake, Record, Alert, Change Cipher Spec)</td><td>pp. 215, 227, 238</td></tr>
+    <tr><td>TLS security services (confidentiality, integrity, authenticity)</td><td>pp. 215, 228, 238, 241</td></tr>
+    <tr><td>TLS Handshake Protocol (overview)</td><td>pp. 215, 226–229, 233</td></tr>
+    <tr><td>ClientHello (version, RClient nonce, Session ID, Cipher Suites)</td><td>pp. 230, 232, 237, 240</td></tr>
+    <tr><td>ServerHello (chosen version, RServer nonce, chosen cipher)</td><td>pp. 221–223, 230, 232, 237, 240</td></tr>
+    <tr><td>Server Certificate (X.509, signed by CA)</td><td>pp. 220, 230, 240</td></tr>
+    <tr><td>Key exchange in TLS (RSA, DH, Ephemeral-DH, Anonymous-DH)</td><td>pp. 230–231, 240–241</td></tr>
+    <tr><td>Cipher suite negotiation (cipher, MAC, key material, IV size)</td><td>pp. 230–231, 240</td></tr>
+    <tr><td>Master secret / pre-master secret derivation</td><td>p. 232</td></tr>
+    <tr><td>Change Cipher Spec + Handshake Finished (MAC over handshake)</td><td>pp. 223, 227–228</td></tr>
+    <tr><td>TLS Record Protocol (fragment → compress → MAC → encrypt)</td><td>pp. 215, 227–228, 238, 241</td></tr>
+    <tr><td>What TLS encrypts vs leaves in plaintext (IP/TCP)</td><td>pp. 227–228, 238</td></tr>
+    <tr><td>TLS 1.2 vs TLS 1.3 (round trips, no RSA key transport)</td><td>pp. 225–226</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">4B · HTTPS &nbsp;<span class="pdf-ref">📄 pp. 224–226, 233</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>HTTPS = HTTP-over-TLS on TCP port 443</td><td>p. 233</td></tr>
+    <tr><td>Three-layer connection initiation (TCP → TLS → HTTP)</td><td>p. 233</td></tr>
+    <tr><td>Wireshark view of a real HTTPS session (dropbox.com / gaia.cs.umass.edu)</td><td>pp. 217–224</td></tr>
+    <tr><td>Connection closure (HTTP Connection: close, TLS close_notify, TCP FIN)</td><td>p. 233</td></tr>
+    <tr><td>Unannounced TCP close = possible attack signal</td><td>p. 233</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">4C · SSH &nbsp;<span class="pdf-ref">📄 pp. 246–258</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>SSH in the network stack (application layer over TCP)</td><td>p. 248</td></tr>
+    <tr><td>SSH applications (remote shell, SFTP/SCP, port forwarding, Git, IoT)</td><td>p. 250</td></tr>
+    <tr><td>SSH three-layer architecture (Transport, User Auth, Connection)</td><td>pp. 252–253, 257</td></tr>
+    <tr><td>SSH Transport Layer (server authentication, DH key exchange)</td><td>p. 252</td></tr>
+    <tr><td>Known-hosts file (local cache of server public keys)</td><td>p. 252</td></tr>
+    <tr><td>Rekeying every 1 GB / 1 hour</td><td>p. 252</td></tr>
+    <tr><td>SSH User Authentication Protocol (password, public key, hostbased)</td><td>p. 257</td></tr>
+    <tr><td>SSH Connection Protocol (multiplexed logical channels)</td><td>p. 253</td></tr>
+    <tr><td>SSH tunneling / port forwarding (local, remote, X11)</td><td>pp. 253, 256</td></tr>
+    <tr><td>TLS ↔ SSH parallels (common challenge-question hook)</td><td>pp. 252, 257</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     EXAM SIGNAL MAP
+     ============================================================ -->
+<h2 id="signal-map">🎯 Exam Signal Map — Instructor's Own Words</h2>
+
+<div class="callout quote">
+  <strong class="lbl">Signal · Explicit</strong>
+  From <span class="mono">scriptMidtermReview-cs548.txt</span> (re-affirmed as final-coverage in the final review):
+  <em>"TLS, you need to know how TLS is implemented, what security services are provided, the handshakes, different steps, purpose of each step, HTTPS is HTTP over TLS, SSH security services implementation..."</em>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Signal · Integration</strong>
+  From <span class="mono">scriptFinalExamReview-cs548.txt</span> (wireless security bridge):
+  <em>"When you read this diagram, you need to think about the TLS and also think about the TLS part when we introduced the server certificate. This is a good example of what the challenge question in wireless security can be tested — it requires you to link different components."</em> → <strong>Wireless + TLS + Certificates</strong> is a likely combined question.
+</div>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">🔴 EXPLICIT targets</h4>
+<ul class="plain">
+  <li><strong>TLS handshake steps &amp; purpose of each step</strong> — named verbatim. <span class="pdf-ref">📄 pp. 226–232</span></li>
+  <li><strong>Security services TLS provides</strong> — confidentiality (AES), integrity (MAC), authenticity (certificates). <span class="pdf-ref">📄 pp. 228, 241</span></li>
+  <li><strong>HTTPS = HTTP over TLS</strong> — port 443 on TCP, three-layer connection init. <span class="pdf-ref">📄 p. 233</span></li>
+  <li><strong>SSH security services + implementation</strong> — server authentication, DH key exchange, three-layer architecture. <span class="pdf-ref">📄 pp. 252, 257</span></li>
+</ul>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">🟠 STRONG integration / challenge-question hooks</h4>
+<ul class="plain">
+  <li><strong>EAP-TLS in WPA2-Enterprise</strong> — map 802.1X/EAP-TLS onto the TLS handshake &amp; X.509 chain. <span class="pdf-ref">📄 pp. 459, 226–230</span></li>
+  <li><strong>DNSSEC vs TLS chain-of-trust</strong> — both PKI-based but rooted differently (DNS zone hierarchy vs CA hierarchy). <span class="pdf-ref">📄 pp. 240–244, 597</span></li>
+  <li><strong>TLS vs IPsec vs DNSSEC</strong> — which layer does each encrypt / authenticate? <span class="pdf-ref">📄 pp. 215, 370–373, 595–597</span></li>
+  <li><strong>AES-GCM across protocols</strong> — same primitive used in TLS record layer (p. 181), IPsec ESP (p. 392), WPA2/3 (p. 446). <span class="pdf-ref">📄 pp. 181, 228, 392, 446</span></li>
+  <li><strong>SSH ↔ TLS protocol mapping</strong> — instructor flagged SSH as a <em>"good example of challenge question"</em> precisely because it mirrors TLS. <span class="pdf-ref">📄 pp. 248–253, 256–257</span></li>
+</ul>
+
+<div class="callout warning">
+  <strong class="lbl">Multi-answer scoring reminder</strong>
+  Partial credit per correct answer; <em>deduction</em> per incorrect answer; minimum 0 per question. <strong>Do not select-all-of-the-above to be safe.</strong>
+</div>
+<!-- ============================================================ -->
+<!-- SUB-TOPIC 4A · TLS                                           -->
+<!-- ============================================================ -->
+<section id="st-tls" class="topic">
+
+<div class="subtopic-banner">
+  <span class="letter">4A</span>
+  <span class="title">TLS — The Reference Secure Session Protocol</span>
+  <span class="pages">📄 Lectures 8 · pp. 207–233 &nbsp;·&nbsp; <span class="signal-explicit">🔴 EXPLICIT</span> <span class="exam-star">⭐</span></span>
+</div>
+
+<!-- ============ SECTION 1: CONCEPT OVERVIEW ============ -->
+<div id="tls-s1" class="section-block">
+<h3>Section 1 · Concept Overview</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 207–233</div>
+
+<h4>1.1 The Problem This Solves <span class="pdf-ref">📄 pp. 215, 228</span></h4>
+<p>TCP delivers bytes reliably between two endpoints, but <em>anyone</em> on the path can read or modify those bytes, and neither endpoint has cryptographic proof the other is who they claim to be. TLS (Transport Layer Security) fills that gap: it negotiates fresh session keys, authenticates the server (and optionally the client) via X.509 certificates, then encrypts and integrity-protects every subsequent byte until the session closes. <span class="pdf-ref">📄 pp. 215, 228</span></p>
+
+<h4>1.2 The Core Idea — Two Layers, Four Components <span class="pdf-ref">📄 pp. 215, 227, 238</span></h4>
+<p>TLS sits between TCP and the application and is split into two layers:</p>
+<ul class="plain">
+  <li><strong>Upper (Handshake) layer</strong> — short-lived, responsible for <em>negotiating</em> crypto parameters and authenticating endpoints. Has three sub-protocols:
+    <ul>
+      <li><strong>Handshake Protocol</strong> (content-type 22) — negotiates crypto for a "TLS session" that may be reused for many "TLS/TCP connections." <span class="pdf-ref">📄 pp. 215, 227, 229, 238</span></li>
+      <li><strong>Change Cipher Spec Protocol</strong> (content-type 20) — one-byte message: "from the next record onward, use the newly negotiated keys." <span class="pdf-ref">📄 pp. 215, 227, 238</span></li>
+      <li><strong>Alert Protocol</strong> (content-type 21) — conveys warnings/errors (bad certificate, close_notify, etc.). <span class="pdf-ref">📄 pp. 215, 227, 238</span></li>
+    </ul>
+  </li>
+  <li><strong>Lower (Record) layer</strong>:
+    <ul>
+      <li><strong>Record Protocol</strong> (content-type 23) — carries all application data after handshake; provides <em>confidentiality</em> (symmetric encryption) and <em>integrity</em> (MAC). <span class="pdf-ref">📄 pp. 215, 227–228, 241</span></li>
+    </ul>
+  </li>
+</ul>
+<p>A "TLS session" is a cached negotiation (cipher suite + master secret); a "TLS connection" is one active TCP stream using that session. One expensive handshake → many cheap connections. <span class="pdf-ref">📄 pp. 215, 227</span></p>
+
+<h4>1.3 Analogy — Embassy Visa Interview <span class="pdf-ref">📄 pp. 229–232</span></h4>
+<p>Think of TLS as the security dance at an embassy:</p>
+<ul class="plain">
+  <li><strong>ClientHello</strong> = you arriving and saying <em>"Hi, I speak English/French/Mandarin; I prefer French."</em></li>
+  <li><strong>ServerHello + Certificate</strong> = the visa officer replies <em>"Let's use French,"</em> and hands you their government ID card signed by the national seal (CA).</li>
+  <li><strong>You verify the ID</strong> against your trusted list of national seals (browser's root CA store).</li>
+  <li><strong>Key exchange</strong> = you both mix a shared secret through the window using a math trick (Diffie-Hellman) that even a recorder outside the room cannot undo later.</li>
+  <li><strong>Finished messages</strong> = you both repeat back everything said so far ("here's a cryptographic receipt of the entire conversation") so nobody tampered in the middle.</li>
+  <li><strong>Record layer</strong> = now that you share a secret phrase, every later sentence is whispered through the phrase-book.</li>
+</ul>
+
+<h4>1.4 Technical Definition <span class="pdf-ref">📄 pp. 215, 228, 229</span></h4>
+<p><strong>TLS Handshake Protocol</strong> allows a client and server to (a) authenticate each other, (b) negotiate encryption and MAC algorithms, and (c) negotiate cryptographic keys — via a phased series of TLV-encoded messages. <strong>TLS Record Protocol</strong> takes each outbound application-layer message, optionally compresses it, appends a keyed MAC, encrypts the result with a symmetric cipher (AES-128, AES-256, 3DES, or RC4-128) using the session's write keys/IV, and hands the record to TCP. <span class="pdf-ref">📄 pp. 228, 229, 241</span></p>
+
+<h4>1.5 Key Terms &amp; Definitions</h4>
+<table class="data">
+  <thead>
+    <tr><th style="width:22%">Term</th><th style="width:38%">Plain-English Definition</th><th style="width:28%">Why It Matters for the Exam</th><th style="width:12%">📄 Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TLS session vs TLS connection</strong> <span class="exam-star">⭐</span></td>
+      <td>A <em>session</em> is the cached result of one handshake (cipher suite + master secret). A <em>connection</em> is one active TCP stream using that session's keys.</td>
+      <td>Explains why TLS handshakes can be resumed — session ID lookup avoids the expensive public-key ops.</td>
+      <td>p. 215</td>
+    </tr>
+    <tr>
+      <td><strong>Handshake Protocol</strong></td>
+      <td>TLS sub-protocol (content-type 22) that negotiates cipher suite, authenticates endpoints, and derives keys.</td>
+      <td>Exam expects you to list the 4 phases and the purpose of each message.</td>
+      <td>pp. 215, 229</td>
+    </tr>
+    <tr>
+      <td><strong>Record Protocol</strong></td>
+      <td>TLS sub-protocol (content-type 23) that fragments, optionally compresses, MACs, and encrypts application data.</td>
+      <td>Understand the pipeline: <em>fragment → compress → MAC → encrypt → transmit</em>.</td>
+      <td>pp. 215, 228, 241</td>
+    </tr>
+    <tr>
+      <td><strong>Change Cipher Spec</strong></td>
+      <td>One-byte message (content-type 20) saying "switch to the keys we just negotiated, starting now."</td>
+      <td>Trap: it's the smallest TLS message, but marks a huge semantic shift.</td>
+      <td>pp. 215, 227</td>
+    </tr>
+    <tr>
+      <td><strong>Alert Protocol</strong></td>
+      <td>TLS sub-protocol (content-type 21) for warnings and fatal errors — e.g. bad_certificate, close_notify.</td>
+      <td>Know that close_notify is <em>in-band</em>; an unannounced TCP close is suspicious.</td>
+      <td>pp. 215, 233</td>
+    </tr>
+    <tr>
+      <td><strong>ClientHello</strong></td>
+      <td>First handshake message. Contains: highest protocol version, 32-byte nonce <em>R<sub>Client</sub></em>, session ID, supported cipher suites (list), compression methods.</td>
+      <td>The R<sub>Client</sub> nonce contributes to master-secret derivation — prevents replay.</td>
+      <td>pp. 225, 230, 240</td>
+    </tr>
+    <tr>
+      <td><strong>ServerHello</strong></td>
+      <td>Server reply. Contains: chosen version, 32-byte nonce <em>R<sub>Server</sub></em>, session ID, chosen cipher suite, chosen compression.</td>
+      <td>Only <em>one</em> cipher suite is selected (the server's pick from the client's list).</td>
+      <td>pp. 225, 230, 240</td>
+    </tr>
+    <tr>
+      <td><strong>Server Certificate</strong> <span class="exam-star">⭐</span></td>
+      <td>X.509 certificate containing the server's public key, signed by a CA in the browser's trust store.</td>
+      <td>The <em>authenticity</em> pillar: without cert validation, TLS reduces to anonymous DH (MITM-vulnerable).</td>
+      <td>pp. 220, 230</td>
+    </tr>
+    <tr>
+      <td><strong>Cipher suite</strong></td>
+      <td>A named bundle specifying (key exchange, authentication, symmetric cipher, MAC algorithm). E.g. <code>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</code>.</td>
+      <td>Common MCQ: decode a cipher-suite string into its 4 components.</td>
+      <td>pp. 230–231</td>
+    </tr>
+    <tr>
+      <td><strong>Key exchange methods</strong></td>
+      <td>RSA (client-encrypts-pre-master), Fixed-DH, Ephemeral-DH (DHE/ECDHE), Anonymous-DH (no auth → MITM).</td>
+      <td>Ephemeral-DH gives <em>forward secrecy</em>; anonymous-DH is the classic trap answer.</td>
+      <td>p. 231</td>
+    </tr>
+    <tr>
+      <td><strong>Pre-master secret</strong></td>
+      <td>A 48-byte secret established by the key exchange (RSA-encrypted or DH-derived).</td>
+      <td>Input to master-secret derivation.</td>
+      <td>p. 232</td>
+    </tr>
+    <tr>
+      <td><strong>Master secret</strong></td>
+      <td>48-byte value derived from pre-master + R<sub>Client</sub> + R<sub>Server</sub> via iterated hashing.</td>
+      <td>Both sides derive it independently; never transmitted on the wire.</td>
+      <td>p. 232</td>
+    </tr>
+    <tr>
+      <td><strong>Session keys (6 values)</strong></td>
+      <td>From master secret + nonces: client-write-MAC-secret, server-write-MAC-secret, client-write-key, server-write-key, client-write-IV, server-write-IV.</td>
+      <td>Six distinct keys — each direction has its own MAC key, encryption key, and IV.</td>
+      <td>p. 232</td>
+    </tr>
+    <tr>
+      <td><strong>Handshake Finished</strong></td>
+      <td>Final handshake message from each side, carrying a keyed hash over all prior handshake messages.</td>
+      <td>Detects any tampering/downgrade during the handshake.</td>
+      <td>pp. 223, 227, 230</td>
+    </tr>
+    <tr>
+      <td><strong>Cipher Suite TLS 1.3 change</strong></td>
+      <td>TLS 1.3 removed RSA key transport, static DH, and export-grade ciphers. Only (EC)DHE-based forward-secret suites remain.</td>
+      <td>Explains TLS 1.3's 1-RTT handshake and forward-secrecy-by-default.</td>
+      <td>p. 226</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<!-- ============ SECTION 2: HOW IT WORKS ============ -->
+<div id="tls-s2" class="section-block">
+<h3>Section 2 · How It Works — The TLS 1.2 Handshake, Step by Step</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 217–233</div>
+
+<p>The instructor's Wireshark walk-through of dropbox.com (<span class="pdf-ref">📄 pp. 217–223</span>) enumerates seven observable handshake steps. Below, each step gives its <em>purpose</em> (what security service it contributes), <em>message content</em>, and <em>what it proves</em>.</p>
+
+<div class="step">
+  <div class="step-head">Step 1 · TCP 3-way handshake (background)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Open the underlying TCP connection to port 443. <br>
+    <strong class="lbl">Content:</strong> SYN → SYN-ACK → ACK. <br>
+    <strong class="lbl">Proves:</strong> Nothing yet — no crypto. TLS only begins <em>after</em> TCP is established.
+    <span class="pdf-ref">📄 p. 233</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 2 · ClientHello (client → server)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Initiate TLS, advertise capabilities, contribute client-side randomness. <br>
+    <strong class="lbl">Content:</strong> Highest TLS version supported · 32-byte nonce R<sub>Client</sub> (4-byte timestamp + 28 random bytes) · Session ID (empty if fresh, populated if resuming) · <em>list</em> of supported cipher suites · supported compression methods. <br>
+    <strong class="lbl">Proves:</strong> Nothing about identity; it's a proposal. The nonce binds the later key derivation to this specific session.
+    <span class="pdf-ref">📄 pp. 225, 230, 240</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 3 · ServerHello (server → client)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Pick one cipher suite and contribute server-side randomness. <br>
+    <strong class="lbl">Content:</strong> Chosen TLS version · 32-byte nonce R<sub>Server</sub> · Session ID · chosen cipher suite (just one) · chosen compression. <br>
+    <strong class="lbl">Proves:</strong> Still nothing — server has not yet authenticated itself.
+    <span class="pdf-ref">📄 pp. 221, 225, 230, 240</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 4 · Certificate (server → client)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Authenticate the server via public-key infrastructure. <br>
+    <strong class="lbl">Content:</strong> Server's X.509 certificate chain — server cert signed by intermediate CA, intermediate signed by root, root in browser's trust store. <br>
+    <strong class="lbl">Client checks:</strong> signature chain, expiry date, Common Name / SAN matches the hostname, not revoked (OCSP/CRL). <br>
+    <strong class="lbl">Proves:</strong> The server possesses the private key matching the cert — <em>once</em> it uses that key in the next step.
+    <span class="pdf-ref">📄 pp. 220, 230</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 5 · ServerKeyExchange + ServerHelloDone (server → client)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Contribute the server side of an ephemeral Diffie-Hellman (if using (EC)DHE), and signal "done talking for now." <br>
+    <strong class="lbl">Content (DHE):</strong> DH parameters (p, g) + server's public DH value Y<sub>S</sub>, <em>signed</em> with the server's long-term private key (from the certificate). Sending ServerHelloDone signals end of server's handshake contribution. <br>
+    <strong class="lbl">Proves:</strong> <em>This is the step that proves the server owns the cert</em> — the signature over (R<sub>C</sub>‖R<sub>S</sub>‖DH params) binds the handshake nonces to the cert's public key. Also enables forward secrecy: even if the long-term private key leaks later, the ephemeral DH secret is unrecoverable.
+    <span class="pdf-ref">📄 pp. 222, 223, 230, 231</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 6 · ClientKeyExchange + ChangeCipherSpec + Finished (client → server)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Establish the shared secret; signal "from now on, encrypt"; prove integrity of the whole handshake. <br>
+    <strong class="lbl">Content:</strong>
+    <ul>
+      <li><strong>ClientKeyExchange</strong> — client's DH public value Y<sub>C</sub> (DHE/ECDHE case), <em>or</em> client sends a 48-byte pre-master secret encrypted with the server's public key (RSA case). Both sides now derive: pre-master → master secret (using R<sub>C</sub>, R<sub>S</sub>) → six session keys.</li>
+      <li><strong>ChangeCipherSpec</strong> — one-byte message meaning "all records I send after this are encrypted/MACed with the new keys."</li>
+      <li><strong>Finished</strong> — first record under the new keys. Contains MAC/HMAC of <em>all</em> previous handshake messages, verified by server. If someone tampered with any earlier message, Finished fails.</li>
+    </ul>
+    <strong class="lbl">Proves:</strong> Integrity of the whole handshake (no downgrade). The Finished's MAC uses the freshly derived keys.
+    <span class="pdf-ref">📄 pp. 223, 227, 230, 232</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 7 · ChangeCipherSpec + Finished (server → client)</div>
+  <div class="step-detail">
+    <strong class="lbl">Purpose:</strong> Server's mirror of step 6: switch to new keys and prove handshake integrity from its side. <br>
+    <strong class="lbl">Content:</strong> ChangeCipherSpec byte, then Finished with server's MAC over the handshake. <br>
+    <strong class="lbl">Proves:</strong> The handshake is cryptographically complete. Both sides now hold identical session keys. HTTP requests and responses flow next as <em>encrypted records</em>.
+    <span class="pdf-ref">📄 pp. 223, 227, 230</span>
+  </div>
+</div>
+
+<h4>Whole-Handshake Visual (TLS 1.2 — synthesized from pp. 217–223, 226)</h4>
+
+<pre class="diagram">
+   Client                                              Server
+   ──────                                              ──────
+        ──────────── TCP 3-way handshake ────────────►          Step 1  (TCP only)
+   (1)  ────────────── ClientHello ──────────────────►          Step 2
+        version, R_C, session_id, cipher_suites[],
+        compression_methods[]
+                                                                Step 3
+   (2)  ◄───────────── ServerHello ───────────────────          
+        version, R_S, session_id,
+        chosen_cipher_suite, chosen_compression
+                                                                Step 4
+   (3)  ◄───────────── Certificate ──────────────────
+        server_cert signed by CA
+                                                                Step 5
+   (4)  ◄──── ServerKeyExchange (DH_params, sig) ────
+        ◄──── ServerHelloDone ─────────────────────
+   [client verifies cert + signature over handshake]
+                                                                Step 6
+   (5)  ─── ClientKeyExchange (Y_C or RSA-enc PM) ──►
+        ─── ChangeCipherSpec ───────────────────────►
+   [both sides derive master_secret and 6 session keys]
+        ─── Finished (MAC over handshake) ──────────►
+                                                                Step 7
+   (6)  ◄─── ChangeCipherSpec ─────────────────────
+        ◄─── Finished (MAC over handshake) ─────────
+        
+        ════════════ Record layer active ═════════════
+        ─── HTTP GET (encrypted + MACed) ───────────►
+        ◄─── HTTP 200 OK (encrypted + MACed) ───────
+</pre>
+<p class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–223</span> (Wireshark dropbox.com walkthrough), <span class="pdf-ref">📄 pp. 225–226</span> (TLS 1.2 vs 1.3 diagrams), <span class="pdf-ref">📄 p. 230</span> (handshake message types).</p>
+
+<h4>The Record Layer Pipeline (post-handshake) <span class="pdf-ref">📄 pp. 228, 241</span></h4>
+<p>Every application-layer message flows through this pipeline before hitting TCP:</p>
+<pre class="diagram">
+                      ┌──────────────────────────────────────────┐
+  Application data    │ "GET /file HTTP/1.1 …"                   │
+                      └───────────────┬──────────────────────────┘
+                                      ▼
+        Fragment into ≤ 2^14 B chunks (16 384 bytes max)
+                                      ▼
+              (Optional compression — often null in practice)
+                                      ▼
+       Append MAC = HMAC( write_MAC_key , seq_num ‖ header ‖ data )
+                                      ▼
+       Encrypt  ( data ‖ MAC ‖ padding )   with AES-CBC or AES-GCM
+                                      ▼
+      Prepend TLS Record header (content-type 23, length, version)
+                                      ▼
+                              Hand to TCP
+</pre>
+<p>Services delivered by this pipeline: <strong>confidentiality</strong> via symmetric encryption, <strong>integrity</strong> via MAC, <strong>authenticity</strong> inherited from the handshake (only the legitimate server could have derived these keys). <span class="pdf-ref">📄 pp. 228, 241</span></p>
+
+<h4>Key Derivation Details <span class="pdf-ref">📄 p. 232</span></h4>
+<ul class="plain">
+  <li><strong>Pre-master secret</strong> — 48 bytes; established by the key exchange (RSA-encrypted under server's public key, OR derived from (EC)DHE).</li>
+  <li><strong>Master secret</strong> = one-time 48-byte value derived by iterated hashing: <br>
+    <code>MS = SHA('A' ‖ PMS ‖ R_C ‖ R_S) ‖ SHA('BB' ‖ PMS ‖ R_C ‖ R_S) ‖ SHA('CCC' ‖ PMS ‖ R_C ‖ R_S)</code> (approx; actual TLS 1.2 uses PRF).</li>
+  <li><strong>Six session keys</strong> then derived by hashing master secret with more labels: <em>client-write-MAC-key</em>, <em>server-write-MAC-key</em>, <em>client-write-key</em>, <em>server-write-key</em>, <em>client-write-IV</em>, <em>server-write-IV</em>.</li>
+  <li>Every key is direction-specific — client and server encrypt independently, removing sequence-number re-use issues.</li>
+</ul>
+
+<h4>Line-by-Line Handshake Annotation</h4>
+<ul class="plain">
+  <li><strong>Nonces (R<sub>C</sub>, R<sub>S</sub>)</strong> — exchanged in the clear; not secret. Their role is <em>freshness</em> — they guarantee each session derives unique keys even from the same pre-master. <span class="pdf-ref">📄 pp. 225, 232</span></li>
+  <li><strong>Cipher suite list</strong> — client <em>proposes</em>, server <em>chooses</em>. A downgrade attacker could try to strip strong suites; the Finished MAC over the handshake defeats this. <span class="pdf-ref">📄 pp. 227, 230</span></li>
+  <li><strong>Certificate</strong> — trust is anchored at the root CAs pre-installed in the browser. Compromise of a single CA (e.g. DigiNotar 2011) breaks the chain system-wide. <span class="pdf-ref">📄 pp. 104, 130, 230</span></li>
+  <li><strong>ServerKeyExchange signature</strong> — covers (R<sub>C</sub> ‖ R<sub>S</sub> ‖ DH_params). Because both nonces are included, it cannot be replayed into a different session. <span class="pdf-ref">📄 pp. 222, 231</span></li>
+  <li><strong>Finished</strong> — this is where handshake tampering becomes detectable; anyone who changed any earlier message breaks the MAC. <span class="pdf-ref">📄 pp. 223, 227, 230</span></li>
+  <li><strong>Change Cipher Spec</strong> — architecturally separate because it <em>activates</em> a new state rather than carrying data. <span class="pdf-ref">📄 pp. 215, 227</span></li>
+</ul>
+
+<h4>TLS 1.2 vs TLS 1.3 — What Changed <span class="pdf-ref">📄 pp. 225–226</span></h4>
+<table class="data">
+  <thead><tr><th>Dimension</th><th>TLS 1.2</th><th>TLS 1.3</th></tr></thead>
+  <tbody>
+    <tr><td>Round trips before application data</td><td>2 RTT</td><td>1 RTT (0-RTT with session resumption)</td></tr>
+    <tr><td>Key exchange methods</td><td>RSA, DH, DHE, ECDHE, Anonymous-DH</td><td>(EC)DHE only — RSA key transport <em>removed</em></td></tr>
+    <tr><td>Forward secrecy</td><td>Only with DHE/ECDHE suites</td><td>Mandatory</td></tr>
+    <tr><td>Cipher suites</td><td>Bundled (KX + Auth + Cipher + MAC)</td><td>Split — KX and Auth negotiated separately from AEAD cipher</td></tr>
+    <tr><td>Legacy / broken algorithms</td><td>Still present for compat (RC4, 3DES, MD5)</td><td>Removed (AEAD only: AES-GCM, ChaCha20-Poly1305)</td></tr>
+  </tbody>
+</table>
+
+</div>
+<!-- ============ SECTION 3: EXAM INTELLIGENCE ============ -->
+<div id="tls-s3" class="section-block">
+<h3>Section 3 · Exam Intelligence</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 215–233</div>
+
+<h4>3.1 What Exams Typically Test on TLS</h4>
+<ul class="plain">
+  <li><strong>"List and explain the steps of the TLS handshake."</strong> — verbatim instructor ask. Expect a 5–7-step short-answer. <span class="pdf-ref">📄 pp. 226–232</span></li>
+  <li><strong>"What is the purpose of each handshake message?"</strong> — the words "purpose of each step" are from the review script. Map each message to a security service: negotiation, authentication, key establishment, integrity check. <span class="pdf-ref">📄 pp. 215, 229, 230</span></li>
+  <li><strong>"What security services does TLS provide?"</strong> — Confidentiality (symmetric encryption of records), Integrity (per-record MAC), Authenticity (handshake + certificate). <span class="pdf-ref">📄 pp. 215, 228</span></li>
+  <li><strong>"Why nonces in ClientHello and ServerHello?"</strong> — <em>Freshness / replay prevention.</em> The master secret derivation includes both nonces, so every session derives unique keys. <span class="pdf-ref">📄 pp. 225, 232</span></li>
+  <li><strong>"Why is the Finished message important?"</strong> — Its MAC covers all earlier handshake messages, detecting tampering/downgrade. <span class="pdf-ref">📄 pp. 223, 227</span></li>
+  <li><strong>"What is the difference between TLS session and TLS connection?"</strong> — Session = cached negotiation result; connection = one active TCP stream. One session can back many connections. <span class="pdf-ref">📄 p. 215</span></li>
+  <li><strong>"Why ECDHE is preferred over RSA key transport."</strong> — Forward secrecy. If server's long-term key leaks later, past ECDHE sessions stay safe. <span class="pdf-ref">📄 pp. 231, 226</span></li>
+  <li><strong>Integration: "How does EAP-TLS (WPA2-Enterprise) use the TLS handshake?"</strong> — instructor's named challenge question. <span class="pdf-ref">📄 pp. 459, 226–230</span></li>
+  <li><strong>Integration: "TLS vs DNSSEC chain of trust."</strong> — both PKI-based but rooted differently. <span class="pdf-ref">📄 p. 597</span></li>
+</ul>
+
+<h4>3.2 Common Misconceptions &amp; Traps</h4>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "TLS encrypts the entire TCP segment including IP headers."</p>
+  <p><span class="reality">REALITY:</span> TLS encrypts only the application-layer payload (the TLS record). IP and TCP headers remain in plaintext — that's why a network eavesdropper still sees <em>who</em> you connect to (SNI in early handshake, destination IP), just not what is said. <span class="pdf-ref">📄 pp. 227–228</span></p>
+  <p><span class="trap">EXAM TRAP:</span> "HTTPS hides the URL you visit" is tricky — the domain is in the SNI (visible) but the path and query are encrypted.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "The server picks <em>a</em> cipher suite from the client's list."</p>
+  <p><span class="reality">REALITY:</span> Correct. The client <em>proposes</em> a list of cipher suites ordered by preference; the <em>server</em> makes the final choice. A misconfigured server that picks a weak suite is a common vulnerability. <span class="pdf-ref">📄 p. 230</span></p>
+  <p><span class="trap">EXAM TRAP:</span> A distractor says "both sides independently choose" or "the client chooses" — false.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "Anonymous Diffie-Hellman (ADH) key exchange is safe because it uses DH."</p>
+  <p><span class="reality">REALITY:</span> ADH has no certificate, so the client cannot authenticate the server — trivially vulnerable to man-in-the-middle. Pure DH <em>without</em> authentication is exactly the "unauthenticated channel" from the crypto lectures. <span class="pdf-ref">📄 pp. 145, 231</span></p>
+  <p><span class="trap">EXAM TRAP:</span> MCQ listing ADH as a secure option for production TLS.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "The master secret is sent encrypted over the wire."</p>
+  <p><span class="reality">REALITY:</span> The master secret is <em>never</em> transmitted. Both sides derive it independently from the pre-master secret plus the two nonces. Only the pre-master is communicated (RSA-encrypted under server's public key, or established via (EC)DHE). <span class="pdf-ref">📄 p. 232</span></p>
+  <p><span class="trap">EXAM TRAP:</span> T/F question claiming the master secret appears on the wire.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "ChangeCipherSpec is part of the Handshake Protocol."</p>
+  <p><span class="reality">REALITY:</span> ChangeCipherSpec is its own TLS sub-protocol (content-type 20). It's architecturally separate because it <em>activates</em> the new cipher state rather than negotiating it. <span class="pdf-ref">📄 pp. 215, 227</span></p>
+  <p><span class="trap">EXAM TRAP:</span> Multi-answer question "Which of the following are TLS sub-protocols?" — ChangeCipherSpec is one of four; missing it loses a point.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "Certificate validation proves the server is trustworthy."</p>
+  <p><span class="reality">REALITY:</span> It only proves the server holds the private key for the <em>name</em> on the certificate, and that the name was vouched for by a CA the browser trusts. It does not prove the server is not a phishing site, nor that the CA's vetting was rigorous. <span class="pdf-ref">📄 pp. 130, 230</span></p>
+  <p><span class="trap">EXAM TRAP:</span> Link-building: the wireless-plus-TLS challenge question often hinges on what certificates do <em>and don't</em> guarantee.</p>
+</div>
+
+<h4>3.3 Compare &amp; Contrast — TLS Key Exchange Methods <span class="pdf-ref">📄 p. 231</span></h4>
+<table class="data">
+  <thead>
+    <tr>
+      <th style="width:17%">Method</th>
+      <th style="width:24%">How the pre-master is established</th>
+      <th style="width:17%">Forward Secrecy?</th>
+      <th style="width:25%">Authentication</th>
+      <th style="width:17%">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RSA</strong></td>
+      <td>Client encrypts random 48-byte PMS with server's RSA public key.</td>
+      <td>❌ No — if server's private key later leaks, past recorded sessions are decryptable.</td>
+      <td>Server authenticated via its RSA certificate.</td>
+      <td>Removed in TLS 1.3; still in TLS 1.2 fallback.</td>
+    </tr>
+    <tr>
+      <td><strong>Fixed DH</strong></td>
+      <td>Server's DH public value is fixed in its certificate; client generates fresh DH pair.</td>
+      <td>❌ No — server's DH key is long-term.</td>
+      <td>Via certificate (fixed DH key).</td>
+      <td>Rarely used; legacy.</td>
+    </tr>
+    <tr>
+      <td><strong>DHE</strong> (Ephemeral DH)</td>
+      <td>Both sides generate fresh DH keys per handshake; server signs its public value with long-term cert key.</td>
+      <td>✅ Yes.</td>
+      <td>Via certificate (signing ephemeral DH).</td>
+      <td>Standard in TLS 1.2; superseded by ECDHE.</td>
+    </tr>
+    <tr>
+      <td><strong>ECDHE</strong> (Ephemeral EC DH) <span class="exam-star">⭐</span></td>
+      <td>Elliptic-curve variant of DHE — same forward secrecy with much smaller keys.</td>
+      <td>✅ Yes.</td>
+      <td>Via certificate (signing ephemeral EC-point).</td>
+      <td><strong>Default in TLS 1.3, modern browsers.</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Anonymous DH</strong></td>
+      <td>Plain DH, no certificate, no signature.</td>
+      <td>✅ Yes (but moot).</td>
+      <td>❌ None — MITM-vulnerable.</td>
+      <td>Never use in production.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>3.4 Memory Aids</h4>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic · 7-step handshake</strong>
+  <strong>"TCP-Hello-Hello-Cert-DH-Key-Done"</strong> — TCP handshake → ClientHello → ServerHello → Certificate → ServerKeyExchange → ClientKeyExchange/CCS/Finished → ServerCCS/Finished. <span class="pdf-ref">📄 pp. 217–223</span>
+</div>
+
+<div class="callout">
+  <strong class="lbl">Mnemonic · Record Protocol pipeline</strong>
+  <strong>"FC-MEP"</strong> — <em>Fragment, Compress, MAC, Encrypt, Prepend header</em>. <span class="pdf-ref">📄 p. 228</span>
+</div>
+
+<div class="callout">
+  <strong class="lbl">Mnemonic · Four TLS sub-protocols</strong>
+  <strong>"HARD"</strong> — <em>Handshake (22), Alert (21), Record (23), Data-Change-Spec (20)</em>. <span class="pdf-ref">📄 pp. 215, 227</span>
+</div>
+
+<div class="callout">
+  <strong class="lbl">Mnemonic · Why ECDHE</strong>
+  <strong>"Ephemeral = Forgets."</strong> Long-term key signs; ephemeral DH carries the secret. If the long-term key later leaks, the ephemeral secret is already forgotten → past sessions safe.
+</div>
+
+</div>
+<!-- ============ SECTION 4: FOLLOW-UP QUESTIONS ============ -->
+<div id="tls-s4" class="section-block">
+<h3>Section 4 · Follow-Up Questions</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 207–233 · 13 questions</div>
+
+<h4>Part A — Multiple Choice (4: 1 BEG · 1 INT · 2 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 215</span></div>
+  <p class="question-stem">Q1. TLS is structured as two layers. Which of the following correctly identifies them?</p>
+  <ol class="mcq-options">
+    <li>IP layer and TCP layer</li>
+    <li>Application layer and Network layer</li>
+    <li>Handshake / Change-Cipher-Spec / Alert (upper) and Record (lower)</li>
+    <li>ClientHello layer and ServerHello layer</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> TLS has four sub-protocols in two layers: the upper layer (Handshake, Change Cipher Spec, Alert) negotiates; the lower layer (Record) carries encrypted application data. <span class="pdf-ref">📄 pp. 215, 227</span></p>
+    <ul>
+      <li>Why A wrong: IP and TCP are below TLS, not part of it.</li>
+      <li>Why B wrong: TLS sits between transport and application.</li>
+      <li>Why D wrong: Hello messages are individual handshake messages, not layers.</li>
+    </ul>
+    <p><strong>Exam tip:</strong> Memorize the four content-type numbers: 22 Handshake, 20 ChangeCipherSpec, 21 Alert, 23 Record.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 pp. 225, 232</span></div>
+  <p class="question-stem">Q2. What is the primary purpose of the 32-byte random nonces (R<sub>Client</sub>, R<sub>Server</sub>) exchanged in ClientHello and ServerHello?</p>
+  <ol class="mcq-options">
+    <li>They are the actual session keys used for encryption.</li>
+    <li>They contribute to master-secret derivation so each session derives unique keys, preventing replay.</li>
+    <li>They authenticate the server to the client.</li>
+    <li>They are discarded immediately after the handshake.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: B.</strong> The nonces provide <em>freshness</em> — they are inputs to the master-secret hash, so even identical pre-master secrets would yield different session keys. <span class="pdf-ref">📄 pp. 225, 232</span></p>
+    <ul>
+      <li>Why A wrong: The nonces are <em>inputs</em> to key derivation, not keys themselves.</li>
+      <li>Why C wrong: Server authentication comes from the Certificate + ServerKeyExchange signature, not the nonce.</li>
+      <li>Why D wrong: The nonces feed the master secret, which lives for the whole session.</li>
+    </ul>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 pp. 223, 227, 230</span></div>
+  <p class="question-stem">Q3. A downgrade attacker silently strips the strong cipher suites from the client's ClientHello so the server picks the weakest one. Which handshake message is designed to detect this attack?</p>
+  <ol class="mcq-options">
+    <li>ChangeCipherSpec</li>
+    <li>Alert close_notify</li>
+    <li>Finished (contains MAC over all prior handshake messages)</li>
+    <li>ClientKeyExchange</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> Each side's Finished message is a keyed MAC over every handshake message seen so far (in its unmodified form, as expected by that side). If an attacker altered any byte of ClientHello or ServerHello, the two sides' MACs disagree and the handshake aborts. <span class="pdf-ref">📄 pp. 223, 227</span></p>
+    <p><strong>Exam tip:</strong> This is why the Finished message is said to give "integrity of the handshake" — a single sentence summary worth memorising.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 pp. 231, 226</span></div>
+  <p class="question-stem">Q4. Why is ECDHE preferred over static RSA key transport in TLS 1.3?</p>
+  <ol class="mcq-options">
+    <li>ECDHE uses shorter keys, making servers faster.</li>
+    <li>ECDHE provides forward secrecy: compromising the server's long-term key does not decrypt past sessions.</li>
+    <li>RSA cannot authenticate servers.</li>
+    <li>ECDHE encrypts faster than AES.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: B.</strong> With static RSA key transport, the pre-master is encrypted under the server's long-term RSA public key. If that private key ever leaks, a passive attacker who recorded past sessions can recover the pre-master → master secret → session keys. ECDHE uses per-session ephemeral DH; once the ephemeral values are discarded, the secret is irretrievable. <span class="pdf-ref">📄 pp. 226, 231</span></p>
+    <ul>
+      <li>Why A partially true but not the main reason.</li>
+      <li>Why C wrong: RSA <em>does</em> authenticate (via signature/encryption).</li>
+      <li>Why D wrong: ECDHE is key exchange, not bulk encryption.</li>
+    </ul>
+  </div></details>
+</div>
+
+<h4>Part B — True / False (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">T/F</span><span class="pdf-ref">📄 pp. 215, 227</span></div>
+  <p class="question-stem">Q5. In TLS, a single "session" can be reused across multiple "connections," avoiding a full handshake on every new TCP stream.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: TRUE.</strong> That is the precise definition of TLS session vs. connection on slide 215: handshake produces a cached session (cipher suite + master secret); subsequent TCP streams resume it via the session ID, skipping the expensive public-key steps. <span class="pdf-ref">📄 p. 215</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">T/F</span><span class="pdf-ref">📄 pp. 227–228</span></div>
+  <p class="question-stem">Q6. The TLS Record Protocol encrypts the IP header, TCP header, and application payload.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: FALSE.</strong> TLS operates above TCP and can only see/modify the application data. IP and TCP headers remain in the clear — this is why the network can still route the segment and why a passive observer can still infer the destination server's IP and the TCP ports. <span class="pdf-ref">📄 pp. 227–228</span></p>
+    <p><strong>Tip:</strong> If you need to hide the headers too, the answer is IPsec (next topic).</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">T/F</span><span class="pdf-ref">📄 pp. 145, 231</span></div>
+  <p class="question-stem">Q7. Anonymous Diffie-Hellman (ADH) key exchange is safe in TLS because DH itself is immune to man-in-the-middle attacks.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: FALSE.</strong> DH produces a shared secret between two parties, but by itself does not authenticate them. Without a certificate-signed key-exchange message, a MITM can perform DH separately with each side and sit in the middle decrypting/re-encrypting. Authentication (via ServerKeyExchange signature over the DH parameters) is exactly what makes ephemeral DH secure in TLS. <span class="pdf-ref">📄 pp. 145, 231</span></p>
+  </div></details>
+</div>
+
+<h4>Part C — Short Answer (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 215, 228</span></div>
+  <p class="question-stem">Q8. List the three security services that TLS provides and name the TLS mechanism that delivers each.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model (bullet answer, as instructor recommends):</strong></p>
+    <ul>
+      <li><strong>Confidentiality</strong> — symmetric encryption of the record payload using AES-128/256 (or 3DES/RC4 legacy) with the session's write keys. <span class="pdf-ref">📄 p. 228</span></li>
+      <li><strong>Integrity</strong> — a keyed MAC appended to each record, verified by the receiver using the session MAC key. <span class="pdf-ref">📄 p. 228</span></li>
+      <li><strong>Authenticity</strong> — X.509 certificate chain verified during the handshake; only the legitimate server could have produced the signature over the DH parameters. <span class="pdf-ref">📄 p. 230</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ confidentiality + symmetric encryption ☐ integrity + MAC ☐ authenticity + certificate.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 225–232</span></div>
+  <p class="question-stem">Q9. Summarise the TLS 1.2 handshake in roughly 7 bullet points, naming the purpose of each message.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>(TCP 3-way handshake)</strong> — Opens the TCP connection on port 443. <span class="pdf-ref">📄 p. 233</span></li>
+      <li><strong>ClientHello</strong> — Client proposes TLS version, nonce R<sub>C</sub>, cipher-suite list. <span class="pdf-ref">📄 p. 230</span></li>
+      <li><strong>ServerHello</strong> — Server replies with chosen version, nonce R<sub>S</sub>, chosen cipher suite. <span class="pdf-ref">📄 p. 230</span></li>
+      <li><strong>Certificate</strong> — Server sends X.509 cert chain (signed by CA). <span class="pdf-ref">📄 p. 230</span></li>
+      <li><strong>ServerKeyExchange + ServerHelloDone</strong> — Server sends ephemeral DH public value + signature over (R<sub>C</sub> ‖ R<sub>S</sub> ‖ DH params), proving cert ownership. <span class="pdf-ref">📄 pp. 222, 230</span></li>
+      <li><strong>ClientKeyExchange + ChangeCipherSpec + Finished</strong> — Client sends its DH public value (or RSA-encrypted PMS); both sides derive master secret + 6 session keys; Finished MAC is over all prior handshake messages. <span class="pdf-ref">📄 pp. 230, 232</span></li>
+      <li><strong>(Server) ChangeCipherSpec + Finished</strong> — Server mirrors: switch to new keys, MAC over handshake; application data now flows encrypted. <span class="pdf-ref">📄 pp. 223, 227</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ propose ☐ negotiate ☐ authenticate (cert+sig) ☐ key-exchange ☐ CCS+Finished both sides ☐ purpose stated for each.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 226, 231</span></div>
+  <p class="question-stem">Q10. Explain why TLS 1.3 deliberately removed RSA key transport and static-DH key exchange, keeping only (EC)DHE. Include the security property that motivated the change and one trade-off.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>Motivation — forward secrecy.</strong> With RSA key transport, the pre-master secret is encrypted under the server's long-term RSA public key. An attacker who records ciphertext today and obtains the RSA private key later (via subpoena, breach, or algorithm break) can decrypt past sessions retroactively. <span class="pdf-ref">📄 p. 231</span></li>
+      <li><strong>(EC)DHE fix.</strong> Both sides generate ephemeral DH keys per handshake; the long-term certificate key is only used to <em>sign</em> the ephemeral public value. Once the ephemeral secrets are zeroed after the session, the pre-master cannot be recomputed even with the long-term key. <span class="pdf-ref">📄 pp. 222, 231</span></li>
+      <li><strong>Static DH</strong> removed for the same reason — its DH secret was long-term.</li>
+      <li><strong>Trade-off:</strong> Every handshake now includes fresh DH computation on both sides (moderate CPU cost, mitigated by elliptic-curve arithmetic being fast). Simpler cipher-suite negotiation (no RSA-KT options) is actually a benefit. <span class="pdf-ref">📄 p. 226</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ forward-secrecy property named ☐ RSA-KT vulnerability explained ☐ ECDHE mechanism stated ☐ trade-off mentioned.</p>
+  </div></details>
+</div>
+
+<h4>Part D — Fill in the Blank (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 230</span></div>
+  <p class="question-stem">Q11. All TLS handshake messages are encoded in ________ format (3-letter abbreviation), where each type is identified by a numerical value.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer:</strong> TLV (Type-Length-Value). <span class="pdf-ref">📄 p. 230</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 232</span></div>
+  <p class="question-stem">Q12. From the 48-byte ________ secret and the two handshake nonces, TLS derives a 48-byte ________ secret, from which six session keys are derived.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer:</strong> pre-master (PMS); master (MS). <span class="pdf-ref">📄 p. 232</span></p>
+    <p><strong>Why:</strong> The pre-master is established by the key exchange (RSA-enc or (EC)DHE), never transmitted in cleartext. The master secret is derived identically on both sides using a PRF over (PMS, R<sub>C</sub>, R<sub>S</sub>).</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 231</span></div>
+  <p class="question-stem">Q13. A cipher suite name like <code>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</code> specifies key exchange = ________, authentication = ________, bulk cipher = ________, and MAC/PRF = ________.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer:</strong> ECDHE; RSA (certificate signature); AES-128-GCM; SHA-256. <span class="pdf-ref">📄 p. 231</span></p>
+    <p><strong>Why:</strong> Read the suite left-to-right: protocol_KX_Auth_WITH_Cipher_MAC. ECDHE = ephemeral EC Diffie-Hellman (key exchange); RSA = the cert signs the ephemeral value; AES-128-GCM = authenticated encryption (so SHA-256 here is only for the HKDF/PRF, not a separate MAC).</p>
+  </div></details>
+</div>
+
+</div>
+<!-- ============ SECTION 5: CHEAT SHEET ============ -->
+<div id="tls-s5" class="cheat-sheet">
+  <h4>Section 5 · 4A TLS Cheat Sheet</h4>
+  <p class="oneliner">TLS is a two-layer, four-component protocol where the Handshake layer (Handshake/CCS/Alert sub-protocols) negotiates cipher suite, authenticates the server via X.509 certificate, and derives a master secret via (EC)DHE; the Record layer then fragments-MACs-encrypts all application data using direction-specific session keys.</p>
+
+  <h4>THE 3 THINGS YOU MUST KNOW</h4>
+  <ol>
+    <li><strong>Four TLS sub-protocols</strong> — Handshake (22), Record (23), Change Cipher Spec (20), Alert (21). The first three define the handshake + data phases; the fourth carries warnings and close_notify. <span class="pdf-ref">📄 pp. 215, 227</span></li>
+    <li><strong>Seven-step TLS 1.2 handshake</strong> — TCP → ClientHello → ServerHello → Certificate → ServerKeyExchange + HelloDone → ClientKeyExchange + CCS + Finished → ServerCCS + Finished. Master secret derived from pre-master + R<sub>C</sub> + R<sub>S</sub>. <span class="pdf-ref">📄 pp. 217–232</span></li>
+    <li><strong>ECDHE &gt; RSA key transport</strong> — ECDHE gives forward secrecy; TLS 1.3 removed RSA key transport entirely and keeps only (EC)DHE. <span class="pdf-ref">📄 pp. 226, 231</span></li>
+  </ol>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE</h4>
+  <p>Confusing what TLS protects — TLS encrypts the <em>record payload</em>, not the IP or TCP headers. A network observer still sees destination IP and port. If that troubles you, reach for IPsec (transport/tunnel mode) at the next layer down. <span class="pdf-ref">📄 pp. 227–228</span></p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE</h4>
+  <p class="remember">"Hello → Hello → Cert → Sig → KX → Done. The Finished MAC signs the whole conversation."</p>
+
+  <h4>QUICK NAVIGATION</h4>
+  <table class="data" style="margin-top:8px;">
+    <tr><th>To review…</th><th>Go to lecture page(s)</th></tr>
+    <tr><td>TLS architecture (4 components, 2 layers)</td><td>pp. 215, 227, 238</td></tr>
+    <tr><td>Full handshake walkthrough</td><td>pp. 217–226</td></tr>
+    <tr><td>Handshake message types (TLV, Type IDs 1–20)</td><td>pp. 230, 240</td></tr>
+    <tr><td>Key exchange methods (RSA, DH, DHE, ECDHE, ADH)</td><td>p. 231</td></tr>
+    <tr><td>Master-secret derivation</td><td>p. 232</td></tr>
+    <tr><td>Record-layer services</td><td>pp. 228, 241</td></tr>
+    <tr><td>TLS 1.2 vs TLS 1.3 differences</td><td>pp. 225–226</td></tr>
+  </table>
+</div>
+
+</section>
+
+<!-- ============================================================ -->
+<!-- SUB-TOPIC 4B · HTTPS                                         -->
+<!-- ============================================================ -->
+<section id="st-https" class="topic">
+
+<div class="subtopic-banner">
+  <span class="letter">4B</span>
+  <span class="title">HTTPS — HTTP over TLS on TCP 443</span>
+  <span class="pages">📄 Lectures 9 · pp. 224–226, 233 &nbsp;·&nbsp; <span class="signal-explicit">🔴 EXPLICIT</span></span>
+</div>
+
+<!-- ============ SECTION 1: CONCEPT OVERVIEW ============ -->
+<div id="https-s1" class="section-block">
+<h3>Section 1 · Concept Overview</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 224–226, 233</div>
+
+<h4>1.1 The Problem This Solves <span class="pdf-ref">📄 p. 233</span></h4>
+<p>Plain HTTP transmits URLs, cookies, form fields, and bodies in cleartext. Anyone on the network path (ISP, public Wi-Fi attacker, compromised router) can read them, inject scripts, or modify responses. HTTPS is the trivially-simple answer: run ordinary HTTP <em>inside</em> a TLS session. No change to the application semantics; every byte of HTTP is now confidential, integrity-protected, and the server is authenticated. <span class="pdf-ref">📄 p. 233</span></p>
+
+<h4>1.2 The Core Idea — Three-Layer Connection Init <span class="pdf-ref">📄 p. 233</span></h4>
+<p>A single HTTPS fetch cascades through three protocol layers, each depending on the one below it:</p>
+<ol class="mcq-options">
+  <li><strong>TCP layer</strong> — 3-way handshake on port 443 establishes a reliable byte stream.</li>
+  <li><strong>TLS layer</strong> — full TLS handshake (see 4A) runs over that TCP stream, producing session keys.</li>
+  <li><strong>HTTP layer</strong> — actual GET/POST requests and responses flow, each one wrapped in an encrypted TLS record.</li>
+</ol>
+<p>Slide 233 states it verbatim: <em>"TCP 3-way handshake ⇒ TLS handshake ⇒ HTTP request(s)"</em>. That sequence is the single most likely HTTPS exam question.</p>
+
+<h4>1.3 Analogy — Talking on an Encrypted Phone <span class="pdf-ref">📄 p. 233</span></h4>
+<p>Imagine making a secret phone call:</p>
+<ul class="plain">
+  <li><strong>TCP</strong> = dialling and hearing the ring tone until the other person picks up.</li>
+  <li><strong>TLS</strong> = you both put on voice-scrambling headsets and agree on tonight's codebook.</li>
+  <li><strong>HTTP</strong> = the actual conversation, now scrambled through the headsets.</li>
+</ul>
+<p>Close-down mirrors the build-up: "okay, bye" (HTTP Connection: close) → "ending secure session" (TLS close_notify) → hang up (TCP FIN). If someone hangs up before saying "ending secure session," that's suspicious — could be a truncation attack. <span class="pdf-ref">📄 p. 233</span></p>
+
+<h4>1.4 Technical Definition <span class="pdf-ref">📄 p. 233</span></h4>
+<p><strong>HTTPS</strong> is not a new protocol but a composition: <em>HTTP semantics, carried as the application-layer payload of TLS records, flowing over TCP port 443.</em> The HTTP client initiates by requesting a connection to the next-lower layer (TLS); the TLS layer in turn requests a TCP connection. All HTTP parsing logic is unchanged — the HTTP client and server see a plain socket; the TLS library transparently encrypts/decrypts in between. <span class="pdf-ref">📄 p. 233</span></p>
+
+<h4>1.5 Key Terms &amp; Definitions</h4>
+<table class="data">
+  <thead>
+    <tr><th style="width:22%">Term</th><th style="width:38%">Plain-English Definition</th><th style="width:28%">Why It Matters for the Exam</th><th style="width:12%">📄 Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>HTTPS</strong></td>
+      <td>HTTP carried inside a TLS session; transport over TCP port 443.</td>
+      <td>One-line definition the instructor repeats twice in the review scripts.</td>
+      <td>p. 233</td>
+    </tr>
+    <tr>
+      <td><strong>TCP port 443</strong></td>
+      <td>The well-known port for HTTPS (HTTP is 80, DNS is 53, SSH is 22).</td>
+      <td>Distinguishes from HTTP (80). Expect a port-matching MCQ.</td>
+      <td>p. 233</td>
+    </tr>
+    <tr>
+      <td><strong>Connection initiation cascade</strong></td>
+      <td>TCP 3-way handshake → TLS handshake → HTTP request.</td>
+      <td>Memorise the order; instructor named it explicitly.</td>
+      <td>p. 233</td>
+    </tr>
+    <tr>
+      <td><strong>Connection closure cascade</strong></td>
+      <td>HTTP "Connection: close" header → TLS close_notify alert → TCP FIN/ACK.</td>
+      <td>Mirror of initiation; close_notify must precede TCP close.</td>
+      <td>p. 233</td>
+    </tr>
+    <tr>
+      <td><strong>close_notify alert</strong></td>
+      <td>TLS Alert-protocol message (content-type 21) signalling graceful shutdown of the secure channel.</td>
+      <td>Absence of close_notify before TCP close = possible truncation attack.</td>
+      <td>p. 233</td>
+    </tr>
+    <tr>
+      <td><strong>Unannounced TCP closure</strong> <span class="exam-star">⭐</span></td>
+      <td>TCP FIN/RST arriving <em>without</em> a prior TLS close_notify.</td>
+      <td>Slide 233 flags this as "evidence of some sort of attack" — should trigger a security warning.</td>
+      <td>p. 233</td>
+    </tr>
+    <tr>
+      <td><strong>Wireshark capture</strong></td>
+      <td>Traffic recording tool used in lecture to show the real byte-level sequence of an HTTPS connection.</td>
+      <td>The gaia.cs.umass.edu and dropbox.com walkthroughs are on the slide deck.</td>
+      <td>pp. 217–224</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============ SECTION 2: HOW IT WORKS ============ -->
+<div id="https-s2" class="section-block">
+<h3>Section 2 · How It Works — An HTTPS Connection, Beginning to End</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 217–226, 233</div>
+
+<div class="step">
+  <div class="step-head">Phase 1 · DNS Resolution (implied, not part of HTTPS itself)</div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> Browser asks its resolver for <code>gaia.cs.umass.edu</code>, gets an A record with the IP. <br>
+    <strong class="lbl">Key exam note:</strong> If DNS is poisoned (Topic 2 DNS attacks), the client will connect to the attacker's IP — but TLS certificate validation in Phase 3 catches the impersonator because the cert's CN/SAN won't match. This is the classic <em>TLS saves you when DNS lies</em> integration point.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 2 · TCP 3-way handshake on port 443</div>
+  <div class="step-detail">
+    <strong class="lbl">Messages:</strong> SYN → SYN-ACK → ACK. <br>
+    <strong class="lbl">Result:</strong> Reliable bidirectional byte stream between client:rand_port and server:443. Nothing is yet encrypted. <span class="pdf-ref">📄 p. 233</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 3 · TLS handshake (identical to 4A)</div>
+  <div class="step-detail">
+    <strong class="lbl">Messages:</strong> ClientHello → ServerHello → Certificate → ServerKeyExchange + HelloDone → ClientKeyExchange + CCS + Finished → ServerCCS + Finished. <br>
+    <strong class="lbl">Certificate verification:</strong> Browser checks that the cert's subject matches <code>gaia.cs.umass.edu</code> (SAN or CN), signature chain is valid up to a trusted root CA, and the cert is not expired/revoked. <br>
+    <strong class="lbl">Result:</strong> Both sides hold six session keys; encrypted tunnel is open. <span class="pdf-ref">📄 pp. 217–223</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 4 · Encrypted HTTP transaction(s)</div>
+  <div class="step-detail">
+    <strong class="lbl">Messages:</strong> HTTP GET / path → HTTP 200 OK + body. Every HTTP byte is a TLS record payload; the TLS Record Protocol encrypts each with AES-CBC/AES-GCM + MAC. <br>
+    <strong class="lbl">Observer sees:</strong> TCP segments to/from port 443, visible length pattern, but not the URL path, headers, cookies, or body. <br>
+    <strong class="lbl">Keep-alive:</strong> HTTP/1.1 by default keeps the TLS connection open for multiple requests. HTTP/2 multiplexes many requests over a single TLS connection.
+    <span class="pdf-ref">📄 p. 233</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 5 · Graceful close</div>
+  <div class="step-detail">
+    <strong class="lbl">Messages:</strong> HTTP includes <em>Connection: close</em> in its last response → TLS sends close_notify alert (both sides) → TCP FIN/ACK exchange. <br>
+    <strong class="lbl">Security rule:</strong> If the TCP FIN/RST arrives <em>without</em> a preceding close_notify, the HTTPS client should raise a warning — possibly a truncation attack (attacker cut off the response early). <span class="pdf-ref">📄 p. 233</span>
+  </div>
+</div>
+
+<h4>End-to-End Diagram (synthesized from <span class="pdf-ref">📄 pp. 217–223, 233</span>)</h4>
+<pre class="diagram">
+   Client                                                Server
+   ──────                                                ──────
+                   [DNS resolution: gaia.cs.umass.edu → IP]
+   
+   ────────────────── TCP SYN ────────────────────────►  Phase 2
+   ◄───────────── TCP SYN-ACK ─────────────────────────
+   ────────────────── TCP ACK ────────────────────────►
+                                                         Phase 3
+   ────── TLS ClientHello ────────────────────────────► 
+   ◄─── TLS ServerHello + Cert + KeyExchange + Done ────
+   ── TLS ClientKeyExchange + CCS + Finished ─────────► 
+   ◄───── TLS CCS + Finished ──────────────────────────
+   
+   ═══════════════ secure tunnel established ════════════  Phase 4
+   ── HTTP GET /index.html  (encrypted) ──────────────► 
+   ◄── HTTP 200 OK + body    (encrypted) ──────────────
+   ── HTTP GET /style.css   (encrypted) ──────────────► 
+   ◄── HTTP 200 OK + body    (encrypted) ──────────────
+         ... more requests reusing the TLS session ...
+                                                         Phase 5
+   ── HTTP: Connection: close  (encrypted) ───────────►
+   ── TLS close_notify ───────────────────────────────►
+   ◄── TLS close_notify ───────────────────────────────
+   ── TCP FIN ────────────────────────────────────────►
+   ◄── TCP FIN-ACK ────────────────────────────────────
+</pre>
+<p class="diagram-source">SOURCE: Synthesized from the TCP→TLS→HTTP cascade on <span class="pdf-ref">📄 p. 233</span> and the Wireshark walkthrough on <span class="pdf-ref">📄 pp. 217–224</span>.</p>
+
+<h4>Line-by-Line Annotation</h4>
+<ul class="plain">
+  <li><strong>Port 443 hard-coded</strong> — the client connects to this port by convention; nothing about TLS itself requires it. <span class="pdf-ref">📄 p. 233</span></li>
+  <li><strong>Wireshark view</strong> — in the lecture's gaia.cs.umass.edu capture, you can see TCP SYN/SYN-ACK/ACK, then TLS ClientHello (recognisable by TLS record header), and beyond that only encrypted "Application Data" records. The HTTP is invisible at this layer. <span class="pdf-ref">📄 p. 224</span></li>
+  <li><strong>Cert validation before any HTTP byte</strong> — the browser refuses to send the HTTP GET if certificate validation fails; you get a "Your connection is not private" warning instead. <span class="pdf-ref">📄 pp. 220, 230</span></li>
+  <li><strong>Session reuse across requests</strong> — the same TLS session (session ID or session ticket) backs multiple HTTP requests in HTTP/1.1 keep-alive and HTTP/2. Full handshakes amortise. <span class="pdf-ref">📄 p. 215</span></li>
+  <li><strong>close_notify is in-band</strong> — it travels as a TLS Alert record inside the very TLS session it terminates. That is why a TCP RST without close_notify should be treated with suspicion. <span class="pdf-ref">📄 p. 233</span></li>
+</ul>
+</div>
+
+<!-- ============ SECTION 3: EXAM INTELLIGENCE ============ -->
+<div id="https-s3" class="section-block">
+<h3>Section 3 · Exam Intelligence</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 224–226, 233</div>
+
+<h4>3.1 What Exams Typically Test on HTTPS</h4>
+<ul class="plain">
+  <li><strong>"What does HTTPS stand for?"</strong> — HTTP over TLS (sometimes "HTTP Secure"). <span class="pdf-ref">📄 p. 233</span></li>
+  <li><strong>"What port does HTTPS use?"</strong> — TCP 443. <span class="pdf-ref">📄 p. 233</span></li>
+  <li><strong>"Describe the connection-initiation order for an HTTPS fetch."</strong> — TCP 3-way handshake → TLS handshake → HTTP request. Instructor named this verbatim. <span class="pdf-ref">📄 p. 233</span></li>
+  <li><strong>"What should the client do if the TCP connection closes without a TLS close_notify?"</strong> — Raise a security warning; possible truncation attack. <span class="pdf-ref">📄 p. 233</span></li>
+  <li><strong>"Does HTTPS hide the destination IP or hostname?"</strong> — No; IP is in the IP header (plaintext); hostname appears in the Server Name Indication extension of ClientHello (plaintext in TLS 1.2, encrypted with ECH in TLS 1.3). Common MCQ trap. <span class="pdf-ref">📄 pp. 227–228</span></li>
+</ul>
+
+<h4>3.2 Common Misconceptions &amp; Traps</h4>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "HTTPS uses a different HTTP protocol from HTTP."</p>
+  <p><span class="reality">REALITY:</span> HTTP syntax and semantics are identical — method verbs (GET/POST), headers, status codes, bodies. HTTPS only adds a TLS wrapper. A developer writing an HTTP server library doesn't change anything; the TLS library wraps the socket. <span class="pdf-ref">📄 p. 233</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "HTTPS protects the URL, including the domain name, from observers."</p>
+  <p><span class="reality">REALITY:</span> HTTPS encrypts the <em>path and query</em> (those live inside HTTP), but the destination IP is visible (IP header, plaintext) and the domain appears in the TLS ClientHello's SNI extension (plaintext in TLS 1.2). An on-path observer knows you visited <code>gaia.cs.umass.edu</code>, just not which page. <span class="pdf-ref">📄 pp. 225, 227–228</span></p>
+  <p><span class="trap">EXAM TRAP:</span> T/F "HTTPS hides which website you're visiting" — nuanced, but generally FALSE.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "HTTPS runs over UDP for speed."</p>
+  <p><span class="reality">REALITY:</span> HTTPS runs over TCP port 443. HTTP/3 (QUIC) does use UDP, but that's a separate protocol with its own crypto handshake derived from TLS 1.3 — not what the CS 448 slides cover. <span class="pdf-ref">📄 p. 233</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "A TCP RST always indicates a network problem."</p>
+  <p><span class="reality">REALITY:</span> In the HTTPS context, a RST or unannounced FIN <em>in the middle</em> of a response may be a truncation attack — attacker cuts the response before sensitive data finishes, aiming to trick the client into processing an incomplete page. The slide tells the client to "issue some sort of security warning" in that case. <span class="pdf-ref">📄 p. 233</span></p>
+</div>
+
+<h4>3.3 Compare &amp; Contrast — HTTP vs HTTPS</h4>
+<table class="data">
+  <thead>
+    <tr><th>Dimension</th><th>HTTP (plain)</th><th>HTTPS</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Port</td><td>TCP 80</td><td>TCP 443</td></tr>
+    <tr><td>Transport</td><td>TCP directly</td><td>TCP → TLS → HTTP</td></tr>
+    <tr><td>Confidentiality</td><td>❌ None</td><td>✅ AES (via TLS record)</td></tr>
+    <tr><td>Integrity</td><td>❌ None</td><td>✅ MAC per record</td></tr>
+    <tr><td>Server authenticity</td><td>❌ None</td><td>✅ X.509 certificate chain</td></tr>
+    <tr><td>Client authenticity</td><td>Via cookies/passwords inside HTTP (plaintext)</td><td>Via client cert (optional) or inside-tunnel credentials</td></tr>
+    <tr><td>URL path visible to observer</td><td>Yes</td><td>No (encrypted)</td></tr>
+    <tr><td>Domain visible to observer</td><td>Yes</td><td>Yes (SNI in TLS 1.2; ECH hides in TLS 1.3)</td></tr>
+    <tr><td>Destination IP visible</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Handshake cost</td><td>TCP-only</td><td>TCP + TLS (2 RTT in 1.2; 1 RTT in 1.3)</td></tr>
+  </tbody>
+</table>
+
+<h4>3.4 Memory Aids</h4>
+<div class="callout quote">
+  <strong class="lbl">Mnemonic · HTTPS cascade</strong>
+  <strong>"TLS is a sandwich filling: TCP under, HTTP over."</strong> <span class="pdf-ref">📄 p. 233</span>
+</div>
+<div class="callout">
+  <strong class="lbl">Mnemonic · Close sequence</strong>
+  <strong>"HTC → TLS-bye → TCP-FIN"</strong> — HTTP's "Connection: close" → TLS close_notify → TCP FIN. Miss the middle step and it's an attack. <span class="pdf-ref">📄 p. 233</span>
+</div>
+<div class="callout">
+  <strong class="lbl">Mnemonic · What HTTPS does and doesn't hide</strong>
+  <strong>"HIDES the path; SHOWS the host."</strong> Path/query/headers/body are encrypted; destination IP and SNI domain are not (in TLS 1.2). <span class="pdf-ref">📄 pp. 225, 227</span>
+</div>
+</div>
+
+<!-- ============ SECTION 4: QUESTIONS ============ -->
+<div id="https-s4" class="section-block">
+<h3>Section 4 · Follow-Up Questions</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 224–233 · 13 questions</div>
+
+<h4>Part A — Multiple Choice (4: 1 BEG · 1 INT · 2 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q1. What is HTTPS, most precisely?</p>
+  <ol class="mcq-options">
+    <li>A rewrite of HTTP for encrypted use.</li>
+    <li>HTTP running inside a TLS session on TCP port 443.</li>
+    <li>A UDP-based secure web protocol.</li>
+    <li>HTTP plus Kerberos authentication.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: B.</strong> HTTPS is the plain HTTP protocol, unchanged, carried as the application-layer payload of TLS records on TCP 443. <span class="pdf-ref">📄 p. 233</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q2. In the correct order, the connection-initiation sequence for a fresh HTTPS fetch is:</p>
+  <ol class="mcq-options">
+    <li>TLS handshake → TCP 3-way handshake → HTTP GET</li>
+    <li>HTTP GET → TCP handshake → TLS handshake</li>
+    <li>TCP 3-way handshake → TLS handshake → HTTP GET</li>
+    <li>TCP handshake → HTTP GET → TLS handshake</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> Each upper layer depends on the one below being already established. Slide 233 states it verbatim. <span class="pdf-ref">📄 p. 233</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q3. Midway through downloading a page over HTTPS, the client sees a TCP RST arrive from the server's IP address with <em>no prior</em> TLS close_notify. According to the lecture, what should the HTTPS client do?</p>
+  <ol class="mcq-options">
+    <li>Silently accept the partial response.</li>
+    <li>Retry the request automatically without informing the user.</li>
+    <li>Issue a security warning — possible truncation attack.</li>
+    <li>Downgrade to HTTP and try again.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> Slide 233 says: <em>"An unannounced TCP closure could be evidence of some sort of attack, so the HTTPS client should issue some sort of security warning when this occurs."</em> <span class="pdf-ref">📄 p. 233</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 pp. 225, 227–228</span></div>
+  <p class="question-stem">Q4. An eavesdropper captures a user's HTTPS session to <code>bank.example.com</code>. Which of these is/are visible to the eavesdropper? (Pick the one complete, correct answer.)</p>
+  <ol class="mcq-options">
+    <li>Nothing at all.</li>
+    <li>The URL path and the body content only.</li>
+    <li>The destination IP and the SNI hostname (TLS 1.2), plus packet sizes and timings.</li>
+    <li>The user's password, but nothing else.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> IP headers are in the clear (essential for routing). In TLS 1.2, the Server Name Indication sent during ClientHello reveals the requested hostname in plaintext. Lengths and inter-arrival times also leak side-channel information. The URL path, body, cookies, and any password remain encrypted. TLS 1.3's Encrypted ClientHello (ECH) extension is designed to cover the SNI, but isn't universally deployed. <span class="pdf-ref">📄 pp. 225, 227–228</span></p>
+    <p><strong>Exam tip:</strong> This is the classic "HTTPS hides less than you think" question.</p>
+  </div></details>
+</div>
+
+<h4>Part B — True / False (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">T/F</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q5. HTTPS uses TCP port 80.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: FALSE.</strong> HTTPS uses TCP <strong>443</strong>; plain HTTP uses 80. <span class="pdf-ref">📄 p. 233</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">T/F</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q6. HTTPS defines a new HTTP message syntax in which header names are case-insensitive binary tokens.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: FALSE.</strong> HTTPS does not modify HTTP syntax or semantics at all. The same GET/POST/headers/status lines travel as plaintext HTTP inside the encrypted TLS record. HTTP/2 <em>does</em> introduce binary framing, but that is independent of HTTPS. <span class="pdf-ref">📄 p. 233</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">T/F</span><span class="pdf-ref">📄 pp. 225, 227</span></div>
+  <p class="question-stem">Q7. With TLS 1.2, an on-path observer of an HTTPS session can learn which specific hostname the client is connecting to, because SNI is sent in plaintext inside the ClientHello.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: TRUE.</strong> The Server Name Indication extension lets a single server IP host multiple certificates, but its plaintext transmission in TLS 1.2 reveals the target hostname. TLS 1.3 introduces Encrypted ClientHello (ECH) to close this gap, but adoption is partial. <span class="pdf-ref">📄 pp. 225, 227</span></p>
+  </div></details>
+</div>
+
+<h4>Part C — Short Answer (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">SA</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q8. Describe the three-layer connection-initiation sequence for an HTTPS fetch.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>TCP:</strong> 3-way handshake (SYN, SYN-ACK, ACK) to the server's port 443. <span class="pdf-ref">📄 p. 233</span></li>
+      <li><strong>TLS:</strong> Full TLS handshake over that TCP stream — ClientHello, ServerHello, Certificate, key exchange, Finished both sides — yielding shared session keys. <span class="pdf-ref">📄 pp. 217–223</span></li>
+      <li><strong>HTTP:</strong> Encrypted GET/POST requests and responses flow inside TLS records over the same TCP connection until close. <span class="pdf-ref">📄 p. 233</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ TCP port 443 ☐ TLS handshake wraps ☐ HTTP inside TLS.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">SA</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q9. Explain what a TLS <em>close_notify</em> alert is and why the HTTPS client should care if a TCP RST arrives without one.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>close_notify</strong> is a TLS Alert-protocol message (content-type 21) that signals graceful shutdown of the secure channel. Both sides typically send one before TCP close. <span class="pdf-ref">📄 p. 233</span></li>
+      <li>Because close_notify is authenticated by the TLS keys, only the legitimate peer can generate it. A TCP FIN/RST without close_notify may indicate a network attacker cutting the connection mid-response to truncate the content. <span class="pdf-ref">📄 p. 233</span></li>
+      <li><strong>Consequence:</strong> The HTTPS client should warn the user and <em>not</em> treat the received partial data as authoritative. Slide 233 explicitly instructs implementations to issue a security warning. <span class="pdf-ref">📄 p. 233</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ close_notify definition ☐ why authentic ☐ truncation attack + user warning.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 225, 227, 233</span></div>
+  <p class="question-stem">Q10. A user in a coffee shop visits <code>https://bank.example.com/transfer?to=Alice&amp;amount=100</code>. Classify what a passive Wi-Fi eavesdropper learns (visible), what she cannot learn (hidden), and one piece of metadata that could still betray the user.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>Visible:</strong>
+        <ul>
+          <li>Destination IP (bank.example.com's IP), source IP, TCP ports — IP/TCP headers are not encrypted. <span class="pdf-ref">📄 pp. 227–228</span></li>
+          <li>Hostname — SNI in ClientHello is plaintext in TLS 1.2. <span class="pdf-ref">📄 p. 225</span></li>
+          <li>Coarse timings and record sizes.</li>
+        </ul>
+      </li>
+      <li><strong>Hidden:</strong>
+        <ul>
+          <li>The URL path (<code>/transfer</code>) and query parameters (<code>to=Alice&amp;amount=100</code>) — these are inside the HTTP request, wrapped in TLS records. <span class="pdf-ref">📄 p. 233</span></li>
+          <li>All request/response headers and bodies. <span class="pdf-ref">📄 p. 233</span></li>
+          <li>Session cookies, authentication tokens.</li>
+        </ul>
+      </li>
+      <li><strong>Side-channel betrayal:</strong> Encrypted record lengths can fingerprint specific pages (page-length fingerprinting) or identify which form was submitted. Fixed-length actions (always 100-byte "transfer confirmed" responses) leak semantic info. <span class="pdf-ref">📄 pp. 227–228</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ IP &amp; SNI visible ☐ path &amp; body hidden ☐ side-channel cited.</p>
+  </div></details>
+</div>
+
+<h4>Part D — Fill in the Blank (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q11. HTTPS traffic uses TCP port ________.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content"><p><strong>✅ Answer:</strong> 443. <span class="pdf-ref">📄 p. 233</span></p></div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 233</span></div>
+  <p class="question-stem">Q12. During graceful HTTPS shutdown the order of events is: HTTP "Connection: close" → TLS ________ alert → TCP ________.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content"><p><strong>✅ Answer:</strong> close_notify; FIN (FIN/ACK). <span class="pdf-ref">📄 p. 233</span></p></div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">FIB</span><span class="pdf-ref">📄 pp. 225, 227</span></div>
+  <p class="question-stem">Q13. A passive observer of a TLS 1.2 HTTPS session can still read the target hostname because it travels unencrypted in the ________ extension of the ClientHello message.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer:</strong> Server Name Indication (SNI). <span class="pdf-ref">📄 p. 225</span></p>
+    <p><strong>Context:</strong> This was necessary because a single IP can host many virtual TLS servers; the server needs to know which certificate to present before encryption begins. TLS 1.3's ECH (Encrypted ClientHello) addresses this residual leak.</p>
+  </div></details>
+</div>
+
+</div>
+
+<!-- ============ SECTION 5: CHEAT SHEET ============ -->
+<div id="https-s5" class="cheat-sheet">
+  <h4>Section 5 · 4B HTTPS Cheat Sheet</h4>
+  <p class="oneliner">HTTPS is HTTP running inside a TLS session on TCP port 443: the same HTTP syntax you already know, with confidentiality + integrity + server authenticity bolted on by the lower TLS layer — set up as TCP handshake → TLS handshake → HTTP request and torn down in mirror order via close_notify + TCP FIN.</p>
+
+  <h4>THE 3 THINGS YOU MUST KNOW</h4>
+  <ol>
+    <li><strong>Three-layer cascade</strong> — TCP 3-way handshake → TLS handshake → HTTP request/response. Port 443. <span class="pdf-ref">📄 p. 233</span></li>
+    <li><strong>Graceful close</strong> — HTTP "Connection: close" → TLS close_notify → TCP FIN. An unannounced TCP close = warn the user. <span class="pdf-ref">📄 p. 233</span></li>
+    <li><strong>What HTTPS hides and doesn't</strong> — Hides: path, query, headers, body. Visible: destination IP, SNI hostname (TLS 1.2), packet lengths/timings. <span class="pdf-ref">📄 pp. 225, 227</span></li>
+  </ol>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE</h4>
+  <p>Treating HTTPS as a different HTTP protocol. It is <em>literally the same</em> HTTP — the only difference is the socket underneath is a TLS-wrapped TCP socket instead of a plain TCP socket. All HTTP library code is unchanged. <span class="pdf-ref">📄 p. 233</span></p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE</h4>
+  <p class="remember">"HTTP unchanged. TLS wraps. TCP below. 443."</p>
+
+  <h4>QUICK NAVIGATION</h4>
+  <table class="data" style="margin-top:8px;">
+    <tr><th>To review…</th><th>Go to lecture page(s)</th></tr>
+    <tr><td>HTTPS definition + port 443</td><td>p. 233</td></tr>
+    <tr><td>Connection initiation cascade</td><td>p. 233</td></tr>
+    <tr><td>Graceful close + unannounced-close warning</td><td>p. 233</td></tr>
+    <tr><td>Wireshark capture walkthrough</td><td>pp. 217–224</td></tr>
+    <tr><td>TLS 1.2 vs 1.3 (how it affects HTTPS)</td><td>pp. 225–226</td></tr>
+  </table>
+</div>
+
+</section>
+<!-- ============================================================ -->
+<!-- SUB-TOPIC 4C · SSH                                           -->
+<!-- ============================================================ -->
+<section id="st-ssh" class="topic">
+
+<div class="subtopic-banner">
+  <span class="letter">4C</span>
+  <span class="title">SSH — Secure Shell &amp; Tunneling</span>
+  <span class="pages">📄 Lecture 10 · pp. 246–258 &nbsp;·&nbsp; <span class="signal-explicit">🔴 EXPLICIT</span> <span class="exam-star">⭐ Challenge-question anchor</span></span>
+</div>
+
+<!-- ============ SECTION 1: CONCEPT OVERVIEW ============ -->
+<div id="ssh-s1" class="section-block">
+<h3>Section 1 · Concept Overview</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 246–258</div>
+
+<h4>1.1 The Problem This Solves <span class="pdf-ref">📄 p. 246</span></h4>
+<p>Before SSH, remote administration tools like Telnet, rlogin, and rsh carried usernames, passwords, and typed commands across the network as plaintext. Anyone on the path could harvest admin credentials and shell sessions. SSH (1995) replaces those protocols with an authenticated, encrypted, integrity-protected tunnel — and on top of that, a flexible multiplexed-channel architecture that handles shell, file transfer, port forwarding, and X11 over the same connection. <span class="pdf-ref">📄 p. 246</span></p>
+
+<h4>1.2 The Core Idea — Three-Layer Architecture <span class="pdf-ref">📄 pp. 252–253, 257</span></h4>
+<p>SSH is organised as <strong>three sub-protocols stacked on top of a TCP connection to port 22</strong>:</p>
+<ol class="mcq-options">
+  <li><strong>Transport Layer Protocol</strong> — server authentication, confidentiality, integrity, forward secrecy via Diffie-Hellman. Analogous to TLS's record + handshake layers. <span class="pdf-ref">📄 p. 252</span></li>
+  <li><strong>User Authentication Protocol</strong> — runs <em>inside</em> the already-encrypted tunnel to authenticate the <em>user</em> (distinct from server authentication). Supports password, public key, hostbased. <span class="pdf-ref">📄 p. 257</span></li>
+  <li><strong>Connection Protocol</strong> — provides multiple multiplexed logical channels inside the one authenticated tunnel: session, X11, forwarded-tcpip (remote port forwarding), direct-tcpip (local port forwarding). <span class="pdf-ref">📄 p. 253</span></li>
+</ol>
+<p>This stacked design is what makes SSH a first-class "good example of challenge question" — the instructor flagged it explicitly — because each layer maps onto a TLS concept and so invites cross-protocol questions. <span class="pdf-ref">📄 p. 257</span></p>
+
+<h4>1.3 Analogy — A Secured Office Building <span class="pdf-ref">📄 pp. 252–253</span></h4>
+<ul class="plain">
+  <li><strong>Transport Layer Protocol</strong> = the guarded lobby. Identity of the building is verified (the building shows its ID — server public key). You exchange a one-time secret with the receptionist. From here, the whole building is sealed.</li>
+  <li><strong>User Authentication Protocol</strong> = inside the sealed building, <em>you</em> present <em>your</em> badge to a turnstile (password in the tunnel, or public-key signature).</li>
+  <li><strong>Connection Protocol</strong> = once past the turnstile, you can walk into multiple rooms simultaneously — the meeting room (shell session), the print room (SFTP), the conference line (port forward) — all inside the same building.</li>
+</ul>
+
+<h4>1.4 Technical Definition <span class="pdf-ref">📄 pp. 252, 257</span></h4>
+<p><strong>SSH (Secure Shell)</strong> is an application-layer protocol (typically TCP port 22) providing encrypted remote login and other secure network services. The <strong>SSH Transport Layer Protocol</strong> authenticates the server using a long-term server public/private key pair and establishes fresh session keys via Diffie-Hellman, with keys rotated every 1 GB of data or every 1 hour. The <strong>User Authentication Protocol</strong> authenticates the user inside the encrypted transport, using password, public key, or hostbased methods. The <strong>Connection Protocol</strong> multiplexes independent logical channels (each with unique IDs) over the authenticated transport. <span class="pdf-ref">📄 pp. 252–253, 257</span></p>
+
+<h4>1.5 Key Terms &amp; Definitions</h4>
+<table class="data">
+  <thead>
+    <tr><th style="width:22%">Term</th><th style="width:38%">Plain-English Definition</th><th style="width:28%">Why It Matters for the Exam</th><th style="width:12%">📄 Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SSH Transport Layer Protocol</strong></td>
+      <td>Bottom SSH layer. Server authentication, privacy, integrity, forward secrecy via DH. Rekeys every 1 GB or 1 hour.</td>
+      <td>Directly analogous to TLS handshake + record layer.</td>
+      <td>p. 252</td>
+    </tr>
+    <tr>
+      <td><strong>SSH User Authentication Protocol</strong></td>
+      <td>Middle layer. Runs <em>inside</em> the Transport Layer tunnel to authenticate the user.</td>
+      <td>Distinction from server authentication is a common exam point.</td>
+      <td>p. 257</td>
+    </tr>
+    <tr>
+      <td><strong>SSH Connection Protocol</strong></td>
+      <td>Top layer. Multiplexes many logical channels over the authenticated tunnel.</td>
+      <td>Four channel types: session, x11, forwarded-tcpip, direct-tcpip.</td>
+      <td>p. 253</td>
+    </tr>
+    <tr>
+      <td><strong>Server host key (pair)</strong> <span class="exam-star">⭐</span></td>
+      <td>Long-term public/private key pair of the server. Used to authenticate the server.</td>
+      <td>Analogue of the server's X.509 certificate in TLS, but without a CA chain.</td>
+      <td>p. 252</td>
+    </tr>
+    <tr>
+      <td><strong>known_hosts</strong> <span class="exam-star">⭐</span></td>
+      <td>Local database on the <em>client</em> machine mapping each visited hostname to its server public key.</td>
+      <td>SSH's trust model: Trust-On-First-Use (TOFU), no CA hierarchy.</td>
+      <td>p. 252</td>
+    </tr>
+    <tr>
+      <td><strong>DH key exchange (in SSH)</strong></td>
+      <td>Standard Diffie-Hellman to derive fresh session keys after server authentication.</td>
+      <td>Provides forward secrecy.</td>
+      <td>p. 252</td>
+    </tr>
+    <tr>
+      <td><strong>Rekeying (1 GB / 1 hour)</strong></td>
+      <td>Session keys regenerated periodically during a long session.</td>
+      <td>Specific instructor-flagged numeric detail — memorise.</td>
+      <td>p. 252</td>
+    </tr>
+    <tr>
+      <td><strong>Password authentication</strong></td>
+      <td>Client sends plaintext password <em>inside</em> the encrypted Transport Layer tunnel; server verifies.</td>
+      <td>Password is protected only because the tunnel is encrypted.</td>
+      <td>p. 257</td>
+    </tr>
+    <tr>
+      <td><strong>Public key authentication</strong></td>
+      <td>Client sends its public key + a signature made with its private key; server checks that the key is authorised and signature verifies.</td>
+      <td>Preferred for automation; the signature proves possession of the private key.</td>
+      <td>p. 257</td>
+    </tr>
+    <tr>
+      <td><strong>Hostbased authentication</strong></td>
+      <td>Authentication uses the client <em>host</em>'s key; server trusts identities vouched for by the host.</td>
+      <td>Rare in practice; worth knowing for MCQ coverage.</td>
+      <td>p. 257</td>
+    </tr>
+    <tr>
+      <td><strong>Session channel</strong></td>
+      <td>Logical channel inside the Connection Protocol carrying an interactive shell or command.</td>
+      <td>The most common channel type.</td>
+      <td>p. 253</td>
+    </tr>
+    <tr>
+      <td><strong>direct-tcpip</strong></td>
+      <td>Local port forwarding: traffic to a local port on the client is tunnelled through SSH to a remote target.</td>
+      <td><code>ssh -L 8080:target:80 host</code> — tunnelling through firewalls.</td>
+      <td>p. 253</td>
+    </tr>
+    <tr>
+      <td><strong>forwarded-tcpip</strong></td>
+      <td>Remote port forwarding: a port on the server side is forwarded back to the client.</td>
+      <td><code>ssh -R 9000:local:22 host</code> — reverse tunnel.</td>
+      <td>p. 253</td>
+    </tr>
+    <tr>
+      <td><strong>SFTP / SCP</strong></td>
+      <td>Secure file transfer protocols that ride over an SSH connection.</td>
+      <td>One-line "secure file transfer" trivia.</td>
+      <td>p. 250</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============ SECTION 2: HOW IT WORKS ============ -->
+<div id="ssh-s2" class="section-block">
+<h3>Section 2 · How It Works — An SSH Session End-to-End</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 248–253, 256–257</div>
+
+<div class="step">
+  <div class="step-head">Phase 1 · TCP connection to port 22</div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> Client opens TCP to the server's port 22. <br>
+    <strong class="lbl">Exam note:</strong> Nothing yet is encrypted — but port 22 is the only required convention for SSH. <span class="pdf-ref">📄 p. 248</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 2 · SSH protocol-version exchange + algorithm negotiation</div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> Each side sends an ASCII banner (<code>SSH-2.0-OpenSSH_8.4</code>). Both send lists of supported algorithms for key exchange, encryption, MAC, and compression. One is selected for each. <br>
+    <strong class="lbl">Analogy to TLS:</strong> This step corresponds to ClientHello/ServerHello in TLS.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 3 · Server authentication + Diffie-Hellman key exchange (Transport Layer Protocol)</div>
+  <div class="step-detail">
+    <strong class="lbl">Messages:</strong> <br>
+    <ol>
+      <li>Server sends its long-term public host key.</li>
+      <li>Client <em>looks up</em> the server's hostname in its local <code>known_hosts</code> file:
+        <ul>
+          <li>If match → proceed silently.</li>
+          <li>If first time → prompt user "The authenticity of host X can't be established, key fingerprint = SHA-256:…, continue?" (Trust-On-First-Use).</li>
+          <li>If mismatch → warn loudly: "@@@@@ REMOTE HOST IDENTIFICATION HAS CHANGED @@@@@" and refuse to connect unless the user overrides. This is the on-wire signal of a MITM attack.</li>
+        </ul>
+      </li>
+      <li>Both sides run a DH key exchange; the server signs its DH public value with the host private key to prove it holds the host key.</li>
+      <li>Both derive fresh session encryption + MAC keys.</li>
+    </ol>
+    <strong class="lbl">Proves:</strong> The server owns the host key whose fingerprint is in <code>known_hosts</code>, and both sides now share a secret unknown to eavesdroppers. Forward secrecy is achieved via ephemeral DH.
+    <span class="pdf-ref">📄 p. 252</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 4 · User authentication (User Authentication Protocol) — inside the encrypted tunnel</div>
+  <div class="step-detail">
+    Choose one of:
+    <ul>
+      <li><strong>Password:</strong> client sends plaintext password encapsulated in an encrypted SSH packet → server verifies against <code>/etc/shadow</code> or PAM. <span class="pdf-ref">📄 p. 257</span></li>
+      <li><strong>Public key:</strong> client sends its public key + a signature over a session-bound challenge, made with its private key. Server checks the key is in <code>~/.ssh/authorized_keys</code> and signature verifies. No password ever crosses the wire. <span class="pdf-ref">📄 p. 257</span></li>
+      <li><strong>Hostbased:</strong> client sends signature made with the <em>client host's</em> private key; server trusts users vouched for by that host. <span class="pdf-ref">📄 p. 257</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 5 · Multiplexed channels (Connection Protocol)</div>
+  <div class="step-detail">
+    <strong class="lbl">What happens:</strong> The authenticated tunnel now carries multiple logical channels simultaneously. Either side may open a channel; each has a unique numeric ID. Four channel types are defined:
+    <ul>
+      <li><strong>session</strong> — a shell or single command execution.</li>
+      <li><strong>x11</strong> — X Window System forwarding (remote GUI).</li>
+      <li><strong>forwarded-tcpip</strong> — remote port forwarding (server → client).</li>
+      <li><strong>direct-tcpip</strong> — local port forwarding (client → server → destination).</li>
+    </ul>
+    All channels are multiplexed into the single encryption tunnel. <span class="pdf-ref">📄 p. 253</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Phase 6 · Rekeying and close</div>
+  <div class="step-detail">
+    Every 1 GB of data or 1 hour of session time, both sides rerun DH to derive new session keys, then switch over. <span class="pdf-ref">📄 p. 252</span> At end, either side sends a channel close; when all channels are closed, the transport layer tears down and TCP FIN follows.
+  </div>
+</div>
+
+<h4>Whole-Session Diagram (synthesized from <span class="pdf-ref">📄 pp. 248–253, 257</span>)</h4>
+<pre class="diagram">
+   Client                                               Server
+   ──────                                               ──────
+        ────────── TCP 3-way handshake (port 22) ──────►       Phase 1
+        ─── "SSH-2.0-OpenSSH_9.6" banner ──────────────►       Phase 2
+        ◄─── "SSH-2.0-OpenSSH_9.6" banner ──────────────
+        ─── Algorithm-negotiation lists ────────────────►
+        ◄─── Chosen algorithms ─────────────────────────
+                                                                Phase 3
+        ◄───── Server host public key ──────────────────
+        [client looks up known_hosts — prompt if first use]
+        ─── DH exchange initiation ────────────────────► 
+        ◄─── DH response + signature over DH with host key ──
+        [both derive session keys; transport layer secured]
+                                                                Phase 4
+        ═════════════ encryption active ═════════════════
+        ─── SSH_MSG_USERAUTH_REQUEST (method: publickey) ─►
+        ◄─── SSH_MSG_USERAUTH_PK_OK ────────────────────
+        ─── SSH_MSG_USERAUTH_REQUEST (with signature) ──►
+        ◄─── SSH_MSG_USERAUTH_SUCCESS ──────────────────
+                                                                Phase 5
+        ─── SSH_MSG_CHANNEL_OPEN (type=session, ch=0) ──►
+        ◄─── SSH_MSG_CHANNEL_OPEN_CONFIRMATION ─────────
+        ─── CHANNEL_REQUEST (pty + shell) ──────────────►
+        ◄─── CHANNEL_DATA "$" (prompt) ────────────────
+        
+        ─── Open parallel channel for SFTP (ch=1) ─────►
+        ... multiplexed traffic inside the single tunnel ...
+                                                                Phase 6
+        ... every 1 GB or 1 hour: rekey (new DH) ...
+        ─── CHANNEL_CLOSE + TCP FIN ──────────────────►
+</pre>
+<p class="diagram-source">SOURCE: Synthesized from <span class="pdf-ref">📄 pp. 248–253, 257</span>. Specific message names (USERAUTH_REQUEST, CHANNEL_OPEN) are from SSH protocol convention; the three-layer decomposition is from the slides verbatim.</p>
+
+<h4>SSH ↔ TLS Side-by-Side <span class="pdf-ref">📄 p. 252 ("TLS 5-7" notation on slide)</span></h4>
+<p>The slide deck on page 252 literally uses the tag "TLS 5-7" on the SSH Transport Layer Protocol slide — the instructor is telegraphing the parallel. Here it is explicitly:</p>
+<table class="data">
+  <thead><tr><th>Role</th><th>TLS (over TCP 443)</th><th>SSH (over TCP 22)</th></tr></thead>
+  <tbody>
+    <tr><td>Server authentication</td><td>X.509 certificate chain rooted at CA</td><td>Server host public key (no CA; TOFU via known_hosts)</td></tr>
+    <tr><td>Key exchange</td><td>ECDHE / DHE</td><td>Diffie-Hellman</td></tr>
+    <tr><td>Forward secrecy</td><td>Yes (ephemeral DH)</td><td>Yes (ephemeral DH)</td></tr>
+    <tr><td>User authentication</td><td>Optional client certificate, or inside-tunnel (cookies/HTTP basic)</td><td>Explicit User Auth Protocol layer (password/pubkey/hostbased)</td></tr>
+    <tr><td>Record protection</td><td>TLS Record Protocol (AEAD)</td><td>SSH binary packet (encrypt-and-MAC)</td></tr>
+    <tr><td>Rekeying</td><td>Session resumption / per-connection</td><td>Periodic (1 GB or 1 hour)</td></tr>
+    <tr><td>Multiplexing</td><td>One logical stream per TLS conn (HTTP/2 multiplexes at application)</td><td>Native multiplexing via Connection Protocol channels</td></tr>
+  </tbody>
+</table>
+
+<h4>Line-by-Line Annotation</h4>
+<ul class="plain">
+  <li><strong>No CA hierarchy in SSH</strong> — unlike TLS, SSH does not rely on global CAs. Trust is local (known_hosts) and established on first connect. This is a classic exam contrast. <span class="pdf-ref">📄 p. 252</span></li>
+  <li><strong>Server authentication happens before user authentication</strong> — the server proves itself first; then the encrypted tunnel is used to carry user credentials. This order is the entire point of the layer separation. <span class="pdf-ref">📄 pp. 252, 257</span></li>
+  <li><strong>Password goes through the encrypted tunnel</strong> — SSH with password auth is not insecure because the password is plaintext <em>at the tunnel boundary</em>; the tunnel encrypts it end-to-end. Public-key auth is <em>still</em> preferred because it avoids storing the password on the server side at all. <span class="pdf-ref">📄 p. 257</span></li>
+  <li><strong>Rekey limits are conservative</strong> — the 1 GB / 1 hour thresholds bound cryptanalytic leakage from any single key pair. <span class="pdf-ref">📄 p. 252</span></li>
+  <li><strong>Port forwarding = tunnelling arbitrary TCP inside SSH</strong> — a single SSH connection can carry shell + file transfer + forwarded web traffic + forwarded database, all as separate channels. This is why "ssh -L" is universally used to cross firewalls. <span class="pdf-ref">📄 pp. 253, 256</span></li>
+</ul>
+
+</div>
+<!-- ============ SECTION 3: EXAM INTELLIGENCE ============ -->
+<div id="ssh-s3" class="section-block">
+<h3>Section 3 · Exam Intelligence</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 246–258</div>
+
+<h4>3.1 What Exams Typically Test on SSH</h4>
+<ul class="plain">
+  <li><strong>"Name the three SSH sub-protocols and state the purpose of each."</strong> — Transport (server auth + encryption), User Authentication (password/pubkey/hostbased), Connection (multiplexed channels). <span class="pdf-ref">📄 pp. 252–253, 257</span></li>
+  <li><strong>"How does SSH authenticate the server, and how does it differ from TLS?"</strong> — SSH uses a server host key verified locally via <code>known_hosts</code> (TOFU); TLS uses a CA-signed X.509 certificate. <span class="pdf-ref">📄 p. 252</span></li>
+  <li><strong>"What are the three user-authentication methods?"</strong> — Password (inside tunnel), public key (signature), hostbased (client-host-signed). Memorise all three. <span class="pdf-ref">📄 p. 257</span></li>
+  <li><strong>"When does SSH rekey?"</strong> — Every 1 GB of data or 1 hour, whichever comes first. This numeric detail was explicitly on the slide. <span class="pdf-ref">📄 p. 252</span></li>
+  <li><strong>"What channel types does the Connection Protocol support?"</strong> — session, x11, forwarded-tcpip (remote port forwarding), direct-tcpip (local port forwarding). <span class="pdf-ref">📄 p. 253</span></li>
+  <li><strong>Integration (challenge question):</strong> "Map SSH sub-protocols onto TLS counterparts" — the instructor explicitly named SSH as a protocol-mapping challenge question candidate. <span class="pdf-ref">📄 pp. 248–253</span></li>
+</ul>
+
+<h4>3.2 Common Misconceptions &amp; Traps</h4>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "SSH uses X.509 certificates signed by CAs, like TLS."</p>
+  <p><span class="reality">REALITY:</span> Classic SSH uses raw public keys stored locally in <code>known_hosts</code>. There is no global CA system; trust is established on first connection (Trust-On-First-Use). Enterprise SSH deployments can use SSH certificate authorities, but that is an extension, not the default. <span class="pdf-ref">📄 p. 252</span></p>
+  <p><span class="trap">EXAM TRAP:</span> MCQ listing "server presents an X.509 certificate signed by a CA" as an SSH behaviour — wrong.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "Password authentication in SSH is insecure because the password travels in plaintext."</p>
+  <p><span class="reality">REALITY:</span> The password is sent inside the already-encrypted Transport Layer tunnel — so on the wire it is ciphertext. Public-key auth is preferred for other reasons (no reusable secret on the server, defence against offline attacks), but password over SSH is <em>not</em> equivalent to password over Telnet. <span class="pdf-ref">📄 p. 257</span></p>
+  <p><span class="trap">EXAM TRAP:</span> T/F "SSH with password auth sends credentials in the clear" — FALSE.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "TOFU (known_hosts) is as strong as TLS's CA model."</p>
+  <p><span class="reality">REALITY:</span> TOFU is vulnerable on the <em>first</em> connection — if an attacker MITMs that initial connection, the attacker's key lands in <code>known_hosts</code> and subsequent sessions will silently accept it. TLS's PKI model avoids this by anchoring trust in pre-installed CA roots. Both are valid models with different attack surfaces. <span class="pdf-ref">📄 p. 252</span></p>
+  <p><span class="trap">EXAM TRAP:</span> A question asking when SSH's trust model is weakest — answer is the first connection.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "One SSH connection carries one service at a time (shell OR file transfer)."</p>
+  <p><span class="reality">REALITY:</span> The Connection Protocol multiplexes multiple independent channels in parallel. A single SSH session can simultaneously carry an interactive shell, an SFTP transfer, and several port-forwards. <span class="pdf-ref">📄 p. 253</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">MYTH:</span> "SSH runs over UDP for low latency."</p>
+  <p><span class="reality">REALITY:</span> SSH requires reliable delivery and runs over TCP port 22. <span class="pdf-ref">📄 p. 248</span></p>
+</div>
+
+<h4>3.3 Compare &amp; Contrast — Authentication Models Across the Course</h4>
+<table class="data">
+  <thead>
+    <tr><th>System</th><th>Server Authentication</th><th>User Authentication</th><th>Trust Anchor</th><th>📄 Pages</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>TLS</strong></td><td>X.509 cert signed by CA</td><td>Optional client cert; usually at HTTP layer</td><td>Browser root CA store</td><td>pp. 230, 104</td></tr>
+    <tr><td><strong>SSH</strong></td><td>Server host key via <code>known_hosts</code> (TOFU)</td><td>Password / public key / hostbased</td><td>Local <code>known_hosts</code></td><td>pp. 252, 257</td></tr>
+    <tr><td><strong>Kerberos</strong></td><td>Service shares long-term key with KDC</td><td>Ticket presented to service</td><td>Central KDC + shared secrets</td><td>pp. 294–342</td></tr>
+    <tr><td><strong>WPA2-Enterprise (EAP-TLS)</strong></td><td>AS has X.509 cert</td><td>Client X.509 cert (mutual)</td><td>Enterprise CA</td><td>pp. 459, 230</td></tr>
+    <tr><td><strong>DNSSEC</strong></td><td>Zone signs its records</td><td>n/a</td><td>Root DNS zone key</td><td>p. 597</td></tr>
+  </tbody>
+</table>
+
+<h4>3.4 Memory Aids</h4>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic · Three SSH layers</strong>
+  <strong>"TUC"</strong> — <em>Transport</em> (encrypt + server auth), <em>User auth</em> (prove who you are), <em>Connection</em> (multiplexed channels). <span class="pdf-ref">📄 pp. 252–253, 257</span>
+</div>
+<div class="callout">
+  <strong class="lbl">Mnemonic · Three user-auth methods</strong>
+  <strong>"P-P-H"</strong> — <em>Password, Public-key, Hostbased</em>. <span class="pdf-ref">📄 p. 257</span>
+</div>
+<div class="callout">
+  <strong class="lbl">Mnemonic · Four channel types</strong>
+  <strong>"S-X-F-D"</strong> — <em>Session, X11, Forwarded-tcpip (remote port fwd), Direct-tcpip (local port fwd)</em>. <span class="pdf-ref">📄 p. 253</span>
+</div>
+<div class="callout">
+  <strong class="lbl">Mnemonic · Rekey threshold</strong>
+  <strong>"One Gig or One Hour"</strong> — rekey every 1 GB of data OR 1 hour elapsed. <span class="pdf-ref">📄 p. 252</span>
+</div>
+<div class="callout">
+  <strong class="lbl">Mnemonic · SSH vs TLS in one line</strong>
+  <strong>"Same math, local trust."</strong> Both use DH + symmetric crypto; SSH trusts via local known_hosts, TLS trusts via global CAs. <span class="pdf-ref">📄 p. 252</span>
+</div>
+</div>
+
+<!-- ============ SECTION 4: FOLLOW-UP QUESTIONS ============ -->
+<div id="ssh-s4" class="section-block">
+<h3>Section 4 · Follow-Up Questions</h3>
+<div class="pages-coverage">LECTURE PDF COVERAGE: pp. 246–258 · 13 questions</div>
+
+<h4>Part A — Multiple Choice (4: 1 BEG · 1 INT · 2 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 pp. 252–253, 257</span></div>
+  <p class="question-stem">Q1. Which three sub-protocols make up SSH?</p>
+  <ol class="mcq-options">
+    <li>Handshake, Record, Alert</li>
+    <li>Transport Layer, User Authentication, Connection</li>
+    <li>TCP, TLS, HTTP</li>
+    <li>Supplicant, Authenticator, Authentication Server</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: B.</strong> SSH's three-layer architecture: Transport Layer Protocol (server auth + encryption), User Authentication Protocol, Connection Protocol (channels). <span class="pdf-ref">📄 pp. 252–253, 257</span></p>
+    <ul>
+      <li>Why A wrong: Those are TLS sub-protocols.</li>
+      <li>Why C wrong: Those are three network layers, not SSH components.</li>
+      <li>Why D wrong: Those are 802.1X roles.</li>
+    </ul>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 252</span></div>
+  <p class="question-stem">Q2. How does an SSH client authenticate the server the first time it connects to a new host?</p>
+  <ol class="mcq-options">
+    <li>Validates an X.509 certificate chain against a browser root CA store.</li>
+    <li>Prompts the user to verify the server's host key fingerprint and adds it to <code>known_hosts</code> if accepted (Trust-On-First-Use).</li>
+    <li>Contacts a central SSH authority to vouch for the server.</li>
+    <li>Trusts any host key presented without user intervention.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: B.</strong> SSH does not rely on CAs. On first contact, the client prompts the user to confirm the host key fingerprint; accepting it caches the key in <code>~/.ssh/known_hosts</code>. Subsequent connections compare the presented key against the cache. This is TOFU. <span class="pdf-ref">📄 p. 252</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 252</span></div>
+  <p class="question-stem">Q3. During a long SSH session (say, a 4-hour data-transfer), how often are the symmetric session keys refreshed?</p>
+  <ol class="mcq-options">
+    <li>Only once, at session start.</li>
+    <li>Every time a new channel is opened.</li>
+    <li>Every 1 GB of data transferred or every 1 hour, whichever comes first.</li>
+    <li>Never — TCP's guarantees are sufficient.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> The slide explicitly states new keys are generated every 1 GB or 1 hour. This bounds the cryptanalytic exposure of any single key pair. <span class="pdf-ref">📄 p. 252</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 pp. 252, 257</span></div>
+  <p class="question-stem">Q4. Alice uses SSH with password authentication to log into a server. An attacker on the same Wi-Fi captures the entire session. Which statement is most accurate?</p>
+  <ol class="mcq-options">
+    <li>The attacker recovers Alice's password because SSH sends passwords in plaintext.</li>
+    <li>The attacker recovers Alice's password only if she also opens an SFTP channel.</li>
+    <li>The attacker sees only ciphertext; Alice's password is sent inside the encrypted Transport Layer tunnel.</li>
+    <li>The attacker recovers Alice's public key from the handshake.</li>
+  </ol>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: C.</strong> The Transport Layer Protocol establishes encryption <em>before</em> user authentication runs. The password packet is sent inside the encrypted tunnel, so on the wire the attacker sees only ciphertext. Public-key auth is preferred for other reasons (no reusable shared secret), but password auth over SSH is not equivalent to plaintext transmission. <span class="pdf-ref">📄 p. 257</span></p>
+  </div></details>
+</div>
+
+<h4>Part B — True / False (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">T/F</span><span class="pdf-ref">📄 p. 248</span></div>
+  <p class="question-stem">Q5. SSH runs over TCP port 22.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: TRUE.</strong> SSH uses TCP port 22 by convention. <span class="pdf-ref">📄 p. 248</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">T/F</span><span class="pdf-ref">📄 p. 253</span></div>
+  <p class="question-stem">Q6. A single SSH connection can simultaneously carry an interactive shell, an SFTP transfer, and a tunnelled web-server port-forward as independent logical channels.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: TRUE.</strong> The Connection Protocol multiplexes channels into the single encrypted tunnel, and each channel has a unique ID. Session, forwarded-tcpip, direct-tcpip, and x11 can coexist. <span class="pdf-ref">📄 p. 253</span></p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">T/F</span><span class="pdf-ref">📄 p. 252</span></div>
+  <p class="question-stem">Q7. SSH's Trust-On-First-Use model protects the user equally well on the first connection as on all subsequent connections.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer: FALSE.</strong> TOFU is explicitly weaker on the <em>first</em> connection: if an active attacker MITMs that connection, the attacker's host key is cached in <code>known_hosts</code> and silently accepted on all future sessions. TOFU's security depends on the attacker not being on-path the first time. TLS's CA model avoids this gap. <span class="pdf-ref">📄 p. 252</span></p>
+  </div></details>
+</div>
+
+<h4>Part C — Short Answer (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 252–253, 257</span></div>
+  <p class="question-stem">Q8. In bullet points, name SSH's three sub-protocols and state the security service(s) each provides.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>Transport Layer Protocol</strong> — server authentication (via server host key), confidentiality + integrity (symmetric encryption + MAC), forward secrecy (ephemeral DH key exchange), rekeying every 1 GB or 1 hour. <span class="pdf-ref">📄 p. 252</span></li>
+      <li><strong>User Authentication Protocol</strong> — authenticates the <em>user</em> inside the already-encrypted tunnel, using password / public key / hostbased methods. <span class="pdf-ref">📄 p. 257</span></li>
+      <li><strong>Connection Protocol</strong> — multiplexes many logical channels (session, x11, forwarded-tcpip, direct-tcpip) into the single authenticated tunnel. <span class="pdf-ref">📄 p. 253</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ Transport + what it secures ☐ User Auth + 3 methods ☐ Connection + channel multiplexing.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 252, 257</span></div>
+  <p class="question-stem">Q9. Compare SSH's server-authentication mechanism with TLS's. Give two similarities and two differences.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>Similarities:</strong>
+        <ul>
+          <li>Both rely on a long-term server public/private key pair whose private key the server uses to sign key-exchange material. <span class="pdf-ref">📄 pp. 252, 231</span></li>
+          <li>Both use Diffie-Hellman for ephemeral session-key exchange, giving forward secrecy. <span class="pdf-ref">📄 pp. 252, 231</span></li>
+        </ul>
+      </li>
+      <li><strong>Differences:</strong>
+        <ul>
+          <li><strong>Trust anchor:</strong> TLS = global CA hierarchy (browser root store); SSH = local cache (<code>known_hosts</code>, Trust-On-First-Use). <span class="pdf-ref">📄 pp. 230, 252</span></li>
+          <li><strong>Key format:</strong> TLS uses X.509 certificates containing identity + signatures + validity periods; SSH uses raw public keys without issuer metadata. <span class="pdf-ref">📄 pp. 230, 252</span></li>
+        </ul>
+      </li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ two similarities ☐ two differences ☐ trust-anchor distinction explicit.</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">SA</span><span class="pdf-ref">📄 pp. 252–253, 257</span></div>
+  <p class="question-stem">Q10. (Challenge question — protocol mapping.) Map each SSH sub-protocol onto its closest TLS counterpart, and explain one design choice where SSH diverges from TLS and why.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>📝 Model:</strong></p>
+    <ul>
+      <li><strong>Transport Layer Protocol ↔ TLS Handshake + Record Protocol</strong> — both establish server identity (via long-term key) + fresh session keys via DH, then encrypt/MAC records. The SSH Transport slide literally says "TLS 5-7" (same lecture-series slide number), acknowledging the parallel. <span class="pdf-ref">📄 p. 252</span></li>
+      <li><strong>User Authentication Protocol ↔ (No direct TLS equivalent)</strong> — TLS's optional client certificate is closest, but user auth in TLS typically happens at the HTTP layer (cookies, basic auth). SSH makes user auth a first-class protocol layer. <span class="pdf-ref">📄 p. 257</span></li>
+      <li><strong>Connection Protocol ↔ (No direct TLS equivalent)</strong> — HTTP/2's stream multiplexing is the closest analogue, but it lives in the application, not in TLS itself. SSH bakes multiplexing into the protocol stack. <span class="pdf-ref">📄 p. 253</span></li>
+      <li><strong>Divergence — trust model.</strong> SSH does <em>not</em> use CAs; it uses local <code>known_hosts</code> (TOFU). The design choice reflects SSH's primary use case: administrators logging into servers they already know about, where a one-time fingerprint verification is acceptable and the global CA ecosystem's failure modes (CA compromise) are avoided. TLS, by contrast, faces unknown strangers (any browser visiting any website) so delegates trust to CAs. <span class="pdf-ref">📄 p. 252</span></li>
+    </ul>
+    <p><strong>🔑 Checklist:</strong> ☐ Transport↔Handshake+Record mapping ☐ User-auth difference ☐ Connection-multiplexing point ☐ trust-model divergence explained.</p>
+  </div></details>
+</div>
+
+<h4>Part D — Fill in the Blank (3: 1 BEG · 1 INT · 1 ADV)</h4>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 252</span></div>
+  <p class="question-stem">Q11. The SSH client stores server public keys it has previously verified in a local file called ________.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content"><p><strong>✅ Answer:</strong> known_hosts (typically <code>~/.ssh/known_hosts</code>). <span class="pdf-ref">📄 p. 252</span></p></div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 253</span></div>
+  <p class="question-stem">Q12. The four channel types defined by the SSH Connection Protocol are: session, ________, forwarded-tcpip, and ________.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content">
+    <p><strong>✅ Answer:</strong> x11; direct-tcpip. <span class="pdf-ref">📄 p. 253</span></p>
+    <p><strong>Why:</strong> Session = shell or command; x11 = GUI forwarding; forwarded-tcpip = remote port forwarding (server → client); direct-tcpip = local port forwarding (client → server → target).</p>
+  </div></details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">FIB</span><span class="pdf-ref">📄 p. 257</span></div>
+  <p class="question-stem">Q13. In SSH public-key authentication, the client proves possession of its private key by producing a ________ over a session-bound challenge, which the server verifies against the authorised public key.</p>
+  <details class="answer-block"><summary>▶ Show Answer</summary>
+  <div class="answer-content"><p><strong>✅ Answer:</strong> signature (digital signature). <span class="pdf-ref">📄 p. 257</span></p></div></details>
+</div>
+
+</div>
+
+<!-- ============ SECTION 5: CHEAT SHEET ============ -->
+<div id="ssh-s5" class="cheat-sheet">
+  <h4>Section 5 · 4C SSH Cheat Sheet</h4>
+  <p class="oneliner">SSH is a three-layer protocol on TCP port 22: the Transport Layer authenticates the server (via a host key cached in known_hosts) and establishes a DH-based encrypted tunnel; the User Authentication Protocol then authenticates the user inside that tunnel (password / public key / hostbased); and the Connection Protocol multiplexes session, x11, and port-forwarding channels — all rekeyed every 1 GB or 1 hour.</p>
+
+  <h4>THE 3 THINGS YOU MUST KNOW</h4>
+  <ol>
+    <li><strong>Three-layer architecture</strong> — Transport (server auth + crypto), User Auth (password/pubkey/hostbased), Connection (multiplexed channels). <span class="pdf-ref">📄 pp. 252–253, 257</span></li>
+    <li><strong>Trust model ≠ TLS</strong> — SSH uses <code>known_hosts</code> + TOFU (no CAs). Strong after first connection; weakest on first contact. <span class="pdf-ref">📄 p. 252</span></li>
+    <li><strong>Rekey every 1 GB / 1 hour</strong> — a specific numeric fact flagged on the slide. <span class="pdf-ref">📄 p. 252</span></li>
+  </ol>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE</h4>
+  <p>Assuming SSH uses X.509 certificates or CAs. It doesn't — classic SSH is raw public keys + local <code>known_hosts</code>. Also confusing: "password auth in SSH sends plaintext" — it does, but <em>inside the encrypted tunnel</em>, so on the wire it is ciphertext. <span class="pdf-ref">📄 pp. 252, 257</span></p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE</h4>
+  <p class="remember">"Three layers, three auth methods, four channel types — all over one TCP-22 tunnel."</p>
+
+  <h4>QUICK NAVIGATION</h4>
+  <table class="data" style="margin-top:8px;">
+    <tr><th>To review…</th><th>Go to lecture page(s)</th></tr>
+    <tr><td>SSH position in network stack</td><td>p. 248</td></tr>
+    <tr><td>SSH applications (remote, SFTP, port fwd, IoT)</td><td>p. 250</td></tr>
+    <tr><td>Transport Layer Protocol (server auth, DH, rekey)</td><td>p. 252</td></tr>
+    <tr><td>Connection Protocol (channels)</td><td>p. 253</td></tr>
+    <tr><td>Tunneling &amp; port forwarding</td><td>p. 256</td></tr>
+    <tr><td>User Authentication Protocol (3 methods)</td><td>p. 257</td></tr>
+    <tr><td>SSH ↔ TLS parallel</td><td>p. 252 ("TLS 5-7" tag)</td></tr>
+  </table>
+</div>
+
+</section>
+<!-- ============================================================ -->
+<!-- CROSS-PROTOCOL SYNTHESIS                                      -->
+<!-- ============================================================ -->
+<section id="synthesis" class="topic">
+
+<div class="subtopic-banner">
+  <span class="letter">🧩</span>
+  <span class="title">Cross-Protocol Synthesis — Where Topic 4 Meets the Rest of the Final</span>
+  <span class="pages">Likely challenge-question material &nbsp;·&nbsp; <span class="signal-strong">🟠 STRONG integration</span></span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Why this section exists</strong>
+  From <span class="mono">scriptFinalExamReview-cs548.txt</span>: <em>"You also need to think about how those topics are related to the defense mechanisms… it requires you to link different components that we covered in this course."</em> The appendix explicitly flags five integration hooks involving TLS/HTTPS/SSH. Each one below gives the cross-topic frame, the lecture-page anchors, and a sketch of what a challenge question could ask.
+</div>
+
+<div class="section-block">
+<h3>Integration Hook 1 · EAP-TLS in WPA2-Enterprise</h3>
+<p><strong>The hook:</strong> Wireless security (Topic 1) uses 802.1X/EAP as its access-control framework. One EAP method — EAP-TLS — runs a <em>full TLS handshake inside the EAPoL exchange</em>. The client and server present X.509 certificates to each other (mutual authentication), and the TLS master secret becomes the input material for the WPA2 pairwise master key (PMK). <span class="pdf-ref">📄 pp. 459, 226–230, 128–145</span></p>
+
+<p><strong>Why the instructor flagged it:</strong> Script quote — <em>"When you read this diagram, you need to think about the TLS and also think about the TLS part when we introduced the server certificate. This is a good example of what the challenge question in wireless security can be tested — it requires you to link different components."</em></p>
+
+<p><strong>Sketch of a likely question:</strong> Diagram of an 802.1X exchange where the EAP payload is a TLS ClientHello or Certificate. Student must:</p>
+<ul class="plain">
+  <li>Identify which TLS handshake message is in each EAP packet.</li>
+  <li>Explain that EAP-TLS requires <em>mutual</em> certificates (enterprise has CA for both server and all clients) while EAP-TTLS only requires server certificate + tunnelled password.</li>
+  <li>Explain how the derived TLS master secret feeds the WPA2 4-way handshake to derive the PTK.</li>
+</ul>
+<p><strong>Key facts to marshal:</strong> TLS handshake steps (4A §2), server certificate semantics (p. 230), 802.1X roles (pp. 455–456), EAP methods (p. 459).</p>
+</div>
+
+<div class="section-block">
+<h3>Integration Hook 2 · Defense Stack Across Layers (Common-Attacks ↔ TLS ↔ IPsec ↔ WPA2)</h3>
+<p><strong>The hook:</strong> Given any attack from Topic 2 / 3 (TCP reset, ARP spoof, DNS poisoning, IP spoofing), name the counter-measure at each protocol layer. <span class="pdf-ref">📄 pp. 505–540, 370–395, 558–578</span></p>
+
+<table class="data">
+  <thead>
+    <tr><th>Attack</th><th>Link layer (L2)</th><th>Network layer (L3)</th><th>Transport + above (L4+)</th><th>📄 Pages</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ARP spoofing → MITM on LAN</td>
+      <td>WPA2 (AES-CTR) / 802.1X / port security</td>
+      <td>IPsec AH (authenticates IP headers)</td>
+      <td>TLS / SSH over the MITM tunnel still secures content</td>
+      <td>pp. 537–538, 370–373, 228</td>
+    </tr>
+    <tr>
+      <td>TCP reset attack</td>
+      <td>—</td>
+      <td>IPsec ESP hides TCP header → no valid 5-tuple for attacker</td>
+      <td>TLS/SSH session survives if rare; TLS close_notify distinguishes real close</td>
+      <td>pp. 553, 370–373, 233</td>
+    </tr>
+    <tr>
+      <td>DNS cache poisoning</td>
+      <td>—</td>
+      <td>DNSSEC (records signed via zone hierarchy)</td>
+      <td>TLS cert validation catches attacker's wrong hostname</td>
+      <td>pp. 580–597, 230</td>
+    </tr>
+    <tr>
+      <td>IP spoofing (DDoS reflector)</td>
+      <td>—</td>
+      <td>Ingress/egress filtering, SYN cookies</td>
+      <td>TLS-authenticated sessions resist reflection amplification</td>
+      <td>pp. 508–512, 549–551</td>
+    </tr>
+    <tr>
+      <td>WPA2 KRACK</td>
+      <td>WPA3-SAE replaces 4-way handshake</td>
+      <td>IPsec/VPN tunnel gives independent protection</td>
+      <td>TLS application layer remains confidential</td>
+      <td>pp. 449, 370–373, 228</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Sketch of a likely question:</strong> "An attacker on a coffee-shop Wi-Fi ARP-spoofs the gateway. Explain, for a user who (a) browses over HTTP, (b) browses over HTTPS, (c) browses over HTTPS through an IPsec VPN — what the attacker can learn in each case." Answer draws on 4A (TLS hides HTTP content), 4B (SNI leaks hostname in TLS 1.2), wireless/ARP concepts, and the VPN/IPsec topic.</p>
+</div>
+
+<div class="section-block">
+<h3>Integration Hook 3 · Chains of Trust — TLS vs IPsec vs DNSSEC</h3>
+<p><strong>The hook:</strong> All three use public-key cryptography, but root their trust in different hierarchies. Slide 597 is explicit: <em>"Both DNSSEC and TLS/SSL are based on the public key technology, but their chains of trust are different."</em> <span class="pdf-ref">📄 pp. 240–244, 595–597</span></p>
+
+<table class="data">
+  <thead>
+    <tr><th>Property</th><th>TLS/HTTPS</th><th>DNSSEC</th><th>IPsec (IKE)</th><th>SSH</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Uses PKI?</td><td>Yes — CA hierarchy</td><td>Yes — zone hierarchy</td><td>Optional — CA or pre-shared keys</td><td>No CA by default — local TOFU</td></tr>
+    <tr><td>Trust anchor</td><td>Browser/OS root CA store</td><td>Root DNS zone key (trust anchor)</td><td>Enterprise CA or PSK</td><td><code>known_hosts</code> on each client</td></tr>
+    <tr><td>Parent-signs-child chain</td><td>Root CA → intermediate CAs → server cert</td><td>Root → TLD → authoritative zone signs records</td><td>CA → IKE identity cert</td><td>n/a (flat)</td></tr>
+    <tr><td>Weakness if root compromised</td><td>Any certificate globally forgeable</td><td>Any zone forgeable</td><td>All IPsec identities forgeable in that org</td><td>Single-host scope</td></tr>
+    <tr><td>📄 Pages</td><td>pp. 104, 130, 230, 240–244</td><td>pp. 595–597</td><td>pp. 393–395</td><td>p. 252</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Sketch of a likely question:</strong> "Compare the chain of trust in TLS with that in DNSSEC. Identify the trust anchor in each, and describe a failure mode unique to each model." Answer: TLS roots in CAs → DigiNotar-style global breach; DNSSEC roots in DNS zones → losing the root zone key compromises entire Internet naming.</p>
+</div>
+
+<div class="section-block">
+<h3>Integration Hook 4 · AES-GCM — The Same Primitive Everywhere</h3>
+<p><strong>The hook:</strong> AES-GCM is the single most widely deployed authenticated encryption primitive across the final's protocols. <span class="pdf-ref">📄 pp. 181, 228, 392, 446</span></p>
+
+<table class="data">
+  <thead><tr><th>Protocol</th><th>Where AES-GCM appears</th><th>📄 Page</th></tr></thead>
+  <tbody>
+    <tr><td>TLS 1.2 / 1.3</td><td>TLS Record Protocol (AEAD cipher suites)</td><td>pp. 181, 228</td></tr>
+    <tr><td>IPsec ESP</td><td>Authenticated encryption mode for ESP</td><td>p. 392</td></tr>
+    <tr><td>WPA2/3</td><td>CCMP (AES-CCM) in WPA2; GCMP (AES-GCM) in WPA3-Enterprise-192</td><td>p. 446</td></tr>
+    <tr><td>SSH</td><td>AEAD cipher suites (<code>aes128-gcm@openssh.com</code>, <code>aes256-gcm@openssh.com</code>)</td><td>p. 252 (context)</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Why it matters for challenge questions:</strong> The appendix calls this "a classic challenge-question integration point." A single AES-GCM explanation (AES-CTR stream + GMAC authentication → confidentiality + integrity + authenticity in one pass) transfers to four protocols.</p>
+</div>
+
+<div class="section-block">
+<h3>Integration Hook 5 · SSH ↔ TLS Protocol Mapping (Instructor's flagged challenge)</h3>
+<p>Already covered in detail in <a href="#ssh-s3">§4C 3.3</a> and question 4C-Q10 above, but here's the mnemonic summary worth one last pass:</p>
+
+<pre class="diagram">
+   ┌─────────────────────────────────────────────────────────┐
+   │ TLS                           │ SSH                     │
+   ├───────────────────────────────┼─────────────────────────┤
+   │ Handshake Protocol     (22)   │ Transport Layer Protocol│
+   │  · cert auth server            │  · host key auth server │
+   │  · (EC)DHE key exchange        │  · DH key exchange      │
+   │  · derive session keys         │  · derive session keys  │
+   │                                │                         │
+   │ Change Cipher Spec     (20)   │ NEWKEYS message         │
+   │                                │                         │
+   │ Record Protocol        (23)   │ Transport Layer Protocol│
+   │  · fragment/compress/MAC/enc   │  · binary packet encrypt│
+   │  · AEAD (AES-GCM)              │  · AEAD                 │
+   │                                │                         │
+   │ Alert Protocol         (21)   │ SSH_MSG_DISCONNECT etc. │
+   │                                │                         │
+   │ (no direct user-auth layer)    │ User Auth Protocol      │
+   │  client cert is optional       │  password/pubkey/       │
+   │                                │  hostbased              │
+   │                                │                         │
+   │ HTTP/2 stream multiplexing     │ Connection Protocol     │
+   │  (in app layer, not TLS)       │  session/x11/fwd-tcpip/ │
+   │                                │  direct-tcpip           │
+   │                                │                         │
+   │ Trust anchor: CA root store    │ Trust anchor: known_host│
+   │                                │                         │
+   │ Rekey: on connection resume    │ Rekey: every 1GB / 1hr  │
+   └─────────────────────────────────────────────────────────┘
+</pre>
+
+<h4>Common Threads Across All Three Protocols</h4>
+<ul class="plain">
+  <li><strong>All three use (EC)DHE for forward secrecy.</strong> Modern TLS, SSH, and IPsec all rely on ephemeral Diffie-Hellman. The long-term keys are used only to <em>sign</em> (authenticate) the ephemeral values. <span class="pdf-ref">📄 pp. 231, 252</span></li>
+  <li><strong>All three separate server authentication from record protection.</strong> A short handshake phase establishes identity + keys; a long data phase uses those keys. <span class="pdf-ref">📄 pp. 215, 252</span></li>
+  <li><strong>All three tunnel application data.</strong> TLS tunnels HTTP (HTTPS); SSH tunnels shell/SFTP/forwarded ports; IPsec tunnels whole IP packets. <span class="pdf-ref">📄 pp. 233, 253, 373</span></li>
+  <li><strong>All three have a "signal the switchover" step.</strong> TLS: ChangeCipherSpec. SSH: NEWKEYS. IPsec: IKE SA established. <span class="pdf-ref">📄 pp. 215, 252</span></li>
+</ul>
+
+<h4>Final study tip</h4>
+<p>For each attack you learn in Topic 2, rehearse saying: <em>"It works because X is not authenticated; it persists because Y caches state; it is stopped by Z (TLS / IPsec / DNSSEC / SSH)."</em> That one-sentence template covers 80% of the challenge questions. <span class="pdf-ref">📄 pp. 505–540, 228, 595–597</span></p>
+</div>
+
+</section>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs548-theme';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
