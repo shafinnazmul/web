@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 Final Exam · Topic 3: Cryptography Foundations (Symmetric, Asymmetric, Hash)</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE & TYPOGRAPHY — DARK MODE (default)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+
+    --topic-accent: #26a69a;  /* Teal-emerald — Topic 3 accent (crypto = foundations) */
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+
+    --topic-accent: #00695c;  /* Deeper teal for light mode contrast */
+
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(0,105,92,0.06), rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(0,105,92,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(0,105,92,0.06), rgba(26,95,224,0.06)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .misconception { background: #eef1f7; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  /* ================================================================
+     THEME TOGGLE — FIXED IN THE TOP BAR
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+  [data-theme="light"] .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;  /* make room for the top bar */
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono {
+    font-family: 'Consolas', 'Courier New', 'Menlo', monospace;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 {
+    font-size: 2.1em;
+    margin: 0 0 8px 0;
+    color: #fff;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 1.55em;
+    color: var(--topic-accent);
+    margin: 36px 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.2em;
+    color: #fff;
+    margin: 26px 0 10px 0;
+  }
+  h4 {
+    font-size: 1em;
+    color: var(--text-dim);
+    margin: 18px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 0.82em;
+  }
+
+  p { margin: 8px 0 12px 0; }
+
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     STICKY NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }  /* 44px top bar + 52px nav */
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar {
+      top: 44px;  /* sit below the top bar */
+      width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main {
+    max-width: 1100px;
+    padding: 40px 48px 80px 48px;
+  }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta {
+    color: var(--text-faint);
+    font-size: 0.9em;
+    margin-top: 6px;
+  }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(38,166,154,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER (2a, 2b, 2c, 2d)
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title {
+    font-size: 1.12em;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .signal-moderate { color: var(--yellow); }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & TOPIC CONTAINERS
+     ================================================================ */
+  section.topic {
+    border-left: 3px solid var(--topic-accent);
+    padding-left: 22px;
+    margin-bottom: 40px;
+  }
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+    width: 230px;
+  }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  /* ================================================================
+     ASCII DIAGRAM / FLOW BOX
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f0;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head {
+    color: var(--topic-accent);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .step .step-detail {
+    margin-top: 6px;
+    font-size: 0.93em;
+    color: var(--text-dim);
+  }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 110px; }
+
+  /* Myth / reality blocks */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+  .misconception .trap { color: var(--orange); font-weight: 600; }
+
+  /* ================================================================
+     QUESTION BLOCKS (Section 4)
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options {
+    margin: 4px 0 6px 0;
+    padding-left: 26px;
+  }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content {
+    padding: 8px 0 4px 0;
+    font-size: 0.95em;
+  }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+
+  /* ================================================================
+     CHEAT SHEET (Section 5)
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(38,166,154,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 {
+    color: var(--gold);
+    font-size: 0.82em;
+    margin-top: 14px;
+  }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,152,0,0.05);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-accent);
+    background: rgba(38,166,154,0.05);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,82,82,0.05);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">📗 Topic 3</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 Concept Overview</a>
+  <a href="#section-2">§2 How Each Primitive Works</a>
+  <a href="#section-2a" class="sub">→ 2a · Symmetric Ciphers</a>
+  <a href="#section-2b" class="sub">→ 2b · Asymmetric Ciphers</a>
+  <a href="#section-2c" class="sub">→ 2c · Secure Hash</a>
+  <a href="#section-2d" class="sub">→ 2d · MAC &amp; AES-GCM</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ</a>
+  <a href="#section-4-tf" class="sub">→ True/False</a>
+  <a href="#section-4-sa" class="sub">→ Short Answer</a>
+  <a href="#section-4-fib" class="sub">→ Fill in Blank</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<!-- ── Fixed top bar with theme toggle ── -->
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 448/548 · Final Exam · <strong>Topic 3 · Cryptography Foundations</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 3: Cryptography Foundations</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">Symmetric · Asymmetric · Secure Hash · Message Authentication</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 448/548 Network Security &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Lina Pu &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final — April 27, 2026 · 120 min · Closed-book<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lectures_all_merged_compressed.pdf</span> (601 slides)<br>
+    <strong>Signal:</strong> <span class="signal-strong">🟠 STRONG (re-tested from midterm)</span> — Foundation for every upper-layer security protocol
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">Why this topic matters for your exam</strong><br>
+  From <span class="mono">scriptMidtermReview-cs548.txt</span>:
+  <em>"Topics... crypto, the first part, basically the symmetric, asymmetric, secure hash... AES in block mode, stream mode, message integrity, message authentication, AES GCM mode."</em><br><br>
+  The final is comprehensive, so <strong>everything tested on the midterm can be retested</strong> — but more importantly, crypto is the <em>substrate</em> for every other final-exam topic. TLS, IPsec, Kerberos, WPA2, DNSSEC all assume you understand <strong>AES-GCM</strong>, <strong>ECDHE</strong>, <strong>SHA-256</strong>, <strong>digital signatures</strong>, and <strong>HMAC</strong>. The instructor explicitly flagged cross-topic challenge questions that "combine multiple related techniques" — crypto is almost always one side of those combinations.<br><br>
+  <strong>Her stated test philosophy:</strong> <em>"the purpose of this class is to make sure you understand"</em> — she will ask you to <em>explain</em> concepts (why counter mode, what's a nonce, why DH over RSA for key exchange) rather than memorize parameters. Understanding beats rote recall on this exam.
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 3 is a <strong>4-sub-topic cluster</strong> that spans <em>five lectures</em> — the largest
+  footprint of any final-exam topic. Sources: <em>Lecture 3</em> (pp. 54-82, symmetric),
+  <em>Lectures 4 &amp; 5</em> (pp. 83-162, asymmetric + hash),
+  <em>Lecture 6</em> (pp. 163-181, MAC / HMAC / AES-GCM),
+  <em>Lecture 7</em> (pp. 182-206, review).
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Foundations — Security Objectives &amp; Taxonomy <span class="pdf-ref">📄 pp. 30-31, 55, 137, 152</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Security objectives: Confidentiality · Integrity · Authenticity · Non-repudiation</td><td>pp. 30, 56</td></tr>
+    <tr><td>Security services (Authentication, Access, Confidentiality, Integrity, Non-repudiation)</td><td>p. 31</td></tr>
+    <tr><td>Cryptography taxonomy tree (Symmetric / Asymmetric / Hash)</td><td>pp. 55, 115, 137, 152</td></tr>
+    <tr><td>Applications of cryptography (transmission + storage)</td><td>p. 40</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2a · Symmetric Ciphers <span class="pdf-ref">📄 pp. 54-82</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Symmetric cipher overview &amp; motivation</td><td>pp. 41, 57, 85</td></tr>
+    <tr><td>Substitution &amp; Transposition primitives</td><td>pp. 58-59, 77</td></tr>
+    <tr><td>Confusion &amp; Diffusion (Shannon)</td><td>pp. 59, 77</td></tr>
+    <tr><td>One-Time Pad / Vernam Cipher (perfect secrecy)</td><td>p. 60</td></tr>
+    <tr><td>Feistel cipher structure</td><td>pp. 61-62, 77</td></tr>
+    <tr><td>DES &amp; 3DES (56-bit key, Feistel)</td><td>pp. 41, 53, 55</td></tr>
+    <tr><td>AES structure (SPN, 10/12/14 rounds)</td><td>pp. 63-68, 77</td></tr>
+    <tr><td>AES round operations: SubBytes, ShiftRows, MixColumns, AddRoundKey</td><td>pp. 63-66</td></tr>
+    <tr><td>AES vs DES comparison table</td><td>p. 67</td></tr>
+    <tr><td>Block cipher modes — why we need them (&gt;128-bit messages)</td><td>pp. 70, 77</td></tr>
+    <tr><td>ECB mode (and information leakage example)</td><td>pp. 70-72, 75</td></tr>
+    <tr><td>CBC mode encryption &amp; decryption</td><td>pp. 70, 73-76</td></tr>
+    <tr><td>Initialization Vector (IV) — purpose, choice, reuse dangers</td><td>p. 76</td></tr>
+    <tr><td>Stream cipher concept</td><td>pp. 41, 49, 77</td></tr>
+    <tr><td>Counter (CTR) mode / AES-CTR "stream-server" mode</td><td>pp. 77, 80, 82</td></tr>
+    <tr><td>Nonce purpose &amp; incremental counter rules</td><td>pp. 80, 181</td></tr>
+    <tr><td>Parallelism &amp; random-access benefits of CTR</td><td>p. 80</td></tr>
+    <tr><td>Brute-force attack &amp; key-size security levels</td><td>pp. 82, 190</td></tr>
+    <tr><td>Symmetric summary</td><td>p. 82</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2b · Asymmetric Ciphers <span class="pdf-ref">📄 pp. 83-151</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Motivation: symmetric needs pre-shared secret</td><td>pp. 85, 136</td></tr>
+    <tr><td>Public-key cipher concept (publish public, keep private)</td><td>pp. 87-89</td></tr>
+    <tr><td>Trap-door one-way function definition</td><td>p. 87</td></tr>
+    <tr><td>RSA key generation (p, q, n, φ(n), e, d)</td><td>pp. 90, 95</td></tr>
+    <tr><td>RSA encryption &amp; decryption (M^e mod n · C^d mod n)</td><td>pp. 92, 95</td></tr>
+    <tr><td>RSA faster-encryption / square-and-multiply</td><td>p. 93</td></tr>
+    <tr><td>Applications matrix (RSA / DH / DSS / ECC × encrypt/sign/key-exchange)</td><td>p. 94</td></tr>
+    <tr><td>Diffie-Hellman (DH) key exchange — protocol steps</td><td>pp. 97, 98, 122-123, 140</td></tr>
+    <tr><td>DH vs RSA for key exchange — why DH wins</td><td>pp. 98, 122-123</td></tr>
+    <tr><td>Elliptic Curve Cryptography (ECC) overview</td><td>pp. 94, 101, 115</td></tr>
+    <tr><td>ECDHE — Ephemeral Elliptic-Curve Diffie-Hellman</td><td>pp. 101, 122-123</td></tr>
+    <tr><td>Perfect Forward Secrecy (PFS) via ephemeral keys</td><td>p. 101</td></tr>
+    <tr><td>Digital signatures — RSA signing (hash, then private-key-encrypt)</td><td>pp. 94, 103</td></tr>
+    <tr><td>Signature verification (public-key-decrypt, compare hash)</td><td>p. 103</td></tr>
+    <tr><td>Why messages must be hashed and padded before signing</td><td>p. 103</td></tr>
+    <tr><td>Non-repudiation guarantee via digital signature</td><td>p. 103</td></tr>
+    <tr><td>Man-in-the-middle on raw public-key (impersonation)</td><td>p. 145</td></tr>
+    <tr><td>Public-key certificate &amp; X.509</td><td>pp. 104, 128, 145</td></tr>
+    <tr><td>Certificate Authority (CA) &amp; chain of trust</td><td>pp. 106, 110, 130</td></tr>
+    <tr><td>Obtaining a user certificate from a CA</td><td>p. 130</td></tr>
+    <tr><td>Code signing (Stuxnet 2017 case)</td><td>p. 110</td></tr>
+    <tr><td>Disadvantages of public-key crypto (slow, long keys, unproven)</td><td>p. 150</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2c · Secure Hash <span class="pdf-ref">📄 pp. 152-162, 200</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Message digest purpose (fingerprint, checksum)</td><td>p. 155</td></tr>
+    <tr><td>Cryptographic-hash-function properties (avalanche, one-way)</td><td>pp. 152, 155-157</td></tr>
+    <tr><td>Hash = one-way but NOT invertible (vs asymmetric which is)</td><td>p. 157</td></tr>
+    <tr><td>Merkle-Damgård general structure</td><td>pp. 158, 165</td></tr>
+    <tr><td>Compression function &amp; chaining variable</td><td>pp. 158, 165</td></tr>
+    <tr><td>SHA family history (SHA-1 deprecated, SHA-2, SHA-3)</td><td>p. 160</td></tr>
+    <tr><td>SHA-256 &amp; SHA-512 specifics</td><td>p. 160</td></tr>
+    <tr><td>Security level (collision via birthday attack — half the digest bits)</td><td>pp. 162, 200</td></tr>
+    <tr><td>Brute-force inversion cost (2^n ops)</td><td>pp. 162, 200</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2d · MAC · HMAC · AES-GCM <span class="pdf-ref">📄 pp. 163-181</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Why AES alone doesn't provide integrity/authenticity</td><td>p. 170</td></tr>
+    <tr><td>Integrity vs Authenticity (H(x) vs MAC(k, x))</td><td>p. 172</td></tr>
+    <tr><td>MAC concept (keyed, verifies on receive)</td><td>pp. 174, 177</td></tr>
+    <tr><td>Message-authentication approaches (with/without encryption)</td><td>pp. 175-177</td></tr>
+    <tr><td>HMAC construction (keyed hash)</td><td>pp. 178-180</td></tr>
+    <tr><td>Encrypt-then-MAC paradigm (why)</td><td>p. 180</td></tr>
+    <tr><td>Determinism of MAC &amp; chosen-plaintext pitfall</td><td>p. 180</td></tr>
+    <tr><td>AES-GCM (Galois/Counter Mode) — combines CTR encryption + GHASH auth</td><td>p. 181</td></tr>
+    <tr><td>Industry adoption (TLS, IPsec, WPA2, HTTPS use AES-GCM)</td><td>p. 181</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: CONCEPT OVERVIEW
+     ============================================================ -->
+<h2 id="section-1">§1 — Concept Overview</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 30-31, 54-181 (five consecutive lectures make up the cryptography foundation)</div>
+
+<div class="section-block">
+
+<h3>1.1 The Problem This Solves <span class="pdf-ref">📄 pp. 30, 40, 56</span></h3>
+<p>
+  Networks carry data across channels you do not control — coffee-shop Wi-Fi, the public Internet,
+  shared storage. <strong>Cryptography</strong> is the toolbox that lets two parties achieve the four
+  classical security objectives (slide 30) across such a hostile channel:
+  <strong>Confidentiality</strong> (only the intended reader can read),
+  <strong>Integrity</strong> (bits have not been altered in flight),
+  <strong>Authenticity</strong> (the message genuinely came from the claimed sender), and
+  <strong>Non-repudiation</strong> (the sender cannot later deny having sent it).
+  <span class="pdf-ref">📄 pp. 30, 56</span>
+</p>
+
+<h3>1.2 The Core Idea — Four Primitives, Four Jobs <span class="pdf-ref">📄 pp. 55, 115, 137, 152</span></h3>
+<p>
+  The entire course-taxonomy tree on slides 55/115/137/152 reduces to four primitive families:
+</p>
+<ul class="plain">
+  <li>
+    <strong>Symmetric ciphers</strong> (AES, DES, 3DES; also stream ciphers like RC4) — fast bulk
+    encryption using a shared secret key. Appears in <em>every</em> practical system because it is
+    the only primitive fast enough for large payloads. <span class="pdf-ref">📄 pp. 55, 150</span>
+  </li>
+  <li>
+    <strong>Asymmetric ciphers</strong> (RSA, Diffie-Hellman, ECC) — slow but magical: they let two
+    parties who have <em>never</em> met agree on a secret, sign messages nobody else can forge, and
+    authenticate each other. Almost never used for bulk data — mostly for <em>key exchange</em> and
+    <em>digital signatures</em>. <span class="pdf-ref">📄 pp. 55, 94, 150</span>
+  </li>
+  <li>
+    <strong>Cryptographic hashes</strong> (SHA-256, SHA-512) — one-way fingerprints. Used for
+    integrity checks, password storage, Merkle trees, and as the input to MACs and signatures.
+    Unlike asymmetric primitives, <em>not</em> invertible. <span class="pdf-ref">📄 pp. 152, 157, 160</span>
+  </li>
+  <li>
+    <strong>Message Authentication Codes</strong> (HMAC, AES-GCM, CBC-MAC) — keyed constructions
+    that prove <em>both</em> integrity <em>and</em> authenticity simultaneously. The bridge between
+    encryption and authentication. <span class="pdf-ref">📄 pp. 172, 181</span>
+  </li>
+</ul>
+<p>
+  The <strong>unifying pattern</strong> of every secure protocol on this course: use <em>asymmetric</em>
+  crypto to agree on a secret, then switch to <em>symmetric</em> crypto (AES-GCM in particular) for
+  the actual traffic. TLS does this. IPsec does this. WPA2 does this. SSH does this.
+  <span class="pdf-ref">📄 pp. 150, 181</span>
+</p>
+
+<h3>1.3 Analogy — A Building's Security System <span class="pdf-ref">📄 pp. 85, 87, 145, 155</span></h3>
+<p>Think of a corporate building where four different mechanisms each solve a different problem:</p>
+<ul class="plain">
+  <li><strong>Shared door key</strong> (each employee has the same physical key that opens the back door) → <strong>Symmetric cipher</strong>. Fast, works at scale, but how do you distribute the key the first time? <span class="pdf-ref">📄 p. 85</span></li>
+  <li><strong>The mailbox with a slot</strong> (anyone can drop a letter in, only the owner's key opens it) → <strong>Asymmetric cipher</strong>: public slot, private key. <span class="pdf-ref">📄 p. 87</span></li>
+  <li><strong>A tamper-evident seal</strong> (any stranger can verify the seal is intact, but the seal itself proves nothing about identity) → <strong>Hash</strong>. Integrity without authenticity. <span class="pdf-ref">📄 p. 155</span></li>
+  <li><strong>A wax seal imprinted with a signet ring</strong> (only the owner of the ring can produce it; anyone can verify by the imprint) → <strong>Digital signature + MAC family</strong>. Integrity <em>with</em> authenticity. <span class="pdf-ref">📄 pp. 103, 172</span></li>
+</ul>
+<p>
+  In this analogy, the <strong>Certificate Authority</strong> is the government registry that vouches
+  for who owns which signet ring, preventing a "fake BOA" pretender from fooling Alice (slide 145).
+  <span class="pdf-ref">📄 pp. 104, 130, 145</span>
+</p>
+
+<h3>1.4 Technical Definition <span class="pdf-ref">📄 pp. 55, 87, 152, 172</span></h3>
+<p>
+  <strong>Cryptography</strong> is the study of mathematical techniques for information security.
+  A <strong>symmetric cipher</strong> is a pair of efficient algorithms (Encrypt, Decrypt) such that
+  <em>E<sub>k</sub>(m)</em> produces ciphertext and <em>D<sub>k</sub>(c) = m</em>, using the
+  <em>same</em> secret key <em>k</em> <span class="pdf-ref">📄 p. 55</span>.
+  An <strong>asymmetric cipher</strong> uses a pair (public-key <em>pk</em>, private-key <em>sk</em>)
+  derived from a <em>trap-door one-way function</em>: computing <em>f(x)</em> is easy but inverting
+  it is infeasible without the trap-door <span class="pdf-ref">📄 p. 87</span>.
+  A <strong>cryptographic hash</strong> <em>H(m)</em> is a deterministic function producing a
+  fixed-length output with the properties of pre-image resistance, second-pre-image resistance, and
+  collision resistance <span class="pdf-ref">📄 pp. 155-157</span>.
+  A <strong>Message Authentication Code</strong> <em>MAC(k, m)</em> is a keyed function such that
+  only someone with <em>k</em> can compute a valid tag, and any change to <em>m</em> or <em>k</em>
+  invalidates the tag <span class="pdf-ref">📄 pp. 172, 174</span>.
+</p>
+
+<h3>1.5 Key Terms &amp; Definitions</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th style="width:20%">Term</th>
+      <th style="width:38%">Plain-English Definition</th>
+      <th style="width:30%">Why It Matters for the Exam</th>
+      <th style="width:12%">📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>CIA Triad</strong> <span class="exam-star">⭐</span></td>
+      <td>Confidentiality, Integrity, Availability — plus Authenticity and Non-repudiation as course-extended goals.</td>
+      <td>Opening question type: "Which goal does X primitive provide?"</td>
+      <td><span class="pdf-ref">📄 pp. 30-31, 56, 170</span></td>
+    </tr>
+    <tr>
+      <td><strong>Symmetric cipher</strong></td>
+      <td>Encryption + decryption use the <em>same</em> secret key. Much faster than asymmetric.</td>
+      <td>The workhorse for bulk encryption in every real protocol.</td>
+      <td><span class="pdf-ref">📄 pp. 55, 85, 150</span></td>
+    </tr>
+    <tr>
+      <td><strong>Asymmetric / Public-key cipher</strong></td>
+      <td>Keys come in pairs: a published public key and a private key. Built on trap-door one-way functions.</td>
+      <td>Every session-startup, signature, and certificate chain relies on this.</td>
+      <td><span class="pdf-ref">📄 pp. 55, 87</span></td>
+    </tr>
+    <tr>
+      <td><strong>Trap-door one-way function</strong></td>
+      <td>Easy forward, infeasibly hard reverse — <em>unless</em> you hold the trap-door (private key).</td>
+      <td>Definitional slide 87 — exam expects you to state the two properties.</td>
+      <td><span class="pdf-ref">📄 p. 87</span></td>
+    </tr>
+    <tr>
+      <td><strong>AES</strong> <span class="exam-star">⭐</span></td>
+      <td>Advanced Encryption Standard. 128-bit block, 128/192/256-bit keys, 10/12/14 rounds of Substitution-Permutation Network. Winner of 2001 NIST competition.</td>
+      <td>Instructor said: understand <em>why</em> each AES round has SubBytes, ShiftRows, MixColumns, AddRoundKey — not the tables.</td>
+      <td><span class="pdf-ref">📄 pp. 63-68</span></td>
+    </tr>
+    <tr>
+      <td><strong>DES / 3DES</strong></td>
+      <td>Data Encryption Standard — 56-bit key, Feistel structure, 64-bit block. Too short for modern security; 3DES chains DES three times for ~112 effective bits. Both phased out.</td>
+      <td>Know they are predecessors and why they lost to AES (key size).</td>
+      <td><span class="pdf-ref">📄 pp. 41, 53, 55, 67, 190</span></td>
+    </tr>
+    <tr>
+      <td><strong>Feistel vs SPN</strong></td>
+      <td>Feistel = half-block-at-a-time round structure (DES). SPN = Substitution-Permutation Network operating on the whole block (AES).</td>
+      <td>Appears in the DES vs AES comparison table (slide 67).</td>
+      <td><span class="pdf-ref">📄 pp. 61-62, 67</span></td>
+    </tr>
+    <tr>
+      <td><strong>Block cipher</strong></td>
+      <td>Encrypts fixed-size blocks (AES = 128 bits). Needs a <em>mode of operation</em> for longer messages.</td>
+      <td>ECB/CBC/CTR modes branch from here.</td>
+      <td><span class="pdf-ref">📄 pp. 70, 77</span></td>
+    </tr>
+    <tr>
+      <td><strong>Stream cipher</strong></td>
+      <td>Encrypts one byte/bit at a time by XORing plaintext with a pseudo-random keystream. No padding needed. AES-CTR is effectively a stream cipher.</td>
+      <td>Instructor stressed benefits: no padding, pre-generatable keystream, parallelizable.</td>
+      <td><span class="pdf-ref">📄 pp. 41, 77, 80</span></td>
+    </tr>
+    <tr>
+      <td><strong>ECB mode</strong></td>
+      <td>Electronic Code Book: encrypt each block independently. Identical plaintext blocks → identical ciphertext blocks → leaks structure.</td>
+      <td>Classic "penguin image" example (slide 72). Exam loves this.</td>
+      <td><span class="pdf-ref">📄 pp. 70-72</span></td>
+    </tr>
+    <tr>
+      <td><strong>CBC mode</strong></td>
+      <td>Cipher Block Chaining: XOR each plaintext block with the previous ciphertext, then encrypt. Requires an IV for the first block.</td>
+      <td>Know the XOR-with-previous-ciphertext loop.</td>
+      <td><span class="pdf-ref">📄 pp. 70, 73-76</span></td>
+    </tr>
+    <tr>
+      <td><strong>CTR mode</strong> <span class="exam-star">⭐</span></td>
+      <td>Counter mode: encrypt a counter to produce keystream, XOR with plaintext. Parallelizable, random-access, no padding.</td>
+      <td>Instructor's "why counter mode" favorite; also the basis for AES-GCM.</td>
+      <td><span class="pdf-ref">📄 pp. 77, 80, 82, 170</span></td>
+    </tr>
+    <tr>
+      <td><strong>IV (Initialization Vector)</strong></td>
+      <td>A fresh, public value prepended/mixed at start of encryption to make each session's ciphertext unique even with the same key.</td>
+      <td>Instructor emphasized: <em>"you will need to understand what is nonce, what is the purpose... can we reuse nonces? What's the problem of reusing?"</em></td>
+      <td><span class="pdf-ref">📄 pp. 76, 158, 165</span></td>
+    </tr>
+    <tr>
+      <td><strong>Nonce</strong></td>
+      <td>"Number used Once" — a unique value per message. In CTR mode, the nonce forms the high half of the counter; the incremental counter forms the low half.</td>
+      <td>Reusing a nonce with the same key under CTR mode → <em>catastrophic</em> (keystream reuse).</td>
+      <td><span class="pdf-ref">📄 pp. 80, 181</span></td>
+    </tr>
+    <tr>
+      <td><strong>RSA</strong> <span class="exam-star">⭐</span></td>
+      <td>Rivest-Shamir-Adleman (1978). Key = (e, n) and (d, n) where n = pq, factoring n is hard. Supports encryption AND signatures AND key exchange.</td>
+      <td>Instructor: <em>"you don't need to remember the five steps, but you need to know how to use it."</em></td>
+      <td><span class="pdf-ref">📄 pp. 90-95</span></td>
+    </tr>
+    <tr>
+      <td><strong>Diffie-Hellman (DH)</strong> <span class="exam-star">⭐</span></td>
+      <td>Two parties each pick a secret x, exchange g^x mod p publicly, and both compute g^(xy) mod p as the shared secret. Key exchange only — no encryption, no signatures.</td>
+      <td>The "how two strangers agree on a secret" workhorse.</td>
+      <td><span class="pdf-ref">📄 pp. 94, 97-98, 122-123, 140</span></td>
+    </tr>
+    <tr>
+      <td><strong>ECC / ECDHE</strong></td>
+      <td>Elliptic Curve Cryptography. Same operations as DH but over an elliptic-curve group — far shorter keys for equivalent security (256-bit ECC ≈ 3072-bit RSA). ECDHE = Ephemeral version → Perfect Forward Secrecy.</td>
+      <td>Instructor said <em>"most of our practice now uses ECDHE"</em> for key exchange.</td>
+      <td><span class="pdf-ref">📄 pp. 94, 101, 115, 122-123, 195</span></td>
+    </tr>
+    <tr>
+      <td><strong>Perfect Forward Secrecy (PFS)</strong></td>
+      <td>If a long-term private key is later compromised, <em>past</em> session traffic stays confidential because the session used an ephemeral DH key that was discarded.</td>
+      <td>This is <em>why</em> we prefer DH over RSA for key exchange.</td>
+      <td><span class="pdf-ref">📄 pp. 101, 122</span></td>
+    </tr>
+    <tr>
+      <td><strong>Digital signature</strong> <span class="exam-star">⭐</span></td>
+      <td>Sign: s = Enc<sub>private</sub>(hash(m)). Verify: Dec<sub>public</sub>(s) == hash(m). Provides integrity + authenticity + <strong>non-repudiation</strong>.</td>
+      <td>Non-repudiation is uniquely provided by digital signatures (not MAC) — exam trap.</td>
+      <td><span class="pdf-ref">📄 pp. 94, 103</span></td>
+    </tr>
+    <tr>
+      <td><strong>X.509 certificate</strong></td>
+      <td>A document binding a public key to an identity (server name, user, email), digitally signed by a trusted Certificate Authority (CA).</td>
+      <td>The "how do I know this public key belongs to BOA?" solution. See the "Fake BOA" example slide 145.</td>
+      <td><span class="pdf-ref">📄 pp. 104, 128, 145</span></td>
+    </tr>
+    <tr>
+      <td><strong>Certificate Authority (CA)</strong></td>
+      <td>Trusted third party that issues X.509 certificates. Root CAs are pre-installed in browsers/OSes.</td>
+      <td>Forms the chain of trust for TLS (contrast: DNSSEC uses zone hierarchy).</td>
+      <td><span class="pdf-ref">📄 pp. 106, 110, 130</span></td>
+    </tr>
+    <tr>
+      <td><strong>Hash function</strong></td>
+      <td>A deterministic function H: {0,1}* → {0,1}^n producing a fixed-length fingerprint. Properties: avalanche (bit change → total output change), pre-image resistance, collision resistance.</td>
+      <td>Distinguish from asymmetric: <em>hash is NOT invertible</em>, even with a key.</td>
+      <td><span class="pdf-ref">📄 pp. 152, 155-157</span></td>
+    </tr>
+    <tr>
+      <td><strong>SHA-256 / SHA-512</strong></td>
+      <td>Members of the SHA-2 family. 256 / 512-bit outputs respectively. Based on Merkle-Damgård with Davies-Meyer compression.</td>
+      <td>Know "birthday attack → half-the-digest-bits security" (SHA-256 → 128-bit collision resistance).</td>
+      <td><span class="pdf-ref">📄 pp. 160, 162, 200</span></td>
+    </tr>
+    <tr>
+      <td><strong>Merkle-Damgård</strong></td>
+      <td>Iterative construction: pad message, split into blocks, chain through a compression function F with an IV.</td>
+      <td>Structural diagram on slides 158/165 — "what does F do?" is a likely question.</td>
+      <td><span class="pdf-ref">📄 pp. 158, 165</span></td>
+    </tr>
+    <tr>
+      <td><strong>MAC (Message Authentication Code)</strong> <span class="exam-star">⭐</span></td>
+      <td>A keyed, deterministic function MAC(k, m) attached to a message so the receiver can verify integrity + origin. Only parties with k can produce or verify.</td>
+      <td>Contrast with plain hash (no key) and digital signature (asymmetric + non-repudiation).</td>
+      <td><span class="pdf-ref">📄 pp. 172, 174, 177</span></td>
+    </tr>
+    <tr>
+      <td><strong>HMAC</strong></td>
+      <td>Hash-based MAC: HMAC(k,m) = H((k⊕opad) ‖ H((k⊕ipad) ‖ m)). Uses a hash (like SHA-256) plus two padding constants.</td>
+      <td>The most common MAC in practice.</td>
+      <td><span class="pdf-ref">📄 pp. 178-180</span></td>
+    </tr>
+    <tr>
+      <td><strong>AES-GCM</strong> <span class="exam-star">⭐</span></td>
+      <td>AES in Galois/Counter Mode. Combines AES-CTR for encryption + GHASH for authentication in a single pass. Authenticated encryption with associated data (AEAD).</td>
+      <td>Instructor: <em>"the most commonly used solution that provides encryption and message authentication"</em> — used in TLS, IPsec, WPA2, HTTPS.</td>
+      <td><span class="pdf-ref">📄 pp. 181, 189, 202</span></td>
+    </tr>
+    <tr>
+      <td><strong>Non-repudiation</strong></td>
+      <td>Property that the signer cannot later deny having created the message. Provided uniquely by <em>digital signatures</em> (asymmetric), <em>not</em> by MACs.</td>
+      <td>Instructor: <em>"if someone signed a piece of information using its private key, that means the signer cannot deny of this piece of information."</em></td>
+      <td><span class="pdf-ref">📄 pp. 30, 103</span></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 2: HOW EACH PRIMITIVE WORKS
+     ============================================================ -->
+<h2 id="section-2">§2 — How Each Primitive Works (Step-by-Step)</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 54-181 (five lectures, spanning block ciphers through authenticated encryption)</div>
+
+<div class="section-block">
+
+<p>
+  Each of the four sub-topics below follows the same structure: <strong>(1) mechanism</strong>
+  (what does the algorithm actually do?), <strong>(2) properties and pitfalls</strong> (what does it
+  guarantee, and how can it fail?), <strong>(3) where it appears in real protocols</strong>. This is
+  the angle the instructor explicitly said she wants — <em>"understanding, not memorization."</em>
+</p>
+
+<!-- ================= 2a SYMMETRIC CIPHERS ================= -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span><span class="title">Symmetric Ciphers</span>
+  <span class="pages">📄 pp. 54-82 · Lecture 3</span>
+</div>
+
+<h3>Block Ciphers — AES as the Canonical Example <span class="pdf-ref">📄 pp. 63-68</span></h3>
+
+<pre class="diagram">
+ AES-128 Round Structure  <span class="pdf-ref">📄 pp. 63-68</span>
+
+    Plaintext (128 bits = 4×4 byte matrix)
+         │
+         ▼
+    ┌─────────────────────────┐
+    │    AddRoundKey (key₀)   │    initial whitening
+    └─────────────┬───────────┘
+                  │
+      ┌───────────▼───────────┐     ─┐
+      │    SubBytes   (S-box) │      │
+      │    ShiftRows  (rows)  │      │   × 9 rounds (AES-128)
+      │    MixColumns (matrix)│      │   × 11 rounds (AES-192)
+      │    AddRoundKey (keyᵢ) │      │   × 13 rounds (AES-256)
+      └───────────┬───────────┘     ─┘
+                  │
+    ┌─────────────▼───────────┐
+    │    SubBytes + ShiftRows │    final round — NO MixColumns
+    │    AddRoundKey (key_N)  │
+    └─────────────┬───────────┘
+                  │
+                  ▼
+            Ciphertext (128 bits)
+
+ SubBytes   = non-linear substitution (S-box) → confusion
+ ShiftRows  = cyclic shift rows            ┐
+ MixColumns = matrix multiplication in GF  │ → diffusion
+ AddRoundKey= XOR with round key (derived from master key)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 63-66</span></div>
+
+<div class="step">
+  <div class="step-head">① Mechanism</div>
+  <div class="step-detail">
+    AES operates on a 128-bit block viewed as a 4×4 matrix of bytes. Each round alternates
+    <strong>confusion</strong> operations (SubBytes, AddRoundKey) with <strong>diffusion</strong>
+    operations (ShiftRows, MixColumns) — Shannon's two principles. The key schedule derives a unique
+    round key for each of the 10/12/14 rounds. <span class="pdf-ref">📄 pp. 63-68, 77</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Security Level & Why It Beat DES</div>
+  <div class="step-detail">
+    AES-128 provides <strong>128-bit security</strong> against brute-force key search. DES's 56-bit
+    key falls to exhaustive search in ~1 hour at 10¹³ decryptions/s; AES-128 requires 5.3 × 10²¹ years
+    at the same rate <span class="pdf-ref">📄 p. 190</span>. AES also replaced DES's Feistel structure
+    with a Substitution-Permutation Network that processes the <em>whole</em> 128-bit block per round
+    rather than half. <span class="pdf-ref">📄 p. 67</span>
+  </div>
+</div>
+
+<h3>Modes of Operation — Why They Exist <span class="pdf-ref">📄 pp. 70-82</span></h3>
+
+<pre class="diagram">
+ ECB Mode (Electronic Code Book) — INSECURE for structured data  <span class="pdf-ref">📄 pp. 70-72</span>
+
+    P₁         P₂         P₃         P₄
+    │          │          │          │
+    ▼          ▼          ▼          ▼
+ [AES_k]   [AES_k]   [AES_k]   [AES_k]      ← independent encryptions
+    │          │          │          │
+    ▼          ▼          ▼          ▼
+    C₁         C₂         C₃         C₄
+
+  PROBLEM: P₁ = P₃  ⇒  C₁ = C₃ → leaks structure ("penguin" image)
+
+ CBC Mode (Cipher Block Chaining)  <span class="pdf-ref">📄 pp. 73-76</span>
+
+    IV ──────┐
+             ▼
+    P₁ ──── XOR ──► [AES_k] ──► C₁
+                                 │
+                                 ▼
+    P₂ ──── XOR ──► [AES_k] ──► C₂
+                                 │
+                                 ▼
+    P₃ ──── XOR ──► [AES_k] ──► C₃
+
+  PROPERTY: identical plaintext blocks yield different ciphertext
+  COST:     strictly sequential (can't parallelize encryption)
+
+ CTR Mode (Counter)  <span class="pdf-ref">📄 pp. 77, 80</span>
+
+   [nonce‖0]     [nonce‖1]     [nonce‖2]     [nonce‖3]
+        │             │             │             │
+      [AES_k]       [AES_k]       [AES_k]       [AES_k]     ← generate
+        │             │             │             │           keystream
+        ▼             ▼             ▼             ▼
+       ks₀           ks₁           ks₂           ks₃
+        │             │             │             │
+   P₀ ─XOR─► C₀   P₁ ─XOR─► C₁  P₂ ─XOR─► C₂   P₃ ─XOR─► C₃
+
+  BENEFITS: ★ parallelizable encryption + decryption
+            ★ random-access (decrypt any block independently)
+            ★ no padding (keystream adapts to any length)
+            ★ uses only AES-encrypt; no AES-decrypt needed
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 70-82</span></div>
+
+<div class="callout quote">
+  <strong class="lbl">Instructor's exact framing of the CTR-mode advantages</strong>
+  <em>"The counter mode, the stream-server mode is more widely used in our internet, especially in
+  TLS, IPsec, and the Wi-Fi security — we are all using the AES counter mode... First, no padding
+  needed, so it's good for some short packets. Second, the keystream generation can be pre-generated,
+  so encrypting/decrypting can be faster... also parallelizable."</em>
+  <span class="pdf-ref">📄 p. 80</span>
+</div>
+
+<h3>The Nonce — What, Why, and the Cardinal Rule <span class="pdf-ref">📄 pp. 76, 80, 181</span></h3>
+
+<p>
+  A <strong>nonce</strong> ("Number used Once") is a unique value prepended to each message's counter
+  so that identical plaintexts encrypted under the same key produce <em>different</em> ciphertexts.
+  Without a nonce, CTR-mode encryption of the same plaintext under the same key would yield identical
+  ciphertext streams — and an eavesdropper who sees two such ciphertexts can XOR them to recover
+  (P₁ ⊕ P₂), reducing the problem to known-plaintext cryptanalysis.
+</p>
+<div class="callout warning">
+  <strong class="lbl">⚠️ The cardinal rule</strong>
+  <strong>Never reuse a (key, nonce) pair</strong> in CTR mode. Reusing them leaks the XOR of
+  plaintexts and is exactly what broke WEP in 2001. Instructor emphasized: <em>"can we reuse nonces?
+  What's the problem of reusing?"</em> Answer: catastrophic confidentiality loss.
+  <span class="pdf-ref">📄 pp. 80, 181</span>
+</div>
+
+<!-- ================= 2b ASYMMETRIC CIPHERS ================= -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span><span class="title">Asymmetric Ciphers</span>
+  <span class="pages">📄 pp. 83-151 · Lectures 4 &amp; 5</span>
+</div>
+
+<h3>The Core Insight — Trap-Door One-Way Functions <span class="pdf-ref">📄 p. 87</span></h3>
+
+<p>
+  Symmetric ciphers solve confidentiality <em>after</em> you already share a key. But <em>how</em>
+  do you share a key over an insecure network in the first place? Asymmetric crypto answers this
+  with a mathematical object called a <strong>trap-door one-way function</strong>: a family
+  <em>{f<sub>k</sub>}</em> such that
+</p>
+<ul class="plain">
+  <li><em>f<sub>k</sub>(x)</em> = easy, given <em>k</em> and <em>x</em></li>
+  <li><em>f<sub>k</sub><sup>-1</sup>(y)</em> = easy, given <em>k</em><sup>-1</sup> and <em>y</em></li>
+  <li><em>f<sub>k</sub><sup>-1</sup>(y)</em> = <strong>infeasible</strong>, given <em>y</em> and <em>k</em> (but not <em>k</em><sup>-1</sup>)</li>
+</ul>
+<p>
+  Publish <em>k</em> (the "public key") so anyone can encrypt; keep <em>k</em><sup>-1</sup> (the
+  "private key") so only you can decrypt. The candidate trap-doors in this course are
+  <strong>integer factoring</strong> (RSA), <strong>discrete logarithm</strong> (DH), and
+  <strong>elliptic-curve discrete log</strong> (ECC). <span class="pdf-ref">📄 pp. 87, 94, 115</span>
+</p>
+
+<h3>RSA — Encryption and Signatures <span class="pdf-ref">📄 pp. 90-95, 103</span></h3>
+
+<pre class="diagram">
+ RSA Key Generation                            <span class="pdf-ref">📄 p. 95</span>
+  1. Pick primes p, q      (≥ 1024 bits each)
+  2. n  = p · q            (modulus, public)
+  3. φ(n) = (p-1)(q-1)     (Euler totient, private)
+  4. Pick e with gcd(e, φ(n)) = 1   (public exponent)
+  5. d  = e⁻¹ mod φ(n)     (private exponent)
+  Public key = (e, n)     Private key = (d, n)
+
+ Encryption / Decryption           Digital Signature
+ ──────────────────────            ─────────────────────────
+   C = M^e mod n   (encrypt)          s = hash(M)^d mod n    (sign with private)
+   M = C^d mod n   (decrypt)          hash(M) =? s^e mod n    (verify with public)
+
+ Notice: encryption and signing are the SAME mathematical op —
+         they just use different keys.  <span class="pdf-ref">📄 p. 103</span>
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 95, 103</span></div>
+
+<div class="step">
+  <div class="step-head">① RSA Encryption Use-Case</div>
+  <div class="step-detail">
+    Alice wants to send Bob a confidential message. She fetches Bob's public key (e, n). She computes
+    C = M^e mod n and sends C. Only Bob can decrypt, because only he holds d. Note: real systems
+    don't encrypt user data directly with RSA — it's too slow. They encrypt a freshly-chosen
+    <em>AES session key</em> with RSA, then use the AES key for everything else (hybrid encryption).
+    <span class="pdf-ref">📄 pp. 95, 150</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② RSA Signature Use-Case</div>
+  <div class="step-detail">
+    Alice wants to prove <em>she</em> wrote message M. She computes s = hash(M)^d mod n using her
+    private key and sends (M, s). Anyone can verify: compute hash(M) themselves, decrypt s with
+    Alice's public key, check equality. The <strong>hash is essential</strong> — signing raw M is
+    insecure because an attacker can choose M to make the math convenient. <span class="pdf-ref">📄 p. 103</span>
+    Because Alice is the only one who could have produced s, this provides
+    <strong>non-repudiation</strong> — she cannot later deny signing. <span class="pdf-ref">📄 pp. 30, 103</span>
+  </div>
+</div>
+
+<h3>Diffie-Hellman — Agreeing on a Secret Without Pre-Sharing <span class="pdf-ref">📄 pp. 97-98, 122-123, 140</span></h3>
+
+<pre class="diagram">
+ Diffie-Hellman Key Exchange                   <span class="pdf-ref">📄 pp. 97-98, 140</span>
+
+   Public parameters: large prime p, generator g
+
+   Alice                                     Bob
+   ─────                                     ─────
+   pick secret x_A                           pick secret x_B
+                    g^x_A mod p  ──────────►
+                             ◄──────────  g^x_B mod p
+
+   compute (g^x_B)^x_A = g^(x_A·x_B) mod p   compute (g^x_A)^x_B = g^(x_A·x_B) mod p
+          └────────────────────┘                   └─────────────────────┘
+           identical shared secret K            identical shared secret K
+
+   Eavesdropper sees only g^x_A, g^x_B ─── but deriving x_A or x_B
+   from them is the DISCRETE LOGARITHM PROBLEM (believed hard).
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 97-98, 140</span></div>
+
+<p>
+  <strong>Ephemeral DH (DHE / ECDHE).</strong> If Alice and Bob pick <em>fresh</em> x_A, x_B for
+  every session and discard them afterward, then even if an attacker <em>later</em> compromises their
+  long-term keys, they cannot retroactively decrypt old traffic — this is
+  <strong>Perfect Forward Secrecy (PFS)</strong>. ECDHE (Elliptic-Curve Diffie-Hellman Ephemeral) is
+  what TLS 1.3, modern IPsec, SSH, and WPA3 all use for this reason.
+  <span class="pdf-ref">📄 pp. 101, 122-123</span>
+</p>
+
+<h3>DH vs RSA for Key Exchange — Why DH Wins <span class="pdf-ref">📄 pp. 98, 122-123, 150</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Criterion</th><th>RSA-based key transport</th><th>(EC)DHE-based key exchange</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mechanism</td>
+      <td>Client encrypts AES key with server's public RSA key and sends it.</td>
+      <td>Both parties exchange ephemeral public values, derive shared secret.</td>
+    </tr>
+    <tr>
+      <td>Forward secrecy</td>
+      <td><span style="color: var(--red);">❌ No</span> — if server's private RSA key is later stolen, past sessions decrypt.</td>
+      <td><span style="color: var(--green);">✅ Yes</span> — ephemeral secrets are discarded immediately.</td>
+    </tr>
+    <tr>
+      <td>Computational cost</td>
+      <td>High per session (RSA decryption).</td>
+      <td>Comparable with ECC; much shorter keys.</td>
+    </tr>
+    <tr>
+      <td>Key-size-for-equivalent-security</td>
+      <td>3072-bit RSA for 128-bit security</td>
+      <td>256-bit ECC for 128-bit security</td>
+    </tr>
+    <tr>
+      <td>Course preference</td>
+      <td>Legacy — still valid in TLS 1.2 fallback.</td>
+      <td><strong>Default in TLS 1.3, modern IPsec, SSH, WPA3.</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ================= 2c SECURE HASH ================= -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span><span class="title">Secure Hash Functions</span>
+  <span class="pages">📄 pp. 152-162 · Lecture 5 part 2</span>
+</div>
+
+<h3>The Three Required Properties <span class="pdf-ref">📄 pp. 155-157</span></h3>
+
+<ol>
+  <li><strong>Pre-image resistance</strong> — given <em>h</em>, infeasible to find any <em>m</em> with <em>H(m) = h</em>. (Hence "one-way.")</li>
+  <li><strong>Second-pre-image resistance</strong> — given <em>m₁</em>, infeasible to find <em>m₂ ≠ m₁</em> with <em>H(m₂) = H(m₁)</em>.</li>
+  <li><strong>Collision resistance</strong> — infeasible to find <em>any</em> pair <em>m₁, m₂</em> with <em>H(m₁) = H(m₂)</em>. The birthday attack sets the bar here at 2^(n/2) work for an n-bit digest. <span class="pdf-ref">📄 pp. 162, 200</span></li>
+</ol>
+
+<p>
+  Plus one emergent property: <strong>avalanche</strong> — a single-bit change in the input flips
+  roughly half the output bits. Slide 155 gives the canonical example: hashing "over" vs "once"
+  gives two totally-unrelated digests. <span class="pdf-ref">📄 p. 155</span>
+</p>
+
+<h3>Merkle-Damgård Construction <span class="pdf-ref">📄 pp. 158, 165</span></h3>
+
+<pre class="diagram">
+ Merkle-Damgård Iterated Hash  <span class="pdf-ref">📄 pp. 158, 165</span>
+
+    message m  →  pad to multiple of block size  →  split into m₁, m₂, ..., mₙ
+
+          m₁          m₂          m₃              mₙ
+          │           │           │               │
+          ▼           ▼           ▼               ▼
+    IV ─▶[F]───H₁────▶[F]───H₂───▶[F]──...──Hₙ₋₁─▶[F]──► H(m)
+                                                   (digest)
+
+    F = compression function (one-way, fixed-input-size)
+    H_i = "chaining variable" carrying state across blocks
+    IV = standardized per-algorithm constant
+
+  Examples: MD5, SHA-1 (broken), SHA-2 family (SHA-256, SHA-512)
+           SHA-3 uses a different "sponge" construction instead.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 158, 165</span></div>
+
+<div class="step">
+  <div class="step-head">① SHA Family Status <span class="pdf-ref">📄 p. 160</span></div>
+  <div class="step-detail">
+    <ul class="plain">
+      <li><strong>SHA-1</strong> (160-bit) — <em>deprecated since 2010</em>, collisions demonstrated in 2017.</li>
+      <li><strong>SHA-2</strong> — family including SHA-256 (32-byte) and SHA-512 (64-byte). <em>Widely deployed today.</em></li>
+      <li><strong>SHA-3</strong> — Keccak sponge construction, different math — used when defense-in-depth vs SHA-2 is desired.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Security Levels <span class="pdf-ref">📄 pp. 162, 200</span></div>
+  <div class="step-detail">
+    For an <em>n</em>-bit digest:
+    <ul class="plain">
+      <li>Brute-force pre-image: <strong>2ⁿ</strong> operations</li>
+      <li>Collision via birthday attack: <strong>2^(n/2)</strong> operations</li>
+    </ul>
+    Hence SHA-256 provides <strong>128-bit collision resistance</strong> and SHA-512 provides
+    <strong>256-bit collision resistance</strong>. The instructor's exam-friendly mnemonic:
+    <em>"256-bit SHA gives 128-bit security, matching 128-bit AES."</em>
+  </div>
+</div>
+
+<!-- ================= 2d MAC / AES-GCM ================= -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span><span class="title">Message Authentication — MAC, HMAC &amp; AES-GCM</span>
+  <span class="pages">📄 pp. 163-181 · Lecture 6</span>
+</div>
+
+<h3>Why We Need MACs — AES Alone Is Not Enough <span class="pdf-ref">📄 pp. 170, 172</span></h3>
+
+<p>
+  Encryption hides content but does <em>not</em> detect tampering. An attacker who flips bits in a
+  CTR-mode ciphertext flips the corresponding bits in the decrypted plaintext — the receiver has no
+  way to know. Encryption gives <strong>confidentiality</strong>; we separately need
+  <strong>integrity + authenticity</strong>, which is what MACs provide.
+  <span class="pdf-ref">📄 pp. 170, 172</span>
+</p>
+
+<h3>Integrity vs Authenticity — A Critical Distinction <span class="pdf-ref">📄 p. 172</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Property</th><th>Assured by</th><th>Definition</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data integrity</strong></td>
+      <td>Plain hash H(x)</td>
+      <td>Message has not changed <em>in any way</em>. Protects against noise and accidental corruption. <em>Not</em> against an attacker who can rewrite both message and hash.</td>
+    </tr>
+    <tr>
+      <td><strong>Data authenticity</strong></td>
+      <td>MAC(k, x)</td>
+      <td>Message genuinely came from a holder of the secret key <em>k</em> and has not been altered. Protects against active attackers.</td>
+    </tr>
+    <tr>
+      <td><strong>Non-repudiation</strong></td>
+      <td>Digital signature Sig<sub>priv</sub>(H(x))</td>
+      <td>Sender cannot later deny signing — uniquely provided by <em>asymmetric</em> signatures, not MACs (because both parties hold k and either could have created the MAC).</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>The MAC Protocol — Send + Verify <span class="pdf-ref">📄 pp. 174, 177</span></h3>
+
+<pre class="diagram">
+ MAC (keyed)                                <span class="pdf-ref">📄 p. 174</span>
+
+     Alice                                Bob
+     ──── (both know secret KEY) ────────────
+
+     m    ─► compute t = MAC(KEY, m)
+                       ─────(m, t)─────▶
+                                        compute t' = MAC(KEY, m)
+                                        verify t == t'?
+                                        └─────► accept / reject
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 174</span></div>
+
+<h3>HMAC — The Standard MAC Construction <span class="pdf-ref">📄 pp. 178-180</span></h3>
+
+<p>
+  HMAC is a specific recipe for building a MAC from any cryptographic hash:
+</p>
+<pre class="diagram">
+ HMAC(k, m) = H( (k ⊕ opad) ‖ H( (k ⊕ ipad) ‖ m ) )    <span class="pdf-ref">📄 pp. 178-180</span>
+
+   k     = secret key
+   m     = message
+   H     = hash (typically SHA-256 → "HMAC-SHA-256")
+   opad  = 0x5C repeated (outer padding constant)
+   ipad  = 0x36 repeated (inner padding constant)
+   ‖     = concatenation
+</pre>
+<p>
+  The double-hash construction exists to immunize against length-extension attacks on Merkle-Damgård
+  hashes. HMAC-SHA-256 is the default MAC for every major protocol (TLS, IPsec, IKE, JWT, etc.).
+</p>
+
+<h3>Encrypt-then-MAC vs MAC-then-Encrypt <span class="pdf-ref">📄 p. 180</span></h3>
+
+<div class="callout">
+  <strong class="lbl">Combining encryption + MAC — the right order matters</strong>
+  Cryptographers have converged on <strong>Encrypt-then-MAC</strong>: encrypt the plaintext first,
+  then compute the MAC over the <em>ciphertext</em>. This lets the receiver reject bad MACs
+  <em>before</em> decrypting, avoids a class of chosen-ciphertext attacks, and is what modern AEAD
+  modes (AES-GCM, ChaCha20-Poly1305) effectively do. <span class="pdf-ref">📄 p. 180</span>
+</div>
+
+<h3>AES-GCM — The One-Pass AEAD Champion <span class="pdf-ref">📄 p. 181</span></h3>
+
+<pre class="diagram">
+ AES-GCM (Galois/Counter Mode) = AES-CTR + GHASH authentication  <span class="pdf-ref">📄 p. 181</span>
+
+   Plaintext  P₁, P₂, ..., Pₙ
+   Key        k
+   Nonce      IV (must be unique per (k, message))
+   AAD        "Additional Authenticated Data" (headers etc., not encrypted)
+
+   ┌───────────────── AES-CTR branch ─────────────────┐
+   │  C_i = P_i ⊕ AES_k(IV ‖ counter_i)               │ → ciphertext
+   └──────────────────────────────────────────────────┘
+
+   ┌───────────────── GHASH branch ───────────────────┐
+   │  T = GHASH(H_AES, AAD, C₁…Cₙ) ⊕ AES_k(IV ‖ 0)    │ → auth tag
+   └──────────────────────────────────────────────────┘
+
+   Transmit: (IV, C₁…Cₙ, T, AAD)
+
+ PROPERTIES:
+  ★ Encryption + authentication in a single pass (AEAD)
+  ★ Parallelizable (both branches)
+  ★ Supports associated data (headers authenticated, not encrypted)
+  ★ Instructor quote: "the most commonly used solution that provides
+    encryption and message authentication" — appears in TLS, IPsec, WPA2.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 181</span></div>
+
+<div class="callout quote">
+  <strong class="lbl">Where AES-GCM appears across this exam</strong>
+  AES-GCM is the integrated primitive that shows up in every upper-layer topic: <strong>TLS record
+  layer</strong> (p. 181), <strong>IPsec ESP</strong> (p. 392), <strong>WPA2 CCMP/GCMP</strong>
+  (p. 446). Recognize it as the same underlying construction no matter where it appears — this is a
+  prime cross-topic challenge-question hook.
+  <span class="pdf-ref">📄 pp. 181, 392, 446</span>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 54-206 (signal sources: scriptMidtermReview-cs548.txt, scriptFinalExamReview-cs548.txt)</div>
+
+<div class="section-block">
+
+<h3>3.1 — What Exams Typically Test On This Topic</h3>
+<p>
+  The midterm review was unusually specific about crypto. Direct instructor quotes from
+  <span class="mono">scriptMidtermReview-cs548.txt</span> preview these patterns:
+</p>
+<ol>
+  <li>
+    <strong>"Given this AES round diagram, what's the purpose of each step?"</strong> —
+    <em>"You don't need to remember this diagram, but when you're given this diagram, you need to
+    understand what each step or what's the purpose of each step."</em>
+    <span class="pdf-ref">📄 pp. 63-66</span>
+  </li>
+  <li>
+    <strong>"What's the security level of X-bit AES/ECC/SHA?"</strong> —
+    <em>"You will need to know level of security given the number of bits for the key or the hash
+    length. We need to understand the relation."</em> Mapping: AES-128 → 128-bit; ECC-256 → 128-bit;
+    SHA-256 → 128-bit (collision). <span class="pdf-ref">📄 pp. 162, 190, 195, 200</span>
+  </li>
+  <li>
+    <strong>"What is a nonce and why can't we reuse it?"</strong> —
+    <em>"You need to understand what is nonce, what is the purpose of nonce, and can we reuse
+    nonces? What's the problem of reusing the nonces?"</em> <span class="pdf-ref">📄 pp. 80, 181</span>
+  </li>
+  <li>
+    <strong>"Why counter mode over block mode?"</strong> —
+    <em>"You will need to understand the key advantages of the stream-server [counter] mode. First,
+    no padding needed... Second, the keystream generation can be pre-generated... also parallelizable."</em>
+    <span class="pdf-ref">📄 p. 80</span>
+  </li>
+  <li>
+    <strong>"Why DH instead of RSA for key exchange?"</strong> —
+    Perfect Forward Secrecy via ephemeral keys. This is a <em>named</em> exam pattern.
+    <span class="pdf-ref">📄 pp. 98, 122-123</span>
+  </li>
+  <li>
+    <strong>"Why asymmetric cipher when we already have AES?"</strong> —
+    <em>"AES cannot be used for key exchange. So when there is no secure channel, we will use
+    asymmetric cipher for the key exchange."</em> <span class="pdf-ref">📄 pp. 85, 87</span>
+  </li>
+  <li>
+    <strong>"Difference between asymmetric cipher and secure hash — both are one-way?"</strong> —
+    <em>"The difference is asymmetric cipher is invertible based on the correct keys, but secure
+    hash is NOT invertible. There is no way to recover the plaintext from the hash value."</em>
+    <span class="pdf-ref">📄 pp. 87, 157</span>
+  </li>
+  <li>
+    <strong>"What is non-repudiation and which primitive provides it?"</strong> —
+    Only digital signatures (asymmetric) provide it, not MACs. <span class="pdf-ref">📄 pp. 30, 103</span>
+  </li>
+  <li>
+    <strong>Challenge question integrating crypto with TLS / Kerberos / IPsec / WPA2</strong> —
+    Instructor said: <em>"the challenge question will, from crypto, TLS, SSH, Kerberos, IPsec, basically
+    those chapters."</em> Expect to identify which primitive lives at which step of a higher-layer
+    protocol.
+  </li>
+</ol>
+
+<h3>3.2 — Common Misconceptions &amp; Traps</h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "ECB mode is secure as long as the plaintext is short."</p>
+  <p><span class="reality">✅ REALITY:</span> ECB is insecure <em>whenever</em> two plaintext blocks
+    are identical, because they encrypt to identical ciphertext blocks. For structured data (images,
+    documents), this pattern leaks across blocks — the "Tux penguin" image example on slide 72 is
+    canonical. ECB is only "safe" for a single block of true random data, which essentially never
+    happens in practice. <span class="pdf-ref">📄 pp. 70-72</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> T/F: "ECB mode is secure for messages ≤ 128 bits." —
+    technically defensible but the instructor treats ECB as broadly insecure.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "A hash function can be 'decrypted' if you have the key."</p>
+  <p><span class="reality">✅ REALITY:</span> Hashes have no key, and they are <em>not</em> invertible
+    under any circumstance. This is the key distinction from asymmetric encryption. Instructor
+    verbatim: <em>"the difference between asymmetric cipher and secure hash is asymmetric cipher is
+    invertible based on the correct keys... but the secure hash is not invertible because there is
+    no way to recover the plaintext from the hash value — it is a long compression operation."</em>
+    <span class="pdf-ref">📄 p. 157</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> MCQ offering "hash decryption" as an option.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "MAC and digital signature are the same thing."</p>
+  <p><span class="reality">✅ REALITY:</span> Both provide integrity + authenticity, but only
+    <strong>digital signatures</strong> provide <strong>non-repudiation</strong>. With a MAC, both
+    sender and receiver share the key, so the receiver could forge any message and claim the sender
+    wrote it. With a signature, only the sender holds the private key, so authorship is undeniable.
+    <span class="pdf-ref">📄 pp. 103, 172</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "Which primitive is required for legal non-repudiation?"
+    — the answer is digital signature, not MAC.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "RSA and ECC provide the same security level at the same key size."</p>
+  <p><span class="reality">✅ REALITY:</span> ECC is dramatically more efficient. For 128-bit
+    security: RSA needs <strong>3072-bit keys</strong>, ECC needs only <strong>256-bit keys</strong>.
+    This is why modern protocols (TLS 1.3, SSH, WPA3) use ECDHE rather than DHE or RSA.
+    <span class="pdf-ref">📄 p. 195</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Key-size matching tables that swap the RSA and ECC numbers.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "Counter mode adds integrity because it uses sequence counters."</p>
+  <p><span class="reality">✅ REALITY:</span> CTR mode provides <strong>confidentiality only</strong>.
+    The counter is for making each block's keystream unique, not for integrity. An attacker can flip
+    any bit of CTR-mode ciphertext and the corresponding plaintext bit flips after decryption — with
+    no detection. To add integrity you must either (a) run a separate MAC (Encrypt-then-MAC) or
+    (b) use an AEAD mode like AES-GCM that bundles both. <span class="pdf-ref">📄 pp. 80, 170, 181</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Multi-answer: "Which AES modes provide integrity?" —
+    CTR should NOT be selected.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "It's fine to reuse a nonce as long as you keep the key secret."</p>
+  <p><span class="reality">✅ REALITY:</span> Reusing a <strong>(key, nonce) pair</strong> in CTR or
+    GCM mode is <em>catastrophic</em>. Two ciphertexts C₁ = P₁ ⊕ KS and C₂ = P₂ ⊕ KS with the same
+    keystream KS allow the attacker to compute C₁ ⊕ C₂ = P₁ ⊕ P₂, reducing the problem to
+    known-plaintext cryptanalysis. GCM in particular also loses its authentication guarantees on
+    nonce reuse. This is exactly how WEP was broken in 2001.
+    <span class="pdf-ref">📄 pp. 80, 181</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Instructor said she will directly ask: <em>"Can we reuse
+    nonces? What's the problem?"</em></p>
+</div>
+
+<h3>3.3 — Compare &amp; Contrast: The Four Primitive Families</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Primitive</th>
+      <th>Key?</th>
+      <th>Invertible?</th>
+      <th>Provides</th>
+      <th>Speed</th>
+      <th>Typical role</th>
+      <th>📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Symmetric cipher</strong><br>(AES, DES)</td>
+      <td>Single shared key</td>
+      <td>Yes (with key)</td>
+      <td>Confidentiality</td>
+      <td><strong>Fast</strong></td>
+      <td>Bulk traffic encryption</td>
+      <td><span class="pdf-ref">📄 pp. 55, 150</span></td>
+    </tr>
+    <tr>
+      <td><strong>Asymmetric cipher</strong><br>(RSA, ECC)</td>
+      <td>Public / private pair</td>
+      <td>Yes (with private key)</td>
+      <td>Confidentiality, signatures, key exchange, <strong>non-repudiation</strong></td>
+      <td>Slow (2-3 orders of magnitude)</td>
+      <td>Key exchange + signatures at session start</td>
+      <td><span class="pdf-ref">📄 pp. 55, 94, 150</span></td>
+    </tr>
+    <tr>
+      <td><strong>Hash</strong><br>(SHA-256, SHA-512)</td>
+      <td><strong>No key</strong></td>
+      <td><strong>No</strong></td>
+      <td>Integrity, fingerprint</td>
+      <td><strong>Very fast</strong></td>
+      <td>Input to signatures, MACs; password storage</td>
+      <td><span class="pdf-ref">📄 pp. 155-157</span></td>
+    </tr>
+    <tr>
+      <td><strong>MAC</strong><br>(HMAC, AES-GCM)</td>
+      <td>Single shared key</td>
+      <td>Tag is not "invertible" in the usual sense</td>
+      <td>Integrity + authenticity (but <em>not</em> non-repudiation)</td>
+      <td>Fast</td>
+      <td>Message-level authentication alongside encryption</td>
+      <td><span class="pdf-ref">📄 pp. 172, 174</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.4 — Compare &amp; Contrast: AES Modes (ECB · CBC · CTR · GCM)</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Mode</th><th>Parallelizable?</th><th>Needs IV/Nonce?</th><th>Padding needed?</th><th>Integrity?</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>ECB</strong></td><td>Yes</td><td>No</td><td>Yes</td><td>No</td><td style="color:var(--red)">Insecure for structured data</td></tr>
+    <tr><td><strong>CBC</strong></td><td>Decryption yes; encryption no</td><td>Yes (IV)</td><td>Yes</td><td>No</td><td>OK with separate MAC; legacy</td></tr>
+    <tr><td><strong>CTR</strong></td><td><strong>Yes (both)</strong></td><td>Yes (nonce + counter)</td><td>No</td><td>No</td><td>Fast, needs separate MAC</td></tr>
+    <tr><td><strong>GCM</strong></td><td><strong>Yes (both)</strong></td><td>Yes (nonce)</td><td>No</td><td><strong>Yes (built-in)</strong></td><td style="color:var(--green)">Industry default (TLS, IPsec, WPA2)</td></tr>
+  </tbody>
+</table>
+
+<h3>3.5 — Compare &amp; Contrast: RSA · DH · ECC Applications <span class="pdf-ref">📄 p. 94</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Algorithm</th><th>Encryption</th><th>Digital Signature</th><th>Key Exchange</th><th>Key Size for 128-bit Security</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>RSA</strong></td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes (key transport)</td><td>3072 bits</td></tr>
+    <tr><td><strong>Diffie-Hellman</strong></td><td>❌ No</td><td>❌ No</td><td>✅ Yes</td><td>3072 bits (classic DH)</td></tr>
+    <tr><td><strong>DSS / DSA</strong></td><td>❌ No</td><td>✅ Yes</td><td>❌ No</td><td>3072 bits</td></tr>
+    <tr><td><strong>Elliptic Curve</strong></td><td>✅ Yes (ECIES)</td><td>✅ Yes (ECDSA)</td><td>✅ Yes (ECDHE)</td><td><strong>256 bits</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>3.6 — Memory Aids</h3>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Four Primitives" = S-A-H-M</strong>
+  <strong>S</strong>ymmetric → <strong>A</strong>symmetric → <strong>H</strong>ash → <strong>M</strong>AC.
+  "<em>Secrets Are Harder Maintained</em>" — each family adds a property the previous one lacked
+  (confidentiality → key-exchange-and-signatures → fingerprint → authenticated fingerprint).
+  <span class="pdf-ref">📄 pp. 55, 115, 137, 152</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "AES Round" = SB-SR-MC-AR</strong>
+  <strong>S</strong>ub<strong>B</strong>ytes → <strong>S</strong>hift<strong>R</strong>ows →
+  <strong>M</strong>ix<strong>C</strong>olumns → <strong>A</strong>dd<strong>R</strong>oundKey.
+  Confusion (SubBytes, AddRoundKey) + Diffusion (ShiftRows, MixColumns).
+  Final round skips MixColumns. <span class="pdf-ref">📄 pp. 63-66</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "128-bit Security = 128 AES · 256 ECC · 256 SHA"</strong>
+  Given n-bit symmetric security: AES needs n bits, ECC needs 2n bits, SHA needs 2n bits (for
+  collision resistance). RSA is the outlier needing 24× the bits.
+  <span class="pdf-ref">📄 pp. 162, 195, 200</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "CTR-mode advantages" = PPP + NPAD</strong>
+  <strong>P</strong>arallelizable, <strong>P</strong>re-generatable keystream, random-access
+  (<strong>P</strong>ick any block), <strong>N</strong>o <strong>PAD</strong>ding.
+  Plus: only needs AES-encrypt, never AES-decrypt. <span class="pdf-ref">📄 p. 80</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Which Primitive for Non-Repudiation?" = ONE</strong>
+  <strong>O</strong>nly a <strong>N</strong>on-secret-sharing signature — <strong>E</strong>lliptic
+  or RSA. MAC requires two parties to share a key, so non-repudiation is impossible — either party
+  could have produced the tag. Only asymmetric signatures have a single signer.
+  <span class="pdf-ref">📄 pp. 103, 172</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Hybrid Crypto Pattern" — used by TLS, IPsec, SSH, WPA2-Enterprise</strong>
+  <ol style="margin: 6px 0 6px 22px;">
+    <li>Use <strong>asymmetric</strong> (RSA / ECDSA) to <em>authenticate</em> the server via its certificate.</li>
+    <li>Use <strong>DH / ECDHE</strong> to <em>agree on</em> a fresh session key (with PFS).</li>
+    <li>Use <strong>AES-GCM</strong> (symmetric AEAD) for the actual <em>data traffic</em>.</li>
+    <li>Use <strong>HMAC / GHASH</strong> for any separate <em>message-level</em> authentication.</li>
+  </ol>
+  This pattern is a cross-topic goldmine. <span class="pdf-ref">📄 pp. 150, 181</span>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 4: FOLLOW-UP QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Follow-up Questions</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 54-206 (questions span all four sub-topics)</div>
+
+<div class="section-block">
+
+<p style="color: var(--text-dim); font-size: 0.94em;">
+  13 questions · 3 difficulty levels · 4 formats · every stem &amp; answer tagged to the source slide.
+  Click <strong style="color: var(--green);">▶ Show Answer</strong> to reveal each explanation.
+</p>
+
+<!-- =========================== PART A: MCQ =========================== -->
+<h3 id="section-4-mcq">Part A — Multiple Choice (4 questions: 1 BEG, 1 INT, 2 ADV)</h3>
+
+<!-- Q1 BEG MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 55, 85, 150</span>
+  </div>
+  <p class="question-stem"><strong>Q1.</strong> Why do virtually all real-world secure protocols (TLS,
+    IPsec, SSH, WPA2) combine both asymmetric and symmetric cryptography instead of using just one?</p>
+  <ol class="mcq-options" type="A">
+    <li>Asymmetric crypto alone cannot encrypt data — it only supports key exchange.</li>
+    <li>Symmetric crypto is 2-3 orders of magnitude faster than asymmetric, but cannot solve key distribution without a pre-shared secret. Hybrid use gets the best of both.</li>
+    <li>Government regulations require both forms be used simultaneously.</li>
+    <li>Symmetric crypto has weaker security than asymmetric even at matched key sizes.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) Speed + key-distribution tradeoff.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Slide 150 states: <em>"Calculations are 2-3 orders of magnitude slower... typical usage: use public-key cryptography to establish a shared secret, then switch to symmetric crypto. SSL, IPsec, most other systems based on public crypto."</em> <span class="pdf-ref">📄 p. 150</span> Symmetric alone cannot distribute keys over an insecure channel (slide 85); asymmetric alone is too slow for bulk traffic.</li>
+        <li><strong>Why A is wrong:</strong> Asymmetric crypto <em>can</em> encrypt data (e.g., RSA encryption). It's just impractical for large payloads due to speed.</li>
+        <li><strong>Why C is wrong:</strong> No such regulation exists; this is purely engineering optimization.</li>
+        <li><strong>Why D is wrong:</strong> AES-128 and 3072-bit RSA both give ~128-bit security; symmetric is not weaker at equivalent sizes.</li>
+        <li><strong>Exam Tip:</strong> This is the foundational "why hybrid" question — expect it in some form.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 INT MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 80, 181</span>
+  </div>
+  <p class="question-stem"><strong>Q2.</strong> What goes wrong if the same (key, nonce) pair is reused
+    for two different plaintexts P₁ and P₂ in AES-CTR mode?</p>
+  <ol class="mcq-options" type="A">
+    <li>Nothing — CTR mode is designed to allow nonce reuse as long as the key is kept secret.</li>
+    <li>The server can no longer decrypt the messages because the counter becomes ambiguous.</li>
+    <li>The attacker can compute C₁ ⊕ C₂ = P₁ ⊕ P₂, effectively reducing the problem to known-plaintext cryptanalysis and enabling content recovery.</li>
+    <li>The attacker gains the ability to compute the secret key directly from the two ciphertexts.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> C) Leaks P₁ ⊕ P₂ via ciphertext XOR.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why C is correct:</strong> In CTR mode, C_i = P_i ⊕ keystream(k, nonce, counter). If (key, nonce) pair is the same for two messages, both produce the <em>same</em> keystream KS. Therefore C₁ ⊕ C₂ = (P₁ ⊕ KS) ⊕ (P₂ ⊕ KS) = P₁ ⊕ P₂. Given any knowledge about P₁ (English text, known headers), the attacker recovers parts of P₂ and vice versa. <span class="pdf-ref">📄 pp. 80, 181</span></li>
+        <li><strong>Why A is wrong:</strong> Instructor explicitly posed this as a test question: <em>"can we reuse nonces? What's the problem?"</em> — so the answer is decidedly "not fine."</li>
+        <li><strong>Why B is wrong:</strong> The server can still decrypt each message individually (it knows the nonce); the issue is confidentiality <em>against an eavesdropper</em>, not the server.</li>
+        <li><strong>Why D is wrong:</strong> Nonce reuse leaks plaintext, but does not directly reveal the AES key. The key is still protected by AES's underlying security.</li>
+        <li><strong>Exam Tip:</strong> This is exactly the WEP failure mode of 2001 — 24-bit IVs guaranteed reuse within hours on busy networks.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 ADV MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 103, 172</span>
+  </div>
+  <p class="question-stem"><strong>Q3.</strong> Alice and Bob communicate using AES-GCM over a shared
+    secret key derived from Diffie-Hellman. Later in court, Bob claims Alice sent him a threatening
+    message. Alice denies it. Can the AES-GCM authentication tag on that message be used to
+    <strong>legally prove</strong> Alice wrote it?</p>
+  <ol class="mcq-options" type="A">
+    <li>Yes — the tag is cryptographically unforgeable and uniquely identifies Alice.</li>
+    <li>No — because Bob also knows the shared key, he could have fabricated the message and tag. Only a digital signature made with Alice's private key would prove authorship.</li>
+    <li>Yes — provided the tag was computed using SHA-256 inside GHASH.</li>
+    <li>Only if DH was run with ephemeral keys (ECDHE), because forward secrecy implies authorship.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) No — MAC cannot provide non-repudiation.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> A MAC (including AES-GCM's auth tag) uses a <em>shared</em> secret key. Both Alice and Bob hold it. Either party could have created any valid (message, tag) pair — the tag does not distinguish them. Slide 103 makes this explicit: non-repudiation is a unique property of <strong>digital signatures</strong>, which use the sender's private key that only the sender possesses. <span class="pdf-ref">📄 pp. 103, 172</span></li>
+        <li><strong>Why A is wrong:</strong> Tags are unforgeable <em>to outsiders without the key</em>, but Bob has the key.</li>
+        <li><strong>Why C is wrong:</strong> The choice of hash function inside GHASH doesn't change who holds the key.</li>
+        <li><strong>Why D is wrong:</strong> Forward secrecy protects <em>past</em> confidentiality against future key leaks; it says nothing about authorship.</li>
+        <li><strong>Exam Tip:</strong> Instructor's exact test quote: <em>"if someone signed a piece of information using its private key, that means the signer cannot deny of this piece of information."</em> That's the non-repudiation hook.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 ADV MCQ (integration) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 94, 98, 101, 122-123, 150</span>
+  </div>
+  <p class="question-stem"><strong>Q4.</strong> In TLS 1.3 the default key exchange is
+    <strong>ECDHE</strong> rather than RSA key transport. Which of the following is the <em>single
+    most important</em> reason for this choice?</p>
+  <ol class="mcq-options" type="A">
+    <li>ECDHE is computationally faster than RSA of equivalent security.</li>
+    <li>ECDHE provides Perfect Forward Secrecy: ephemeral session keys are discarded after use, so compromise of a server's long-term key does not retroactively decrypt past traffic.</li>
+    <li>ECDHE is resistant to quantum-computing attacks while RSA is not.</li>
+    <li>ECDHE allows the client to authenticate the server without a certificate.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) Perfect Forward Secrecy.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Instructor's direct quote: <em>"Why DH instead of RSA for key exchange? — Perfect Forward Secrecy."</em> <span class="pdf-ref">📄 pp. 98, 122-123</span> RSA key transport means the client encrypts the session key with the server's long-term RSA public key. If that private key is later stolen (Heartbleed-style), an adversary with recorded past ciphertext can retroactively decrypt every session. ECDHE uses ephemeral x_A, x_B that are discarded immediately after the session — no long-term key ever touched the session secret. <span class="pdf-ref">📄 p. 101</span></li>
+        <li><strong>Why A is wrong:</strong> ECDHE is <em>also</em> faster, but that's a secondary benefit. Plain DHE also has forward secrecy and is slower than RSA — yet still preferred — proving speed is not the key reason.</li>
+        <li><strong>Why C is wrong:</strong> ECDHE is also broken by quantum computers (Shor's algorithm applies to both factoring and discrete log). Post-quantum migration is an orthogonal issue.</li>
+        <li><strong>Why D is wrong:</strong> ECDHE does not authenticate the server — that still requires a certificate signed by a CA. ECDHE only does key agreement.</li>
+        <li><strong>Exam Tip:</strong> This is the canonical crypto ⊕ TLS challenge question. PFS is the one-sentence differentiator.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART B: TRUE/FALSE =========================== -->
+<h3 id="section-4-tf">Part B — True/False (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q5 BEG TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 p. 157</span>
+  </div>
+  <p class="question-stem"><strong>Q5. Statement:</strong> Given a SHA-256 hash value h, someone with
+    enough computing power and the right secret key can "decrypt" h back to the original message.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>Hash functions are <strong>not invertible under any circumstance</strong> — there is no key,
+        and there is no inverse algorithm. A hash compresses an arbitrary-length input to a
+        fixed-length digest, destroying information. The instructor drew this contrast explicitly:
+        <em>"the difference between asymmetric cipher and secure hash is, asymmetric cipher is
+        invertible based on the correct keys, but the secure hash is not invertible — there is no way
+        to recover the plaintext from the hash value, because it is a long compression operation."</em>
+        The best an attacker can do is brute-force guess inputs (2²⁵⁶ for pre-image resistance on
+        SHA-256). <span class="pdf-ref">📄 pp. 155-157, 162</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 INT TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 p. 80</span>
+  </div>
+  <p class="question-stem"><strong>Q6. Statement:</strong> Because AES-CTR mode uses an incrementing
+    counter that never repeats within a message, it provides built-in integrity protection against
+    bit-flip attacks on the ciphertext.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>The counter in CTR mode exists to <em>vary the keystream</em> across blocks and prevent
+        keystream reuse. It provides <strong>confidentiality only</strong>, not integrity. An attacker
+        who flips any bit of a CTR-mode ciphertext causes the corresponding bit of the decrypted
+        plaintext to flip — with no detection. The counter never "checks" anything on decryption. For
+        integrity you need a separate MAC (Encrypt-then-MAC) or an AEAD mode like
+        <strong>AES-GCM</strong>, which explicitly adds GHASH authentication on top of CTR-mode
+        encryption. <span class="pdf-ref">📄 pp. 80, 170, 181</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 ADV TF subtle -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · subtle</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 162, 200</span>
+  </div>
+  <p class="question-stem"><strong>Q7. Statement:</strong> A 256-bit hash function (such as SHA-256)
+    provides 256 bits of collision resistance, meaning an attacker needs roughly 2²⁵⁶ operations to
+    find two inputs with the same hash value.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>The <strong>birthday attack</strong> finds collisions in approximately 2^(n/2) operations
+        for an n-bit digest, <em>not</em> 2ⁿ. For SHA-256, that is roughly 2¹²⁸ operations — strong,
+        but half the naive expectation. Slide 162 states: <em>"Brute-force inversion requires 2²⁵⁶
+        ops, birthday attack on collision resistance requires 2²⁵⁶ ops"</em> — <em>wait</em>, actually
+        that slide shows SHA-512, where 2²⁵⁶ is the correct collision bound because n = 512.
+        For SHA-256, the collision bound is 2¹²⁸. General rule: <strong>collision resistance =
+        half the digest bits</strong>; <strong>pre-image resistance = full digest bits</strong>.
+        The instructor's exam mnemonic: SHA-256 → 128-bit collision resistance = matches AES-128.
+        <span class="pdf-ref">📄 pp. 162, 200</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART C: SHORT ANSWER =========================== -->
+<h3 id="section-4-sa">Part C — Short Answer (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q8 BEG SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 63-68, 80</span>
+  </div>
+  <p class="question-stem"><strong>Q8.</strong> The AES round performs four operations in order. Name
+    them and, in one clause each, state the purpose of each operation. Finally, note which operation
+    is <em>omitted</em> in the final round.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ul class="plain">
+        <li><strong>SubBytes</strong> — non-linear byte-wise substitution via the S-box; provides
+          <em>confusion</em> (obscures the relationship between plaintext and ciphertext).
+          <span class="pdf-ref">📄 pp. 63-65</span></li>
+        <li><strong>ShiftRows</strong> — cyclic shift of the state matrix rows; provides
+          <em>diffusion</em> across columns.</li>
+        <li><strong>MixColumns</strong> — matrix multiplication over GF(2⁸); provides further
+          <em>diffusion</em> by mixing bytes within each column. <span class="pdf-ref">📄 p. 66</span></li>
+        <li><strong>AddRoundKey</strong> — XOR with the round-specific subkey derived from the master
+          key; this is where the <em>secret is injected</em> into the state. <span class="pdf-ref">📄 p. 65</span></li>
+      </ul>
+      <p>The <strong>final round omits MixColumns</strong> — an intentional design choice that lets
+        decryption have a symmetric structure without affecting security.</p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ All four operations named in correct order <span class="pdf-ref">📄 pp. 63-66</span></li>
+        <li>☐ Identifies confusion vs diffusion role of each <span class="pdf-ref">📄 p. 77</span></li>
+        <li>☐ Notes AddRoundKey is where the key enters <span class="pdf-ref">📄 p. 65</span></li>
+        <li>☐ States final round omits MixColumns</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 INT SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 97-98, 140</span>
+  </div>
+  <p class="question-stem"><strong>Q9.</strong> Describe the Diffie-Hellman key-exchange protocol in
+    5 steps or fewer. What secret does an eavesdropper need to compute in order to break it, and why
+    is that considered hard?</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ol>
+        <li>Alice and Bob publicly agree on a large prime <em>p</em> and a generator <em>g</em>.</li>
+        <li>Alice picks a secret integer <em>x_A</em>; computes <em>A = g<sup>x_A</sup> mod p</em>; sends <em>A</em> to Bob.</li>
+        <li>Bob picks a secret integer <em>x_B</em>; computes <em>B = g<sup>x_B</sup> mod p</em>; sends <em>B</em> to Alice.</li>
+        <li>Alice computes shared secret <em>K = B<sup>x_A</sup> = g<sup>x_A · x_B</sup> mod p</em>.</li>
+        <li>Bob computes shared secret <em>K = A<sup>x_B</sup> = g<sup>x_A · x_B</sup> mod p</em> — same value.</li>
+      </ol>
+      <p>An eavesdropper sees <em>p, g, A, B</em> on the wire but needs to recover either <em>x_A</em>
+        from <em>A</em> or <em>x_B</em> from <em>B</em> to derive <em>K</em>. This is the
+        <strong>Discrete Logarithm Problem</strong>: given <em>g</em> and <em>g<sup>x</sup> mod p</em>,
+        compute <em>x</em>. For sufficiently large <em>p</em> (≥ 2048 bits), no efficient classical
+        algorithm is known. Elliptic-curve variants (ECDH) use the analogous Elliptic-Curve Discrete
+        Logarithm Problem, which appears even harder for equivalent key sizes — letting 256-bit ECC
+        match 3072-bit classical DH. <span class="pdf-ref">📄 pp. 97-98, 140, 195</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Correct math: <em>g<sup>x_A · x_B</sup></em> is the shared secret <span class="pdf-ref">📄 p. 98</span></li>
+        <li>☐ Both sides compute the <em>same</em> K via commutativity of exponents <span class="pdf-ref">📄 p. 140</span></li>
+        <li>☐ Names the Discrete Logarithm Problem as the security assumption <span class="pdf-ref">📄 p. 150</span></li>
+        <li>☐ Notes that the attacker sees A and B but cannot derive x_A or x_B</li>
+        <li>☐ Bonus: mentions ECDH as the elliptic-curve variant used in practice <span class="pdf-ref">📄 p. 101</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 ADV SA (integration) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 94, 103, 172 &nbsp;+&nbsp; p. 30</span>
+  </div>
+  <p class="question-stem"><strong>Q10.</strong> Compare <strong>MAC</strong> and <strong>Digital
+    Signature</strong> across three dimensions: (1) what cryptographic primitive they're built on,
+    (2) what security services they provide, (3) why only one of them provides non-repudiation.
+    Conclude with one sentence explaining when you would choose each in practice.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <p><strong>(1) Primitive.</strong> A MAC is a <em>symmetric-key</em> construction — both sender
+        and receiver share the same secret key <em>k</em>, used to compute MAC(k, m). HMAC builds it
+        from a hash function; AES-GCM's tag is an AEAD MAC. A digital signature is an
+        <em>asymmetric</em> construction — the sender holds a private key <em>sk</em>, the receiver
+        (or any verifier) uses the corresponding public key <em>pk</em>. Classic signing formula:
+        <em>s = hash(m)<sup>d</sup> mod n</em> in RSA. <span class="pdf-ref">📄 pp. 94, 103, 172, 177</span></p>
+      <p><strong>(2) Security services.</strong> Both provide <em>integrity</em> (message not altered)
+        and <em>authenticity</em> (message came from a key-holder). The difference is in
+        <em>which</em> key-holder: MAC verifies that some party with the shared key made the tag —
+        either sender or receiver, indistinguishably. Signature verifies specifically that the
+        <em>private-key holder</em> made it, which is unambiguously one party.
+        <span class="pdf-ref">📄 pp. 103, 172</span></p>
+      <p><strong>(3) Non-repudiation.</strong> With a MAC, Bob cannot convince a third party that
+        Alice authored a message, because Bob also holds the key and could have forged the tag
+        himself. With a signature, only Alice has her private key, so any valid signature
+        demonstrably binds Alice to the message — she cannot later deny it.
+        <span class="pdf-ref">📄 pp. 30, 103</span></p>
+      <p><strong>Choosing in practice.</strong> Use MAC (especially AES-GCM or HMAC) for <em>fast
+        per-packet integrity</em> on established sessions where both parties already trust each other;
+        use a digital signature when you need legal non-repudiation or when the verifier is not the
+        same party as the sender (e.g., code signing, certificates, software updates).</p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ MAC uses symmetric / shared key; signature uses asymmetric / private key <span class="pdf-ref">📄 pp. 172, 103</span></li>
+        <li>☐ Both give integrity + authenticity; only signature gives non-repudiation <span class="pdf-ref">📄 pp. 30, 103</span></li>
+        <li>☐ Correctly explains <em>why</em> MAC lacks non-repudiation (shared key) <span class="pdf-ref">📄 p. 172</span></li>
+        <li>☐ Concrete example of each use-case in the closing sentence</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART D: FILL IN THE BLANK =========================== -->
+<h3 id="section-4-fib">Part D — Fill in the Blank (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q11 BEG FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 55, 67</span>
+  </div>
+  <p class="question-stem"><strong>Q11.</strong> AES uses a ____________ structure (a specific class
+    of round architecture) operating on 128-bit blocks, with key sizes of 128, 192, or ____________
+    bits, requiring 10, 12, or 14 rounds respectively.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>Substitution-Permutation Network (SPN)</strong>;
+        (2) <strong>256</strong> bits.</p>
+      <p><strong>📝 Why:</strong> The comparison table on slide 67 specifies AES as "Substitution-
+        Permutation Network (SPN)" with block size 128 bits, key sizes 128/192/256, and 10/12/14
+        rounds. This distinguishes AES from DES, which uses a Feistel structure with a 56-bit key.
+        <span class="pdf-ref">📄 pp. 55, 67</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 INT FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 162, 200</span>
+  </div>
+  <p class="question-stem"><strong>Q12.</strong> For a hash function with an n-bit digest, the
+    expected cost to find a <em>collision</em> via the birthday attack is 2^(____________)
+    operations, whereas the cost of a <em>brute-force pre-image</em> attack is 2^(____________)
+    operations. Concretely, SHA-256 therefore provides ____________ bits of collision resistance.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>n / 2</strong>; (2) <strong>n</strong>;
+        (3) <strong>128</strong> bits.</p>
+      <p><strong>📝 Why:</strong> The birthday bound states that among 2^(n/2) random hashes there's
+        a ≥50% chance of collision. Slide 162 matches this for SHA-512: <em>"birthday attack on
+        collision resistance requires 2²⁵⁶ ops"</em> (= 2^(512/2)). Applying the same formula to
+        SHA-256 gives 2^128 collision cost. Pre-image attacks on a 256-bit digest require ~2²⁵⁶ ops.
+        <span class="pdf-ref">📄 pp. 162, 200</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 ADV FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 101, 122-123</span>
+  </div>
+  <p class="question-stem"><strong>Q13.</strong> When a TLS handshake uses ____________ — the
+    ephemeral variant of Elliptic-Curve Diffie-Hellman — the resulting session key has the property
+    of ____________, meaning that even if the server's long-term private key is later compromised,
+    an adversary with recorded past traffic ____________ retroactively decrypt those past sessions.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>ECDHE</strong> (Elliptic-Curve Diffie-Hellman
+        Ephemeral); (2) <strong>Perfect Forward Secrecy (PFS)</strong>; (3) <strong>cannot</strong>.</p>
+      <p><strong>📝 Why:</strong> Slide 101 defines ECDHE as "the last E represents Ephemeral mode"
+        and names the property as "Perfect Forward Secrecy (PFS)." Because the session uses
+        ephemeral keys that are discarded immediately after the handshake, no stored long-term key
+        is sufficient to recover the session secret post-hoc. This is the architectural reason TLS
+        1.3 removed RSA key transport in favor of (EC)DHE-only key exchange.
+        <span class="pdf-ref">📄 pp. 101, 122-123</span></p>
+    </div>
+  </details>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Summary · Exam Cheat Sheet</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 54-206 (condensed view of the entire foundations layer)</div>
+
+<div class="cheat-sheet">
+
+  <h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+  <p class="oneliner">
+    Four cryptographic primitives — <strong>symmetric ciphers</strong> (fast bulk encryption),
+    <strong>asymmetric ciphers</strong> (key exchange + signatures), <strong>hashes</strong> (one-way
+    fingerprints), and <strong>MACs</strong> (keyed integrity+authenticity) — composed in a
+    <strong>hybrid pattern</strong> (asymmetric-for-setup + symmetric-for-bulk + MAC-for-integrity)
+    that underlies every secure protocol on this course.
+    <span class="pdf-ref">📄 pp. 55, 115, 137, 150, 181</span>
+  </p>
+
+  <h4>THE THREE THINGS YOU MUST KNOW FOR EVERY PRIMITIVE:</h4>
+  <ol>
+    <li>
+      <strong>What service it provides</strong> — confidentiality (sym/asym), integrity (hash/MAC),
+      authenticity (MAC/signature), non-repudiation (signature only).
+      <span class="pdf-ref">📄 pp. 30, 103, 172</span>
+    </li>
+    <li>
+      <strong>Its key model</strong> — one shared key (sym/MAC), keypair (asym/signature), no key
+      (hash). This is what determines whether non-repudiation is achievable.
+    </li>
+    <li>
+      <strong>Its representative algorithm &amp; security level</strong> — AES-128 → 128-bit;
+      AES-256 → 256-bit; RSA-3072 → 128-bit; ECC-256 → 128-bit; SHA-256 → 128-bit collision
+      resistance. <span class="pdf-ref">📄 pp. 162, 190, 195, 200</span>
+    </li>
+  </ol>
+
+  <h4>THE ONE-PAGE PRIMITIVE MATRIX:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr>
+        <th>Family</th><th>Algorithm</th><th>Key model</th><th>Speed</th><th>Provides</th><th>📄 Page</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Symmetric · block</td>
+        <td>AES (SPN, 10-14 rounds)</td>
+        <td>1 shared key</td>
+        <td>Fast</td>
+        <td>Confidentiality</td>
+        <td><span class="pdf-ref">📄 pp. 63-68</span></td>
+      </tr>
+      <tr>
+        <td>Symmetric · stream/mode</td>
+        <td>AES-CTR</td>
+        <td>1 shared key + nonce</td>
+        <td>Faster (parallel, no padding)</td>
+        <td>Confidentiality</td>
+        <td><span class="pdf-ref">📄 pp. 77, 80</span></td>
+      </tr>
+      <tr>
+        <td>Asymmetric · encrypt/sign</td>
+        <td>RSA</td>
+        <td>Public (e,n) / private d</td>
+        <td>Slow</td>
+        <td>Encrypt · Sign · Key-transport</td>
+        <td><span class="pdf-ref">📄 pp. 90-95, 103</span></td>
+      </tr>
+      <tr>
+        <td>Asymmetric · key exchange</td>
+        <td>(EC)DHE</td>
+        <td>Ephemeral x_A, x_B</td>
+        <td>Medium</td>
+        <td>Shared secret + <strong>PFS</strong></td>
+        <td><span class="pdf-ref">📄 pp. 97-98, 101</span></td>
+      </tr>
+      <tr>
+        <td>Hash</td>
+        <td>SHA-256 / SHA-512</td>
+        <td><strong>No key</strong></td>
+        <td>Very fast</td>
+        <td>Fingerprint; <em>not</em> authenticity alone</td>
+        <td><span class="pdf-ref">📄 pp. 155-162</span></td>
+      </tr>
+      <tr>
+        <td>MAC · hash-based</td>
+        <td>HMAC-SHA-256</td>
+        <td>1 shared key</td>
+        <td>Fast</td>
+        <td>Integrity + authenticity</td>
+        <td><span class="pdf-ref">📄 pp. 178-180</span></td>
+      </tr>
+      <tr>
+        <td>AEAD (MAC + encrypt)</td>
+        <td>AES-GCM</td>
+        <td>1 shared key + nonce</td>
+        <td>Fast (parallel)</td>
+        <td>Confidentiality + integrity + authenticity</td>
+        <td><span class="pdf-ref">📄 p. 181</span></td>
+      </tr>
+      <tr>
+        <td>Asymmetric · signature</td>
+        <td>RSA-sign / ECDSA</td>
+        <td>Keypair (signer holds private)</td>
+        <td>Slow</td>
+        <td>All three above + <strong>non-repudiation</strong></td>
+        <td><span class="pdf-ref">📄 pp. 103, 195</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE:</h4>
+  <p>
+    Confusing <strong>MACs</strong> with <strong>digital signatures</strong>. They share a shape
+    (tag appended to message, verifier checks) but the key model is fundamentally different —
+    shared-key vs keypair — and that difference determines the single security property that courts
+    care about: <strong>non-repudiation</strong>. A MAC <em>never</em> proves authorship to a
+    third party because either party could have made it. Only a private-key signature does.
+    <span class="pdf-ref">📄 pp. 103, 172</span>
+  </p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+  <p class="remember">
+    "Hybrid crypto is king: <strong>ECDHE</strong> agrees on a session key, <strong>AES-GCM</strong>
+    encrypts with integrity, <strong>digital signatures</strong> authenticate identity, and
+    <strong>hashes</strong> glue them all together."
+    <span class="pdf-ref">📄 pp. 150, 181</span>
+  </p>
+
+  <h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS TOPIC IN THE PDF:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr><th>If you want to review...</th><th>Go to Lecture PDF page(s)...</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Security objectives (C · I · A · Authenticity · Non-repudiation)</td><td><span class="pdf-ref">📄 pp. 30, 56</span></td></tr>
+      <tr><td>The full crypto taxonomy tree</td><td><span class="pdf-ref">📄 pp. 55, 115, 137, 152</span></td></tr>
+      <tr><td>One-Time Pad &amp; perfect secrecy</td><td><span class="pdf-ref">📄 p. 60</span></td></tr>
+      <tr><td>Feistel cipher structure (DES)</td><td><span class="pdf-ref">📄 pp. 61-62</span></td></tr>
+      <tr><td>AES round structure (SB/SR/MC/AR)</td><td><span class="pdf-ref">📄 pp. 63-66</span></td></tr>
+      <tr><td>AES vs DES comparison table</td><td><span class="pdf-ref">📄 p. 67</span></td></tr>
+      <tr><td>Block modes overview (ECB / CBC / CTR)</td><td><span class="pdf-ref">📄 p. 70</span></td></tr>
+      <tr><td>ECB's "Tux penguin" information leakage</td><td><span class="pdf-ref">📄 p. 72</span></td></tr>
+      <tr><td>CBC encryption &amp; decryption diagrams</td><td><span class="pdf-ref">📄 pp. 73-74</span></td></tr>
+      <tr><td>Initialization Vector (IV) rules</td><td><span class="pdf-ref">📄 p. 76</span></td></tr>
+      <tr><td>CTR mode &amp; its five benefits</td><td><span class="pdf-ref">📄 pp. 77, 80</span></td></tr>
+      <tr><td>Brute-force key-search table (DES vs AES)</td><td><span class="pdf-ref">📄 p. 190</span></td></tr>
+      <tr><td>Motivation for public-key crypto</td><td><span class="pdf-ref">📄 pp. 85, 87</span></td></tr>
+      <tr><td>Trap-door one-way function definition</td><td><span class="pdf-ref">📄 p. 87</span></td></tr>
+      <tr><td>RSA key generation &amp; encrypt/decrypt</td><td><span class="pdf-ref">📄 pp. 90-95</span></td></tr>
+      <tr><td>RSA fast exponentiation (square-and-multiply)</td><td><span class="pdf-ref">📄 p. 93</span></td></tr>
+      <tr><td>Applications matrix (RSA / DH / DSS / ECC)</td><td><span class="pdf-ref">📄 p. 94</span></td></tr>
+      <tr><td>Diffie-Hellman key exchange</td><td><span class="pdf-ref">📄 pp. 97-98, 140</span></td></tr>
+      <tr><td>DH vs RSA comparison (why DH)</td><td><span class="pdf-ref">📄 pp. 98, 122-123</span></td></tr>
+      <tr><td>ECDHE &amp; Perfect Forward Secrecy</td><td><span class="pdf-ref">📄 p. 101</span></td></tr>
+      <tr><td>RSA digital signature</td><td><span class="pdf-ref">📄 p. 103</span></td></tr>
+      <tr><td>X.509 certificates &amp; CAs</td><td><span class="pdf-ref">📄 pp. 104, 128, 130</span></td></tr>
+      <tr><td>The "Fake BOA" MITM example (need for certs)</td><td><span class="pdf-ref">📄 p. 145</span></td></tr>
+      <tr><td>Disadvantages of public-key crypto</td><td><span class="pdf-ref">📄 p. 150</span></td></tr>
+      <tr><td>Hash-function properties</td><td><span class="pdf-ref">📄 pp. 155-157</span></td></tr>
+      <tr><td>Merkle-Damgård construction</td><td><span class="pdf-ref">📄 pp. 158, 165</span></td></tr>
+      <tr><td>SHA family history</td><td><span class="pdf-ref">📄 p. 160</span></td></tr>
+      <tr><td>Hash security levels (birthday bound)</td><td><span class="pdf-ref">📄 pp. 162, 200</span></td></tr>
+      <tr><td>Why AES alone can't provide integrity</td><td><span class="pdf-ref">📄 p. 170</span></td></tr>
+      <tr><td>Integrity vs Authenticity (H vs MAC)</td><td><span class="pdf-ref">📄 p. 172</span></td></tr>
+      <tr><td>MAC protocol &amp; message-auth approaches</td><td><span class="pdf-ref">📄 pp. 174-177</span></td></tr>
+      <tr><td>HMAC construction</td><td><span class="pdf-ref">📄 pp. 178-180</span></td></tr>
+      <tr><td>Encrypt-then-MAC + AES-GCM summary</td><td><span class="pdf-ref">📄 pp. 180-181</span></td></tr>
+      <tr><td>Key-size-for-security comparison (AES/RSA/ECC)</td><td><span class="pdf-ref">📄 p. 195</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top: 22px;">15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM)</h4>
+  <ol>
+    <li>Glance at the taxonomy tree on <span class="pdf-ref">📄 p. 55</span> and mentally place each primitive family.</li>
+    <li>Memorize <em>SubBytes → ShiftRows → MixColumns → AddRoundKey</em> <span class="pdf-ref">📄 pp. 63-66</span>.</li>
+    <li>Say aloud the five CTR-mode benefits: <em>Parallelizable · Pre-generatable · Random-access · No padding · Only AES-encrypt needed</em> <span class="pdf-ref">📄 p. 80</span>.</li>
+    <li>Lock in the security-level mapping: AES-128 = 128-bit, AES-256 = 256-bit, ECC-256 ≈ 128-bit, RSA-3072 ≈ 128-bit, SHA-256 = 128-bit collision <span class="pdf-ref">📄 pp. 162, 195</span>.</li>
+    <li>Say aloud: "MAC = shared key, no non-repudiation. Signature = private key, non-repudiation" <span class="pdf-ref">📄 pp. 103, 172</span>.</li>
+    <li>Say aloud: "DH over RSA because ephemeral + Perfect Forward Secrecy" <span class="pdf-ref">📄 p. 101</span>.</li>
+    <li>Say aloud: "AES-GCM = AES-CTR (confidentiality) + GHASH (authenticity) = AEAD. Used in TLS, IPsec, WPA2" <span class="pdf-ref">📄 p. 181</span>.</li>
+    <li>Write the hybrid-crypto pattern at the top of your exam scratch area: <em>ECDHE → AES-GCM → Certificate → HMAC</em>.</li>
+  </ol>
+
+</div>
+
+<!-- ============================================================
+     END OF TOPIC 3
+     ============================================================ -->
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This study guide covers <strong>only Topic 3</strong> as listed in <span class="mono">appendix_finalexam.md</span>.
+  Previous guides cover Topic 1 (Wireless / Link-Layer Security) and Topic 2 (Common Network Attacks).
+  Remaining topics — TLS/HTTPS/SSH, User Authentication, IPsec &amp; VPN, Firewalls — are prepared as
+  separate study guides using the same master-prompt template.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs548-theme';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>

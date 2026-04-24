@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 Final Exam · Topic 2: Common Network Attacks (TCP / IP / ARP / DNS)</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE & TYPOGRAPHY — DARK MODE (default)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+
+    --topic-accent: #ff6e40;  /* Burnt-orange — Topic 2 accent (attacks = danger) */
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+
+    --topic-accent: #d84315;  /* Deeper burnt-orange for light mode contrast */
+
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(216,67,21,0.06), rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(216,67,21,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(216,67,21,0.06), rgba(26,95,224,0.06)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .misconception { background: #eef1f7; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  /* ================================================================
+     THEME TOGGLE — FIXED IN THE TOP BAR
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+  [data-theme="light"] .theme-opt.active {
+    background: var(--topic-accent);
+    color: #fff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;  /* make room for the top bar */
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono {
+    font-family: 'Consolas', 'Courier New', 'Menlo', monospace;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 {
+    font-size: 2.1em;
+    margin: 0 0 8px 0;
+    color: #fff;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 1.55em;
+    color: var(--topic-accent);
+    margin: 36px 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.2em;
+    color: #fff;
+    margin: 26px 0 10px 0;
+  }
+  h4 {
+    font-size: 1em;
+    color: var(--text-dim);
+    margin: 18px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 0.82em;
+  }
+
+  p { margin: 8px 0 12px 0; }
+
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     STICKY NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }  /* 44px top bar + 52px nav */
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar {
+      top: 44px;  /* sit below the top bar */
+      width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main {
+    max-width: 1100px;
+    padding: 40px 48px 80px 48px;
+  }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta {
+    color: var(--text-faint);
+    font-size: 0.9em;
+    margin-top: 6px;
+  }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(255,110,64,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER (2a, 2b, 2c, 2d)
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title {
+    font-size: 1.12em;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .signal-moderate { color: var(--yellow); }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & TOPIC CONTAINERS
+     ================================================================ */
+  section.topic {
+    border-left: 3px solid var(--topic-accent);
+    padding-left: 22px;
+    margin-bottom: 40px;
+  }
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+    width: 230px;
+  }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  /* ================================================================
+     ASCII DIAGRAM / FLOW BOX
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f0;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head {
+    color: var(--topic-accent);
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .step .step-detail {
+    margin-top: 6px;
+    font-size: 0.93em;
+    color: var(--text-dim);
+  }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 110px; }
+
+  /* Myth / reality blocks */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+  .misconception .trap { color: var(--orange); font-weight: 600; }
+
+  /* ================================================================
+     QUESTION BLOCKS (Section 4)
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options {
+    margin: 4px 0 6px 0;
+    padding-left: 26px;
+  }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content {
+    padding: 8px 0 4px 0;
+    font-size: 0.95em;
+  }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+
+  /* ================================================================
+     CHEAT SHEET (Section 5)
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(255,110,64,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 {
+    color: var(--gold);
+    font-size: 0.82em;
+    margin-top: 14px;
+  }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,152,0,0.05);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-accent);
+    background: rgba(255,110,64,0.05);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,82,82,0.05);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">📕 Topic 2</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 Concept Overview</a>
+  <a href="#section-2">§2 How Each Attack Works</a>
+  <a href="#section-2a" class="sub">→ 2a · TCP Attacks</a>
+  <a href="#section-2b" class="sub">→ 2b · IP Attacks</a>
+  <a href="#section-2c" class="sub">→ 2c · ARP Attacks</a>
+  <a href="#section-2d" class="sub">→ 2d · DNS Attacks</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ</a>
+  <a href="#section-4-tf" class="sub">→ True/False</a>
+  <a href="#section-4-sa" class="sub">→ Short Answer</a>
+  <a href="#section-4-fib" class="sub">→ Fill in Blank</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<!-- ── Fixed top bar with theme toggle ── -->
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 448/548 · Final Exam · <strong>Topic 2 · Common Network Attacks</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 2: Common Network Attacks</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">TCP · IP · ARP · DNS</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 448/548 Network Security &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Lina Pu &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final — April 27, 2026 · 120 min · Closed-book<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lectures_all_merged_compressed.pdf</span> (601 slides)<br>
+    <strong>Signal:</strong> <span class="signal-explicit">🔴 EXPLICIT</span> — Second of two "never-before-tested" chapters named in the final exam review
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">Why this topic matters for your exam</strong><br>
+  In <span class="mono">scriptFinalExamReview-cs548.txt</span>, the instructor said verbatim:
+  <em>"Additional material chapter is the common network attacks. We introduced from top to bottom: TCP attacks, network layer attacks, link layer attacks, and DNS attacks... typically those can be tested in terms of true and false, or multiple choice, or multiple answer questions. But when you review those topics, you also need to think about how they are related to network security / defense / protection mechanisms."</em><br><br>
+  <strong>The three-part drill:</strong> for <em>every</em> attack below, you must master — (1) the attack mechanism, (2) the conditions under which it succeeds (local vs remote attacker), and (3) the defense / countermeasure. This is explicitly what the instructor said she would test.
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 2 is a <strong>4-sub-topic cluster</strong>. All page numbers refer to slide positions in
+  <span class="mono">00_Lectures_all_merged_compressed.pdf</span>. Sources: <em>Lecture 19</em> (pp. 503-540, IP/ARP),
+  <em>Lecture 20 pt. 1</em> (pp. 541-557, TCP), <em>Lecture 22</em> (pp. 579-601, DNS).
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2a · TCP Attacks <span class="pdf-ref">📄 pp. 541-557</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>TCP protocol overview &amp; reliability model</td><td>pp. 543-544</td></tr>
+    <tr><td>TCP client &amp; server program structure</td><td>pp. 545-546</td></tr>
+    <tr><td>TCP 3-way handshake (SYN / SYN-ACK / ACK)</td><td>pp. 547-548</td></tr>
+    <tr><td>TCB (Transmission Control Block) &amp; half-open queue</td><td>p. 548</td></tr>
+    <tr><td>SYN flooding attack (mechanism)</td><td>pp. 542, 549, 557</td></tr>
+    <tr><td>SYN cookies (defense)</td><td>pp. 550-551</td></tr>
+    <tr><td>TCP Reset attack — FIN vs RST</td><td>p. 552</td></tr>
+    <tr><td>TCP Reset attack — preconditions (IPs, ports, seq #)</td><td>pp. 553-554</td></tr>
+    <tr><td>Local vs remote attacker difficulty (spoofing)</td><td>pp. 553-554, 556</td></tr>
+    <tr><td>TCP Session Hijacking &amp; sequence number windowing</td><td>pp. 555-557</td></tr>
+    <tr><td>Defense: randomize ISN, randomize source port</td><td>pp. 551, 554, 556</td></tr>
+    <tr><td>Defense: IPsec to neutralize transport-layer attacks</td><td>pp. 370-371, 556</td></tr>
+    <tr><td>TCP attacks summary slide</td><td>p. 557</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2b · IP / Network-Layer Attacks <span class="pdf-ref">📄 pp. 505-528</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>Overview of common network-layer attacks</td><td>pp. 505-506</td></tr>
+    <tr><td>Security flaws in IP (no source auth, source routing)</td><td>p. 507</td></tr>
+    <tr><td>IP address spoofing (mechanism)</td><td>pp. 508, 511</td></tr>
+    <tr><td>Tools: Scapy (Python) &amp; libnet (C)</td><td>pp. 509-510</td></tr>
+    <tr><td>IP spoofing → unauthorized access, DDoS</td><td>pp. 511, 521</td></tr>
+    <tr><td>Defenses: ingress &amp; egress packet filtering</td><td>pp. 403, 425, 512</td></tr>
+    <tr><td>Defenses: IPsec, randomize ISN, Unicast Reverse-Path Forwarding, TTL check</td><td>p. 512</td></tr>
+    <tr><td>TTL-based spoofing detection (probe scenarios)</td><td>pp. 513-517</td></tr>
+    <tr><td>ICMP overview (types, encapsulation)</td><td>pp. 518-519</td></tr>
+    <tr><td>ICMP Echo scan / ping scan / nmap</td><td>p. 520</td></tr>
+    <tr><td>Smurf attack (ICMP broadcast amplification)</td><td>p. 521</td></tr>
+    <tr><td>ICMP Destination Unreachable attack (isolate victim)</td><td>pp. 522-523, 528</td></tr>
+    <tr><td>IP fragmentation attack &amp; firewall evasion</td><td>pp. 524-526</td></tr>
+    <tr><td>Ping of Death (oversized fragmented datagram)</td><td>p. 527</td></tr>
+    <tr><td>General ICMP attack category (no authentication)</td><td>p. 528</td></tr>
+    <tr><td>Network segmentation as ICMP-scan defense</td><td>pp. 362, 393</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2c · ARP (Link-Layer) Attacks <span class="pdf-ref">📄 pp. 529-538</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>ARP purpose &amp; protocol (IP ↔ MAC translation)</td><td>p. 529</td></tr>
+    <tr><td>ARP request / reply &amp; cache-on-receive optimization</td><td>pp. 529-530</td></tr>
+    <tr><td>ARP spoofing overview (stateless, unsolicited replies)</td><td>p. 531</td></tr>
+    <tr><td>ARP spoofing step-by-step poisoning</td><td>pp. 532-536</td></tr>
+    <tr><td>Man-in-the-Middle (MITM) via ARP poisoning</td><td>p. 537</td></tr>
+    <tr><td>Why ARP attacks persist (local cache effect + repeated gratuitous replies)</td><td>p. 538</td></tr>
+    <tr><td>Mitigation advice: avoid cleartext (HTTP/FTP/Telnet)</td><td>p. 538</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">2d · DNS Attacks <span class="pdf-ref">📄 pp. 579-601</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th></tr></thead>
+  <tbody>
+    <tr><td>DNS purpose &amp; introduction</td><td>pp. 580-581</td></tr>
+    <tr><td>DNS domain hierarchy (Root, TLD, second-level)</td><td>pp. 582, 584, 597</td></tr>
+    <tr><td>DNS query process (recursive vs iterative)</td><td>pp. 583-586</td></tr>
+    <tr><td>Local DNS files: /etc/hosts &amp; /etc/resolv.conf</td><td>p. 587</td></tr>
+    <tr><td>DNS attack categories (DoS + Spoofing)</td><td>p. 588</td></tr>
+    <tr><td>DNS spoofing from LAN (local attacker)</td><td>p. 589</td></tr>
+    <tr><td>Remote DNS cache poisoning &amp; two random numbers</td><td>pp. 590-591</td></tr>
+    <tr><td>DNS packet structure (transaction ID, source port)</td><td>pp. 590-591</td></tr>
+    <tr><td>Kaminsky attack mechanism</td><td>p. 592</td></tr>
+    <tr><td>Kaminsky attack sample response</td><td>p. 593</td></tr>
+    <tr><td>Defense — overview</td><td>p. 594</td></tr>
+    <tr><td>DNSSEC (signature on DNS records)</td><td>pp. 595, 597</td></tr>
+    <tr><td>DNS over TLS/SSL</td><td>p. 596</td></tr>
+    <tr><td>DNSSEC vs TLS/SSL chain-of-trust comparison</td><td>p. 597</td></tr>
+    <tr><td>DoS on DNS overview</td><td>p. 598</td></tr>
+    <tr><td>DoS on root servers (difficult — 13 distributed clusters, 48-hr cache)</td><td>p. 599</td></tr>
+    <tr><td>DoS on TLD servers (easier for small ccTLDs)</td><td>p. 600</td></tr>
+    <tr><td>DoS on authoritative nameservers (UltraDNS 2004 case)</td><td>p. 601</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: CONCEPT OVERVIEW
+     ============================================================ -->
+<h2 id="section-1">§1 — Concept Overview</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 505-538, 541-557, 579-601 (three lectures: L19 IP/ARP, L20 pt.1 TCP, L22 DNS)</div>
+
+<div class="section-block">
+
+<h3>1.1 The Problem This Solves <span class="pdf-ref">📄 pp. 507, 528, 531, 588</span></h3>
+<p>
+  The Internet protocol stack was designed in the 1970s-80s with almost <em>no</em> built-in
+  authentication of source addresses or messages. IP packets carry whatever source address the sender
+  writes into them <span class="pdf-ref">📄 p. 507</span>, ICMP messages have "no authentication" at
+  all <span class="pdf-ref">📄 p. 528</span>, ARP replies are accepted even without a prior request
+  <span class="pdf-ref">📄 p. 531</span>, and DNS replies are trusted if they merely <em>look</em>
+  like they came from the right server <span class="pdf-ref">📄 p. 588</span>. This topic catalogues
+  the resulting attacks — and, critically, the defenses we can stack on top at each layer of the
+  TCP/IP model.
+</p>
+
+<h3>1.2 The Core Idea — A Top-to-Bottom Attack Tour <span class="pdf-ref">📄 pp. 505, 542, 580</span></h3>
+<p>
+  The instructor explicitly organized this material "from top to bottom" of the TCP/IP stack, and so
+  does this study guide:
+</p>
+<ul class="plain">
+  <li><strong>Transport layer (TCP)</strong> — exploit the 3-way handshake and per-byte sequence number <span class="pdf-ref">📄 pp. 541-557</span></li>
+  <li><strong>Network layer (IP + ICMP)</strong> — forge source addresses; abuse broadcast and error messages <span class="pdf-ref">📄 pp. 505-528</span></li>
+  <li><strong>Link layer (ARP)</strong> — poison the IP-to-MAC mapping cache to sit between two hosts <span class="pdf-ref">📄 pp. 529-538</span></li>
+  <li><strong>Application / infrastructure layer (DNS)</strong> — poison the name-to-IP mapping cache to redirect entire domains <span class="pdf-ref">📄 pp. 579-601</span></li>
+</ul>
+<p>
+  The <em>unifying thread</em> is that every attack exploits some form of <strong>missing
+  authentication</strong> — and every defense either (a) adds cryptographic authentication, (b) makes
+  the attacker's guesses harder by randomizing values, or (c) filters traffic at the network edge.
+</p>
+
+<h3>1.3 Analogy — The Postal Service With No Return-Address Verification <span class="pdf-ref">📄 pp. 507-508</span></h3>
+<p>Imagine a postal system with these properties:</p>
+<ul class="plain">
+  <li>Anyone can write <em>any</em> return address on an envelope and drop it in a mailbox → <strong>IP spoofing</strong> <span class="pdf-ref">📄 pp. 507-508</span></li>
+  <li>You can send a letter to a broadcast address ("everyone on Maple Street") and ask for replies — the amplification drowns the target → <strong>Smurf attack</strong> <span class="pdf-ref">📄 p. 521</span></li>
+  <li>A helpful neighbor keeps a book of "which house has which phone number" and trusts anyone who hands them an update card → <strong>ARP poisoning</strong> <span class="pdf-ref">📄 pp. 531-535</span></li>
+  <li>The phone directory operator answers "give me the number for ACME Co." by asking the first stranger who whispers an answer through the window → <strong>DNS cache poisoning</strong> <span class="pdf-ref">📄 pp. 589-590</span></li>
+  <li>You can whisper "Hang up! Call ended!" into a phone conversation you overhear, and if your voice is loud enough both parties drop the line → <strong>TCP Reset attack</strong> <span class="pdf-ref">📄 pp. 552-553</span></li>
+</ul>
+
+<h3>1.4 Technical Definition <span class="pdf-ref">📄 pp. 505-506, 542, 580</span></h3>
+<p>
+  A <strong>network attack</strong> in this context is a packet-level abuse of a network protocol that
+  violates one or more of <em>confidentiality</em>, <em>integrity</em>, <em>availability</em>, or
+  <em>authenticity</em> of the service. The attacks in this topic fall into four protocol categories:
+  <strong>TCP attacks</strong> exploit the transport-layer handshake and connection state
+  (SYN flooding, RST injection, session hijacking) <span class="pdf-ref">📄 p. 542</span>;
+  <strong>IP / ICMP attacks</strong> exploit the lack of source-address authentication and the error-reporting
+  channel (IP spoofing, Smurf, Ping of Death, Destination Unreachable)
+  <span class="pdf-ref">📄 pp. 505-506</span>; <strong>ARP attacks</strong> exploit the unsolicited-reply
+  acceptance of the ARP cache (ARP spoofing → MITM) <span class="pdf-ref">📄 pp. 531-538</span>; and
+  <strong>DNS attacks</strong> exploit the unauthenticated reply mechanism of name resolution
+  (cache poisoning, Kaminsky attack, DoS on nameservers) <span class="pdf-ref">📄 p. 588</span>.
+</p>
+
+<h3>1.5 Key Terms &amp; Definitions</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th style="width:20%">Term</th>
+      <th style="width:38%">Plain-English Definition</th>
+      <th style="width:30%">Why It Matters for the Exam</th>
+      <th style="width:12%">📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TCP 3-way handshake</strong></td>
+      <td>SYN → SYN-ACK → ACK exchange that establishes a TCP connection. Each side picks a random initial sequence number (ISN).</td>
+      <td>Foundation for SYN flood, RST, and hijacking. Know which party sends which packet.</td>
+      <td><span class="pdf-ref">📄 pp. 547-548</span></td>
+    </tr>
+    <tr>
+      <td><strong>TCB</strong> (Transmission Control Block)</td>
+      <td>In-memory structure the server allocates <em>when it receives a SYN</em> to track a half-open connection.</td>
+      <td>The TCB queue is what SYN flooding exhausts.</td>
+      <td><span class="pdf-ref">📄 p. 548</span></td>
+    </tr>
+    <tr>
+      <td><strong>SYN flooding</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Attacker sends many SYNs (often from spoofed IPs) without completing the handshake, filling the server's half-open-connection queue.</td>
+      <td>Classic DoS. The instructor explicitly named it in the final review.</td>
+      <td><span class="pdf-ref">📄 pp. 542, 549</span></td>
+    </tr>
+    <tr>
+      <td><strong>SYN cookie</strong></td>
+      <td>Server encodes a keyed hash of connection info as the initial SYN-ACK sequence number, so it does <em>not</em> need to allocate a TCB until the ACK returns a valid cookie-based number.</td>
+      <td>Canonical defense against SYN flooding. Know how it relaxes server state requirements.</td>
+      <td><span class="pdf-ref">📄 pp. 550-551</span></td>
+    </tr>
+    <tr>
+      <td><strong>TCP RST attack</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Attacker injects a spoofed RST packet that matches an active connection's (src IP, src port, dst IP, dst port, seq # within window) tuple to tear it down.</td>
+      <td>Know all five fields the attacker must guess, and why local attackers succeed where remote ones struggle.</td>
+      <td><span class="pdf-ref">📄 pp. 552-554</span></td>
+    </tr>
+    <tr>
+      <td><strong>TCP Session Hijacking</strong></td>
+      <td>Injecting spoofed TCP segments with valid sequence numbers to take over or corrupt an in-progress session.</td>
+      <td>Similar preconditions to RST but the payload is malicious data, not just a RST flag.</td>
+      <td><span class="pdf-ref">📄 pp. 555-556</span></td>
+    </tr>
+    <tr>
+      <td><strong>IP Spoofing</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Sending IP packets with a forged source address. Trivial because IP has no source authentication.</td>
+      <td>Underlies DDoS, Smurf, reflection attacks. Know its defenses (ingress/egress, IPsec).</td>
+      <td><span class="pdf-ref">📄 pp. 507-508, 511</span></td>
+    </tr>
+    <tr>
+      <td><strong>Ingress / Egress filtering</strong></td>
+      <td>Ingress = incoming; Egress = outgoing. ISPs/edge routers drop packets whose source IP cannot legitimately belong to the incoming/outgoing interface.</td>
+      <td>Instructor said egress filtering at ISPs is more effective. Expect a "which filter type" question.</td>
+      <td><span class="pdf-ref">📄 pp. 403, 425, 512</span></td>
+    </tr>
+    <tr>
+      <td><strong>ICMP</strong></td>
+      <td>Internet Control Message Protocol — carries error and diagnostic messages (echo, destination unreachable, TTL exceeded, redirect).</td>
+      <td>"No authentication" is the key exam point.</td>
+      <td><span class="pdf-ref">📄 pp. 518-519, 528</span></td>
+    </tr>
+    <tr>
+      <td><strong>Smurf attack</strong></td>
+      <td>ICMP echo request with victim's IP as source, broadcast destination — every host on the broadcast network replies, drowning the victim.</td>
+      <td>Classic amplification DDoS example. Know it uses <em>broadcast</em>.</td>
+      <td><span class="pdf-ref">📄 p. 521</span></td>
+    </tr>
+    <tr>
+      <td><strong>Destination Unreachable attack</strong></td>
+      <td>Attacker sends forged ICMP "destination unreachable" to trick a host into dropping a legitimate connection.</td>
+      <td>The "isolate a node" DoS variant.</td>
+      <td><span class="pdf-ref">📄 pp. 522-523, 528</span></td>
+    </tr>
+    <tr>
+      <td><strong>Ping of Death</strong></td>
+      <td>Fragments that together reassemble to &gt; 65 535 bytes overflow a kernel buffer and crash the host.</td>
+      <td>Historical but named in the slide list.</td>
+      <td><span class="pdf-ref">📄 p. 527</span></td>
+    </tr>
+    <tr>
+      <td><strong>ARP</strong></td>
+      <td>Address Resolution Protocol — maps IP addresses to link-layer MAC addresses on a LAN.</td>
+      <td>Stateless: replies are cached even without a matching request.</td>
+      <td><span class="pdf-ref">📄 p. 529</span></td>
+    </tr>
+    <tr>
+      <td><strong>ARP Spoofing</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Attacker sends unsolicited ARP replies that map the victim's IP to the attacker's MAC, redirecting traffic through the attacker.</td>
+      <td>The link-layer MITM enabler. Must explain the poisoning step by step.</td>
+      <td><span class="pdf-ref">📄 pp. 531-536</span></td>
+    </tr>
+    <tr>
+      <td><strong>MITM (Man-in-the-Middle)</strong></td>
+      <td>Attacker sits between two parties, forwarding (and optionally modifying) their traffic. ARP poisoning is one way to achieve it on a LAN.</td>
+      <td>Know ARP spoofing → MITM as the typical path on a local network.</td>
+      <td><span class="pdf-ref">📄 p. 537</span></td>
+    </tr>
+    <tr>
+      <td><strong>DNS Cache Poisoning</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Attacker sends a fake DNS reply (before the real one) to a resolver; the bogus mapping gets cached and used for all subsequent queries.</td>
+      <td>The defining DNS attack. Local vs remote difficulty is a classic question.</td>
+      <td><span class="pdf-ref">📄 pp. 589-590</span></td>
+    </tr>
+    <tr>
+      <td><strong>Transaction ID</strong></td>
+      <td>16-bit random number the client picks for each DNS query; reply must match to be accepted. Analogous to TCP sequence number.</td>
+      <td>Key defense variable. Along with random source port, these are the two numbers a remote attacker must guess.</td>
+      <td><span class="pdf-ref">📄 pp. 590-591</span></td>
+    </tr>
+    <tr>
+      <td><strong>Kaminsky attack</strong> <span class="signal-explicit">🔴</span></td>
+      <td>Variant of DNS cache poisoning: attacker asks for random subdomains, so failed attempts don't get cached — removes the "wait for cache to expire" delay, enabling rapid brute-forcing.</td>
+      <td>Instructor walked through this specifically. Know why random subdomains defeat the cache effect.</td>
+      <td><span class="pdf-ref">📄 pp. 592-593</span></td>
+    </tr>
+    <tr>
+      <td><strong>DNSSEC</strong></td>
+      <td>DNS Security Extensions: adds a digital signature chain rooted at the DNS zone hierarchy, so clients can verify record authenticity.</td>
+      <td>Contrast with TLS's CA-based chain of trust — explicit exam comparison.</td>
+      <td><span class="pdf-ref">📄 pp. 595, 597</span></td>
+    </tr>
+    <tr>
+      <td><strong>Recursive vs Iterative query</strong></td>
+      <td>Recursive: local DNS does all the work on your behalf. Iterative: local DNS walks Root → TLD → authoritative, following referrals.</td>
+      <td>Slide 584-585 walks through an iterative example (ua.edu).</td>
+      <td><span class="pdf-ref">📄 pp. 583-586</span></td>
+    </tr>
+    <tr>
+      <td><strong>/etc/hosts</strong></td>
+      <td>Local file consulted <em>before</em> DNS. Attacker who can write here redirects the machine silently.</td>
+      <td>Named as a DNS-spoofing vector: "modify /etc/hosts".</td>
+      <td><span class="pdf-ref">📄 pp. 587-588</span></td>
+    </tr>
+    <tr>
+      <td><strong>/etc/resolv.conf</strong></td>
+      <td>Tells the machine which DNS resolver to use (typically set by DHCP). Attacker who can write here redirects all DNS to a malicious server.</td>
+      <td>The other explicit DNS-spoofing vector on slide 588.</td>
+      <td><span class="pdf-ref">📄 pp. 587-588</span></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 2: HOW IT WORKS — STEP BY STEP
+     ============================================================ -->
+<h2 id="section-2">§2 — How Each Attack Works (Step-by-Step)</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 505-538, 541-557, 579-601</div>
+
+<div class="section-block">
+
+<p>
+  Each of the four sub-topics below follows the same structure: <strong>(1) mechanism</strong>,
+  <strong>(2) preconditions / why local vs remote matters</strong>, <strong>(3) defense</strong>.
+  This three-part pattern is exactly what the instructor said she would test.
+</p>
+
+<!-- ================= 2a TCP ATTACKS ================= -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span><span class="title">TCP Attacks</span>
+  <span class="pages">📄 pp. 541-557 · Lecture 20 pt. 1</span>
+</div>
+
+<h3>Background — The TCP 3-Way Handshake <span class="pdf-ref">📄 pp. 547-548</span></h3>
+
+<pre class="diagram">
+  Client                                          Server
+  ──────                                          ──────
+     │                                                │
+     │────── SYN,   seq = x  ─────────────────────────▶│  1
+     │                                                │      ┌──────────────┐
+     │                                                │  ──> │ TCB allocated│
+     │                                                │      │ (half-open   │
+     │                                                │      │  queue)      │
+     │                                                │      └──────────────┘
+     │◄──── SYN-ACK, seq = y, ack = x+1 ──────────────│  2
+     │                                                │
+     │────── ACK,  seq = x+1, ack = y+1  ─────────────▶│  3
+     │                                                │      ┌──────────────┐
+     │                                                │  ──> │ TCB moved to │
+     │                                                │      │ established  │
+     │                                                │      └──────────────┘
+     │══════ data exchange (with seq numbers) ════════│
+     │                                                │
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 547-548</span></div>
+
+<p>
+  The key structural fact: the server <strong>allocates a TCB at step 1</strong> (when it gets the
+  SYN) and only releases/moves it when the ACK arrives at step 3. That TCB-allocation-on-SYN is
+  precisely what SYN flooding targets. <span class="pdf-ref">📄 p. 548</span>
+</p>
+
+<h3>TCP SYN Flooding <span class="pdf-ref">📄 pp. 549-551</span></h3>
+
+<div class="step">
+  <div class="step-head">① Mechanism <span class="pdf-ref">📄 p. 549</span></div>
+  <div class="step-detail">
+    The attacker sends a continuous stream of SYN packets to the victim server (often with spoofed source
+    IPs so the real address cannot be back-traced). The server allocates a TCB for each SYN into its
+    <em>half-open queue</em>. The attacker <strong>never sends the third ACK</strong>, so each TCB
+    lingers until it times out. With enough pending SYNs, the queue fills and the server refuses all
+    new legitimate connections.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Preconditions</div>
+  <div class="step-detail">
+    <strong class="lbl">Needed:</strong> Ability to send raw SYN packets at high rate. That's it —
+    no authentication is required because TCP has none at this stage.<br>
+    <strong class="lbl">Not needed:</strong> Knowledge of sequence numbers (you aren't trying to
+    impersonate a connection, you are trying to exhaust state).
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">③ Defense — SYN Cookies <span class="pdf-ref">📄 pp. 550-551</span></div>
+  <div class="step-detail">
+    Rather than allocate a TCB on receiving a SYN, the server computes
+    <em>H = keyed-hash(src IP, src port, dst IP, dst port, secret)</em> and returns H as the server's
+    ISN in the SYN-ACK. The server <em>stores nothing</em>. When a genuine ACK arrives with
+    <em>ack = H + 1</em>, the server recomputes H and verifies. Attackers who spoofed source IPs never
+    see the SYN-ACK, so they cannot send a valid ACK. This <strong>offloads server state</strong> onto
+    the client's ACK, neutralizing the flood. <span class="pdf-ref">📄 pp. 550-551</span>
+  </div>
+</div>
+
+<h3>TCP Reset Attack <span class="pdf-ref">📄 pp. 552-554</span></h3>
+
+<div class="step">
+  <div class="step-head">① Mechanism <span class="pdf-ref">📄 pp. 552-553</span></div>
+  <div class="step-detail">
+    The attacker injects a forged TCP packet with the RST flag set, causing both endpoints to tear down
+    the connection immediately. Unlike the graceful FIN/ACK/FIN/ACK close, a single RST ends the session
+    with no round-trip.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Preconditions — the five mandatory fields <span class="pdf-ref">📄 p. 553</span></div>
+  <div class="step-detail">
+    The forged RST must carry a correct value in <em>all</em> of:
+    <ol>
+      <li>Source IP address</li>
+      <li>Source port</li>
+      <li>Destination IP address</li>
+      <li>Destination port</li>
+      <li>Sequence number <strong>within the receiver's current window</strong></li>
+    </ol>
+    A <strong>local</strong> attacker (on the same LAN) can sniff the live connection with Wireshark/tcpdump
+    and observe all five fields directly. A <strong>remote</strong> attacker, who cannot sniff, must
+    guess — and the sequence number alone is a 32-bit space, cut down to the ~receive-window-sized
+    valid range. That is why <em>the instructor said remote reset attacks are difficult</em>.
+    <span class="pdf-ref">📄 pp. 553-554</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">③ Defense <span class="pdf-ref">📄 pp. 554, 556</span></div>
+  <div class="step-detail">
+    Randomize source port (beyond the OS default range) and randomize the initial sequence number
+    heavily <span class="pdf-ref">📄 pp. 551, 554</span>. These make remote guessing infeasible but do
+    <em>not</em> help against a local attacker who can sniff. The ultimate defense is to
+    <strong>encrypt the transport payload</strong> with <strong>IPsec</strong>, which hides the TCP
+    header from any observer (local or remote) inside the encrypted payload.
+    <span class="pdf-ref">📄 pp. 370-371, 556</span>
+  </div>
+</div>
+
+<h3>TCP Session Hijacking <span class="pdf-ref">📄 pp. 555-556</span></h3>
+
+<div class="step">
+  <div class="step-head">① Mechanism <span class="pdf-ref">📄 p. 555</span></div>
+  <div class="step-detail">
+    Same five-field precondition as RST, but instead of a RST flag, the attacker injects a segment with
+    data payload and a sequence number the receiver will accept. If the receiver already has data up
+    to byte <em>x</em>, the attacker must use sequence number <em>x + 1</em>; otherwise the bytes land
+    out-of-order (gap left at positions <em>x+1 … x+δ</em>) and may fall outside the buffer.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Preconditions</div>
+  <div class="step-detail">
+    Identical to RST <em>plus</em> tighter sequence-number accuracy. Local attackers succeed easily;
+    remote attackers are essentially blocked without sniffing. <span class="pdf-ref">📄 pp. 553-556</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">③ Defense <span class="pdf-ref">📄 p. 556</span></div>
+  <div class="step-detail">
+    <em>Randomize ISN</em> and <em>randomize source port</em> (helps against remote);
+    <strong>encrypt with IPsec</strong> (helps against both local and remote). The instructor noted
+    the randomization approaches are <em>not</em> effective against local attackers — only encryption is.
+  </div>
+</div>
+
+<!-- ================= 2b IP ATTACKS ================= -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span><span class="title">IP / Network-Layer Attacks</span>
+  <span class="pages">📄 pp. 505-528 · Lecture 19 pt. 2</span>
+</div>
+
+<h3>IP Address Spoofing <span class="pdf-ref">📄 pp. 507-512</span></h3>
+
+<div class="step">
+  <div class="step-head">① Mechanism <span class="pdf-ref">📄 pp. 507-508</span></div>
+  <div class="step-detail">
+    An IP packet's source address is a header field filled in by the <em>originating host</em>. There
+    is no check on whether it is truthful. Any sender can put any source IP in the field — using tools
+    like <strong>Scapy</strong> (Python) or <strong>libnet</strong> (C)
+    <span class="pdf-ref">📄 pp. 509-510</span> — and the packet routes normally to its destination.
+    The destination replies to the <em>forged</em> source address.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② What it enables <span class="pdf-ref">📄 pp. 511-512</span></div>
+  <div class="step-detail">
+    <ul class="plain">
+      <li><strong>Unauthorized access</strong> — if a server uses source IP for weak "authentication" (r-utilities like rlogin/rsh relied on this historically) <span class="pdf-ref">📄 p. 507</span></li>
+      <li><strong>DDoS / reflection</strong> — spoof the victim's IP as source, send requests to amplifiers, replies drown the victim <span class="pdf-ref">📄 pp. 511, 521</span></li>
+      <li><strong>Enables downstream attacks</strong> — RST injection and session hijacking all start with a spoofed packet</li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">③ Defenses <span class="pdf-ref">📄 p. 512</span></div>
+  <div class="step-detail">
+    Slide 512 lists the full defense stack:
+    <ol>
+      <li><strong>Ingress filtering</strong> — at the edge of your network, drop incoming packets whose source IP cannot legitimately arrive on that interface</li>
+      <li><strong>Egress filtering</strong> — ISPs drop outgoing packets from their customers whose source IP is not in that customer's assigned range. <em>The instructor said this is more effective because it stops spoofed packets at the source.</em></li>
+      <li><strong>Avoid trust relationships based on IP address</strong> — never use source IP as authentication</li>
+      <li><strong>TTL-value check</strong> (see pp. 513-517 for the probe-based detection scheme)</li>
+      <li><strong>IPsec</strong> — cryptographically authenticate source at layer 3</li>
+      <li><strong>Randomized Initial Sequence Number</strong> in TCP — indirectly makes the spoof less useful</li>
+      <li><strong>Unicast Reverse-Path Forwarding</strong> (uRPF)</li>
+    </ol>
+  </div>
+</div>
+
+<h3>ICMP-Based Attacks <span class="pdf-ref">📄 pp. 518-528</span></h3>
+
+<pre class="diagram">
+ Smurf Attack (ICMP echo amplification DDoS):  <span class="pdf-ref">📄 p. 521</span>
+
+   Attacker (spoofs Victim's IP)
+         │
+         │  ICMP Echo Request, src=Victim,
+         │        dst=192.168.1.255 (broadcast)
+         ▼
+   ┌─────────────────────────────────────────┐
+   │  Subnet 192.168.1.0/24                  │
+   │  many hosts: .1 .2 .3 .4 ... .254       │
+   │  each replies to the spoofed "Victim"   │
+   └─────────────────────────────────────────┘
+         │      ┃       ┃       ┃
+         ▼      ▼       ▼       ▼
+   ┌────────────────────────────────┐
+   │    Victim (flooded with        │
+   │    hundreds of echo replies)   │
+   └────────────────────────────────┘
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 521</span></div>
+
+<p>
+  <strong>ICMP Echo scan (ping scan / nmap):</strong> Send ICMP Echo Requests to every IP in a
+  subnet; collect replies to map live hosts. This is the reconnaissance step that often precedes a
+  more targeted attack. Defense: <strong>network segmentation (VLANs)</strong> so that an attacker
+  landing in an IT subnet cannot ping the OT / manufacturing subnet.
+  <span class="pdf-ref">📄 pp. 520, 362, 393</span>
+</p>
+
+<p>
+  <strong>ICMP Destination Unreachable:</strong> Attacker forges ICMP "destination unreachable" messages
+  to one host to trick it into dropping a legitimate connection — effectively isolating the victim.
+  ICMP has <em>no authentication</em>, so the forgery is trivial on the wire.
+  <span class="pdf-ref">📄 pp. 522-523, 528</span>
+</p>
+
+<p>
+  <strong>Ping of Death:</strong> Multiple IP fragments that reassemble to a datagram
+  &gt; 65 535 bytes (the IP maximum), overflowing a kernel buffer in old TCP/IP stacks.
+  Historical but named. <span class="pdf-ref">📄 p. 527</span>
+</p>
+
+<p>
+  <strong>Fragmentation attack for firewall evasion:</strong> Since some firewalls inspect only the
+  <em>first</em> fragment, an attacker can place benign headers in fragment 1 and malicious content
+  (e.g., TCP flags) in later fragments. <span class="pdf-ref">📄 p. 526</span>
+</p>
+
+<!-- ================= 2c ARP ATTACKS ================= -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span><span class="title">ARP (Link-Layer) Attacks</span>
+  <span class="pages">📄 pp. 529-538 · Lecture 19 pt. 2</span>
+</div>
+
+<h3>How ARP Normally Works <span class="pdf-ref">📄 pp. 529-530</span></h3>
+
+<p>
+  When Host A wants to send an IP packet to Host B on the same LAN, it needs B's MAC address. It
+  broadcasts an ARP Request: <em>"Who has IP 192.168.1.10? Tell 192.168.1.100."</em> B replies
+  unicast: <em>"192.168.1.10 is at 00:01:03:1D:98:B8."</em> A caches this mapping for subsequent
+  traffic. <span class="pdf-ref">📄 p. 530</span>
+</p>
+
+<p>
+  Two design choices set up the attack:
+</p>
+<ul class="plain">
+  <li><strong>Stateless</strong> — a host accepts an ARP <em>reply</em> even if it never sent a request. <span class="pdf-ref">📄 p. 531</span></li>
+  <li><strong>Replies overwrite the cache</strong> — the latest reply wins, so repeated spoofed replies keep the cache poisoned. <span class="pdf-ref">📄 p. 538</span></li>
+</ul>
+
+<h3>ARP Spoofing → Man-in-the-Middle <span class="pdf-ref">📄 pp. 531-537</span></h3>
+
+<pre class="diagram">
+ Initial state:
+   Host A (192.168.1.100, MAC 08:00:46:07:04:A3)
+   Host B (192.168.1.10,  MAC 00:01:03:1D:98:B8)
+   Host C (192.168.1.137, MAC BA:DB:AD:BA:DB:AD)  ◄── attacker
+
+ ┌─ Attack step 1 ────────────────────────────────────────────────┐
+ │  C → A:   "192.168.1.10  is at  BA:DB:AD:BA:DB:AD"    (spoof) │  <span class="pdf-ref">📄 p. 533</span>
+ │  C → B:   "192.168.1.100 is at  BA:DB:AD:BA:DB:AD"    (spoof) │  <span class="pdf-ref">📄 p. 535</span>
+ └────────────────────────────────────────────────────────────────┘
+
+ Poisoned state — both A's and B's ARP caches now point
+ their peer's IP to C's MAC:                                       <span class="pdf-ref">📄 p. 536</span>
+   A: 192.168.1.10  → BA:DB:AD:BA:DB:AD   (should be 00:01:03:…)
+   B: 192.168.1.100 → BA:DB:AD:BA:DB:AD   (should be 08:00:46:…)
+
+ ┌─ Data exchange post-poisoning ─────────────────────────────────┐
+ │                                                                │
+ │   A ──── "to 192.168.1.10" ────▶  C  ──── forward ──▶  B       │  <span class="pdf-ref">📄 p. 537</span>
+ │                                   │                             │
+ │                                   └── can read / modify every  │
+ │                                       packet (MITM)            │
+ └────────────────────────────────────────────────────────────────┘
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 532-537</span></div>
+
+<p>
+  The attacker acts as a silent router between A and B. To keep the poisoning active — because a
+  legitimate ARP reply would correct the cache — most ARP-spoofing tools send their forged replies
+  <strong>repeatedly</strong> (gratuitous ARP). <span class="pdf-ref">📄 p. 538</span>
+</p>
+
+<p>
+  <strong>Defenses:</strong>
+</p>
+<ul class="plain">
+  <li>Static ARP entries for critical gateways (operational overhead)</li>
+  <li>DHCP snooping + Dynamic ARP Inspection on managed switches</li>
+  <li><strong>End-to-end encryption</strong> (TLS, SSH, IPsec) — if traffic is encrypted, a MITM who cannot produce the right certificate cannot read or modify the payload. Instructor's advice on slide 538: <em>"Avoid sending data in cleartext — HTTP, FTP, Telnet."</em> <span class="pdf-ref">📄 p. 538</span></li>
+</ul>
+
+<!-- ================= 2d DNS ATTACKS ================= -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span><span class="title">DNS Attacks</span>
+  <span class="pages">📄 pp. 579-601 · Lecture 22</span>
+</div>
+
+<h3>Background — How a DNS Lookup Flows <span class="pdf-ref">📄 pp. 582-586</span></h3>
+
+<pre class="diagram">
+  Iterative query for "ua.edu" (local DNS as resolver):   <span class="pdf-ref">📄 pp. 584-585</span>
+
+  Client ──── Q: ua.edu ? ───▶  Local DNS
+                                    │
+                                    │ 1. ROOT server  (a.root-servers.net)
+                                    │    "Try the .edu nameserver"
+                                    ▼
+                                 TLD (.edu) server  (b.edu-servers.net)
+                                    │    "Try int-dns3.ua.edu"
+                                    ▼
+                                 Authoritative (int-dns3.ua.edu)
+                                    │    "ua.edu is at 130.160.X.Y"
+                                    ▼
+  Client ◄── Answer: 130.160.X.Y ──  Local DNS (caches the answer)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 583-586</span></div>
+
+<p>
+  Two additional local-machine files participate <em>before</em> the network lookup:
+  <span class="mono">/etc/hosts</span> (a static name → IP map, consulted first) and
+  <span class="mono">/etc/resolv.conf</span> (tells the machine <em>which</em> DNS server to use).
+  Modifying either is an explicit DNS-spoofing vector on slide 588.
+  <span class="pdf-ref">📄 pp. 587-588</span>
+</p>
+
+<h3>Attack Category 1 — DNS Spoofing (LAN / Local) <span class="pdf-ref">📄 p. 589</span></h3>
+
+<div class="step">
+  <div class="step-head">① Mechanism</div>
+  <div class="step-detail">
+    The attacker is on the same LAN as either the client or the local DNS server. When the client
+    sends a DNS query out, the attacker (who can sniff) immediately sends a spoofed reply using the
+    local DNS server's IP as the source. Because the attacker sees the real query, they copy the
+    transaction ID, source port, and question section exactly — the victim accepts the reply.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② Variant: Cache Poisoning on the Local DNS Server</div>
+  <div class="step-detail">
+    When the local DNS itself sends an iterative query outward, a LAN attacker can spoof the reply
+    "to" the local DNS, using a remote-nameserver-looking source. If the spoof arrives before the
+    real reply, the poisoned answer is cached and served to <em>every</em> downstream client until the
+    TTL expires.
+  </div>
+</div>
+
+<h3>Attack Category 2 — Remote DNS Cache Poisoning <span class="pdf-ref">📄 pp. 590-591</span></h3>
+
+<div class="step">
+  <div class="step-head">① Mechanism</div>
+  <div class="step-detail">
+    Same goal (poison the cache) but the attacker cannot sniff the outbound query. They must guess
+    two 16-bit random numbers:
+    <ol>
+      <li><strong>Source port</strong> of the query (chosen randomly by the resolver) — 16 bits</li>
+      <li><strong>Transaction ID</strong> (chosen randomly by the client for each query) — 16 bits</li>
+    </ol>
+    Total guess space: 2³² ≈ 4 billion combinations per attempt.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② The "Cache Effect" Obstacle <span class="pdf-ref">📄 p. 590</span></div>
+  <div class="step-detail">
+    After a <em>failed</em> guess, the real reply arrives and gets cached. The attacker must wait for
+    the cache entry to time out before trying again — dramatically slowing the attack.
+  </div>
+</div>
+
+<h3>Attack Category 3 — Kaminsky Attack <span class="pdf-ref">📄 pp. 592-593</span></h3>
+
+<div class="step">
+  <div class="step-head">① The Trick <span class="pdf-ref">📄 p. 592</span></div>
+  <div class="step-detail">
+    Kaminsky's insight was to <strong>ask a different question every time</strong>. Instead of
+    querying <span class="mono">www.example.com</span> repeatedly (where one failed guess caches the
+    real answer), the attacker queries random subdomains:
+    <span class="mono">aaaa.example.com</span>, <span class="mono">aaab.example.com</span>, … Each
+    is a cache miss that forces a fresh outward query → a fresh attempt.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② The Payload <span class="pdf-ref">📄 p. 593</span></div>
+  <div class="step-detail">
+    The spoofed reply does not need to provide a useful answer for the random subdomain. What matters
+    is the <em>Authority / Additional</em> section, which tells the local DNS: <em>"Here is the
+    authoritative nameserver for the whole <span class="mono">example.com</span> domain — and its
+    IP is &lt;attacker's IP&gt;."</em> That authoritative pointer gets cached and used for every
+    future <span class="mono">*.example.com</span> lookup.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">③ Why it was devastating</div>
+  <div class="step-detail">
+    Before Kaminsky, DNS resolvers often used a <em>fixed</em> source port, cutting the guess space to
+    16 bits. The patch that followed randomized source ports at every resolver, restoring the 32-bit
+    guess space. But the Kaminsky technique still works against any deployment that does not enforce
+    full port randomization.
+  </div>
+</div>
+
+<h3>Defenses Against DNS Attacks <span class="pdf-ref">📄 pp. 594-597</span></h3>
+
+<div class="step">
+  <div class="step-head">① DNSSEC — Digital signatures on DNS records <span class="pdf-ref">📄 pp. 595, 597</span></div>
+  <div class="step-detail">
+    Each DNS zone signs its records with a private key. The <em>parent zone</em> vouches for the
+    child's public key. Chain of trust rooted at the DNS <em>zone hierarchy</em>: Root → TLD →
+    authoritative → your record.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">② DNS over TLS (or HTTPS) <span class="pdf-ref">📄 p. 596</span></div>
+  <div class="step-detail">
+    Even if a poisoned reply gives the victim an attacker's IP, the subsequent TLS handshake to that
+    IP fails because the attacker cannot produce a valid certificate for
+    <span class="mono">www.example.com</span>. So HTTPS effectively <em>defeats</em> DNS cache
+    poisoning at the application layer — even though it doesn't fix DNS itself.
+  </div>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Cross-topic hook</strong>
+  <em>"DNSSEC relies on the DNS zone hierarchy for its chain of trust, while TLS/SSL relies on the CA
+  hierarchy (Public Key Infrastructure). Both use public-key signatures — what differs is where the
+  chain is rooted."</em> <span class="pdf-ref">📄 p. 597</span> — this exact comparison is the
+  instructor's #1 integration question between Topic 2 and Topic 3/4.
+</div>
+
+<h3>DoS Attacks on DNS Infrastructure <span class="pdf-ref">📄 pp. 598-601</span></h3>
+
+<ul class="plain">
+  <li><strong>Root servers (pp. 599)</strong> — 13 logical servers (A-M) implemented as anycast clusters. Also, the 48-hour TTL on TLD entries means most resolvers rarely query root directly. Attacks must be sustained and massive to have impact.</li>
+  <li><strong>TLD servers (pp. 600)</strong> — Large TLDs (.com, .net) are resilient; obscure country-code TLDs are softer targets and can effectively knock a whole country offline.</li>
+  <li><strong>Authoritative nameservers (pp. 601)</strong> — DNS providers like UltraDNS host many companies' records; the 2004 UltraDNS DoS took Amazon/Walmart/Expedia offline for an hour.</li>
+</ul>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 505-538, 541-557, 579-601 (signal sources: scriptFinalExamReview-cs548.txt)</div>
+
+<div class="section-block">
+
+<h3>3.1 — What Exams Typically Test On This Topic</h3>
+<p>
+  Per the instructor's own words in the final-exam review — <em>"typically those can be tested in
+  terms of true and false, or multiple choice, or multiple answer questions"</em> — Topic 2 is
+  concentrated on <strong>objective-format</strong> questions rather than deep short-answer. The
+  recurring patterns:
+</p>
+<ol>
+  <li>
+    <strong>"Local vs Remote attacker — which one succeeds?"</strong> For every TCP attack (RST, Session
+    Hijack) and DNS cache-poisoning variant, the exam can ask which class of attacker needs to guess
+    values versus observe them directly. <span class="pdf-ref">📄 pp. 553-556, 590</span>
+  </li>
+  <li>
+    <strong>"Given an attack, name the defense."</strong> The instructor emphasized that for every
+    attack you must know the countermeasure. Expect matching-style MCQs.
+    <span class="pdf-ref">📄 pp. 512, 550, 556, 594-596</span>
+  </li>
+  <li>
+    <strong>"What information must an attacker possess?"</strong> The five-field RST tuple, the two
+    16-bit random numbers for DNS cache poisoning, the receiver's sequence-number window.
+    <span class="pdf-ref">📄 pp. 553, 555, 590</span>
+  </li>
+  <li>
+    <strong>"How does SYN cookies work?"</strong> — a common full-sentence question, since it is the
+    one purely-algorithmic defense in this topic. <span class="pdf-ref">📄 pp. 550-551</span>
+  </li>
+  <li>
+    <strong>"DNSSEC vs TLS chain of trust."</strong> The instructor put a whole slide on this
+    comparison (p. 597) — a near-certain short-answer or multi-answer MCQ.
+    <span class="pdf-ref">📄 p. 597</span>
+  </li>
+  <li>
+    <strong>"Walk through ARP poisoning."</strong> With 4 consecutive slides (pp. 532-536) showing the
+    step-by-step cache state, this is a prime short-answer candidate.
+  </li>
+  <li>
+    <strong>"Which layer does X attack target?"</strong> TCP/transport, IP/network, ARP/link,
+    DNS/application. Simple stratum-matching question.
+  </li>
+  <li>
+    <strong>Multi-answer: "Select all defenses against IP spoofing."</strong> Slide 512 lists seven —
+    ingress, egress, avoid IP-trust, TTL, IPsec, randomized ISN, uRPF.
+    <span class="pdf-ref">📄 p. 512</span>
+  </li>
+</ol>
+
+<h3>3.2 — Common Misconceptions &amp; Traps</h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "SYN cookies prevent SYN floods by filtering malicious SYNs at the firewall."</p>
+  <p><span class="reality">✅ REALITY:</span> SYN cookies do <em>not</em> filter or drop SYNs — the
+    server <em>still accepts every SYN</em>. The fix is that the server <strong>allocates no state
+    (no TCB)</strong> until the ACK returns a valid keyed-hash cookie. State is offloaded onto the
+    client's ACK value.
+    <span class="pdf-ref">📄 pp. 550-551</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Answer-option phrased as "SYN cookies block incoming SYN packets" — this is wrong.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "Ingress filtering is what ISPs do to stop IP spoofing."</p>
+  <p><span class="reality">✅ REALITY:</span> Ingress and egress filtering are applied at different
+    points and catch different things. <strong>Egress filtering</strong> at the ISP drops customer
+    packets with forged source IPs <em>leaving</em> the customer network — this is the most effective
+    because it stops spoofing at the origin. <strong>Ingress filtering</strong> at your own network
+    edge drops incoming packets whose source IP could not legitimately come from that interface
+    (e.g., a packet from the outside claiming to have an internal source).
+    <span class="pdf-ref">📄 pp. 403, 425, 512</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Multi-answer MCQ mixes up which side does which.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "A remote TCP RST attack is roughly as easy as a local one."</p>
+  <p><span class="reality">✅ REALITY:</span> Local attackers can <em>sniff</em> the connection and
+    read all five required fields — source IP, source port, destination IP, destination port, and
+    the current sequence-number window — directly. Remote attackers, who cannot sniff, must
+    <em>guess</em> the sequence number within the receive window (a 32-bit space narrowed by window
+    size). The instructor explicitly said remote RST is "difficult." Sequence-number randomization
+    defeats remote attacks; only <strong>encryption (IPsec)</strong> defeats local ones.
+    <span class="pdf-ref">📄 pp. 553-556</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> T/F: "Randomizing the initial sequence number protects against local TCP RST attacks." — FALSE.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "ARP spoofing can be done over the Internet from anywhere."</p>
+  <p><span class="reality">✅ REALITY:</span> ARP is a <strong>link-layer</strong> protocol that
+    operates <em>only within a single broadcast domain</em> (LAN). Routers do not forward ARP
+    messages. So ARP spoofing is strictly a local-network attack.
+    <span class="pdf-ref">📄 pp. 529-531</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> Multi-answer: "Which of these attacks can a remote attacker perform from anywhere on the Internet?" — ARP spoofing should NOT be selected.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "DNSSEC and TLS both use the same chain of trust."</p>
+  <p><span class="reality">✅ REALITY:</span> Both use public-key signatures, but <em>where the chain
+    is rooted</em> is different. <strong>DNSSEC</strong> roots its chain in the <em>DNS zone
+    hierarchy</em> — Root signs TLD, TLD signs second-level, second-level signs your record.
+    <strong>TLS/SSL</strong> roots its chain in the <em>Public Key Infrastructure (PKI)</em> — a small
+    number of Certificate Authorities (CAs) that the browser trusts by default.
+    <span class="pdf-ref">📄 p. 597</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> T/F: "DNSSEC uses Certificate Authorities just like TLS." — FALSE.</p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ MYTH:</span> "The Kaminsky attack works because DNSSEC is broken."</p>
+  <p><span class="reality">✅ REALITY:</span> The Kaminsky attack targets plain (non-DNSSEC) DNS. It
+    bypasses the <em>cache effect</em> that previously slowed DNS cache poisoning by asking random
+    subdomains. DNSSEC, once deployed, actually <em>defeats</em> Kaminsky because the spoofed reply
+    has no valid signature. <span class="pdf-ref">📄 pp. 592-593, 595</span></p>
+  <p><span class="trap">🎯 EXAM TRAP:</span> "Kaminsky attack defeats DNSSEC" — this is the reverse; DNSSEC defeats Kaminsky.</p>
+</div>
+
+<h3>3.3 — Compare &amp; Contrast: The Four Attack Families</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Family</th>
+      <th>Layer</th>
+      <th>Signature attack</th>
+      <th>Root cause</th>
+      <th>Primary defense</th>
+      <th>📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TCP</strong></td>
+      <td>Transport (L4)</td>
+      <td>SYN flooding, RST, Session hijacking</td>
+      <td>Server-side state on SYN; sequence numbers guessable if not randomized</td>
+      <td>SYN cookies; ISN/port randomization; IPsec encryption</td>
+      <td><span class="pdf-ref">📄 pp. 549-556</span></td>
+    </tr>
+    <tr>
+      <td><strong>IP / ICMP</strong></td>
+      <td>Network (L3)</td>
+      <td>IP spoofing, Smurf, Destination Unreachable</td>
+      <td>No source authentication in IP; no authentication in ICMP</td>
+      <td>Ingress/Egress filtering; IPsec; disable ICMP responses / broadcast</td>
+      <td><span class="pdf-ref">📄 pp. 505-528</span></td>
+    </tr>
+    <tr>
+      <td><strong>ARP</strong></td>
+      <td>Link (L2)</td>
+      <td>ARP spoofing / poisoning → MITM</td>
+      <td>Stateless protocol; unsolicited replies accepted</td>
+      <td>Static ARP entries; Dynamic ARP Inspection; end-to-end TLS/IPsec</td>
+      <td><span class="pdf-ref">📄 pp. 531-538</span></td>
+    </tr>
+    <tr>
+      <td><strong>DNS</strong></td>
+      <td>Application / infrastructure</td>
+      <td>Cache poisoning, Kaminsky attack</td>
+      <td>Unauthenticated replies; only 32 bits of secret (port + TX-ID)</td>
+      <td>DNSSEC; DNS over TLS; HTTPS at the app layer</td>
+      <td><span class="pdf-ref">📄 pp. 588-597</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.4 — Compare &amp; Contrast: Local vs Remote Attacker Difficulty</h3>
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Attack</th>
+      <th>Local attacker</th>
+      <th>Remote attacker</th>
+      <th>Why the gap</th>
+      <th>📄 Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>TCP SYN flood</td>
+      <td>Easy</td>
+      <td>Easy</td>
+      <td>No secret fields needed — just high packet rate</td>
+      <td><span class="pdf-ref">📄 p. 549</span></td>
+    </tr>
+    <tr>
+      <td>TCP RST / Session Hijack</td>
+      <td>Easy (sniff to read seq#)</td>
+      <td>Hard (guess seq# in window)</td>
+      <td>5-tuple must match; seq# is 32-bit</td>
+      <td><span class="pdf-ref">📄 pp. 553-556</span></td>
+    </tr>
+    <tr>
+      <td>IP Spoofing (send one-off packet)</td>
+      <td>Trivial</td>
+      <td>Trivial</td>
+      <td>No checks at all on source IP</td>
+      <td><span class="pdf-ref">📄 pp. 507-508</span></td>
+    </tr>
+    <tr>
+      <td>ARP spoofing / MITM</td>
+      <td>Easy</td>
+      <td><strong>Impossible</strong></td>
+      <td>ARP doesn't cross routers — LAN-only</td>
+      <td><span class="pdf-ref">📄 pp. 529-531</span></td>
+    </tr>
+    <tr>
+      <td>DNS spoofing (from LAN)</td>
+      <td>Easy (sniff query, reply first)</td>
+      <td>Hard (guess both 16-bit numbers)</td>
+      <td>Source-port + transaction-ID = 32 bits</td>
+      <td><span class="pdf-ref">📄 pp. 589-590</span></td>
+    </tr>
+    <tr>
+      <td>Kaminsky DNS</td>
+      <td>n/a (local is easy anyway)</td>
+      <td>Medium (no cache-effect delay)</td>
+      <td>Random subdomains remove cache-wait</td>
+      <td><span class="pdf-ref">📄 pp. 592-593</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3.5 — Memory Aids</h3>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Four Attack Families" = T-I-A-D</strong>
+  <strong>T</strong>CP (transport) → <strong>I</strong>P (network) → <strong>A</strong>RP (link) →
+  <strong>D</strong>NS (app). Top-to-bottom-and-out the stack. "<em>Top Internet Attack Directions.</em>"
+  <span class="pdf-ref">📄 pp. 541, 505, 529, 580</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Five Fields for a TCP RST"</strong>
+  <strong>src IP · src port · dst IP · dst port · seq# (in window)</strong>. Think of it as an
+  address on a letter: <em>from street, from apartment, to street, to apartment, page number.</em>
+  Miss any one and the receiver discards the packet.
+  <span class="pdf-ref">📄 p. 553</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "Two 16's for remote DNS poisoning"</strong>
+  Remote attacker must guess <strong>source port (16 bits)</strong> + <strong>transaction ID (16 bits)</strong> = 2³² ≈ 4 billion attempts per query. Kaminsky's trick asks a
+  <em>different</em> question every time to defeat the cache effect.
+  <span class="pdf-ref">📄 pp. 590-593</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "SYN-cookie = no TCB"</strong>
+  The server computes a keyed-hash <em>H</em> and sends H as its ISN. <strong>No state is stored</strong>.
+  A genuine client echoes H back (well, H+1 in ACK); the server just recomputes to verify. No TCB = no queue = no flood.
+  <span class="pdf-ref">📄 pp. 550-551</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "DNSSEC zones, TLS CAs"</strong>
+  Same math (public-key signatures), different tree root.
+  <em>DNSSEC's</em> chain of trust is the <em>zone hierarchy</em>: Root → TLD → authoritative.
+  <em>TLS's</em> chain of trust is the <em>CA hierarchy</em>: Root CAs → intermediates → server cert.
+  <span class="pdf-ref">📄 p. 597</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">Mnemonic — "ARP is stateless, so it's spoof-able"</strong>
+  Unsolicited ARP replies are accepted and cached. The attacker just has to <em>keep</em> sending
+  them so that any correcting legitimate reply gets overwritten again.
+  <span class="pdf-ref">📄 pp. 531, 538</span>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 4: FOLLOW-UP QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Follow-up Questions</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 505-538, 541-557, 579-601 (questions span all four sub-topics)</div>
+
+<div class="section-block">
+
+<p style="color: var(--text-dim); font-size: 0.94em;">
+  13 questions · 3 difficulty levels · 4 formats · every stem &amp; answer tagged to the source slide.
+  Click <strong style="color: var(--green);">▶ Show Answer</strong> to reveal each explanation.
+</p>
+
+<!-- =========================== PART A: MCQ =========================== -->
+<h3 id="section-4-mcq">Part A — Multiple Choice (4 questions: 1 BEG, 1 INT, 2 ADV)</h3>
+
+<!-- Q1 BEG MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 547-549</span>
+  </div>
+  <p class="question-stem"><strong>Q1.</strong> In a TCP SYN flooding attack, which server-side resource
+    is primarily exhausted?</p>
+  <ol class="mcq-options" type="A">
+    <li>The server's CPU cycles spent computing TCP checksums.</li>
+    <li>The server's half-open connection queue, which stores a TCB for every SYN received.</li>
+    <li>The server's cryptographic key-storage buffer used for TLS.</li>
+    <li>The server's application-layer thread pool.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) The half-open connection queue / TCB storage.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Slide 548 states: <em>"the server stores the TCB in a queue that is only for the half-open connection... if ACK doesn't arrive, the server will resend SYN+ACK packet. The TCB will eventually be discarded after a certain time period."</em> The attacker fills this queue with incomplete connections. <span class="pdf-ref">📄 pp. 548-549</span></li>
+        <li><strong>Why A is wrong:</strong> TCP checksum computation is trivial and is not the bottleneck.</li>
+        <li><strong>Why C is wrong:</strong> TLS/crypto is a higher layer; SYN flooding occurs before any TLS handshake.</li>
+        <li><strong>Why D is wrong:</strong> Application threads are not allocated until the 3-way handshake completes; a half-open connection has no application thread yet.</li>
+        <li><strong>Exam Tip:</strong> If "half-open connection queue" appears in an answer option, it's almost always the SYN-flood answer.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 INT MCQ -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 p. 553</span>
+  </div>
+  <p class="question-stem"><strong>Q2.</strong> To successfully inject a TCP RST packet that tears down
+    an existing connection between Alice and Bob, which fields must the attacker set correctly in
+    the forged packet?</p>
+  <ol class="mcq-options" type="A">
+    <li>Only the source and destination IP addresses.</li>
+    <li>Source IP, source port, destination IP, and destination port — the sequence number is optional.</li>
+    <li>Source IP, source port, destination IP, destination port, and a sequence number within the receiver's current window.</li>
+    <li>Only the destination IP and destination port, along with the RST flag.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> C) All five fields — the classic "5-tuple + seq#".</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why C is correct:</strong> Slide 553 explicitly lists: <em>"Source IP address, Source Port, Destination IP address, Destination Port, Sequence number (within the receiver's window)."</em> All five are mandatory. <span class="pdf-ref">📄 p. 553</span></li>
+        <li><strong>Why A is wrong:</strong> TCP connections are identified by the full 4-tuple plus the sequence number state; IPs alone cannot match a specific connection.</li>
+        <li><strong>Why B is wrong:</strong> The receiver rejects any RST whose sequence number falls outside the current receive window — it is not optional.</li>
+        <li><strong>Why D is wrong:</strong> Without the source fields, the packet is not attributable to the connection and the receiver discards it.</li>
+        <li><strong>Exam Tip:</strong> The "5-tuple + seq# within window" requirement is also why remote RST attacks are hard — the attacker cannot sniff to discover the current seq#.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 ADV MCQ multi-answer -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ · multi-answer</span>
+    <span class="pdf-ref">📄 p. 512</span>
+  </div>
+  <p class="question-stem"><strong>Q3.</strong> Select <em>all</em> defenses against IP address spoofing
+    that slide 512 explicitly lists.</p>
+  <ol class="mcq-options" type="A">
+    <li>Ingress packet filtering at the network edge.</li>
+    <li>Egress packet filtering at the ISP.</li>
+    <li>Avoiding trust relationships based on IP address.</li>
+    <li>TTL-value checks (with TCP probe verification).</li>
+    <li>IPsec with cryptographic source authentication.</li>
+    <li>Randomized Initial Sequence Number in TCP.</li>
+    <li>Unicast Reverse-Path Forwarding (uRPF).</li>
+    <li>Disabling all ICMP Echo responses on the host.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answers:</strong> A, B, C, D, E, F, G. (Everything except H.)</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why A-G are correct:</strong> Slide 512 lists all seven verbatim: <em>"Packet filtering (Ingress filtering, Egress filtering); Avoiding trust relationship based on IP address; TTL Value; IPSec; Randomized Initial Sequence Number in TCP; Unicast Reverse Path Forwarding."</em> <span class="pdf-ref">📄 p. 512</span></li>
+        <li><strong>Why H is wrong:</strong> Disabling ICMP Echo responses is a defense against <em>ping scans and Smurf amplification</em> — it does not prevent an attacker from forging IP source addresses. <span class="pdf-ref">📄 pp. 520-521</span></li>
+        <li><strong>Exam Tip:</strong> On multi-answer MCQs where seven of eight options are correct, always look for a <em>related but mis-categorized</em> distractor — that's usually the wrong one.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 ADV MCQ (challenge — integrates DNS + TLS) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 595-597</span>
+  </div>
+  <p class="question-stem"><strong>Q4.</strong> Suppose an attacker successfully poisons your local DNS
+    cache so that <span class="mono">www.bank.com</span> resolves to the attacker's IP. The victim
+    then opens <strong>HTTPS</strong> to <span class="mono">www.bank.com</span>. What happens?</p>
+  <ol class="mcq-options" type="A">
+    <li>The attacker can read all traffic in cleartext — poisoning DNS also defeats TLS.</li>
+    <li>The TLS handshake fails because the attacker cannot produce a valid certificate for <span class="mono">www.bank.com</span> signed by a trusted Certificate Authority.</li>
+    <li>The TLS handshake succeeds but the browser shows a warning only if DNSSEC is enabled.</li>
+    <li>TLS is bypassed entirely because DNS poisoning changes the routing layer.</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Correct Answer:</strong> B) The TLS handshake fails; the attacker cannot forge the certificate.</p>
+      <p><strong>📝 Explanation:</strong></p>
+      <ul>
+        <li><strong>Why B is correct:</strong> Slide 596 states: <em>"HTTPS is built on top of TLS/SSL. It defeats DNS cache poisoning attacks."</em> After DNS resolution, the client still demands the server prove it owns the name via a CA-signed certificate. The attacker at the wrong IP cannot produce a certificate for <span class="mono">www.bank.com</span> that chains to a trusted CA, so the handshake aborts with a certificate error. <span class="pdf-ref">📄 p. 596</span></li>
+        <li><strong>Why A is wrong:</strong> TLS and DNS are independent trust anchors; poisoning one does not compromise the other.</li>
+        <li><strong>Why C is wrong:</strong> The certificate warning fires regardless of DNSSEC status — TLS has its own PKI chain-of-trust mechanism. <span class="pdf-ref">📄 p. 597</span></li>
+        <li><strong>Why D is wrong:</strong> DNS returns an IP; routing to that IP happens normally. TLS runs on top of the resulting TCP connection, independent of how the IP was obtained.</li>
+        <li><strong>Exam Tip:</strong> This is exactly the Topic 2 ⊕ Topic 4 integration the instructor flagged. The slide 597 DNSSEC-vs-TLS comparison is the cleanest short-answer version of the same idea.</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART B: TRUE/FALSE =========================== -->
+<h3 id="section-4-tf">Part B — True/False (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q5 BEG TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 529-531</span>
+  </div>
+  <p class="question-stem"><strong>Q5. Statement:</strong> A remote attacker located on a different
+    continent from the victim can perform an ARP spoofing attack against that victim's laptop as
+    long as both machines are connected to the Internet.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>ARP is a <strong>link-layer</strong> protocol that operates only within a single
+        <em>broadcast domain</em> (the local LAN). Routers do not forward ARP frames across network
+        boundaries. A remote attacker on a different network cannot send ARP messages to the victim's
+        LAN. ARP spoofing is strictly a <em>local</em> attack — the attacker must be on the same
+        physical/logical LAN as the victim. <span class="pdf-ref">📄 pp. 529-531</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 INT TF -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 550-551</span>
+  </div>
+  <p class="question-stem"><strong>Q6. Statement:</strong> When SYN cookies are enabled, the server
+    drops every incoming SYN packet until the client has completed a cryptographic handshake proving
+    it is not a flood source.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>SYN cookies do <em>not</em> drop SYN packets. The server <strong>still replies</strong> to
+        every SYN with a SYN-ACK — but crucially, it sends back a <em>keyed hash</em> H as the server's
+        ISN without storing any TCB. Only when (and if) the client returns a valid ACK with
+        <em>H + 1</em> does the server recompute the cookie, verify, and then allocate connection
+        state. The key insight is that <strong>state allocation is deferred from SYN to ACK</strong>,
+        so a flood of SYNs without matching ACKs costs the server essentially nothing.
+        <span class="pdf-ref">📄 pp. 550-551</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 ADV TF (subtle) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · subtle</span>
+    <span class="q-format">TF</span>
+    <span class="pdf-ref">📄 pp. 553-556</span>
+  </div>
+  <p class="question-stem"><strong>Q7. Statement:</strong> Randomizing the TCP Initial Sequence Number
+    (ISN) and source port successfully defeats both local and remote TCP Reset / Session Hijacking
+    attacks.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answer: FALSE.</strong></p>
+      <p>Randomization helps against <em>remote</em> attackers who must <strong>guess</strong> these
+        values, because the guess space explodes combinatorially. But a <em>local</em> attacker on the
+        same LAN can <strong>sniff</strong> the ongoing connection with Wireshark/tcpdump and
+        observe the current sequence number and ports directly — no guessing required. Slide 556
+        makes this explicit: <em>"Randomize source port number; Randomize initial sequence number —
+        Not effective against local attacks."</em> The only defense that works against local attackers
+        is <strong>encrypting the transport payload</strong> (IPsec), which hides the TCP header
+        from the sniffer. <span class="pdf-ref">📄 p. 556</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART C: SHORT ANSWER =========================== -->
+<h3 id="section-4-sa">Part C — Short Answer (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q8 BEG SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 531-537</span>
+  </div>
+  <p class="question-stem"><strong>Q8.</strong> Describe, in 3-5 bullet points, how ARP spoofing enables
+    a Man-in-the-Middle attack between two hosts A and B on the same LAN.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <ul class="plain">
+        <li>The attacker C sends an unsolicited ARP reply to A claiming <em>"B's IP is at C's MAC address."</em> Because ARP is stateless, A accepts and caches this mapping. <span class="pdf-ref">📄 p. 533</span></li>
+        <li>C sends a matching unsolicited ARP reply to B claiming <em>"A's IP is at C's MAC address."</em> B similarly caches it. <span class="pdf-ref">📄 p. 535</span></li>
+        <li>Now when A sends a frame destined for B's IP, the link-layer framing uses C's MAC as the destination — so the frame is physically delivered to C, not B. Same for B → A. <span class="pdf-ref">📄 p. 537</span></li>
+        <li>C acts as a silent router between A and B, reading and optionally modifying every frame, then forwarding the packet on to the real destination using the correct MAC it still knows. <span class="pdf-ref">📄 p. 537</span></li>
+        <li>To keep the poisoning active against any legitimate ARP traffic that would correct the caches, C repeats its gratuitous ARP replies periodically. <span class="pdf-ref">📄 p. 538</span></li>
+      </ul>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Identifies that two separate poisonings happen (A's cache AND B's cache) <span class="pdf-ref">📄 pp. 533-535</span></li>
+        <li>☐ States that ARP is stateless / unsolicited replies are accepted <span class="pdf-ref">📄 p. 531</span></li>
+        <li>☐ Explains how traffic flows through the attacker (MITM) <span class="pdf-ref">📄 p. 537</span></li>
+        <li>☐ Mentions the need to keep replaying (gratuitous ARP) <span class="pdf-ref">📄 p. 538</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 INT SA -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 pp. 590-593</span>
+  </div>
+  <p class="question-stem"><strong>Q9.</strong> Explain the <em>Kaminsky DNS attack</em>. Specifically:
+    what two random numbers must the attacker match in a spoofed reply, and how does asking for
+    "random subdomains" help the attacker?</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <p>For a remote attacker, a spoofed DNS reply is accepted only if it matches the
+        <strong>source port</strong> (16-bit random, chosen by the resolver) and the
+        <strong>transaction ID</strong> (16-bit random, chosen by the client for each query) of the
+        outstanding legitimate query. Before Kaminsky, attackers faced a "cache effect" problem:
+        once a failed guess arrives, the resolver accepts the <em>real</em> reply that follows and
+        caches it, so the attacker must wait for the TTL to expire before retrying.
+        <span class="pdf-ref">📄 p. 590</span></p>
+      <p>Kaminsky's insight was to <strong>change the question itself every attempt</strong>. Instead
+        of querying <span class="mono">www.example.com</span> repeatedly, the attacker induces queries
+        for random subdomains — <span class="mono">aaaa.example.com</span>,
+        <span class="mono">aaab.example.com</span>, etc. Each is a fresh cache miss, so the resolver
+        issues a new outward query every time. The spoofed reply carries a valid-looking answer for
+        the random subdomain but also includes an <em>Authority</em> / <em>Additional</em> section
+        that reassigns the authoritative nameserver for the <em>whole</em>
+        <span class="mono">example.com</span> domain to the attacker's IP. That delegation gets
+        cached and is used for every subsequent <span class="mono">*.example.com</span> lookup.
+        <span class="pdf-ref">📄 pp. 592-593</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ Names the two 16-bit numbers: source port + transaction ID <span class="pdf-ref">📄 p. 590</span></li>
+        <li>☐ Identifies the "cache effect" as the obstacle Kaminsky bypasses <span class="pdf-ref">📄 p. 590</span></li>
+        <li>☐ Explains that random subdomains cause cache misses every attempt <span class="pdf-ref">📄 p. 592</span></li>
+        <li>☐ Mentions that the payload is the delegation (Authority section), not the direct answer <span class="pdf-ref">📄 p. 593</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 ADV SA (challenge) -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV · challenge</span>
+    <span class="q-format">SA</span>
+    <span class="pdf-ref">📄 p. 597 &nbsp;+&nbsp; pp. 240-244 (TLS PKI)</span>
+  </div>
+  <p class="question-stem"><strong>Q10.</strong> Both DNSSEC and TLS/SSL use public-key signatures,
+    but their <em>chains of trust</em> are structurally different. Contrast them: where is the root
+    of trust in each system, and what infrastructure is responsible for vouching for subordinate
+    entities?</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>📝 Model Answer:</strong></p>
+      <p><strong>DNSSEC</strong> roots its chain of trust in the <em>DNS zone hierarchy</em>. The
+        <strong>Root zone</strong> signs and publishes a key for each <strong>TLD</strong>
+        (e.g., <span class="mono">.com</span>, <span class="mono">.edu</span>). Each TLD in turn signs
+        keys for its second-level domains (e.g., <span class="mono">ua.edu</span>), which sign keys
+        for their own sub-zones. A client validating a record walks upward through the zone hierarchy
+        until reaching the Root key that is hard-coded in the resolver. The key property: the
+        <em>parent zone</em> vouches for the <em>child zone</em>, mirroring the DNS delegation
+        structure. <span class="pdf-ref">📄 pp. 595, 597</span></p>
+      <p><strong>TLS/SSL</strong> roots its chain of trust in the <em>Public Key Infrastructure
+        (PKI)</em>. A small number of <strong>Certificate Authorities</strong> are pre-installed in
+        every browser / OS as trusted roots. A CA signs a server's X.509 certificate, possibly via
+        intermediate CAs. The client walks from the server certificate up through the intermediates
+        until it reaches a pre-trusted Root CA. The key property: a <em>separate body (the CA)</em>
+        vouches for the server's identity — there is no inherent relationship between the CA and the
+        domain hierarchy. <span class="pdf-ref">📄 p. 597, pp. 240-244</span></p>
+      <p><strong>Practical consequence:</strong> DNSSEC protects DNS answers themselves. TLS protects
+        the TCP/IP connection <em>after</em> DNS has handed you an IP. They address different
+        threats with the same cryptographic building block, and HTTPS effectively compensates for
+        non-DNSSEC DNS because even a poisoned IP cannot produce a valid CA-signed certificate.
+        <span class="pdf-ref">📄 p. 596</span></p>
+      <p><strong>🔑 Key Points (Grading Checklist):</strong></p>
+      <ul class="plain">
+        <li>☐ DNSSEC: chain rooted at DNS Root zone, parent-vouches-for-child structure <span class="pdf-ref">📄 p. 597</span></li>
+        <li>☐ TLS: chain rooted at trusted CAs (PKI), CAs vouch for server certificates <span class="pdf-ref">📄 p. 597</span></li>
+        <li>☐ Both use public-key signatures (same underlying technology) <span class="pdf-ref">📄 p. 597</span></li>
+        <li>☐ Bonus: notes that HTTPS defeats DNS cache poisoning independently of DNSSEC <span class="pdf-ref">📄 p. 596</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- =========================== PART D: FILL IN THE BLANK =========================== -->
+<h3 id="section-4-fib">Part D — Fill in the Blank (3 questions: 1 BEG, 1 INT, 1 ADV)</h3>
+
+<!-- Q11 BEG FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 p. 521</span>
+  </div>
+  <p class="question-stem"><strong>Q11.</strong> In the ____________ attack, the attacker sends an
+    ICMP Echo Request with the victim's IP as source and a ____________ address as destination,
+    causing every host on that subnet to reply to the victim.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> <strong>Smurf</strong> attack; <strong>broadcast</strong> (IP
+        broadcast / subnet broadcast) address.</p>
+      <p><strong>📝 Why:</strong> Slide 521 describes: <em>"ICMP Echo Request can be used to perform
+        a denial of service attack (smurf)"</em> with a forged source equal to the victim and a
+        destination like <span class="mono">192.168.1.255</span>. Every host on the broadcast network
+        replies unicast to the victim, amplifying the attacker's bandwidth by the number of hosts on
+        the subnet. <span class="pdf-ref">📄 p. 521</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 INT FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 p. 588</span>
+  </div>
+  <p class="question-stem"><strong>Q12.</strong> An attacker with write access to a victim's machine
+    can perform DNS spoofing locally by modifying either ____________ (to add static name-to-IP
+    entries that are consulted before DNS) or ____________ (to change which DNS resolver the machine
+    uses).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> <strong><span class="mono">/etc/hosts</span></strong>
+        (local static hostname-to-IP map); <strong><span class="mono">/etc/resolv.conf</span></strong>
+        (resolver configuration file).</p>
+      <p><strong>📝 Why:</strong> Slide 588 explicitly names both vectors: <em>"Modify /etc/resolv.conf:
+        use malicious DNS server as the machine's local DNS server and can control the entire DNS
+        process. Modify /etc/hosts: add new records to the file, providing the IP addresses for some
+        selected domains."</em> These attacks don't require network traffic at all — they are
+        host-level compromises. <span class="pdf-ref">📄 p. 588</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 ADV FIB -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">FIB</span>
+    <span class="pdf-ref">📄 pp. 550-551</span>
+  </div>
+  <p class="question-stem"><strong>Q13.</strong> In the SYN cookie defense, the server computes
+    H = keyed-hash(source IP, source port, destination IP, destination port, secret) and returns H
+    as its ____________ in the SYN-ACK packet. Crucially, the server stores ____________ at this
+    stage, deferring all connection state until the client returns a valid ACK containing ____________.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>✅ Answers:</strong> (1) <strong>Initial Sequence Number (ISN)</strong> (or simply
+        "sequence number"); (2) <strong>no state / no TCB / nothing</strong>; (3) <strong>H + 1</strong>
+        (or "the cookie value incremented").</p>
+      <p><strong>📝 Why:</strong> Slide 550 describes the mechanism: <em>"This hash (H) is sent to the
+        client as the initial sequence number from the server. H is called SYN cookie. The server
+        will not store the half-open connection in its queue... If the client is not an attacker, it
+        sends H+1 in the acknowledgement field. The server checks if the number in the
+        acknowledgement field is valid or not by recalculating the cookie."</em>
+        <span class="pdf-ref">📄 pp. 550-551</span></p>
+    </div>
+  </details>
+</div>
+
+</div>
+<!-- /section-block -->
+
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Summary · Exam Cheat Sheet</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 505-538, 541-557, 579-601 (condensed view of the entire topic)</div>
+
+<div class="cheat-sheet">
+
+  <h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+  <p class="oneliner">
+    A top-to-bottom catalog of how the core Internet protocols — TCP, IP/ICMP, ARP, and DNS — can be
+    abused because they lack built-in authentication, and what defenses (<strong>randomization</strong>,
+    <strong>filtering</strong>, <strong>encryption</strong>, <strong>digital signatures</strong>) we
+    deploy to restore that authentication at each layer.
+    <span class="pdf-ref">📄 pp. 505-601</span>
+  </p>
+
+  <h4>THE THREE THINGS YOU MUST KNOW FOR EVERY ATTACK:</h4>
+  <ol>
+    <li>
+      <strong>The mechanism</strong> — what packet(s) does the attacker send, what field(s) do they
+      forge, and what does the victim do wrong in response?
+    </li>
+    <li>
+      <strong>The preconditions / attacker class</strong> — is this <em>local</em> (sniffs, reads
+      current state directly) or <em>remote</em> (must guess random values)? The gap is biggest for
+      TCP RST / Session Hijacking and for DNS cache poisoning.
+      <span class="pdf-ref">📄 pp. 553-556, 590</span>
+    </li>
+    <li>
+      <strong>The defense</strong> — every attack has at least one named countermeasure.
+      Randomization (ISN, ports, TX-ID); filtering (ingress, egress, uRPF); encryption (IPsec, TLS);
+      signatures (DNSSEC); state offloading (SYN cookies). The instructor said explicitly that she
+      will test this pairing.
+    </li>
+  </ol>
+
+  <h4>THE ONE-PAGE ATTACK-DEFENSE MATRIX:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr>
+        <th>Layer</th><th>Attack</th><th>Preconditions</th><th>Defense</th><th>📄 Page</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>L4 TCP</td>
+        <td>SYN flood</td>
+        <td>High packet rate</td>
+        <td>SYN cookies (no TCB until ACK)</td>
+        <td><span class="pdf-ref">📄 pp. 549-551</span></td>
+      </tr>
+      <tr>
+        <td>L4 TCP</td>
+        <td>RST / Session hijack</td>
+        <td>5-tuple + seq# in window</td>
+        <td>Random ISN + port (remote); IPsec (local+remote)</td>
+        <td><span class="pdf-ref">📄 pp. 553-556</span></td>
+      </tr>
+      <tr>
+        <td>L3 IP</td>
+        <td>IP spoofing</td>
+        <td>None — just forge the source field</td>
+        <td>Ingress/egress filtering; uRPF; IPsec</td>
+        <td><span class="pdf-ref">📄 pp. 507-512</span></td>
+      </tr>
+      <tr>
+        <td>L3 ICMP</td>
+        <td>Smurf</td>
+        <td>Broadcast-enabled network</td>
+        <td>Disable directed broadcasts; egress filtering</td>
+        <td><span class="pdf-ref">📄 p. 521</span></td>
+      </tr>
+      <tr>
+        <td>L3 ICMP</td>
+        <td>Destination Unreachable / Redirect</td>
+        <td>Know the connection's IPs</td>
+        <td>Ignore unauthenticated ICMP; IPsec</td>
+        <td><span class="pdf-ref">📄 pp. 522-523, 528</span></td>
+      </tr>
+      <tr>
+        <td>L2 ARP</td>
+        <td>ARP spoofing / MITM</td>
+        <td>Same LAN (broadcast domain)</td>
+        <td>Static ARP; Dynamic ARP Inspection; end-to-end TLS</td>
+        <td><span class="pdf-ref">📄 pp. 531-538</span></td>
+      </tr>
+      <tr>
+        <td>DNS · local</td>
+        <td>DNS spoof reply</td>
+        <td>Same LAN / sniff query</td>
+        <td>DNSSEC; DNS over TLS; HTTPS</td>
+        <td><span class="pdf-ref">📄 p. 589</span></td>
+      </tr>
+      <tr>
+        <td>DNS · remote</td>
+        <td>Cache poisoning</td>
+        <td>Guess 16-bit port + 16-bit TX-ID</td>
+        <td>Random source ports + DNSSEC</td>
+        <td><span class="pdf-ref">📄 pp. 590-591</span></td>
+      </tr>
+      <tr>
+        <td>DNS · remote</td>
+        <td>Kaminsky</td>
+        <td>Ability to trigger queries for random subdomains</td>
+        <td>Full source-port randomization; DNSSEC</td>
+        <td><span class="pdf-ref">📄 pp. 592-593</span></td>
+      </tr>
+      <tr>
+        <td>DNS · infra</td>
+        <td>DoS on Root / TLD / Authoritative</td>
+        <td>Massive sustained bandwidth</td>
+        <td>Anycast clusters; caching; overprovisioning</td>
+        <td><span class="pdf-ref">📄 pp. 598-601</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>THE #1 MISTAKE STUDENTS MAKE:</h4>
+  <p>
+    Treating all attacks as "remote network attacks." Many of this topic's nastiest attacks — TCP
+    RST, TCP Session Hijacking, ARP spoofing, DNS spoofing from LAN — are dramatically easier for a
+    <em>local</em> attacker (who can sniff) than a <em>remote</em> one (who must guess). Defenses
+    that work against remote attackers (like ISN randomization) <strong>do not help</strong> against
+    local attackers. Only end-to-end encryption (IPsec / TLS) defeats both.
+    <span class="pdf-ref">📄 pp. 553-556, 589</span>
+  </p>
+
+  <h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+  <p class="remember">
+    "Top-to-bottom: TCP, IP, ARP, DNS. For each attack know mechanism · preconditions · defense —
+    and ask 'local or remote?' first." <span class="pdf-ref">📄 pp. 505, 542, 580</span>
+  </p>
+
+  <h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS TOPIC IN THE PDF:</h4>
+  <table class="data" style="margin-top: 10px;">
+    <thead>
+      <tr><th>If you want to review...</th><th>Go to Lecture PDF page(s)...</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>TCP 3-way handshake (background for all TCP attacks)</td><td><span class="pdf-ref">📄 pp. 547-548</span></td></tr>
+      <tr><td>SYN flooding mechanism &amp; TCB queue</td><td><span class="pdf-ref">📄 pp. 548-549</span></td></tr>
+      <tr><td>SYN cookies defense (full explanation)</td><td><span class="pdf-ref">📄 pp. 550-551</span></td></tr>
+      <tr><td>TCP RST attack &amp; 5-tuple + seq# preconditions</td><td><span class="pdf-ref">📄 pp. 552-554</span></td></tr>
+      <tr><td>TCP Session Hijacking &amp; sequence-number window</td><td><span class="pdf-ref">📄 pp. 555-556</span></td></tr>
+      <tr><td>IP spoofing mechanism + tools (Scapy, libnet)</td><td><span class="pdf-ref">📄 pp. 507-511</span></td></tr>
+      <tr><td>Full list of 7 defenses against IP spoofing</td><td><span class="pdf-ref">📄 p. 512</span></td></tr>
+      <tr><td>ICMP protocol overview</td><td><span class="pdf-ref">📄 pp. 518-519</span></td></tr>
+      <tr><td>ICMP Echo scan &amp; nmap reconnaissance</td><td><span class="pdf-ref">📄 p. 520</span></td></tr>
+      <tr><td>Smurf attack (ICMP broadcast amplification)</td><td><span class="pdf-ref">📄 p. 521</span></td></tr>
+      <tr><td>ICMP Destination Unreachable attack</td><td><span class="pdf-ref">📄 pp. 522-523, 528</span></td></tr>
+      <tr><td>Ping of Death &amp; fragmentation attacks</td><td><span class="pdf-ref">📄 pp. 525-527</span></td></tr>
+      <tr><td>ARP protocol basics (IP ↔ MAC)</td><td><span class="pdf-ref">📄 pp. 529-530</span></td></tr>
+      <tr><td>ARP spoofing step-by-step (poisoning diagrams)</td><td><span class="pdf-ref">📄 pp. 531-536</span></td></tr>
+      <tr><td>ARP → Man-in-the-Middle</td><td><span class="pdf-ref">📄 p. 537</span></td></tr>
+      <tr><td>DNS protocol overview &amp; hierarchy</td><td><span class="pdf-ref">📄 pp. 580-582</span></td></tr>
+      <tr><td>Iterative DNS query (walk-through)</td><td><span class="pdf-ref">📄 pp. 584-586</span></td></tr>
+      <tr><td>Local DNS files (/etc/hosts, /etc/resolv.conf)</td><td><span class="pdf-ref">📄 p. 587</span></td></tr>
+      <tr><td>DNS attack categories (DoS + Spoofing)</td><td><span class="pdf-ref">📄 p. 588</span></td></tr>
+      <tr><td>DNS spoofing from LAN</td><td><span class="pdf-ref">📄 p. 589</span></td></tr>
+      <tr><td>Remote DNS cache poisoning (2× 16-bit)</td><td><span class="pdf-ref">📄 pp. 590-591</span></td></tr>
+      <tr><td>Kaminsky attack (random subdomains)</td><td><span class="pdf-ref">📄 pp. 592-593</span></td></tr>
+      <tr><td>DNSSEC protection mechanism</td><td><span class="pdf-ref">📄 p. 595</span></td></tr>
+      <tr><td>DNS over TLS/SSL (HTTPS as fallback defense)</td><td><span class="pdf-ref">📄 p. 596</span></td></tr>
+      <tr><td>DNSSEC vs TLS chain-of-trust comparison</td><td><span class="pdf-ref">📄 p. 597</span></td></tr>
+      <tr><td>DoS on DNS infrastructure (Root / TLD / authoritative)</td><td><span class="pdf-ref">📄 pp. 599-601</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin-top: 22px;">15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM)</h4>
+  <ol>
+    <li>Re-read the 4 attack-family table in §3.3 above — lock in which attack lives at which layer.</li>
+    <li>Memorize the <strong>5-tuple + seq#</strong> requirement for TCP RST <span class="pdf-ref">📄 p. 553</span>.</li>
+    <li>Memorize the <strong>2× 16-bit</strong> secret for remote DNS poisoning <span class="pdf-ref">📄 p. 590</span>.</li>
+    <li>Redraw the ARP MITM on scratch paper — both victims' caches poisoned <span class="pdf-ref">📄 pp. 533-537</span>.</li>
+    <li>Say to yourself: "SYN cookies = no TCB until ACK verifies H" <span class="pdf-ref">📄 p. 550</span>.</li>
+    <li>Say to yourself: "DNSSEC = zone chain; TLS = CA chain; HTTPS defeats DNS poisoning at app layer" <span class="pdf-ref">📄 p. 597</span>.</li>
+    <li>Write out <em>"Local vs Remote"</em> in the margin of your exam and mark each attack accordingly.</li>
+  </ol>
+
+</div>
+
+<!-- ============================================================
+     END OF TOPIC 2
+     ============================================================ -->
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This study guide covers <strong>only Topic 2</strong> as listed in <span class="mono">appendix_finalexam.md</span>.
+  The previous guide covers Topic 1 (Wireless / Link-Layer Security). Remaining topics — Cryptography
+  Foundations, TLS/HTTPS/SSH, User Authentication, IPsec &amp; VPN, Firewalls — are prepared as
+  separate study guides using the same master-prompt template.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs548-theme';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
