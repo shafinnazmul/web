@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 — Block Ciphers & AES: Complete Study Guide</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #38bdf8;
+    --gold: #fbbf24;
+    --green: #34d399;
+    --red: #f87171;
+    --orange: #fb923c;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #4a5a7a;
+    --mono: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
+    --sans: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    padding-bottom: 80px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: #070a12;
+    border-bottom: 2px solid var(--accent);
+    padding: 20px 48px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .topbar h1 { font-size: 1.1em; font-weight: 700; color: var(--accent); }
+  .topbar span { color: var(--text2); font-size: .82em; }
+
+  /* ── PAGE ── */
+  .page { max-width: 1300px; margin: 0 auto; padding: 40px 48px; }
+
+  /* ── SLIDE CARD ── */
+  .slide-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .slide-header {
+    background: linear-gradient(90deg, #0d1a2e 0%, #111827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .slide-num {
+    background: var(--accent);
+    color: #000;
+    font-weight: 800;
+    font-size: .75em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .slide-title { font-size: 1.05em; font-weight: 700; color: var(--text); }
+  .slide-ref { color: var(--text2); font-size: .78em; margin-left: auto; font-style: italic; }
+  .slide-body { padding: 28px; }
+
+  /* ── CODE BLOCK (Slide content) ── */
+  .code-block {
+    background: #060b14;
+    border: 1px solid #1e3050;
+    border-radius: 8px;
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: .82em;
+    line-height: 1.75;
+    color: #a8d8ea;
+    overflow-x: auto;
+    margin-bottom: 8px;
+  }
+  .code-block .cm { color: #4a6a4a; } /* comment */
+  .code-block .kw { color: var(--accent); font-weight: 700; } /* keyword */
+  .code-block .op { color: var(--gold); } /* operator */
+  .code-block .hl { color: var(--green); } /* highlight */
+  .code-block .hl2 { color: var(--orange); }
+  .code-block .hl3 { color: var(--purple); }
+  .code-block .hl4 { color: var(--pink); }
+
+  /* ── SECTION HEADERS inside discussion ── */
+  .disc-section {
+    margin-top: 32px;
+    margin-bottom: 8px;
+  }
+  .disc-section:first-child { margin-top: 0; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .82em;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 14px 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .badge-key   { background: #1a2a1a; color: var(--green); border: 1px solid #234d23; }
+  .badge-why   { background: #1a1a0a; color: var(--gold); border: 1px solid #4d3d00; }
+  .badge-deep  { background: #0a1a2a; color: var(--accent); border: 1px solid #1a3a5a; }
+  .badge-warn  { background: #1a0a0a; color: var(--red); border: 1px solid #4d1a1a; }
+  .badge-tip   { background: #1a0a2a; color: var(--purple); border: 1px solid #3a1a5a; }
+
+  /* ── KEY CONCEPTS BOX ── */
+  .kc-box {
+    background: #0d1a10;
+    border: 1px solid #1e4d28;
+    border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .kc-box ul { list-style: none; padding: 0; }
+  .kc-box ul li { padding: 3px 0 3px 20px; position: relative; color: #b8f0c8; font-size: .9em; }
+  .kc-box ul li::before { content: "✦"; position: absolute; left: 0; color: var(--green); font-size: .7em; top: 5px; }
+
+  /* ── GOLDEN CIRCLE TABLE ── */
+  .gc-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .gc-table th {
+    padding: 14px 18px;
+    text-align: left;
+    font-size: .82em;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .gc-table td { padding: 16px 18px; vertical-align: top; font-size: .9em; line-height: 1.7; }
+  .gc-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+  .gc-why   th { background: #2d1a00; color: var(--gold); }
+  .gc-why   td { background: #1a1000; color: #fde68a; }
+  .gc-how   th { background: #00251a; color: var(--green); }
+  .gc-how   td { background: #001a10; color: #a7f3d0; }
+  .gc-what  th { background: #001a2a; color: var(--accent); }
+  .gc-what  td { background: #000f1a; color: #bae6fd; }
+
+  /* ── DEEP DIVE TEXT ── */
+  .deep-dive { color: var(--text2); line-height: 1.85; }
+  .deep-dive p { margin-bottom: 14px; }
+  .deep-dive strong { color: var(--text); }
+  .deep-dive em { color: var(--gold); font-style: normal; font-weight: 600; }
+
+  /* ── ANALOGY BOX ── */
+  .analogy-box {
+    background: #130a1f;
+    border: 1px solid #2d1a4d;
+    border-left: 4px solid var(--purple);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 16px 0 24px;
+    color: #d8b4fe;
+    font-size: .9em;
+    line-height: 1.75;
+  }
+  .analogy-box .analogy-title {
+    font-weight: 700;
+    color: var(--purple);
+    font-size: .82em;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* ── WARN/NOTE BOX ── */
+  .warn-box {
+    background: #1a0a08;
+    border: 1px solid #4d1a14;
+    border-left: 4px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    color: #fca5a5;
+    font-size: .88em;
+  }
+  .note-box {
+    background: #0a1810;
+    border: 1px solid #1a4d28;
+    border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    color: #86efac;
+    font-size: .88em;
+  }
+
+  /* ── STEP-BY-STEP TABLE ── */
+  .step-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .step-table thead tr { background: #0d1526; }
+  .step-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: .75em;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+  .step-table tbody tr { border-bottom: 1px solid var(--border); }
+  .step-table tbody tr:last-child { border-bottom: none; }
+  .step-table tbody tr:hover { background: #0f1a2e; }
+  .step-table td { padding: 14px 16px; vertical-align: top; font-size: .88em; line-height: 1.7; }
+  .step-table tbody tr:nth-child(even) td { background: #0d1525; }
+  .step-num { font-family: var(--mono); font-weight: 800; color: var(--accent); font-size: .85em; }
+  .step-name { font-weight: 700; color: var(--text); }
+  .step-op { font-family: var(--mono); font-size: .82em; color: var(--purple); }
+  .step-purpose { color: var(--gold); }
+  .step-security { color: var(--green); }
+  .step-detail { color: var(--text2); }
+
+  /* ── MATRIX DEMO ── */
+  .matrix-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .matrix-label { color: var(--text2); font-size: .8em; font-weight: 700; text-align: center; margin-bottom: 6px; }
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(4, 44px);
+    gap: 3px;
+  }
+  .matrix-cell {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: .78em;
+    font-weight: 700;
+    border-radius: 4px;
+  }
+  .mc-blue  { background: #0a1a3a; color: var(--accent); border-color: #1a3a6a; }
+  .mc-gold  { background: #2a1a00; color: var(--gold); border-color: #5a3a00; }
+  .mc-green { background: #0a2a0a; color: var(--green); border-color: #1a5a1a; }
+  .mc-red   { background: #2a0a0a; color: var(--red); border-color: #5a1a1a; }
+  .mc-purple{ background: #1a0a2a; color: var(--purple); border-color: #3a1a5a; }
+  .mc-mix   { background: #1a1a2a; color: var(--text2); border-color: var(--border); }
+  .arrow-right { font-size: 1.5em; color: var(--text3); }
+
+  /* ── Q&A SECTION ── */
+  .qa-section {
+    background: #0a1020;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gold);
+    border-radius: 0 0 12px 12px;
+    padding: 28px;
+    margin-top: 0;
+  }
+  .qa-section h3 {
+    color: var(--gold);
+    font-size: .95em;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .q-item { margin-bottom: 22px; }
+  .q-type {
+    display: inline-block;
+    font-size: .68em;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 7px;
+  }
+  .qt-mc   { background: #1a1000; color: #fbbf24; border: 1px solid #4d3000; }
+  .qt-tf   { background: #001a1a; color: #67e8f9; border: 1px solid #004d4d; }
+  .qt-sa   { background: #0a001a; color: #c4b5fd; border: 1px solid #2a005a; }
+  .qt-fb   { background: #001a0a; color: #4ade80; border: 1px solid #005a1a; }
+
+  .q-text { color: var(--text); font-weight: 600; font-size: .92em; margin-bottom: 10px; }
+  .q-options { padding-left: 0; list-style: none; }
+  .q-options li { padding: 5px 10px; color: var(--text2); font-size: .88em; border-radius: 4px; margin-bottom: 3px; }
+  .q-options li.correct { background: #0a2a10; color: var(--green); font-weight: 700; }
+  .q-options li.distractor { background: #1a0a0a; color: #6b7280; }
+
+  .q-answer {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-top: 6px;
+    font-size: .87em;
+    color: #a7f3d0;
+    line-height: 1.65;
+  }
+  .q-answer strong { color: var(--green); }
+
+  /* ── QUICK REF TABLE ── */
+  .qr-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .qr-table thead tr { background: #0a1828; }
+  .qr-table th { padding: 12px 16px; text-align: left; color: var(--accent); font-size: .8em; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+  .qr-table tbody tr { border-bottom: 1px solid var(--border); }
+  .qr-table tbody tr:last-child { border-bottom: none; }
+  .qr-table tbody tr:hover { background: #0f1a2e; }
+  .qr-table td { padding: 12px 16px; font-size: .87em; vertical-align: top; color: var(--text2); }
+  .qr-table td:first-child { color: var(--text); font-weight: 600; font-family: var(--mono); font-size: .82em; }
+  .qr-table tbody tr:nth-child(even) td { background: #0d1525; }
+
+  /* ── INTEGRATIVE Q SECTION ── */
+  .integrative {
+    background: #0d1020;
+    border: 2px solid #1e3a5a;
+    border-radius: 12px;
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .integrative h2 { color: var(--accent); font-size: 1em; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 22px; }
+  .int-q { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .int-q:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .int-q-text { color: var(--text); font-weight: 600; margin-bottom: 10px; font-size: .95em; }
+  .int-q-ans { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 14px 18px; color: var(--text2); font-size: .88em; line-height: 1.75; }
+  .int-q-ans strong { color: var(--accent); }
+
+  /* ── SECTION DIVIDER ── */
+  .section-title {
+    margin: 48px 0 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-title h2 { font-size: 1.1em; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+
+  /* ── ROUND STRUCTURE VISUAL ── */
+  .round-vis {
+    background: #060b14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 20px 0;
+    font-family: var(--mono);
+    font-size: .82em;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+  .rv-box {
+    border: 1px solid;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 8px 0;
+    font-family: var(--sans);
+    font-size: .88em;
+  }
+  .rv-input  { border-color: #2a4a6a; background: #0a1a2a; color: var(--accent); }
+  .rv-sub    { border-color: #4a2a00; background: #1a0f00; color: var(--orange); }
+  .rv-shift  { border-color: #004a2a; background: #001a0f; color: var(--green); }
+  .rv-mix    { border-color: #2a004a; background: #0f001a; color: var(--purple); }
+  .rv-ark    { border-color: #4a4a00; background: #1a1a00; color: var(--gold); }
+  .rv-repeat { color: var(--text3); font-size: .8em; text-align: center; font-family: var(--mono); padding: 4px 0; }
+  .rv-final  { border-color: #4a0a0a; background: #1a0505; color: var(--red); }
+  .rv-output { border-color: #1a3a1a; background: #0a150a; color: var(--green); }
+  .rv-arrow  { text-align: center; color: var(--text3); font-size: 1.1em; }
+  .rv-label  { font-weight: 700; }
+  .rv-note   { font-size: .8em; opacity: .7; margin-left: 10px; }
+
+  /* ── GF MATH BOX ── */
+  .math-box {
+    background: #0a0a1a;
+    border: 1px solid #1a1a3a;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    font-family: var(--mono);
+    font-size: .82em;
+    color: #c4b5fd;
+    line-height: 1.85;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+  }
+  .toc h3 { color: var(--accent); font-size: .85em; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { color: var(--text2); font-size: .88em; padding: 3px 0; }
+  .toc a { color: var(--text2); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  /* ── DIFFUSION CONFUSION VISUAL ── */
+  .dc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .dc-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .dc-card h4 { font-size: .85em; font-weight: 700; margin-bottom: 8px; }
+  .dc-card p { font-size: .85em; color: var(--text2); line-height: 1.65; }
+
+  /* ── KEYED HIGHLIGHT TEXT ── */
+  .k { background: #1a1a3a; color: var(--purple); font-family: var(--mono); font-size: .85em; padding: 1px 6px; border-radius: 3px; }
+  .kv { color: var(--green); }
+  .kc { color: var(--gold); }
+  strong { color: var(--text); }
+  em { color: var(--gold); font-style: normal; font-weight: 600; }
+
+  @media (max-width: 800px) {
+    .page { padding: 20px 18px; }
+    .topbar { padding: 14px 18px; }
+    .dc-grid { grid-template-columns: 1fr; }
+    .matrix-wrap { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>CS 448/548 — Block Ciphers &amp; AES: Complete Study Guide</h1>
+  <span>Spring 2026 · Dr. Lina Pu · Stallings [C] Ch. 5–6 / [N] Ch. 2</span>
+</div>
+
+<div class="page">
+
+<div class="toc">
+  <h3>📋 Table of Contents</h3>
+  <ol>
+    <li><a href="#slide1">Slide 1 — Cryptographic Systems Overview</a></li>
+    <li><a href="#slide2">Slide 2 — Block vs Stream Ciphers</a></li>
+    <li><a href="#slide3">Slide 3 — DES and Its Weaknesses</a></li>
+    <li><a href="#slide4">Slide 4 — AES Main Takeaways</a></li>
+    <li><a href="#slide5">Slide 5 — AES Encryption Round (The Core — DEEP DIVE)</a></li>
+    <li><a href="#slide6">Slide 6 — SubBytes: The S-Box Transformation</a></li>
+    <li><a href="#slide7">Slide 7 — ShiftRows: Row Rotation</a></li>
+    <li><a href="#slide8">Slide 8 — MixColumns: Column Mixing in GF(2⁸)</a></li>
+    <li><a href="#slide9">Slide 9 — AddRoundKey: XOR with Round Key</a></li>
+    <li><a href="#slide10">Slide 10 — Key Schedule / Key Expansion</a></li>
+    <li><a href="#slide11">Slide 11 — AES-CTR Mode (Stream Cipher)</a></li>
+    <li><a href="#slide12">Slide 12 — Brute Force Attacks &amp; Security Levels</a></li>
+    <li><a href="#qref">Quick Reference Summary</a></li>
+    <li><a href="#integrative">Exam Preparation — Integrative Questions</a></li>
+  </ol>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1                                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide1" class="slide-card">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 1</span>
+    <span class="slide-title">Cryptographic Systems — Three Dimensions</span>
+    <span class="slide-ref">Stallings [C] Ch. 2 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// Cryptographic Systems are characterized along THREE independent dimensions:</span>
+
+<span class="hl">Dimension 1 — Type of Operations</span>
+  ├── <span class="hl2">Substitution</span>:  replace each element of plaintext with another element
+  └── <span class="hl3">Transposition</span>: rearrange elements of plaintext (position swap)
+
+<span class="hl">Dimension 2 — Way Plaintext is Processed</span>
+  ├── <span class="hl2">Block Cipher</span>:  process fixed-length blocks (e.g., 128 bits at a time)
+  └── <span class="hl3">Stream Cipher</span>: process one element at a time (bit or byte)
+
+<span class="hl">Dimension 3 — Number of Keys</span>
+  ├── <span class="hl2">Symmetric</span>:     same key for encryption AND decryption
+  └── <span class="hl3">Asymmetric</span>:    public key to encrypt, private key to decrypt
+
+  encrypt                      decrypt
+  ┌───────┐    ciphertext     ┌───────┐
+  │ Alice │ ──────────────▶  │  Bob  │
+  └───────┘                  └───────┘
+    enc_key ──────────────────── dec_key
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box">
+        <ul>
+          <li>Every cipher can be described along exactly three independent axes: operations used, processing method, and key structure.</li>
+          <li>Substitution = change what a symbol IS. Transposition = change where a symbol SITS.</li>
+          <li>Block ciphers work on chunks of data (AES: 128 bits). Stream ciphers work one bit/byte at a time (RC4, One-Time Pad).</li>
+          <li>Symmetric = one shared secret key (fast, used for bulk encryption). Asymmetric = key pair (slower, used for key exchange and signatures).</li>
+          <li>AES is a symmetric block cipher — it uses the same key for encryption and decryption, and processes 128-bit blocks.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-why">🌀 Simon Sinek's Golden Circle</span>
+      <table class="gc-table">
+        <tr class="gc-why"><th>🔴 WHY — Purpose</th></tr>
+        <tr class="gc-why"><td>Communication is inherently insecure — anyone between Alice and Bob can read a plaintext message. We need transformations that make the message unreadable to everyone except the intended recipient. Cryptography exists precisely because the channel is assumed hostile.</td></tr>
+        <tr class="gc-how"><th>🟡 HOW — Mechanism</th></tr>
+        <tr class="gc-how"><td>By combining substitution (change symbol values) and transposition (change symbol positions) across many rounds, a cipher creates such a complex relationship between plaintext and ciphertext that reversing the transformation without the key is computationally infeasible. The three-dimensional classification framework lets us reason about which combination of operations and key structure a cipher uses.</td></tr>
+        <tr class="gc-what"><th>🟢 WHAT — Result</th></tr>
+        <tr class="gc-what"><td>AES: symmetric + block + substitution-permutation = fast, parallelizable bulk encryption used in virtually every secure internet connection you make today (TLS, WiFi WPA2/3, VPN, file encryption).</td></tr>
+      </table>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive</span>
+      <div class="deep-dive">
+        <p>Think of designing a cipher like designing a lock. You have exactly three questions to answer before you build it:</p>
+        <p><strong>Question 1: What tricks will you use to scramble the data?</strong> You can swap symbols for other symbols (<em>substitution</em>) — like a secret decoder ring where A becomes Q, B becomes Z. Or you can shuffle their positions (<em>transposition</em>) — like an anagram where "HELLO" becomes "OLELH". Strong modern ciphers use <em>both</em> in combination because each alone is fragile.</p>
+        <p><strong>Question 2: How much data do you process at once?</strong> A <em>block cipher</em> takes a fixed chunk — AES takes exactly 128 bits (16 bytes) at a time and scrambles all 128 bits together, so each output bit potentially depends on every input bit. This interdependency is what makes block ciphers so powerful. A <em>stream cipher</em> processes one bit or byte at a time — simpler, but requires careful use to avoid weaknesses.</p>
+        <p><strong>Question 3: Who holds the key(s)?</strong> <em>Symmetric</em> means Alice and Bob share the exact same secret key — whoever has it can both lock and unlock. <em>Asymmetric</em> means Bob publishes a "lock" (public key) that anyone can use to seal a message, but only Bob's private key can open it.</p>
+      </div>
+      <div class="analogy-box">
+        <span class="analogy-title">🎯 Analogy — The Three-Dial Combination Lock</span>
+        Every combination lock has three dials. Similarly, every cipher has three dials: (1) which operations scramble the data, (2) how much data is processed at once, and (3) how many keys are used. AES is set to: Substitution+Permutation | 128-bit blocks | 1 symmetric key.
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: Cryptographic Systems</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">AES is best described as which type of cipher?</div>
+      <ul class="q-options">
+        <li class="distractor">A) Asymmetric stream cipher</li>
+        <li class="correct">B) Symmetric block cipher</li>
+        <li class="distractor">C) Symmetric stream cipher</li>
+        <li class="distractor">D) Asymmetric block cipher</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B — Symmetric block cipher.</strong> AES uses the same key for encryption and decryption (symmetric) and processes data in fixed 128-bit blocks (block cipher). It uses substitution-permutation operations internally.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">Transposition changes WHAT a symbol is, while substitution changes WHERE a symbol sits in the message.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> It is the reverse: <strong>Substitution</strong> changes WHAT a symbol is (replaces it with a different symbol). <strong>Transposition</strong> changes WHERE a symbol sits (rearranges positions). A common exam trap — get these straight!</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">A cipher that uses the same key for both encryption and decryption is called a _______ cipher, while one that uses a public/private key pair is called _______ encryption.</div>
+      <div class="q-answer"><strong>✔ Symmetric; Asymmetric (Public-key).</strong> AES is symmetric; RSA is asymmetric. Symmetric ciphers are much faster but require secure key distribution.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-sa">Short Answer</span>
+      <div class="q-text">Why do modern block ciphers like AES use both substitution AND transposition (permutation) rather than just one?</div>
+      <div class="q-answer"><strong>✔ Answer:</strong> Substitution alone (like a Caesar cipher) is vulnerable to frequency analysis — common letters still appear commonly even in encrypted form. Transposition alone rearranges letters but their frequencies remain intact. Combining both creates <strong>confusion</strong> (substitution hides the relationship between key and ciphertext) and <strong>diffusion</strong> (transposition/permutation spreads the influence of each plaintext bit across many ciphertext bits). Together, after multiple rounds, statistical patterns in the plaintext are completely obliterated.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2                                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide2" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 2</span>
+    <span class="slide-title">One-Time Pad &amp; Stream Cipher Concepts</span>
+    <span class="slide-ref">Stallings [C] Ch. 2 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// One-Time Pad — Theoretically Perfect Cipher</span>
+Key K = <span class="hl">10110010</span>   <span class="cm">// same length as plaintext, truly random</span>
+P   = <span class="hl2">01101001</span>   <span class="cm">// plaintext</span>
+C   = K ⊕ P = <span class="hl3">11011011</span>   <span class="cm">// XOR: 1 if bits differ, 0 if same</span>
+
+<span class="cm">// Decryption (same operation — XOR is its own inverse!)</span>
+P   = K ⊕ C = <span class="hl2">01101001</span>   <span class="cm">// XOR with same key recovers plaintext</span>
+
+<span class="cm">// ✅ Advantages</span>
+  Each ciphertext bit is truly random → no statistical pattern → unbreakable
+
+<span class="cm">// ⚠️ Disadvantages</span>
+  Key must be as long as plaintext → 1 GB file = 1 GB key
+  Key can NEVER be reused → reuse leaks XOR of plaintexts
+  Key must be secretly pre-shared → impractical over internet
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>XOR (⊕) is its own inverse: K ⊕ P = C and K ⊕ C = P (same key, same operation).</li>
+        <li>One-Time Pad is provably secure (Shannon, 1949) — if key is truly random and used once only.</li>
+        <li>OTP's impracticality motivates stream ciphers: use a short key to generate a long pseudo-random keystream.</li>
+        <li>AES-CTR mode IS a stream cipher — it generates a keystream by encrypting successive counter values with AES.</li>
+        <li>Key reuse in OTP/stream ciphers is catastrophic: C1 ⊕ C2 = P1 ⊕ P2 (key cancels out!).</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive</span>
+      <div class="deep-dive">
+        <p>XOR is the single most important binary operation in cryptography. It follows one elegant rule: <strong>"output 1 if the bits DIFFER, output 0 if they are the SAME."</strong></p>
+        <p>Why is XOR perfect for encryption? Because XOR is its own inverse. If you XOR a value twice with the same key, you get back to where you started: (P ⊕ K) ⊕ K = P. Encryption and decryption are literally the same operation. No separate decrypt algorithm needed.</p>
+        <p>The One-Time Pad takes this to its logical extreme: use a key that is perfectly random and exactly as long as your message. Every bit of ciphertext is independently random regardless of what the plaintext was. This is <em>information-theoretically secure</em> — mathematically impossible to break even with infinite computing power. However, you need to securely share a key as large as all your messages combined — before the internet existed, spies used OTP pads, but this doesn't scale to billions of users.</p>
+        <p><strong>The stream cipher compromise:</strong> instead of a truly random key, use a short random seed to generate a deterministic but unpredictable pseudorandom keystream. This is less than theoretically perfect, but practically secure and efficient. AES-CTR generates a keystream by encrypting counter values 0, 1, 2, 3… with AES.</p>
+      </div>
+      <div class="warn-box">⚠️ <strong>Key Reuse Attack:</strong> If you encrypt two messages with the same OTP key: C₁ = P₁ ⊕ K and C₂ = P₂ ⊕ K. Then C₁ ⊕ C₂ = P₁ ⊕ P₂ (the key cancels!). An attacker now has the XOR of your plaintexts. For English text, this is enough to partially recover both messages. This is why nonces and IVs must NEVER be reused in AES-CTR or AES-GCM.</div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: Stream Ciphers &amp; XOR</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">AES-CTR mode functions as a stream cipher.</div>
+      <div class="q-answer"><strong>✔ TRUE.</strong> AES-CTR generates a keystream by encrypting a nonce+counter value with AES for each block, then XORs the keystream with plaintext. This makes it behave like a stream cipher: no padding needed, encryption/decryption use the same operation, and blocks can be processed in parallel.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">Which of the following is a stream cipher characteristic that AES-CTR provides compared to AES-CBC?</div>
+      <ul class="q-options">
+        <li class="distractor">A) Higher security against brute force</li>
+        <li class="correct">B) No padding required</li>
+        <li class="correct">C) Encryption can be parallelized (XOR with keystream)</li>
+        <li class="distractor">D) Larger key size</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B and C.</strong> AES-CTR requires no padding (plaintext can be any length — XOR only as many keystream bytes as needed), and since each counter block is encrypted independently, encryption/decryption can be fully parallelized. AES-CBC requires padding and has a sequential dependency (each block depends on the previous ciphertext block).</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">In AES-CTR mode, the nonce must be _______ per session to prevent an attacker from XORing two ciphertexts to obtain the XOR of the plaintexts.</div>
+      <div class="q-answer"><strong>✔ Unique (never reused).</strong> Reusing a nonce with the same key in CTR mode means the keystream repeats, allowing an attacker to compute C₁ ⊕ C₂ = P₁ ⊕ P₂. This is the same key-reuse attack as against the One-Time Pad.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3                                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide3" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 3</span>
+    <span class="slide-title">DES — Design &amp; Why It Failed</span>
+    <span class="slide-ref">Stallings [C] Ch. 3 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// DES — Data Encryption Standard (1977–1990s)</span>
+Block size:   <span class="hl2">64 bits</span>
+Key length:   <span class="hl3">56 bits</span>   <span class="cm">← THIS is the fatal flaw</span>
+Rounds:       16 Feistel rounds
+
+<span class="cm">// Brute Force Analysis</span>
+Possible keys = 2^56 = <span class="hl">72,057,594,037,927,936</span>  (~72 quadrillion)
+
+At 10^9 decryptions/second:
+  Avg time = 2^55 / 10^9 seconds = <span class="hl2">1.125 years</span>     <span class="cm">// 1977: safe</span>
+
+At 10^13 decryptions/second:
+  Avg time = 2^55 / 10^13 seconds = <span class="hl3">1 hour</span>          <span class="cm">// modern: trivial</span>
+
+<span class="cm">// EFF DES Cracker (1998): cracked DES in 22 HOURS</span>
+<span class="cm">// Conclusion: 56-bit key length is catastrophically short</span>
+
+3DES:   key 168 bits  → security level ~112 bits (meet-in-middle)
+AES:    key 128/192/256 bits → secure for decades
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>DES has NO major algorithm flaw — it was broken solely by its 56-bit key length becoming too short.</li>
+        <li>The key length determines how many keys an attacker must try in brute force: 2^56 was manageable by 1990s hardware.</li>
+        <li>3DES extends DES using three keys (Encrypt-Decrypt-Encrypt pattern) but is slow and only achieves ~112-bit security due to the meet-in-the-middle attack.</li>
+        <li>AES replaced DES/3DES and is the current standard for symmetric encryption.</li>
+        <li>DES withdrawal was due to key length, NOT algorithm design flaws — this distinction is a common exam question.</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-why">🌀 Simon Sinek's Golden Circle</span>
+      <table class="gc-table">
+        <tr class="gc-why"><th>🔴 WHY — Purpose</th></tr>
+        <tr class="gc-why"><td>DES was designed in 1977 when 56-bit keys seemed enormous — trying 72 quadrillion keys by hand was unimaginable. The NSA specified 56 bits, and at the time it provided a comfortable security margin. Understanding WHY DES failed teaches us the most important principle of cryptography: <strong>key length must outpace hardware speed improvements forever</strong>.</td></tr>
+        <tr class="gc-how"><th>🟡 HOW — Mechanism</th></tr>
+        <tr class="gc-how"><td>A brute-force attacker tries every possible 56-bit key until one decrypts a known ciphertext to recognizable plaintext. At 10⁹ decryptions/second (1977 hardware), this takes years. At 10¹³ decryptions/second (modern FPGAs/ASICs), this takes about an hour. In 1998, the EFF built a dedicated DES cracker for $250,000 that broke DES in 22 hours — definitively proving 56 bits was dead.</td></tr>
+        <tr class="gc-what"><th>🟢 WHAT — Result</th></tr>
+        <tr class="gc-what"><td>NIST formally withdrew DES as a standard in 2005. AES became the replacement — with 128, 192, or 256-bit keys providing security for the foreseeable future even against quantum computers (AES-256 provides ~128-bit post-quantum security).</td></tr>
+      </table>
+    </div>
+
+    <div class="warn-box">⚠️ <strong>Common Exam Misconception:</strong> "DES was withdrawn because of design flaws." FALSE. DES was withdrawn due to its <strong>short key length (56 bits)</strong>. The algorithm itself (Feistel structure, S-boxes, permutations) was well-designed. The distinction matters: if DES had 256-bit keys, it might still be in use today.</div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: DES &amp; Key Length</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">The official withdrawal of DES as a standard was primarily due to design flaws in the algorithm.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> DES was withdrawn because its 56-bit key length became too short for modern computing power, making brute-force attacks practical. The underlying Feistel network design was sound — only the key space was too small.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">What factor primarily determines the security level of a block cipher against brute force attacks?</div>
+      <ul class="q-options">
+        <li class="distractor">A) The number of encryption rounds</li>
+        <li class="correct">B) The length of the key</li>
+        <li class="distractor">C) The size of the data block</li>
+        <li class="distractor">D) The complexity of the encryption algorithm</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B — Key length.</strong> The key length defines the size of the keyspace (2^n possibilities). Brute force must try all 2^n keys on average testing 2^(n-1). Longer key = exponentially harder to brute force. Rounds affect resistance to cryptanalysis; block size affects collision resistance; but key length alone determines brute-force resistance.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">DES uses a ______-bit key, while AES supports key sizes of ______, ______, and ______ bits.</div>
+      <div class="q-answer"><strong>✔ 56; 128, 192, and 256.</strong> DES's 56-bit key gives 2^56 ≈ 7.2×10^16 possibilities. AES-128 gives 2^128 ≈ 3.4×10^38 — so astronomically larger that even all the world's computers running for the age of the universe couldn't brute force it.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4                                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide4" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 4</span>
+    <span class="slide-title">AES Main Takeaways — Overview</span>
+    <span class="slide-ref">Stallings [C] Ch. 5 / [N] Ch. 2 pp. 58-63</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// AES — Advanced Encryption Standard (NIST, 2001)</span>
+Structure:   <span class="hl">Substitution-Permutation Network (SPN)</span>
+
+Block size:  <span class="hl2">128 bits</span>  (always — regardless of key size)
+Key sizes:
+  AES-128:  128-bit key → <span class="hl3">10 rounds</span>
+  AES-192:  192-bit key → <span class="hl3">12 rounds</span>
+  AES-256:  256-bit key → <span class="hl3">14 rounds</span>
+
+Internal state: 4×4 matrix of BYTES (16 bytes = 128 bits)
+  [ b₀  b₄  b₈  b₁₂ ]
+  [ b₁  b₅  b₉  b₁₃ ]
+  [ b₂  b₆  b₁₀ b₁₄ ]
+  [ b₃  b₇  b₁₁ b₁₅ ]
+
+Operations per round:
+  1. SubBytes   — non-linear substitution (S-box)
+  2. ShiftRows  — cyclic row rotation
+  3. MixColumns — matrix multiplication (skipped in final round)
+  4. AddRoundKey — XOR with round key
+
+<span class="cm">// Why multiple rounds?</span>
+  → Complexity: each round adds a layer of transformation
+  → After enough rounds: each output bit depends on ALL input bits
+  → Confusion + Diffusion: the two core goals of cipher design
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>AES is a Substitution-Permutation Network (SPN) — alternating layers of non-linear substitution and linear permutation.</li>
+        <li>State is always a 4×4 byte matrix regardless of key size — key size only affects the number of rounds.</li>
+        <li>More rounds = more rounds of confusion and diffusion = harder to attack with cryptanalysis.</li>
+        <li>The final round omits MixColumns — this ensures AES encryption and decryption have the same round structure (symmetric design).</li>
+        <li>AES is designed to be efficient in both hardware (parallel S-box lookups) and software (table-based implementations).</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-why">🌀 Simon Sinek's Golden Circle</span>
+      <table class="gc-table">
+        <tr class="gc-why"><th>🔴 WHY — Purpose</th></tr>
+        <tr class="gc-why"><td>After DES was broken, NIST held an open competition (1997–2001) for a new standard. The winner, Rijndael (by Daemen and Rijmen), was chosen for its elegant math, fast hardware implementation, and strong security margins. We study AES because it IS modern encryption — understanding it means understanding how every encrypted file, message, and connection is protected today.</td></tr>
+        <tr class="gc-how"><th>🟡 HOW — Mechanism</th></tr>
+        <tr class="gc-how"><td>AES represents plaintext as a 4×4 byte matrix and applies four operations repeatedly. Each operation targets a different type of cryptographic vulnerability. Together, after 10–14 rounds, even a 1-bit change in plaintext produces a completely different ciphertext — the Avalanche Effect.</td></tr>
+        <tr class="gc-what"><th>🟢 WHAT — Result</th></tr>
+        <tr class="gc-what"><td>The strongest standardized cipher in history. AES-128 has never been broken. AES-256 is the algorithm used for Top Secret US government data. Used in: TLS/HTTPS, WPA2/WPA3 WiFi, BitLocker, FileVault, Signal, WhatsApp, and essentially every modern encryption system.</td></tr>
+      </table>
+    </div>
+
+    <div class="dc-grid">
+      <div class="dc-card">
+        <h4 style="color:var(--orange)">🌀 Confusion</h4>
+        <p>Making the relationship between the key and ciphertext as complex as possible. Even if an attacker knows the ciphertext, they cannot deduce the key. <strong>SubBytes (S-box)</strong> provides confusion — it is a highly non-linear, mathematically complex lookup.</p>
+      </div>
+      <div class="dc-card">
+        <h4 style="color:var(--purple)">🔀 Diffusion</h4>
+        <p>Spreading the influence of each plaintext bit across many ciphertext bits (and vice versa). Changing ONE bit of plaintext should change ~50% of ciphertext bits. <strong>ShiftRows + MixColumns</strong> provide diffusion — they spread each byte's influence across the entire state.</p>
+      </div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive — Why Multiple Rounds?</span>
+      <div class="deep-dive">
+        <p>Imagine you have a secret code where you scramble a message once. An attacker might spot patterns — maybe the letter "E" always maps to "Q", and with enough messages they figure out your code. <strong>One round is not enough.</strong></p>
+        <p>Now imagine scrambling the message 10 times, and between each scramble you do a completely different type of scrambling. After 10 rounds of AES, every output byte has been influenced by every input byte and every key byte. This is the <em>Avalanche Effect</em>: flip one input bit → roughly 64 of 128 output bits change. Completely unpredictable without the key.</p>
+        <p><strong>Why not 100 rounds?</strong> More rounds = more security, but also more computational cost. AES uses the minimum number of rounds that provide an adequate security margin: 10 rounds for 128-bit keys provides security far beyond brute-force attacks with no practical cryptanalytic attack known. Adding more rounds would make AES slower with no practical benefit.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: AES Overview</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">AES-256 uses how many encryption rounds?</div>
+      <ul class="q-options">
+        <li class="distractor">A) 10 rounds</li>
+        <li class="distractor">B) 12 rounds</li>
+        <li class="correct">C) 14 rounds</li>
+        <li class="distractor">D) 16 rounds</li>
+      </ul>
+      <div class="q-answer"><strong>✔ C — 14 rounds.</strong> AES round counts: 128-bit key → 10 rounds; 192-bit key → 12 rounds; 256-bit key → 14 rounds. Larger keys need more rounds to fully mix the additional key material into the state.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">AES uses a 256-bit block size when a 256-bit key is used.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> AES always uses a <strong>128-bit block size</strong> regardless of the key size. Key size (128/192/256 bits) only affects the number of rounds (10/12/14) and the key expansion. The state matrix is always 4×4 bytes = 128 bits.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">In AES, _______ refers to hiding the key-ciphertext relationship (achieved by SubBytes), while _______ refers to spreading plaintext influence across ciphertext bits (achieved by ShiftRows and MixColumns).</div>
+      <div class="q-answer"><strong>✔ Confusion; Diffusion.</strong> These two properties — coined by Claude Shannon — are the two fundamental requirements of a secure cipher. AES's design explicitly targets both: the non-linear S-box provides confusion; the diffusion operations spread each bit's influence throughout the entire state.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — THE MAIN DEEP DIVE                               -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide5" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 5 ★ CORE</span>
+    <span class="slide-title">AES Encryption Round — Complete Structure</span>
+    <span class="slide-ref">Stallings [C] pp. 63-68 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// AES-128 Round Structure — Complete Flow</span>
+
+<span class="hl">Plaintext (128 bits = 4×4 byte matrix)</span>
+         │
+         ▼
+<span class="hl2">┌─────────────────────────┐</span>
+<span class="hl2">│    AddRoundKey (key₀)   │</span>    <span class="cm">← initial whitening: XOR with original key</span>
+<span class="hl2">└─────────────┬───────────┘</span>
+              │
+  <span class="hl3">┌───────────▼───────────┐</span>     <span class="cm">─┐</span>
+  <span class="hl3">│    SubBytes   (S-box) │</span>      <span class="cm">│ → CONFUSION: non-linear substitution</span>
+  <span class="hl3">│    ShiftRows  (rows)  │</span>      <span class="cm">│ → DIFFUSION: spread across rows</span>
+  <span class="hl3">│    MixColumns (matrix)│</span>      <span class="cm">│ → DIFFUSION: spread across columns</span>
+  <span class="hl3">│    AddRoundKey (keyᵢ) │</span>      <span class="cm">│ → mix in key material</span>
+  <span class="hl3">└───────────┬───────────┘</span>     <span class="cm">─┘  × 9 rounds (AES-128)</span>
+              │                        × 11 rounds (AES-192)
+              │                        × 13 rounds (AES-256)
+<span class="hl4">┌─────────────▼───────────┐</span>
+<span class="hl4">│    SubBytes + ShiftRows │</span>    <span class="cm">← final round: MixColumns OMITTED</span>
+<span class="hl4">│    AddRoundKey (key_N)  │</span>
+<span class="hl4">└─────────────┬───────────┘</span>
+              │
+              ▼
+        <span class="hl">Ciphertext (128 bits)</span>
+
+<span class="cm">// Each operation's role:</span>
+SubBytes   = S-box lookup     → confusion       (non-linear)
+ShiftRows  = row rotation     ─┐ diffusion      (linear)
+MixColumns = GF(2⁸) multiply ─┘ (both together)
+AddRoundKey= XOR with subkey  → incorporate key material
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>AES processes data as a 4×4 matrix of bytes — the "state". All four operations work on this state matrix.</li>
+        <li>The initial AddRoundKey (before round 1) is called "key whitening" — it ensures the attacker can't even start the algorithm without the key.</li>
+        <li>Rounds 1 through N-1: all four operations (SubBytes → ShiftRows → MixColumns → AddRoundKey).</li>
+        <li>Final round N: omits MixColumns — this is by design so that AES decryption has the same structure as encryption.</li>
+        <li>The security of AES comes from the combination and repetition of these four operations — each alone is reversible and not secure; together and repeated, they are extraordinarily strong.</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-why">🌀 Simon Sinek's Golden Circle</span>
+      <table class="gc-table">
+        <tr class="gc-why"><th>🔴 WHY — Four Operations, Not One?</th></tr>
+        <tr class="gc-why"><td>No single operation provides complete security. SubBytes provides non-linearity but doesn't mix bits across the matrix. ShiftRows rearranges bytes but doesn't mix their values. MixColumns mixes column values but in a linear, predictable way. AddRoundKey incorporates the secret but is just XOR. ONLY TOGETHER do these four operations achieve both confusion and diffusion. Removing any one of them creates a mathematically breakable cipher.</td></tr>
+        <tr class="gc-how"><th>🟡 HOW — One Round Steps</th></tr>
+        <tr class="gc-how"><td>Step 1: SubBytes — replace each byte in the 4×4 state with a new byte from the S-box (a fixed lookup table). Step 2: ShiftRows — rotate rows left by 0, 1, 2, 3 positions. Step 3: MixColumns — multiply each column by a fixed polynomial matrix in GF(2⁸). Step 4: AddRoundKey — XOR each byte of the state with the corresponding byte of the round key. Repeat 9–13 times (minus MixColumns in the last round).</td></tr>
+        <tr class="gc-what"><th>🟢 WHAT — Cumulative Effect</th></tr>
+        <tr class="gc-what"><td>After all rounds: each output byte depends on ALL 16 input bytes AND ALL key bytes. Change 1 bit of plaintext → ~64 output bits flip (Avalanche Effect). Change 1 bit of key → completely different ciphertext. No shortcut exists without knowing the key.</td></tr>
+      </table>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive — The Full Round, Step by Step</span>
+      <div class="deep-dive">
+        <p>Let's trace what actually happens inside one AES round. Picture the 128-bit state as a physical 4×4 grid of 16 boxes, each containing one byte (8 bits, value 0–255).</p>
+      </div>
+    </div>
+
+    <!-- Visual State Matrix -->
+    <div class="deep-dive" style="margin-bottom:16px;">
+      <p style="color:var(--text2); font-size:.9em;">The AES state: 128 bits = 16 bytes arranged in a 4 columns × 4 rows matrix (column-major order):</p>
+    </div>
+    <div class="matrix-wrap">
+      <div>
+        <div class="matrix-label" style="color:var(--accent)">Input State</div>
+        <div class="matrix">
+          <div class="matrix-cell mc-blue">19</div><div class="matrix-cell mc-blue">A0</div><div class="matrix-cell mc-blue">9A</div><div class="matrix-cell mc-blue">E9</div>
+          <div class="matrix-cell mc-blue">3D</div><div class="matrix-cell mc-blue">F4</div><div class="matrix-cell mc-blue">C6</div><div class="matrix-cell mc-blue">F8</div>
+          <div class="matrix-cell mc-blue">E3</div><div class="matrix-cell mc-blue">E2</div><div class="matrix-cell mc-blue">8D</div><div class="matrix-cell mc-blue">48</div>
+          <div class="matrix-cell mc-blue">BE</div><div class="matrix-cell mc-blue">2B</div><div class="matrix-cell mc-blue">2A</div><div class="matrix-cell mc-blue">08</div>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div style="color:var(--text2); font-size:.82em; max-width:200px;">Each cell = 1 byte (hex). All 4 operations work on this matrix in sequence during each round.</div>
+    </div>
+
+    <!-- ROUND STRUCTURE VISUAL -->
+    <div class="round-vis">
+      <div class="rv-box rv-input"><span class="rv-label">📥 Input State</span> <span class="rv-note">16 bytes — 4×4 matrix — 128 bits of plaintext (or previous round output)</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-ark"><span class="rv-label">🔑 Initial AddRoundKey (Round 0)</span> <span class="rv-note">XOR entire state with key₀ — "key whitening" — happens BEFORE round 1</span></div>
+      <div class="rv-arrow">↓ (repeat 9×for AES-128)</div>
+      <div class="rv-box rv-sub"><span class="rv-label">🔀 SubBytes</span> <span class="rv-note">Replace each of the 16 bytes via S-box lookup → CONFUSION (non-linear)</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-shift"><span class="rv-label">↩ ShiftRows</span> <span class="rv-note">Row 0: no shift · Row 1: ←1 · Row 2: ←2 · Row 3: ←3 → starts DIFFUSION</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-mix"><span class="rv-label">✖ MixColumns</span> <span class="rv-note">Multiply each 4-byte column by fixed matrix in GF(2⁸) → completes DIFFUSION</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-ark"><span class="rv-label">🔑 AddRoundKey</span> <span class="rv-note">XOR state with round key keyᵢ (derived from original key) → incorporate secret</span></div>
+      <div class="rv-repeat">↑ repeat 9 times (AES-128) ↑</div>
+      <div class="rv-arrow">↓ (FINAL round — MixColumns SKIPPED)</div>
+      <div class="rv-box rv-final"><span class="rv-label">🔀 SubBytes</span> <span class="rv-note">Final SubBytes</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-final"><span class="rv-label">↩ ShiftRows</span> <span class="rv-note">Final ShiftRows (NO MixColumns here!)</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-final"><span class="rv-label">🔑 AddRoundKey (key_N)</span> <span class="rv-note">Final key addition</span></div>
+      <div class="rv-arrow">↓</div>
+      <div class="rv-box rv-output"><span class="rv-label">📤 Ciphertext Output</span> <span class="rv-note">128 bits — cryptographically indistinguishable from random without the key</span></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Why Is MixColumns Omitted in the Final Round?</span>
+      <div class="deep-dive">
+        <p>This is one of the most elegant design decisions in AES. MixColumns is omitted from the final round for a purely <em>structural</em> reason — it makes decryption easier to implement, not for security reasons.</p>
+        <p>If MixColumns were included in the final round, then during decryption you'd need to apply its inverse as the first step before any other decryption operations. By omitting it, the encryption and decryption round structures mirror each other symmetrically — both end (or begin) with just SubBytes + ShiftRows + AddRoundKey. This simplifies hardware implementation.</p>
+        <p><strong>Does it weaken security?</strong> No. The security of AES does not depend on MixColumns in the final round because the final AddRoundKey already ensures the attacker cannot reverse the final round without the key.</p>
+      </div>
+    </div>
+
+    <!-- Step-by-Step Operation Table -->
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 All Four Operations — Detailed Comparison Table</span>
+    </div>
+    <table class="step-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Operation</th>
+          <th>Works On</th>
+          <th>Mathematical Operation</th>
+          <th>Security Purpose</th>
+          <th>Type</th>
+          <th>In Final Round?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="step-num">0</td>
+          <td><span class="step-name">Initial AddRoundKey</span></td>
+          <td class="step-op">Entire 4×4 state</td>
+          <td class="step-detail">State XOR key₀ (original key)</td>
+          <td class="step-purpose">Key whitening — forces attacker to know key before starting</td>
+          <td class="step-security" style="color:var(--gold)">Linear — key injection</td>
+          <td class="step-security">N/A (pre-round)</td>
+        </tr>
+        <tr>
+          <td class="step-num">1</td>
+          <td><span class="step-name">SubBytes</span></td>
+          <td class="step-op">Each byte independently</td>
+          <td class="step-detail">S-box lookup: byte → new byte via GF(2⁸) inverse + affine transform</td>
+          <td class="step-purpose">Confusion — non-linear relationship between input and output; hides key bits</td>
+          <td class="step-security" style="color:var(--red)">Non-linear ← critical!</td>
+          <td class="step-security">✅ YES</td>
+        </tr>
+        <tr>
+          <td class="step-num">2</td>
+          <td><span class="step-name">ShiftRows</span></td>
+          <td class="step-op">Each row of the state</td>
+          <td class="step-detail">Row 0: no shift; Row 1: left by 1; Row 2: left by 2; Row 3: left by 3</td>
+          <td class="step-purpose">Partial diffusion — moves bytes from one column to another so MixColumns can mix across columns</td>
+          <td class="step-security" style="color:var(--purple)">Linear — permutation</td>
+          <td class="step-security">✅ YES</td>
+        </tr>
+        <tr>
+          <td class="step-num">3</td>
+          <td><span class="step-name">MixColumns</span></td>
+          <td class="step-op">Each column (4 bytes)</td>
+          <td class="step-detail">Multiply 4-byte column by fixed 4×4 MDS matrix in GF(2⁸): each output byte depends on all 4 input bytes</td>
+          <td class="step-purpose">Diffusion — each input byte affects all 4 output bytes of the column; combined with ShiftRows achieves full diffusion across the state</td>
+          <td class="step-security" style="color:var(--purple)">Linear — MDS transform</td>
+          <td class="step-security">❌ OMITTED</td>
+        </tr>
+        <tr>
+          <td class="step-num">4</td>
+          <td><span class="step-name">AddRoundKey</span></td>
+          <td class="step-op">Entire 4×4 state</td>
+          <td class="step-detail">State XOR round_key_i (derived from original key via key schedule)</td>
+          <td class="step-purpose">Incorporate secret key into computation each round — without key, attacker cannot reverse any step</td>
+          <td class="step-security" style="color:var(--gold)">Linear — key injection</td>
+          <td class="step-security">✅ YES</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 The Avalanche Effect — One Bit Changes Everything</span>
+      <div class="deep-dive">
+        <p>Here is perhaps the most striking demonstration of AES's power. Consider encrypting two messages that differ by exactly <strong>one bit</strong>:</p>
+        <p>Message A: <span class="k">00000000 00000000 00000000 00000000</span> (all zeros)</p>
+        <p>Message B: <span class="k">10000000 00000000 00000000 00000000</span> (one bit flipped)</p>
+        <p>After AES-128 encryption with the same key, roughly <strong>64 of the 128 output bits will differ</strong>. Change the key by one bit while encrypting the same message — again, ~64 output bits flip. This is the <em>Avalanche Effect</em>, and it is a direct consequence of the interaction between SubBytes (which creates non-linear bit dependencies), ShiftRows (which moves bytes to different columns), and MixColumns (which then mixes each column so one changed byte affects all four bytes in the column).</p>
+        <p>After just <strong>two rounds</strong>, every output bit depends on every input bit. The remaining 8 rounds of AES-128 provide an enormous security margin against the most sophisticated algebraic attacks known.</p>
+      </div>
+      <div class="analogy-box">
+        <span class="analogy-title">🎯 Analogy — The Chaos Butterfly</span>
+        The Avalanche Effect in AES is analogous to the chaos theory butterfly effect: a tiny initial change (1 bit of plaintext) causes an enormous change in the output (64 bits of ciphertext flip). Unlike weather systems where this happens unpredictably, in AES this avalanche is carefully engineered by the MixColumns operation and required by the cipher's design specification.
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: AES Round Structure</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">Which AES operation is OMITTED in the final round and why?</div>
+      <ul class="q-options">
+        <li class="distractor">A) SubBytes — not needed after multiple rounds of confusion</li>
+        <li class="distractor">B) ShiftRows — bytes are already fully diffused</li>
+        <li class="correct">C) MixColumns — omitted to make decryption structure symmetrical with encryption</li>
+        <li class="distractor">D) AddRoundKey — key material was fully used in previous rounds</li>
+      </ul>
+      <div class="q-answer"><strong>✔ C — MixColumns is omitted in the final round.</strong> This is a structural design choice, not a security weakness. Omitting MixColumns makes the decryption algorithm's round structure mirror the encryption structure, simplifying hardware implementation. The final AddRoundKey still ensures an attacker needs the key to reverse the final round.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">AES is considered more secure than DES due to its use of a greater number of encryption rounds.</div>
+      <div class="q-answer"><strong>✔ FALSE (partially misleading).</strong> AES is more secure than DES primarily because of its <strong>longer key length</strong> (128/192/256 vs 56 bits), not just more rounds. DES uses 16 rounds; AES-128 uses 10 rounds. More rounds help against cryptanalysis, but the key length is the primary driver of brute-force resistance.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-sa">Short Answer</span>
+      <div class="q-text">Explain the difference between "confusion" and "diffusion" in AES, and identify which operation primarily provides each property.</div>
+      <div class="q-answer"><strong>✔ Answer:</strong> <strong>Confusion</strong> (defined by Shannon) means making the relationship between the key and ciphertext as complex as possible — so knowing the ciphertext gives no information about the key. In AES, <strong>SubBytes</strong> provides confusion via the non-linear S-box. <strong>Diffusion</strong> means spreading the influence of each plaintext bit across many ciphertext bits — a change in one bit should cause ~50% of output bits to change. In AES, <strong>ShiftRows and MixColumns</strong> together provide diffusion: ShiftRows moves bytes to different columns, and MixColumns mixes each column so one changed byte affects all four output bytes of that column.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">AES represents its 128-bit state as a ___×___ matrix of _______, and applies ______ distinct operations in each full round.</div>
+      <div class="q-answer"><strong>✔ 4×4; bytes (each 8 bits); four (SubBytes, ShiftRows, MixColumns, AddRoundKey).</strong> The 4×4 structure is fundamental to understanding how ShiftRows (acts on rows) and MixColumns (acts on columns) interact to achieve full diffusion across the state.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">What is the "initial whitening" step in AES, and what does it accomplish?</div>
+      <ul class="q-options">
+        <li class="distractor">A) The first SubBytes operation — it substitutes plaintext bytes before the main rounds</li>
+        <li class="correct">B) AddRoundKey with key₀ before Round 1 — it XORs the plaintext with the original key</li>
+        <li class="distractor">C) The first MixColumns operation — it mixes the plaintext before substitution</li>
+        <li class="distractor">D) A key expansion step that generates all round keys before encryption begins</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B.</strong> Key whitening (initial AddRoundKey with key₀) ensures that an attacker cannot bypass the algorithm entirely — any analysis of even the first operation requires knowing the key. Without it, an attacker could start their analysis directly on the SubBytes operation without any key knowledge.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — SubBytes DEEP DIVE                               -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide6" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 6</span>
+    <span class="slide-title">SubBytes — The S-Box in Depth</span>
+    <span class="slide-ref">Stallings [C] pp. 63-65 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// SubBytes — Applied independently to each of the 16 state bytes</span>
+
+For each byte b in state:
+  new_b = <span class="hl">S_box[b]</span>   <span class="cm">// look up byte b in the 16×16 S-box table</span>
+
+<span class="cm">// HOW is the S-box constructed? Two-step math:</span>
+Step 1: Compute <span class="hl2">multiplicative inverse</span> in GF(2⁸)
+  b' = b⁻¹ mod (x⁸ + x⁴ + x³ + x + 1)   <span class="cm">// irreducible polynomial</span>
+  (0x00 maps to itself — special case)
+
+Step 2: Apply <span class="hl3">affine transformation</span> in GF(2)
+  output = A · b' + c   <span class="cm">// where A is fixed 8×8 bit matrix, c = 0x63</span>
+
+<span class="cm">// Example S-box entries (NIST FIPS 197)</span>
+  0x00 → 0x63    0x01 → 0x7C    0x02 → 0x77    0x03 → 0x7B
+  0x53 → 0xED    0xAE → 0xE7    0xFF → 0x16
+
+<span class="cm">// Key property: S-box is NON-LINEAR</span>
+  Non-linear means: S(a XOR b) ≠ S(a) XOR S(b)
+  This prevents algebraic attacks that work on purely linear ciphers
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>SubBytes is the ONLY non-linear operation in AES — it is what makes AES resistant to linear cryptanalysis.</li>
+        <li>The S-box is a fixed 256-entry lookup table: input byte (0–255) → output byte (0–255).</li>
+        <li>Mathematically, the S-box computes the multiplicative inverse in GF(2⁸), then applies an affine bit transformation.</li>
+        <li>The S-box is designed to have the worst possible correlation between input and output bits — any change to the input causes unpredictable changes to the output.</li>
+        <li>All 16 bytes of the state are substituted independently and in parallel — efficient hardware implementation.</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive — What Is an S-Box?</span>
+      <div class="deep-dive">
+        <p>An S-Box (Substitution Box) is essentially a secret decoder ring, but one that was designed with extreme mathematical care to have specific security properties. It maps every possible byte value (0 to 255) to a different byte value — a total of 256 mappings stored as a lookup table.</p>
+        <p><strong>Why not just a simple lookup table like a Caesar cipher?</strong> A Caesar cipher shifts each letter by a fixed amount — that's a linear operation. Linear operations are easily broken by algebraic analysis. The AES S-box is specifically designed to be <em>maximally non-linear</em>: the output bits are mathematically complex functions of the input bits, not simple shifts or XORs.</p>
+        <p><strong>The S-box construction in plain English:</strong></p>
+        <p>Step 1: Take your input byte (e.g., 0x53 = 01010011 in binary). Find its multiplicative inverse in a special number system called GF(2⁸) — a field where all arithmetic is done in binary with XOR instead of addition and a special modular reduction. This step introduces the non-linearity.</p>
+        <p>Step 2: Apply a fixed bit-level linear transformation to the result (an affine transformation). This step mixes the bits together in a fixed, known pattern.</p>
+        <p>The combination of these two steps produces an S-box where: (1) no single input bit controls any single output bit predictably, (2) each output bit depends on all 8 input bits in complex ways, (3) the function is easily computable by looking up a 256-entry table.</p>
+      </div>
+      <div class="analogy-box">
+        <span class="analogy-title">🎯 Analogy — The Perfect Shuffled Deck</span>
+        The S-box is like a deck of 256 cards that has been shuffled in the most mathematically unpredictable way possible. If you know card position 5 maps to card value 83, you cannot predict what card position 6 maps to — even knowing positions 0 through 5. This unpredictability is non-linearity.
+      </div>
+      <div class="note-box">💡 <strong>Implementation insight:</strong> In software, SubBytes is implemented as a simple array lookup: <span class="k">new_byte = SBOX[old_byte]</span>. This is extremely fast — just a memory read. Modern AES hardware implementations pre-compute combined SubBytes+ShiftRows+MixColumns tables (T-tables) for maximum speed.</div>
+    </div>
+
+    <!-- SubBytes visual -->
+    <div class="matrix-wrap" style="margin:20px 0;">
+      <div>
+        <div class="matrix-label" style="color:var(--orange)">Before SubBytes</div>
+        <div class="matrix">
+          <div class="matrix-cell mc-blue">19</div><div class="matrix-cell mc-blue">A0</div><div class="matrix-cell mc-blue">9A</div><div class="matrix-cell mc-blue">E9</div>
+          <div class="matrix-cell mc-blue">3D</div><div class="matrix-cell mc-blue">F4</div><div class="matrix-cell mc-blue">C6</div><div class="matrix-cell mc-blue">F8</div>
+          <div class="matrix-cell mc-blue">E3</div><div class="matrix-cell mc-blue">E2</div><div class="matrix-cell mc-blue">8D</div><div class="matrix-cell mc-blue">48</div>
+          <div class="matrix-cell mc-blue">BE</div><div class="matrix-cell mc-blue">2B</div><div class="matrix-cell mc-blue">2A</div><div class="matrix-cell mc-blue">08</div>
+        </div>
+      </div>
+      <div class="arrow-right">S-box →</div>
+      <div>
+        <div class="matrix-label" style="color:var(--green)">After SubBytes</div>
+        <div class="matrix">
+          <div class="matrix-cell mc-green">D4</div><div class="matrix-cell mc-green">E0</div><div class="matrix-cell mc-green">B8</div><div class="matrix-cell mc-green">1E</div>
+          <div class="matrix-cell mc-green">27</div><div class="matrix-cell mc-green">BF</div><div class="matrix-cell mc-green">B4</div><div class="matrix-cell mc-green">41</div>
+          <div class="matrix-cell mc-green">11</div><div class="matrix-cell mc-green">98</div><div class="matrix-cell mc-green">5D</div><div class="matrix-cell mc-green">52</div>
+          <div class="matrix-cell mc-green">AE</div><div class="matrix-cell mc-green">F1</div><div class="matrix-cell mc-green">E5</div><div class="matrix-cell mc-green">30</div>
+        </div>
+      </div>
+      <div style="color:var(--text3); font-size:.8em; max-width:160px;">Each byte mapped independently through S-box. 0x19 → 0xD4, 0xA0 → 0xE0, etc. (NIST FIPS 197 example)</div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: SubBytes</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">What is the primary security role of the SubBytes operation in AES?</div>
+      <ul class="q-options">
+        <li class="distractor">A) Diffusion — it spreads each bit's influence across the entire state</li>
+        <li class="correct">B) Confusion — it provides non-linearity to resist algebraic attacks</li>
+        <li class="distractor">C) Key mixing — it incorporates the secret key into the state</li>
+        <li class="distractor">D) Permutation — it rearranges the byte positions in the state</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B — Confusion through non-linearity.</strong> SubBytes is the only non-linear operation in AES. Without it, AES would be a purely linear cipher — easily broken by linear algebra. The S-box's non-linearity ensures that AES cannot be solved as a system of linear equations.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">The AES S-box maps each of the 16 state bytes to a new value using the same mathematical function applied to each byte independently.</div>
+      <div class="q-answer"><strong>✔ TRUE.</strong> SubBytes applies the same S-box function to all 16 bytes independently and in parallel. Each byte is substituted without regard to its neighbors. The S-box is a fixed function (not key-dependent) — the key dependency comes from AddRoundKey operations.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-sa">Short Answer</span>
+      <div class="q-text">What does it mean for the S-box to be "non-linear," and why is this critical for AES security?</div>
+      <div class="q-answer"><strong>✔ Answer:</strong> Non-linear means the S-box does NOT satisfy: S(a XOR b) = S(a) XOR S(b). In other words, you cannot predict the output by combining known input-output pairs linearly. <br><br>This is critical because <strong>linear cryptanalysis</strong> is one of the most powerful attacks against block ciphers — it works by finding linear approximations of the cipher (equations that hold with probability ≠ 0.5). If AES were purely linear, an attacker could set up and solve a system of linear equations to recover the key. The non-linear S-box breaks this: no linear approximation of the S-box holds with probability far from 0.5, making linear cryptanalysis impractical against AES.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — ShiftRows                                        -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide7" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 7</span>
+    <span class="slide-title">ShiftRows — Cyclic Row Rotation</span>
+    <span class="slide-ref">Stallings [C] pp. 65-66 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// ShiftRows — acts on ROWS of the 4×4 state matrix</span>
+
+Before ShiftRows:              After ShiftRows:
+[ D4  E0  B8  1E ]            [ D4  E0  B8  1E ]  <span class="cm">← Row 0: NO shift</span>
+[ 27  BF  B4  41 ]     →      [ BF  B4  41  27 ]  <span class="cm">← Row 1: LEFT shift by 1</span>
+[ 11  98  5D  52 ]            [ 5D  52  11  98 ]  <span class="cm">← Row 2: LEFT shift by 2</span>
+[ AE  F1  E5  30 ]            [ 30  AE  F1  E5 ]  <span class="cm">← Row 3: LEFT shift by 3</span>
+
+<span class="cm">// Effect:</span>
+  Row 0: [b₀, b₄, b₈, b₁₂]  → [b₀, b₄, b₈, b₁₂]    (unchanged)
+  Row 1: [b₁, b₅, b₉, b₁₃]  → [b₅, b₉, b₁₃, b₁]    (bytes from 4 different columns!)
+  Row 2: [b₂, b₆, b₁₀, b₁₄] → [b₁₀, b₁₄, b₂, b₆]   (bytes from 4 different columns!)
+  Row 3: [b₃, b₇, b₁₁, b₁₅] → [b₁₅, b₃, b₇, b₁₁]   (bytes from 4 different columns!)
+
+<span class="cm">// KEY INSIGHT for MixColumns:</span>
+  After ShiftRows, every column of the state contains bytes from 4 DIFFERENT
+  original columns. When MixColumns then mixes each column, it effectively
+  mixes bytes from ALL FOUR original columns → full 4×4 diffusion!
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>ShiftRows cyclically rotates each row LEFT by 0, 1, 2, 3 bytes respectively.</li>
+        <li>ShiftRows alone does NOT change byte values — it only changes their positions.</li>
+        <li>ShiftRows's purpose is to set up MixColumns: after the row shift, each column of the state contains bytes from four different original columns.</li>
+        <li>This means MixColumns (which mixes each column) will effectively mix bytes from ALL four original columns — achieving full diffusion across the entire state.</li>
+        <li>ShiftRows + MixColumns together create full diffusion: every output byte depends on every input byte after just TWO rounds of these operations combined with SubBytes.</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive — Why Shift Rows?</span>
+      <div class="deep-dive">
+        <p>ShiftRows seems simple — just slide some bytes around. But it plays a crucial strategic role. Without ShiftRows, the four columns of the state would be completely independent of each other. MixColumns mixes within each column, but if columns never interact, an attacker could break each column independently — reducing a 128-bit problem to four 32-bit problems.</p>
+        <p><strong>ShiftRows breaks column independence.</strong> After Row 1 is shifted left by 1, the first column now contains the original bytes from columns 0, 1, 2, and 3 (one from each). When MixColumns mixes this column, it mixes bytes that originated from all four columns — creating cross-column dependencies.</p>
+        <p>Think of it like a physical scramble: you have four independent groups of four people (the four columns). ShiftRows reaches into each group, pulls out one person from each, and reassembles four new mixed groups. Now when MixColumns has each group interact internally, people from all four original groups have interacted.</p>
+      </div>
+    </div>
+
+    <!-- ShiftRows visual -->
+    <div class="matrix-wrap" style="margin:20px 0;">
+      <div>
+        <div class="matrix-label" style="color:var(--orange)">Before ShiftRows</div>
+        <div class="matrix">
+          <div class="matrix-cell mc-blue">D4</div><div class="matrix-cell mc-blue">E0</div><div class="matrix-cell mc-blue">B8</div><div class="matrix-cell mc-blue">1E</div>
+          <div class="matrix-cell mc-gold">27</div><div class="matrix-cell mc-gold">BF</div><div class="matrix-cell mc-gold">B4</div><div class="matrix-cell mc-gold">41</div>
+          <div class="matrix-cell mc-green">11</div><div class="matrix-cell mc-green">98</div><div class="matrix-cell mc-green">5D</div><div class="matrix-cell mc-green">52</div>
+          <div class="matrix-cell mc-red">AE</div><div class="matrix-cell mc-red">F1</div><div class="matrix-cell mc-red">E5</div><div class="matrix-cell mc-red">30</div>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div>
+        <div class="matrix-label" style="color:var(--green)">After ShiftRows</div>
+        <div class="matrix">
+          <div class="matrix-cell mc-blue">D4</div><div class="matrix-cell mc-blue">E0</div><div class="matrix-cell mc-blue">B8</div><div class="matrix-cell mc-blue">1E</div>
+          <div class="matrix-cell mc-gold">BF</div><div class="matrix-cell mc-gold">B4</div><div class="matrix-cell mc-gold">41</div><div class="matrix-cell mc-gold">27</div>
+          <div class="matrix-cell mc-green">5D</div><div class="matrix-cell mc-green">52</div><div class="matrix-cell mc-green">11</div><div class="matrix-cell mc-green">98</div>
+          <div class="matrix-cell mc-red">30</div><div class="matrix-cell mc-red">AE</div><div class="matrix-cell mc-red">F1</div><div class="matrix-cell mc-red">E5</div>
+        </div>
+      </div>
+      <div style="color:var(--text3); font-size:.8em; max-width:160px;">Color = original row. After shift, each column has one byte from each original row. Row 0 unchanged, Row 1 shifted ←1, Row 2 shifted ←2, Row 3 shifted ←3.</div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: ShiftRows</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">After ShiftRows, what is true about each column of the AES state?</div>
+      <ul class="q-options">
+        <li class="distractor">A) Each column contains only bytes from the same original column</li>
+        <li class="correct">B) Each column contains bytes from four different original columns</li>
+        <li class="distractor">C) Each column has been cryptographically mixed by a polynomial multiplication</li>
+        <li class="distractor">D) Each column contains the XOR of the original row bytes</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B.</strong> After ShiftRows, Row 0 is unchanged, Row 1 is shifted left by 1, etc. This means each column now contains bytes that came from four different original column positions. This is essential: it allows the subsequent MixColumns step to effectively mix bytes from all four original columns, achieving full diffusion.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">ShiftRows changes the values of bytes in the AES state.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> ShiftRows only changes the <strong>positions</strong> of bytes within the state matrix — it does NOT change their values. The same bytes are present before and after ShiftRows; they are simply in different positions. The value transformation happens in SubBytes (S-box) and MixColumns.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">In ShiftRows, Row 0 is shifted left by _____ positions, Row 1 by _____ position, Row 2 by _____ positions, and Row 3 by _____ positions.</div>
+      <div class="q-answer"><strong>✔ 0, 1, 2, 3.</strong> Row 0 is not shifted (0 shift = unchanged). Each subsequent row shifts one more position to the left. This staggered pattern ensures that each column of the state after ShiftRows contains exactly one byte from each of the original four rows.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — MixColumns                                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide8" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 8</span>
+    <span class="slide-title">MixColumns — Galois Field Arithmetic Deep Dive</span>
+    <span class="slide-ref">Stallings [C] pp. 66-68 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// MixColumns — operates on each COLUMN (4 bytes) of the state</span>
+
+For each column [b₀, b₁, b₂, b₃]:
+
+  [ b'₀ ]   [ 2  3  1  1 ] [ b₀ ]
+  [ b'₁ ] = [ 1  2  3  1 ] [ b₁ ]   <span class="cm">← matrix multiply in GF(2⁸)</span>
+  [ b'₂ ]   [ 1  1  2  3 ] [ b₂ ]
+  [ b'₃ ]   [ 3  1  1  2 ] [ b₃ ]
+
+<span class="cm">// GF(2⁸) Arithmetic Rules</span>
+Addition:       a + b = a XOR b           <span class="cm">// no carry — just XOR bits</span>
+Multiplication: not normal multiplication!
+  × 1 = identity (no change)
+  × 2 = left shift + conditional XOR with 0x1B if bit 7 was set
+  × 3 = (×2) XOR original              <span class="cm">// 3b = 2b XOR b</span>
+
+<span class="cm">// Example computation for b'₀:</span>
+b'₀ = (2·b₀) ⊕ (3·b₁) ⊕ (1·b₂) ⊕ (1·b₃)
+    = (2·b₀) ⊕ (2·b₁ ⊕ b₁) ⊕ b₂ ⊕ b₃
+
+<span class="cm">// Key property — each output byte depends on ALL 4 input bytes</span>
+<span class="cm">// The matrix is an MDS (Maximum Distance Separable) matrix</span>
+<span class="cm">// → changing 1 input byte guarantees at least 3 output bytes change</span>
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>MixColumns operates on each of the 4 columns independently, treating each column as a 4-element vector.</li>
+        <li>Each output byte is a linear combination of ALL 4 input bytes — changing ANY input byte changes ALL 4 output bytes.</li>
+        <li>Arithmetic uses GF(2⁸) (Galois Field): addition = XOR, multiplication = special operation ensuring no overflow beyond 8 bits.</li>
+        <li>The fixed matrix used is an MDS (Maximum Distance Separable) matrix — specifically chosen so any 1-byte change in a column causes at least 3 output bytes to change (maximum possible diffusion).</li>
+        <li>MixColumns is OMITTED in the final AES round (structural design decision, not a security weakness).</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive — GF(2⁸) Without the Pain</span>
+      <div class="deep-dive">
+        <p>MixColumns sounds scary because it involves "Galois Field arithmetic." Let's demystify this completely.</p>
+        <p><strong>Why do we need GF(2⁸)?</strong> We need to multiply bytes together, but regular multiplication of two 8-bit numbers can give a 16-bit result — too big! Galois Field arithmetic is a way of doing multiplication that keeps results within 8 bits, using modular arithmetic with a specific polynomial. Think of it like clock arithmetic: on a 12-hour clock, 11 + 3 = 2 (not 14). GF(2⁸) keeps our byte arithmetic in the 0–255 range.</p>
+        <p><strong>Addition in GF(2⁸):</strong> Dead simple — it's just XOR! No carries, no complexity. 0x53 + 0xCA = 0x53 XOR 0xCA = 0x99. This is because GF(2⁸) works in binary, and binary addition without carries is XOR.</p>
+        <p><strong>Multiplication by 2 in GF(2⁸):</strong> Left-shift the byte by 1 bit. If the original bit 7 (the top bit) was 1, also XOR with 0x1B (the irreducible polynomial, minus its x⁸ term). This XOR step is what keeps the result within 8 bits.</p>
+        <p><strong>Multiplication by 3 in GF(2⁸):</strong> This is (×2) XOR (×1) = shift-and-XOR the original. So 3b = 2b XOR b.</p>
+        <p><strong>Why does any of this matter?</strong> The MixColumns matrix uses only the values 1, 2, and 3 — all easily computable with the rules above. Each output byte is: (2 × some input) XOR (3 × other input) XOR (1 × two inputs). The result: each output byte depends on all four input bytes in a complex, reversible way.</p>
+      </div>
+      <div class="math-box">
+<span style="color:var(--accent)">// GF(2⁸) Multiply-by-2 Algorithm (xtime function):</span>
+function xtime(byte b):
+  if bit7(b) == 0:
+    return b &lt;&lt; 1                    // just left shift
+  else:
+    return (b &lt;&lt; 1) XOR 0x1B         // shift, then reduce
+
+<span style="color:var(--gold)">// Example: xtime(0x57) = ?</span>
+0x57 = 01010111b → bit7 = 0 → xtime(0x57) = 10101110b = 0xAE  ✓
+0xAE = 10101110b → bit7 = 1 → xtime(0xAE) = 01011100b XOR 00011011b = 01000111b = 0x47
+      </div>
+      <div class="analogy-box">
+        <span class="analogy-title">🎯 Analogy — The Mixing Bowl</span>
+        MixColumns is like mixing four colored liquids in a bowl according to a recipe: "2 parts Red + 3 parts Blue + 1 part Yellow + 1 part Green." The output is a new color where every original color contributes. Change the amount of any one color (any input byte) and you change the entire mixture (all four output bytes). The recipe (the fixed matrix) is public — the security comes from the key material added in AddRoundKey, not from secrecy of the mixing formula.
+      </div>
+    </div>
+
+    <!-- MixColumns visual -->
+    <div class="matrix-wrap" style="margin:20px 0; flex-direction:column; align-items:flex-start;">
+      <div style="color:var(--text2); font-size:.85em; margin-bottom:12px;">MixColumns processes ONE column at a time. Each output byte = linear combination of all 4 input bytes:</div>
+      <div class="matrix-wrap" style="margin:0;">
+        <div>
+          <div class="matrix-label" style="color:var(--purple)">Column before</div>
+          <div class="matrix" style="grid-template-columns:44px; width:44px;">
+            <div class="matrix-cell mc-purple">D4</div>
+            <div class="matrix-cell mc-purple">BF</div>
+            <div class="matrix-cell mc-purple">5D</div>
+            <div class="matrix-cell mc-purple">30</div>
+          </div>
+        </div>
+        <div class="arrow-right">×</div>
+        <div>
+          <div class="matrix-label" style="color:var(--gold)">MDS Matrix</div>
+          <div class="matrix">
+            <div class="matrix-cell mc-gold">02</div><div class="matrix-cell mc-gold">03</div><div class="matrix-cell mc-gold">01</div><div class="matrix-cell mc-gold">01</div>
+            <div class="matrix-cell mc-gold">01</div><div class="matrix-cell mc-gold">02</div><div class="matrix-cell mc-gold">03</div><div class="matrix-cell mc-gold">01</div>
+            <div class="matrix-cell mc-gold">01</div><div class="matrix-cell mc-gold">01</div><div class="matrix-cell mc-gold">02</div><div class="matrix-cell mc-gold">03</div>
+            <div class="matrix-cell mc-gold">03</div><div class="matrix-cell mc-gold">01</div><div class="matrix-cell mc-gold">01</div><div class="matrix-cell mc-gold">02</div>
+          </div>
+        </div>
+        <div class="arrow-right">=</div>
+        <div>
+          <div class="matrix-label" style="color:var(--green)">Column after</div>
+          <div class="matrix" style="grid-template-columns:44px; width:44px;">
+            <div class="matrix-cell mc-green">04</div>
+            <div class="matrix-cell mc-green">66</div>
+            <div class="matrix-cell mc-green">81</div>
+            <div class="matrix-cell mc-green">E5</div>
+          </div>
+        </div>
+        <div style="color:var(--text3); font-size:.8em; max-width:150px;">Every output byte depends on all 4 input bytes. (NIST FIPS 197 example)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: MixColumns</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">In MixColumns, if you change exactly ONE input byte of a column, how many output bytes of that column will change?</div>
+      <ul class="q-options">
+        <li class="distractor">A) Exactly 1 — only the corresponding output byte changes</li>
+        <li class="distractor">B) Exactly 2 — the byte and its neighbor</li>
+        <li class="distractor">C) Exactly 3 — the maximum if the matrix is MDS</li>
+        <li class="correct">D) All 4 — every output byte depends on every input byte</li>
+      </ul>
+      <div class="q-answer"><strong>✔ D — All 4 output bytes change.</strong> Each output byte is a linear combination (XOR) of all 4 input bytes. Change any one input byte → all 4 output bytes change because each output formula includes that input byte. The MDS property guarantees that changing 1 input byte changes at least (n+1) = 3+1 = 4 output bytes in a 4×4 MDS matrix — i.e., ALL of them.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">In GF(2⁸) arithmetic, addition is equivalent to XOR.</div>
+      <div class="q-answer"><strong>✔ TRUE.</strong> In GF(2⁸), addition is defined as XOR (bitwise exclusive-or) with no carries. This is because GF(2⁸) elements are polynomials with binary coefficients, and adding two polynomials means adding their coefficients modulo 2 — which is exactly XOR. This property makes GF(2⁸) arithmetic efficient in binary hardware.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-sa">Short Answer</span>
+      <div class="q-text">Why is MixColumns omitted from the final AES round? Is this a security weakness?</div>
+      <div class="q-answer"><strong>✔ Answer:</strong> MixColumns is omitted from the final round for a <strong>structural/implementation reason</strong>, not for security. Including MixColumns in the last round would require the decryption algorithm to start with an InvMixColumns as its first step, complicating the hardware design. By omitting it, the encryption and decryption have symmetric round structures, simplifying the implementation (especially for hardware that needs to support both).<br><br><strong>It is NOT a security weakness</strong> because: (1) the final AddRoundKey still requires the attacker to know the key to reverse the last round; (2) the preceding 9 rounds of full operations have already achieved complete diffusion; (3) removing MixColumns from only the final round does not provide any additional attack surface.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — AddRoundKey                                      -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide9" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 9</span>
+    <span class="slide-title">AddRoundKey — XOR with Round Key</span>
+    <span class="slide-ref">Stallings [C] p. 68</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// AddRoundKey — XOR state with current round key</span>
+
+State after MixColumns (example):        Round Key (key₁):
+[ 04  E0  48  28 ]                       [ A0  FA  FE  17 ]
+[ 66  CB  F8  06 ]          XOR          [ 88  54  23  23 ]
+[ 81  19  D3  26 ]                       [ 31  37  0E  4C ]
+[ E5  9A  7A  4C ]                       [ EC  7B  43  E0 ]
+
+Result:
+[ A4  9C  7F  F2 ]
+[ 3B  8F  93  5D ]
+[ 4C  39  CD  3A ]                       <span class="cm">← output goes to next round's SubBytes</span>
+[ A9  6D  10  AC ]
+
+<span class="cm">// Properties of AddRoundKey:</span>
+  → Simplest operation: just XOR (same for encrypt AND decrypt)
+  → Key-dependent: without key, cannot reverse ANY preceding step
+  → XOR is its own inverse: (state XOR key) XOR key = state (decryption)
+  → Each of the 10/12/14 round keys is DIFFERENT (from key schedule)
+  → ALL key bits eventually influence ALL state bits after multiple rounds
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>AddRoundKey is the only operation that incorporates the secret key — it is what makes AES a keyed cipher rather than a fixed permutation.</li>
+        <li>The operation is simply XOR — the simplest possible operation. Its security comes from key secrecy, not algorithmic complexity.</li>
+        <li>Since XOR is its own inverse, decryption uses the exact same AddRoundKey operation (just with round keys applied in reverse order).</li>
+        <li>Each round uses a DIFFERENT round key derived from the original key by the Key Schedule.</li>
+        <li>Without the key (i.e., without being able to do AddRoundKey correctly), an attacker cannot reverse any step of AES — SubBytes and MixColumns are reversible but only if you know the state after AddRoundKey.</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive</span>
+      <div class="deep-dive">
+        <p>AddRoundKey is deceptively simple: just XOR the state with the round key. But this simplicity is by design. The three other operations (SubBytes, ShiftRows, MixColumns) provide all the confusion and diffusion. AddRoundKey's job is purely to inject key material.</p>
+        <p><strong>Why XOR?</strong> XOR is the fastest possible binary operation — one clock cycle in any hardware. And XOR is perfectly reversible: (A XOR K) XOR K = A always. This means both encryption and decryption do the same operation. Elegant and efficient.</p>
+        <p><strong>The real power comes from repetition.</strong> AddRoundKey is applied after SubBytes (which scrambled bytes non-linearly) and after MixColumns (which mixed them across columns). By the time AddRoundKey runs in round 2, even a single key bit has spread its influence throughout the entire state. After 10 rounds, the relationship between the original key bits and the ciphertext is extraordinarily complex — this is what makes AES resistant to key-recovery attacks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: AddRoundKey</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">AddRoundKey uses a different mathematical operation for encryption versus decryption.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> AddRoundKey uses XOR in both encryption and decryption. Since (state XOR key) XOR key = state, the same XOR operation reversed (by applying round keys in reverse order) achieves decryption. This is one of AES's elegant design properties.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">Which AES operation is the only one that incorporates the secret key into the computation?</div>
+      <ul class="q-options">
+        <li class="distractor">A) SubBytes — the S-box is key-dependent</li>
+        <li class="distractor">B) ShiftRows — the shift amounts are key-dependent</li>
+        <li class="distractor">C) MixColumns — the matrix is key-dependent</li>
+        <li class="correct">D) AddRoundKey — it XORs the state with the round key derived from the secret key</li>
+      </ul>
+      <div class="q-answer"><strong>✔ D — AddRoundKey.</strong> The S-box (SubBytes), shift amounts (ShiftRows), and MDS matrix (MixColumns) are ALL fixed constants — they do not depend on the key. Only AddRoundKey uses key material. The other three operations provide confusion and diffusion; AddRoundKey ties everything to the secret key.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 10 — Key Schedule                                    -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide10" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 10</span>
+    <span class="slide-title">Key Schedule — Generating Round Keys</span>
+    <span class="slide-ref">Stallings [C] pp. 69-72</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// Key Expansion — AES-128 generates 11 round keys from 1 original key</span>
+
+Original key: 128 bits = 4 words (W[0], W[1], W[2], W[3])
+Each word = 32 bits = 4 bytes
+
+Round keys generated: 11 × 128-bit keys = W[0..43] for AES-128
+
+For i = 4 to 43:
+  if i mod 4 == 0:
+    W[i] = W[i-4] XOR SubWord(RotWord(W[i-1])) XOR Rcon[i/4]
+    <span class="cm">  ↑ apply S-box to each byte of RotWord(W[i-1]), then XOR with Rcon</span>
+  else:
+    W[i] = W[i-4] XOR W[i-1]
+
+<span class="cm">// Key components:</span>
+RotWord(w):    Rotate 4-byte word left by 1 byte   (e.g., [a,b,c,d] → [b,c,d,a])
+SubWord(w):    Apply S-box to each byte of the word
+Rcon[i]:       Round constant = [x^(i-1) mod GF(2⁸), 0x00, 0x00, 0x00]
+
+<span class="cm">// Key properties:</span>
+  → All 10 round keys are derived from the SAME original 128-bit key
+  → Each round key is cryptographically related to the original key
+  → Knowing one round key should NOT allow recovering other round keys easily
+  → SubWord + Rcon prevent simple periodic patterns in derived keys
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>AES-128 generates 11 round keys (for rounds 0–10) from one original 128-bit key.</li>
+        <li>AES-192 generates 13 round keys; AES-256 generates 15 round keys.</li>
+        <li>The key schedule uses SubWord (S-box applied to a word) and Rcon (round constants) to prevent the derived keys from being simple rotations or XOR combinations of the original key.</li>
+        <li>Round constants (Rcon) break symmetry — without them, many words would repeat, weakening the key schedule.</li>
+        <li>For the exam: know that key expansion happens before encryption; each round uses a DIFFERENT derived key; the S-box is involved in key expansion too (adding confusion to the key schedule itself).</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-deep">📖 Beginner-Friendly Deep Dive</span>
+      <div class="deep-dive">
+        <p>You have one 128-bit key, but AES-128 needs 11 different 128-bit keys (one for each AddRoundKey call, including the initial one). Where do the extra 10 come from? The Key Schedule.</p>
+        <p>Think of the key schedule as a chain of transformations that stretches one key into eleven. Each link in the chain is mathematically dependent on the previous link but looks completely different.</p>
+        <p><strong>Why not just use the same key for every round?</strong> If every round used key₀, an attacker could analyze each round's AddRoundKey independently and potentially cancel it out algebraically. Using different round keys means the attacker must simultaneously account for 11 different unknown keys — exponentially harder.</p>
+        <p><strong>Why include SubWord?</strong> Without the S-box in the key schedule, the key expansion would be a purely linear process — and linear operations in the key schedule could be exploited. The S-box introduces the same non-linearity into the key expansion that it provides in SubBytes.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: Key Schedule</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">AES-128 generates how many 128-bit round keys from the original key?</div>
+      <ul class="q-options">
+        <li class="distractor">A) 10 round keys (one per round)</li>
+        <li class="correct">B) 11 round keys (one per round + one for initial key whitening)</li>
+        <li class="distractor">C) 16 round keys (one per column per round)</li>
+        <li class="distractor">D) 4 round keys (one per word)</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B — 11 round keys.</strong> AES-128 has 10 rounds, but AddRoundKey is also called BEFORE round 1 (initial key whitening with key₀). So: 1 initial + 10 per round = 11 total. AES-192 uses 13; AES-256 uses 15.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">The AES key schedule uses _______ (applied to a word) and _______ constants to prevent periodic patterns in derived round keys.</div>
+      <div class="q-answer"><strong>✔ SubWord (S-box applied byte-by-byte to a 32-bit word); Round constants (Rcon).</strong> SubWord adds non-linearity. Rcon values (powers of x in GF(2⁸)) ensure that even if two consecutive round key words start identical, the Rcon breaks the symmetry, making each set of 4 words unique.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 11 — AES-CTR Mode                                    -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide11" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 11</span>
+    <span class="slide-title">AES-CTR Mode — Block Cipher as Stream Cipher</span>
+    <span class="slide-ref">Stallings [C] Ch. 6 / [N] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// AES-CTR Mode — Counter Mode of Operation</span>
+
+Nonce (random, unique per session) + Counter (incrementing integer)
+          │
+          ▼
+<span class="hl">┌──────────────┐   ┌──────────────┐   ┌──────────────┐</span>
+<span class="hl">│ Nonce ║  0   │   │ Nonce ║  1   │   │ Nonce ║  2   │</span>  ← AES input
+<span class="hl">└──────┬───────┘   └──────┬───────┘   └──────┬───────┘</span>
+       │AES(key)           │AES(key)           │AES(key)
+       ▼                   ▼                   ▼
+<span class="hl2">   Keystream₀           Keystream₁          Keystream₂</span>
+       │                   │                   │
+  XOR ⊕ P₀           XOR ⊕ P₁            XOR ⊕ P₂
+       │                   │                   │
+<span class="hl3">   Ciphertext₀         Ciphertext₁         Ciphertext₂</span>
+
+<span class="cm">// Properties vs AES-CBC:</span>
+  Padding:     CTR = NOT needed    CBC = REQUIRED
+  Parallelism: CTR = FULL          CBC = NO (sequential dependency)
+  Random access: CTR = YES         CBC = NO
+  Error propagation: CTR = 1 block CBC = 2 blocks
+  Nonce reuse → catastrophic key leak (C1⊕C2 = P1⊕P2)
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>AES-CTR converts AES (a block cipher) into a stream cipher by encrypting successive counter values to generate a keystream.</li>
+        <li>The plaintext is NEVER fed into AES — only the counter is. The keystream is XORed with plaintext separately.</li>
+        <li>No padding required — XOR only as many keystream bytes as there is plaintext.</li>
+        <li>Fully parallelizable — all counter values can be encrypted simultaneously; encryption and decryption are the same operation.</li>
+        <li>NONCE must be unique per (key, session) pair. Reuse = catastrophic key exposure.</li>
+        <li>AES-CTR is the basis for AES-GCM (which adds authentication on top of CTR).</li>
+      </ul></div>
+    </div>
+
+    <div class="disc-section">
+      <span class="badge badge-why">🌀 Simon Sinek's Golden Circle</span>
+      <table class="gc-table">
+        <tr class="gc-why"><th>🔴 WHY — Use CTR Mode?</th></tr>
+        <tr class="gc-why"><td>Some data doesn't fit neatly into 128-bit blocks (e.g., network packets, stream data). Padding schemes add complexity and overhead. AES-CTR eliminates padding entirely, making AES practical for arbitrary-length data. Additionally, AES-CBC requires sequential processing (each block depends on the previous ciphertext) — CTR mode breaks this dependency and allows full parallelism on modern multi-core processors.</td></tr>
+        <tr class="gc-how"><th>🟡 HOW — Mechanism</th></tr>
+        <tr class="gc-how"><td>Encrypt a counter value (Nonce ‖ Counter_i) with AES to produce 128-bit keystream block i. XOR keystream block i with plaintext block i. The counter increments for each block. The nonce ensures uniqueness across sessions using the same key.</td></tr>
+        <tr class="gc-what"><th>🟢 WHAT — Result</th></tr>
+        <tr class="gc-what"><td>A fully parallelizable, padding-free stream cipher with the full security of AES. Used in: WPA2/WPA3 (CCMP/GCMP), TLS 1.3, IPSec, and virtually every modern protocol requiring symmetric encryption.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: AES-CTR</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">Which of the following are advantages of AES-CTR over AES-CBC? (Select all that apply)</div>
+      <ul class="q-options">
+        <li class="correct">A) Encryption can be parallelized (blocks are independent)</li>
+        <li class="distractor">B) More secure against brute-force attacks</li>
+        <li class="correct">C) No padding required for non-block-aligned plaintext</li>
+        <li class="distractor">D) Larger effective key size</li>
+      </ul>
+      <div class="q-answer"><strong>✔ A and C.</strong> AES-CTR counter blocks are independent — they can all be encrypted simultaneously (parallel). No padding is needed because the keystream can be any length, and only as many keystream bytes as plaintext bytes are XORed. Security against brute force depends on key length — both CTR and CBC use the same key size. CTR does not change the key size.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">In AES-CTR mode, the plaintext data is directly fed into the AES block cipher for encryption.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> In AES-CTR, only the <strong>counter value</strong> (Nonce ‖ Counter) is fed into AES. The output of AES is a keystream block. The plaintext is XORed with this keystream block — it never directly enters AES. This is fundamentally different from AES-CBC, where the plaintext XORed with the previous ciphertext block IS what enters AES.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-sa">Short Answer</span>
+      <div class="q-text">Explain why nonce reuse in AES-CTR mode is catastrophic for security.</div>
+      <div class="q-answer"><strong>✔ Answer:</strong> If the same nonce is used with the same key to encrypt two different messages: C₁ = P₁ XOR Keystream and C₂ = P₂ XOR Keystream. An attacker who observes both ciphertexts can compute: C₁ XOR C₂ = (P₁ XOR Keystream) XOR (P₂ XOR Keystream) = P₁ XOR P₂ (the keystream cancels). The attacker now has the XOR of the two plaintexts. For English text, this is enough to partially recover both messages using cribtdragging or frequency analysis. The keystream must be a one-time pad — used exactly once per key. This is equivalent to the OTP key reuse problem.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SLIDE 12 — Brute Force                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="slide12" class="slide-card" style="margin-top:32px;">
+  <div class="slide-header">
+    <span class="slide-num">SLIDE 12</span>
+    <span class="slide-title">Brute Force Attacks &amp; Security Levels Compared</span>
+    <span class="slide-ref">Stallings [C] Ch. 2</span>
+  </div>
+  <div class="slide-body">
+    <div class="code-block">
+<span class="cm">// Brute Force: try every possible key until plaintext is intelligible</span>
+Average keys tried = 2^(n-1) where n = key length in bits
+
+Key Size  Cipher    Keys             At 10⁹ dec/s      At 10¹³ dec/s
+--------  --------  ---------------  ----------------   ---------------
+<span class="hl3">56 bits   DES       7.2 × 10¹⁶       1.125 years        1 hour</span>
+<span class="hl2">128 bits  AES-128   3.4 × 10³⁸       5.3 × 10²¹ yrs     5.3 × 10¹⁷ yrs</span>
+<span class="hl">168 bits  3DES      3.7 × 10⁵⁰       5.8 × 10³³ yrs     5.8 × 10²⁹ yrs</span>
+<span class="hl2">192 bits  AES-192   6.3 × 10⁵⁷       9.8 × 10⁴⁰ yrs     9.8 × 10³⁶ yrs</span>
+<span class="hl2">256 bits  AES-256   1.2 × 10⁷⁷       1.8 × 10⁶⁰ yrs     1.8 × 10⁵⁶ yrs</span>
+
+<span class="cm">// Age of universe ≈ 1.4 × 10¹⁰ years</span>
+<span class="cm">// AES-128 is safe for ≈ 5 × 10¹¹ universe lifetimes at current speeds</span>
+
+<span class="cm">// SHA hash function security (collision resistance via birthday attack):</span>
+SHA-512  → 256-bit collision resistance (NOT 512-bit!)
+<span class="cm">         → Birthday attack requires 2^256 operations</span>
+<span class="cm">         → "security level" = output_length / 2 for collision resistance</span>
+</div>
+
+    <div class="disc-section">
+      <span class="badge badge-key">📌 Key Concepts at a Glance</span>
+      <div class="kc-box"><ul>
+        <li>Brute force = try all 2^n keys; on average succeed after 2^(n-1) attempts.</li>
+        <li>For AES-128: 2^127 operations — would take 5.3 × 10^21 years at 10^9 dec/s — completely infeasible.</li>
+        <li>SHA-512 provides 256-bit collision resistance — NOT 512-bit. The birthday attack requires 2^(n/2) operations for an n-bit hash. Common exam trap!</li>
+        <li>3DES nominally uses 168-bit keys but has only ~112-bit security due to the meet-in-the-middle attack.</li>
+        <li>AES is considered quantum-safe at 256-bit key length: Grover's algorithm reduces effective security by half, so AES-256 → ~128-bit quantum security.</li>
+      </ul></div>
+    </div>
+
+    <div class="warn-box">⚠️ <strong>Exam Trap — SHA-512 Security Level:</strong> SHA-512 provides <strong>256-bit</strong> collision resistance, NOT 512-bit. The birthday attack reduces the security of any n-bit hash to n/2 bits for finding collisions. The question "What is the security level of SHA-512?" answer is 256 bits. Similarly, SHA-256 provides 128-bit collision resistance.</div>
+
+    <div class="note-box">💡 <strong>Key Size vs Security Level:</strong> Not all key bits translate equally to security. 3DES uses 3×56 = 168 bits nominally, but the meet-in-the-middle attack reduces this to ~112 bits of effective security. Always check whether there are known attacks that reduce the effective security below the nominal key length.</div>
+  </div>
+
+  <div class="qa-section">
+    <h3>🧪 Practice Questions — Topic: Security Levels &amp; Brute Force</h3>
+
+    <div class="q-item">
+      <span class="q-type qt-mc">Multiple Choice</span>
+      <div class="q-text">What is the collision security level of SHA-512?</div>
+      <ul class="q-options">
+        <li class="distractor">A) 512-bit</li>
+        <li class="correct">B) 256-bit</li>
+        <li class="distractor">C) 128-bit</li>
+        <li class="distractor">D) 1024-bit</li>
+      </ul>
+      <div class="q-answer"><strong>✔ B — 256-bit.</strong> The birthday attack finds collisions in 2^(n/2) operations for an n-bit hash. SHA-512 produces 512-bit hashes → 2^(512/2) = 2^256 operations to find a collision → 256-bit collision resistance. This is a classic exam trap: SHA-512 → 256-bit security, SHA-256 → 128-bit collision security.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-tf">True / False</span>
+      <div class="q-text">The collision security level of SHA-512 is 512-bit.</div>
+      <div class="q-answer"><strong>✔ FALSE.</strong> SHA-512 provides <strong>256-bit collision resistance</strong> due to the birthday attack, which finds hash collisions in O(2^(n/2)) operations. The output length (512 bits) is not the security level. SHA-512 does provide 512-bit preimage resistance (finding an input for a given hash output requires 2^512 operations).</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-sa">Short Answer</span>
+      <div class="q-text">Why is AES-128 considered computationally infeasible to break by brute force, even with the most powerful computers today?</div>
+      <div class="q-answer"><strong>✔ Answer:</strong> AES-128 has 2^128 ≈ 3.4 × 10^38 possible keys. At 10^13 decryptions per second (state-of-the-art hardware in 2025), trying half the keyspace takes: 2^127 / 10^13 ≈ 5.3 × 10^17 years — roughly 38 billion times the current age of the universe. Even if every atom in the observable universe were a computer performing 10^13 checks per second, breaking AES-128 by brute force would still be completely infeasible within any practical timeframe. The key space is simply too enormous.</div>
+    </div>
+
+    <div class="q-item">
+      <span class="q-type qt-fb">Fill in the Blank</span>
+      <div class="q-text">3DES nominally uses a ____-bit key, but due to the meet-in-the-middle attack, its effective security level is approximately ____-bit.</div>
+      <div class="q-answer"><strong>✔ 168-bit; 112-bit.</strong> 3DES uses three DES keys of 56 bits each = 168 bits total. However, the meet-in-the-middle attack against Double-DES (and partially against 3DES) reduces the effective security. For 3DES, the effective security is approximately 112 bits (2^112 operations). This is why AES-128 (true 128-bit security) is preferred over 3DES.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- QUICK REFERENCE SUMMARY                                    -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="qref" class="section-title" style="margin-top:52px;">
+  <h2>📊 Quick Reference Summary — Block Ciphers &amp; AES</h2>
+</div>
+
+<table class="qr-table">
+  <thead>
+    <tr>
+      <th>Concept / Operation</th>
+      <th>What It Is</th>
+      <th>Security Role</th>
+      <th>Key Facts for Exam</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Symmetric Cipher</td>
+      <td>Same key for encrypt and decrypt</td>
+      <td>Bulk data encryption; fast</td>
+      <td>AES, 3DES, DES are symmetric. Key distribution is the challenge.</td>
+    </tr>
+    <tr>
+      <td>Block Cipher</td>
+      <td>Processes fixed-length blocks of data</td>
+      <td>Each output block depends on all input bits</td>
+      <td>AES block = 128 bits always (regardless of key size)</td>
+    </tr>
+    <tr>
+      <td>Stream Cipher</td>
+      <td>Generates keystream; XOR with plaintext</td>
+      <td>Efficient for arbitrary-length data; no padding</td>
+      <td>AES-CTR is AES used as a stream cipher; nonce MUST be unique</td>
+    </tr>
+    <tr>
+      <td>Confusion</td>
+      <td>Making key↔ciphertext relationship complex</td>
+      <td>Prevents key recovery from ciphertext</td>
+      <td>Provided by SubBytes (S-box non-linearity)</td>
+    </tr>
+    <tr>
+      <td>Diffusion</td>
+      <td>Spreading plaintext influence across ciphertext</td>
+      <td>Avalanche effect — 1 bit change → ~50% output change</td>
+      <td>Provided by ShiftRows + MixColumns together</td>
+    </tr>
+    <tr>
+      <td>DES</td>
+      <td>56-bit key, 64-bit block, 16 Feistel rounds</td>
+      <td>BROKEN — key too short</td>
+      <td>Withdrawn due to key length (NOT design flaws). Broken in &lt;1 hour today.</td>
+    </tr>
+    <tr>
+      <td>AES-128</td>
+      <td>128-bit key, 128-bit block, 10 rounds</td>
+      <td>Current gold standard; 5.3×10²¹ year brute-force time</td>
+      <td>4×4 byte state; 4 operations per round; 11 round keys</td>
+    </tr>
+    <tr>
+      <td>AES-192</td>
+      <td>192-bit key, 128-bit block, 12 rounds</td>
+      <td>Higher security than AES-128; marginal performance cost</td>
+      <td>Same block size and operations; 13 round keys</td>
+    </tr>
+    <tr>
+      <td>AES-256</td>
+      <td>256-bit key, 128-bit block, 14 rounds</td>
+      <td>Top Secret classification; quantum-resistant at ~128-bit PQ security</td>
+      <td>Same block size and operations; 15 round keys</td>
+    </tr>
+    <tr>
+      <td>SubBytes</td>
+      <td>S-box lookup — non-linear substitution of each byte</td>
+      <td>Confusion — the ONLY non-linear operation in AES</td>
+      <td>Applied to all 16 bytes independently; mathematically: GF(2⁸) inverse + affine transform</td>
+    </tr>
+    <tr>
+      <td>ShiftRows</td>
+      <td>Cyclic left rotation of rows by 0, 1, 2, 3 bytes</td>
+      <td>Partial diffusion — interleaves bytes from different columns</td>
+      <td>Does NOT change byte values — only positions; prepares columns for MixColumns</td>
+    </tr>
+    <tr>
+      <td>MixColumns</td>
+      <td>Multiply each column by fixed MDS matrix in GF(2⁸)</td>
+      <td>Diffusion — each output byte depends on all 4 input bytes of column</td>
+      <td>OMITTED in final round (structural choice, not weakness); GF addition = XOR</td>
+    </tr>
+    <tr>
+      <td>AddRoundKey</td>
+      <td>XOR state with current round key</td>
+      <td>Key injection — the ONLY operation that uses the secret key</td>
+      <td>Same operation in encryption and decryption (XOR is self-inverse); 11 different round keys</td>
+    </tr>
+    <tr>
+      <td>Key Schedule</td>
+      <td>Algorithm to derive N+1 round keys from original key</td>
+      <td>Each round uses different key; SubWord adds non-linearity to key expansion</td>
+      <td>AES-128: 1 key → 11 round keys; uses SubWord + RotWord + Rcon</td>
+    </tr>
+    <tr>
+      <td>SHA-512</td>
+      <td>512-bit hash output; 80 rounds</td>
+      <td>256-bit collision resistance (birthday attack = 2^256 ops)</td>
+      <td>Security = output/2 for collisions. SHA-512 → 256-bit. SHA-256 → 128-bit.</td>
+    </tr>
+    <tr>
+      <td>AES-GCM</td>
+      <td>AES-CTR + GHASH authentication</td>
+      <td>Authenticated Encryption: confidentiality + integrity + authentication</td>
+      <td>IV/nonce must be unique per (key, session). Reuse compromises authentication key.</td>
+    </tr>
+    <tr>
+      <td>GF(2⁸) Arithmetic</td>
+      <td>Finite field with addition = XOR and special multiplication</td>
+      <td>Enables MixColumns and S-box construction within 8-bit bytes</td>
+      <td>×1 = identity; ×2 = left-shift + conditional XOR 0x1B; ×3 = ×2 XOR original</td>
+    </tr>
+    <tr>
+      <td>Avalanche Effect</td>
+      <td>Small input change → large output change</td>
+      <td>Shows AES achieves full diffusion after ~2 rounds of operations</td>
+      <td>1 bit change in plaintext or key → ~64 of 128 output bits flip</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- INTEGRATIVE EXAM QUESTIONS                                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="integrative" class="integrative">
+  <h2>🎯 Exam Preparation — Integrative Questions</h2>
+
+  <div class="int-q">
+    <div class="int-q-text">Q1. [Short Answer] AES processes a 128-bit plaintext. Trace the data through all steps of Round 1 (AES-128), naming each operation in order, what it does to the state, and what security property it contributes.</div>
+    <div class="int-q-ans">
+      <strong>Answer:</strong><br>
+      Initial step: <strong>AddRoundKey(key₀)</strong> — XOR the 4×4 state with the original 128-bit key. Purpose: key whitening; forces attacker to know the key before any analysis.<br><br>
+      Round 1, Step 1: <strong>SubBytes</strong> — replace each of the 16 state bytes with the S-box output for that byte. The S-box is a GF(2⁸) inverse + affine transform. Purpose: <em>confusion</em> — introduces non-linearity, destroying any linear relationship between plaintext and ciphertext.<br><br>
+      Round 1, Step 2: <strong>ShiftRows</strong> — cyclically rotate Row 0 by 0, Row 1 by 1, Row 2 by 2, Row 3 by 3 positions leftward. Values unchanged, positions rearranged. Purpose: begin <em>diffusion</em> — ensures each column now contains bytes from four different original columns, setting up MixColumns.<br><br>
+      Round 1, Step 3: <strong>MixColumns</strong> — multiply each of the 4 columns by the fixed 4×4 MDS matrix in GF(2⁸). Each output byte = linear combination of all 4 input bytes of the column. Purpose: complete <em>diffusion</em> — each output byte now depends on all bytes in the original column (which after ShiftRows came from all four original columns).<br><br>
+      Round 1, Step 4: <strong>AddRoundKey(key₁)</strong> — XOR the state with round key 1 (derived from key₀ by the key schedule). Purpose: incorporate secret key material after diffusion/confusion operations, ensuring no step is reversible without the key.
+    </div>
+  </div>
+
+  <div class="int-q">
+    <div class="int-q-text">Q2. [Challenge] Compare and contrast AES-CBC and AES-CTR mode. Identify: (a) which operations are sequential vs parallelizable, (b) padding requirements, (c) what happens if an attacker flips one bit of ciphertext, and (d) the specific security risk unique to each mode.</div>
+    <div class="int-q-ans">
+      <strong>Answer:</strong><br>
+      <strong>(a) Sequential vs Parallel:</strong><br>
+      CBC — Encryption is sequential: C_i = AES(P_i XOR C_{i-1}). Each block depends on the previous ciphertext block — you cannot encrypt block 5 until you have block 4's ciphertext. Decryption is parallelizable: P_i = AES_decrypt(C_i) XOR C_{i-1}, since all C_i are known.<br>
+      CTR — Both encryption and decryption are fully parallelizable: all counter values can be encrypted simultaneously, and each block is independent of all others.<br><br>
+      <strong>(b) Padding:</strong><br>
+      CBC requires padding (e.g., PKCS#7) to make plaintext a multiple of 128 bits. CTR requires NO padding — the keystream is XORed with exactly as many plaintext bytes as exist.<br><br>
+      <strong>(c) Bit flip in ciphertext:</strong><br>
+      CBC — A flip in C_i causes: (1) C_i decrypts to garbage (entire block corrupted); (2) the same bit position in P_{i+1} also flips (because C_i is XORed into the next decryption). Two blocks affected.<br>
+      CTR — A flip in C_i causes only the same bit position in P_i to flip — exactly one bit error, in exactly one block. Limited blast radius, but this also means a targeted bit-flip attack is possible without detection (without an authentication tag).<br><br>
+      <strong>(d) Unique security risks:</strong><br>
+      CBC — Padding Oracle Attack: if an attacker can observe padding validation errors, they can decrypt ciphertext byte-by-byte without the key. Always use authenticated encryption (GCM) instead of CBC+MAC.<br>
+      CTR — Nonce reuse: if the same nonce is reused with the same key, the keystream repeats. C1 XOR C2 = P1 XOR P2, exposing both plaintexts. Critical: nonces must never repeat for any CTR-based cipher (CTR, GCM, etc.).
+    </div>
+  </div>
+
+  <div class="int-q">
+    <div class="int-q-text">Q3. [Multiple Answer — Exam Style] Which of the following statements about the AES S-box are TRUE? (Select all that apply)</div>
+    <div class="int-q-ans">
+      <strong>Options:</strong><br>
+      A) The S-box is key-dependent and changes with each round <br>
+      B) The S-box maps each 8-bit input to an 8-bit output via a fixed lookup table<br>
+      C) The S-box is the only non-linear operation in AES<br>
+      D) The S-box is constructed using GF(2⁸) multiplicative inverse followed by an affine transformation<br>
+      E) The same S-box is also used in the AES key schedule<br><br>
+      <strong>✔ Correct: B, C, D, E</strong><br>
+      A is FALSE — the S-box is a fixed, key-independent lookup table. B is TRUE — 256 entries, each mapping one byte to another. C is TRUE — SubBytes is the only non-linear step; all others (ShiftRows, MixColumns, AddRoundKey) are linear. D is TRUE — this is the mathematical construction of the AES S-box per FIPS 197. E is TRUE — SubWord in the key schedule applies the same S-box to each byte of a 32-bit word.
+    </div>
+  </div>
+
+  <div class="int-q">
+    <div class="int-q-text">Q4. [Short Answer] A security architect proposes using 3DES instead of AES-128 because "3DES uses three 56-bit keys for 168 bits of total key material, which is more than AES-128's 128 bits." Evaluate this reasoning.</div>
+    <div class="int-q-ans">
+      <strong>Answer:</strong> The reasoning is flawed. While 3DES nominally uses 168 bits of key material (3 × 56-bit DES keys), it does NOT provide 168-bit security.<br><br>
+      The <strong>meet-in-the-middle attack</strong> reduces 3DES's effective security to approximately <strong>112 bits</strong>. The attack works by encrypting all 2^56 possible first keys and decrypting with all 2^56 possible third keys, finding matching intermediate values — requiring 2^112 operations instead of 2^168.<br><br>
+      AES-128 provides true <strong>128-bit security</strong> with no known attacks that reduce this level. It is also significantly faster than 3DES in both hardware and software (typically 5–10× faster).<br><br>
+      Additionally, 3DES's 64-bit block size (inherited from DES) creates the SWEET32 birthday attack: encrypting ~68 GB of data with the same key causes a birthday collision in the 64-bit block space, enabling attack. AES-128's 128-bit block size makes this practically impossible.<br><br>
+      <strong>Conclusion:</strong> AES-128 is superior to 3DES in security, speed, and block size. NIST deprecated 3DES in 2023; AES should always be preferred.
+    </div>
+  </div>
+
+  <div class="int-q">
+    <div class="int-q-text">Q5. [True/False — Exam Style] For each statement, identify True or False and briefly justify.</div>
+    <div class="int-q-ans">
+      <strong>(1) AES-CTR functions as a stream cipher. → TRUE.</strong> CTR mode generates a keystream by encrypting counter values and XORs with plaintext — behaves exactly like a stream cipher.<br><br>
+      <strong>(2) AES is considered more secure than DES due to its use of a greater number of encryption rounds. → FALSE (partially).</strong> Primarily AES is more secure due to its longer key length (128/192/256 vs 56 bits). DES has 16 rounds while AES-128 has only 10. Security comes predominantly from key length (brute force resistance) and algorithm design, not round count alone.<br><br>
+      <strong>(3) Reusing nonce values will compromise the security of AES-GCM. → TRUE.</strong> Nonce reuse in AES-GCM catastrophically leaks the GHASH authentication key AND allows P1 XOR P2 recovery, breaking both confidentiality and authentication.<br><br>
+      <strong>(4) AES-CBC (Cipher Block Chaining) alone provides message integrity. → FALSE.</strong> AES-CBC provides only confidentiality. An attacker can perform targeted bit-flip attacks on CBC ciphertext without detection. Integrity requires a MAC (e.g., HMAC) or an authenticated encryption mode (AES-GCM).<br><br>
+      <strong>(5) The collision security level of SHA-512 is 512-bit. → FALSE.</strong> SHA-512 provides 256-bit collision resistance due to the birthday attack (2^(512/2) = 2^256 operations to find a collision). The 512-bit figure is the preimage resistance level, not collision resistance.
+    </div>
+  </div>
+
+  <div class="int-q">
+    <div class="int-q-text">Q6. [Challenge] Explain the complete role of ShiftRows in achieving diffusion across the entire AES state — specifically addressing WHY ShiftRows alone is insufficient and WHY MixColumns alone (without ShiftRows) would also be insufficient for full diffusion.</div>
+    <div class="int-q-ans">
+      <strong>Answer:</strong><br>
+      <strong>Why ShiftRows alone is insufficient:</strong><br>
+      ShiftRows only changes the <em>positions</em> of bytes — it does not change their <em>values</em>. A state after ShiftRows contains the exact same 16 bytes as before, just in different positions. No byte value has been influenced by any other byte. Therefore, ShiftRows alone creates zero diffusion of byte values — it is purely a positional rearrangement (a permutation of the state). It provides no security on its own against statistical attacks.<br><br>
+      <strong>Why MixColumns alone (without ShiftRows) would be insufficient:</strong><br>
+      MixColumns operates on each column independently — it mixes the 4 bytes within a column, but one column never interacts with another. Without ShiftRows, the four columns are completely independent. An attacker could attack each 32-bit column independently, reducing the AES-128 problem to four separate 32-bit problems — a catastrophic weakening (from 2^128 to 4 × 2^32 security).<br><br>
+      <strong>Why ShiftRows + MixColumns together achieve full diffusion:</strong><br>
+      After ShiftRows, each column contains bytes that originated from four different original columns (one byte per original column). When MixColumns then mixes each column, it mixes bytes that came from all four original columns. After just ONE round of ShiftRows + MixColumns, every byte of the state has been influenced by bytes from every original column. After TWO rounds, the influence has spread completely across the entire state — every output byte depends on every input byte. This complete diffusion after 2 rounds, combined with the 10 total rounds of AES, provides the full Avalanche Effect.
+    </div>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<div style="background:#070a12; border-top:1px solid var(--border); padding:18px 48px; margin-top:40px; color:var(--text3); font-size:.8em;">
+  CS 448/548 Network Security · Block Ciphers &amp; AES Study Guide · Spring 2026 · Dr. Lina Pu · Based on Stallings [C]/[N] textbook
+</div>
+
+</body>
+</html>
