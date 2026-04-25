@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 448/548 · Topic 6 Beginner Deep-Dive · IPsec / AH / ESP / VPN</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+    --topic-accent: #ff7043;
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+  }
+
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+    --topic-accent: #c94a1a;
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] h4 { color: #2c3144; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] pre.example { color: #1a1d2e; background: #fdf9e8; border-color: var(--gold); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(201,74,26,0.06), rgba(26,95,224,0.06)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .why-box { background: rgba(201,74,26,0.06); }
+  [data-theme="light"] .pause { background: rgba(255,152,0,0.05); }
+  [data-theme="light"] .vocab { background: #fdf9e8; }
+  [data-theme="light"] .common-confusion { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  /* ─── Top bar with theme toggle ─── */
+  .top-bar {
+    position: fixed; top: 0; left: 260px; right: 0;
+    height: 44px; background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 0 28px; gap: 10px; z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em; color: var(--text-faint);
+    font-family: 'Consolas', monospace; letter-spacing: 0.5px;
+    margin-right: auto; user-select: none; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em; color: var(--text-faint);
+    font-family: 'Consolas', monospace; letter-spacing: 0.5px;
+    user-select: none; flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex; align-items: center; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 3px; gap: 2px; cursor: pointer; flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 22px; border-radius: 16px;
+    font-size: 12px; transition: background 0.2s, color 0.2s;
+    color: var(--text-faint); user-select: none;
+  }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 16px; line-height: 1.75;
+    padding-left: 260px; padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono { font-family: 'Consolas', 'Courier New', 'Menlo', monospace; }
+  code:not(pre code) {
+    background: var(--bg-elev2); color: var(--accent-text);
+    padding: 1px 6px; border-radius: 3px; font-size: 0.92em;
+  }
+
+  h1, h2, h3, h4 { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 600; letter-spacing: 0.2px; }
+  h1 { font-size: 2.2em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 {
+    font-size: 1.65em; color: var(--topic-accent);
+    margin: 44px 0 18px 0; padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  h3 { font-size: 1.32em; color: #fff; margin: 30px 0 12px 0; }
+  h4 {
+    font-size: 1.08em; color: var(--text);
+    margin: 22px 0 10px 0; font-weight: 600;
+  }
+
+  p { margin: 10px 0 14px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ─── Sticky nav ─── */
+  nav.sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
+    background: var(--bg-elev); border-right: 1px solid var(--border);
+    padding: 22px 18px; overflow-y: auto;
+    font-size: 0.88em; z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700; color: var(--topic-accent);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    font-size: 0.74em; margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block; padding: 6px 10px; margin: 2px 0;
+    border-radius: 4px; color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2); color: var(--text);
+    border-left-color: var(--topic-accent); text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.86em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    nav.sidebar {
+      top: 44px; width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title, nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ─── Layout ─── */
+  main { max-width: 920px; padding: 40px 56px 100px 56px; }
+  @media (max-width: 900px) { main { padding: 28px 22px 60px 22px; } }
+
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px; margin-bottom: 36px;
+  }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.92em; margin-top: 8px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  /* ─── Banners and information boxes ─── */
+  .banner {
+    background: linear-gradient(135deg, rgba(255,112,67,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border); border-left: 3px solid var(--topic-accent);
+    border-radius: 6px; padding: 16px 22px; margin: 22px 0;
+    font-size: 1em; transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent); text-transform: uppercase;
+    letter-spacing: 1px; font-size: 0.78em;
+  }
+
+  .subtopic-banner {
+    background: var(--bg-elev); border-top: 4px solid var(--topic-accent);
+    border-radius: 4px; padding: 18px 26px; margin: 36px 0 22px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block; background: var(--topic-accent); color: #fff;
+    font-weight: 700; font-family: 'Consolas', monospace;
+    padding: 3px 12px; border-radius: 4px; margin-right: 12px;
+    font-size: 0.92em; letter-spacing: 1px;
+  }
+  .subtopic-banner .title { font-size: 1.18em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages {
+    display: block; margin-top: 6px;
+    font-family: 'Consolas', monospace; font-size: 0.84em; color: var(--text-faint);
+  }
+
+  /* ─── Vocabulary box: introduces a term ─── */
+  .vocab {
+    background: rgba(255,215,0,0.05); border: 1px solid var(--gold);
+    border-radius: 6px; padding: 14px 18px; margin: 14px 0;
+    transition: background 0.22s ease;
+  }
+  .vocab .term {
+    color: var(--gold); font-weight: 700; font-size: 1.05em;
+    display: block; margin-bottom: 4px;
+  }
+  .vocab .term::before { content: "📖 "; }
+
+  /* ─── Why box: answers anticipated "but why?" questions ─── */
+  .why-box {
+    background: rgba(255,112,67,0.06);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 0 6px 6px 0; padding: 12px 18px;
+    margin: 14px 0; transition: background 0.22s ease;
+  }
+  .why-box .lbl {
+    color: var(--topic-accent); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    font-size: 0.74em; display: block; margin-bottom: 4px;
+  }
+
+  /* ─── Pause/anticipated-question box ─── */
+  .pause {
+    background: rgba(255,152,0,0.05);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 6px 6px 0; padding: 12px 18px;
+    margin: 14px 0; transition: background 0.22s ease;
+  }
+  .pause .lbl {
+    color: var(--orange); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    font-size: 0.74em; display: block; margin-bottom: 4px;
+  }
+
+  /* ─── Common-confusion box (red) ─── */
+  .common-confusion {
+    background: rgba(255,82,82,0.05);
+    border-left: 3px solid var(--red);
+    border-radius: 0 6px 6px 0; padding: 12px 18px;
+    margin: 14px 0; transition: background 0.22s ease;
+  }
+  .common-confusion .lbl {
+    color: var(--red); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    font-size: 0.74em; display: block; margin-bottom: 4px;
+  }
+
+  /* ─── Step-by-step explanation ─── */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 14px 20px; margin: 14px 0;
+    border-radius: 0 6px 6px 0; transition: background 0.22s ease;
+  }
+  .step .step-head {
+    color: var(--topic-accent); font-weight: 700;
+    font-size: 1.04em; display: block; margin-bottom: 6px;
+  }
+
+  /* ─── ASCII diagrams ─── */
+  pre.diagram {
+    background: var(--bg-elev2); border: 1px solid var(--accent);
+    border-radius: 6px; padding: 16px 22px; overflow-x: auto;
+    font-size: 0.86em; line-height: 1.55; color: #dce3f0; margin: 16px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  /* ─── Worked example boxes ─── */
+  pre.example {
+    background: rgba(255,215,0,0.04); border: 1px solid var(--gold);
+    border-radius: 6px; padding: 16px 22px; overflow-x: auto;
+    font-size: 0.86em; line-height: 1.55; color: var(--text); margin: 16px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  .example-label {
+    display: inline-block; background: var(--gold); color: #1a1d2e;
+    padding: 2px 10px; border-radius: 4px; font-size: 0.72em;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin: 14px 0 -8px 0; position: relative; z-index: 1;
+  }
+
+  .diagram-source {
+    font-size: 0.86em; color: var(--text-faint);
+    margin: -8px 0 18px 0; font-style: italic;
+  }
+
+  /* ─── PDF reference badge ─── */
+  .pdf-ref {
+    display: inline-block; background: var(--accent-soft);
+    color: var(--accent-text); border: 1px solid var(--accent);
+    border-radius: 4px; padding: 1px 7px;
+    font-size: 0.78em; font-family: 'Consolas', monospace;
+    white-space: nowrap; margin: 0 3px; vertical-align: baseline;
+  }
+
+  /* ─── Tables ─── */
+  table.data {
+    width: 100%; border-collapse: collapse;
+    margin: 14px 0 20px 0; font-size: 0.94em;
+  }
+  table.data th {
+    background: var(--accent-soft); color: var(--blue-text);
+    text-align: left; padding: 10px 14px;
+    border: 1px solid var(--border); font-weight: 600;
+    font-size: 0.86em; text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 14px; border: 1px solid var(--border); vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  /* ─── Lists ─── */
+  ul.plain { padding-left: 24px; }
+  ul.plain li { margin: 6px 0; }
+  ol.numbered { padding-left: 26px; }
+  ol.numbered li { margin: 8px 0; }
+
+  /* ─── Quiz at the end of each sub-topic ─── */
+  .quiz-block {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 22px; margin: 18px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .quiz-block .qnum {
+    background: var(--surface); color: var(--text-dim);
+    padding: 2px 9px; border-radius: 4px;
+    font-size: 0.8em; font-family: 'Consolas', monospace;
+    font-weight: 600; letter-spacing: 0.6px; margin-right: 8px;
+  }
+  .quiz-block .question-stem {
+    font-weight: 500; font-size: 1.04em; margin: 6px 0 10px 0; color: #fff;
+  }
+  details.answer-block {
+    margin-top: 12px; border-left: 3px solid var(--green); padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer; color: var(--green); font-weight: bold;
+    padding: 4px 0; list-style: none; user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+
+  /* ─── Print ─── */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar, .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .step, .vocab, .why-box, .pause, .common-confusion, .quiz-block, .subtopic-banner {
+      break-inside: avoid; border-color: #aaa; background: #fff; color: #000;
+    }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram, pre.example { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">📘 Topic 6 · Beginner</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#prereqs">🧠 Prerequisites</a>
+  <a href="#big-picture">🌍 The Big Picture</a>
+  <hr>
+  <a href="#st-arch">6A · IPsec Architecture + AH/ESP</a>
+  <a href="#arch-story" class="sub">→ The story</a>
+  <a href="#arch-vocab" class="sub">→ Vocabulary</a>
+  <a href="#arch-walk" class="sub">→ Packet walk-through</a>
+  <a href="#arch-ah-vs-esp" class="sub">→ AH vs ESP</a>
+  <a href="#arch-replay" class="sub">→ Anti-replay</a>
+  <a href="#arch-faq" class="sub">→ FAQ</a>
+  <a href="#arch-quiz" class="sub">→ Self-quiz</a>
+  <a href="#st-modes">6B · Transport vs Tunnel</a>
+  <a href="#modes-story" class="sub">→ The story</a>
+  <a href="#modes-walk" class="sub">→ Four packet shapes</a>
+  <a href="#modes-faq" class="sub">→ FAQ</a>
+  <a href="#modes-quiz" class="sub">→ Self-quiz</a>
+  <a href="#st-vpn">6C · VPN</a>
+  <a href="#vpn-story" class="sub">→ The story</a>
+  <a href="#vpn-walk" class="sub">→ End-to-end walk</a>
+  <a href="#vpn-families" class="sub">→ IPsec vs TLS-based</a>
+  <a href="#vpn-faq" class="sub">→ FAQ</a>
+  <a href="#vpn-quiz" class="sub">→ Self-quiz</a>
+  <hr>
+  <a href="#tying-together">🧩 Tying it all together</a>
+  <a href="#glossary">📚 Glossary</a>
+</nav>
+
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 448/548 · Final Exam · <strong>Topic 6 · Beginner Deep-Dive</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 6 — IPsec, AH/ESP, Transport vs Tunnel, and VPN</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">A beginner-friendly deep dive · Plain English · Worked examples · No memorisation tricks</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 448/548 Network Security &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Lina Pu &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final — April 27, 2026<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lectures_all_merged_compressed.pdf</span>, pp. 355–396<br>
+    <strong>How to use this document:</strong> Read it linearly the first time. Don't skip the analogies — they <em>are</em> the explanation. The boxes labelled <em>"Wait, why?"</em>, <em>"Common confusion"</em>, and <em>"Worked example"</em> are where understanding actually crystallises. Don't move on if a section feels foggy; back up one paragraph and re-read.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">What this document is, and is not</strong><br>
+  This is a <em>learning</em> guide, not a reference card. The condensed reference guide for Topic 6 lists definitions, tables, and exam questions; <em>this</em> guide explains why each thing exists, what problem it solves, and how the pieces fit together.<br><br>
+  <strong>The core question of Topic 6:</strong> <em>How do you protect IP packets — at the network layer, transparent to applications — when the Internet they cross is full of eavesdroppers, spoofers, and hijackers?</em> IPsec is the IETF's answer. VPNs are how IPsec (and similar tools) get used in practice. By the end of this document, the words "AH," "ESP," "tunnel mode," "transport mode," and "VPN" will all click into a coherent picture, not feel like random acronyms.
+</div>
+
+<!-- ============================================================
+     PREREQUISITES
+     ============================================================ -->
+<h2 id="prereqs">🧠 What you should already know (a 5-minute refresh)</h2>
+
+<p>This section reminds you of four ideas you'll lean on heavily. If any of them feel unfamiliar, pause and review the relevant earlier topic before continuing.</p>
+
+<h3>1. The TCP/IP layering, and where each protocol lives</h3>
+
+<p>The Internet uses a layered protocol stack. Bottom to top: physical wires → link (Ethernet, Wi-Fi) → network (IP) → transport (TCP, UDP) → application (HTTP, SSH, DNS). Each layer wraps the layer above it in a header.</p>
+
+<p>When your browser sends an HTTP request, this is what's actually on the wire (simplified):</p>
+
+<pre class="diagram">
+   [ Ethernet hdr | IP hdr | TCP hdr | HTTP request ]
+                    │         │         │
+                    │         │         └── written by your browser
+                    │         └──────────── written by your kernel's TCP stack
+                    └────────────────────── written by your kernel's IP stack
+</pre>
+
+<p>Each layer's header has its own purpose. The IP header has source and destination IP addresses; routers read it to forward the packet. The TCP header has source and destination ports plus sequence numbers; the receiver's kernel uses it to deliver bytes in order to the right application.</p>
+
+<p>IPsec inserts itself between the IP layer and whatever's above it. From the application's perspective, nothing changes — TCP still works the same. From the wire's perspective, there's now a new "IPsec header" between the IP header and the TCP header (or, in tunnel mode, a whole second IP header underneath everything). We'll see exactly how shortly.</p>
+
+<h3>2. Symmetric encryption (recap from Topic 3)</h3>
+
+<p>Two parties who share a secret key can encrypt + decrypt with that key using AES. Modern AES-GCM does encryption <em>and</em> integrity (a MAC) in one operation — it's an <strong>AEAD</strong> cipher (Authenticated Encryption with Associated Data). IPsec uses AES-GCM in modern deployments for the same reason TLS does: one primitive, both services.</p>
+
+<h3>3. Public-key crypto and Diffie-Hellman (recap from Topic 3)</h3>
+
+<p>Two parties who have never met can establish a shared secret over a public channel using Diffie-Hellman. The shared secret then becomes input to a key-derivation function that produces symmetric encryption keys. IPsec uses Diffie-Hellman the same way TLS and SSH do; the only difference is that IPsec wraps the DH exchange in its own protocol, called <strong>IKE</strong> (Internet Key Exchange).</p>
+
+<h3>4. The TCP/IP attacks from Topic 2</h3>
+
+<p>If you remember nothing else from Topic 2, remember this: <strong>plain IP, plain TCP, and plain ARP are unauthenticated.</strong> An attacker with access to the network path can:</p>
+
+<ul class="plain">
+  <li>Read every byte (eavesdropping).</li>
+  <li>Spoof the source IP address of packets they send.</li>
+  <li>Inject TCP RSTs (resets) to tear down connections.</li>
+  <li>Inject TCP data into existing connections by guessing sequence numbers (hijacking).</li>
+  <li>Poison ARP caches on a LAN, redirecting traffic through their own machine.</li>
+</ul>
+
+<p>These attacks all exist because the protocols themselves provide no cryptographic protection. Each one assumes everyone on the network is honest. Upper-layer protocols like TLS and SSH protect <em>specific applications</em> against most of these attacks. IPsec is the network-layer answer that protects <em>all</em> traffic at once, transparently.</p>
+
+<div class="why-box">
+  <span class="lbl">Wait, then why do we need TLS at all if IPsec exists?</span>
+  Two reasons. First, IPsec needs to be configured and supported on both endpoints, which historically meant kernel-level setup and IT involvement; TLS just needs an up-to-date browser and a certificate on the server. Second, IPsec usually terminates at gateways (VPN concentrators), not at the actual application server — so the traffic between the gateway and the server is no longer encrypted. End-to-end encryption between your browser and the server still requires TLS. We'll see exactly how this plays out in 6C.
+</div>
+
+<!-- ============================================================
+     THE BIG PICTURE
+     ============================================================ -->
+<h2 id="big-picture">🌍 The big picture: where Topic 6 fits</h2>
+
+<p>Topic 6 has three sub-topics that are all about protecting traffic at the IP layer or below the application layer:</p>
+
+<div class="step">
+  <span class="step-head">6A · IPsec architecture + AH + ESP</span>
+  IPsec is a framework — not a single protocol — for adding cryptographic protection to IP packets. Its two main packet-protection protocols are <strong>AH</strong> (Authentication Header — integrity + auth, no encryption) and <strong>ESP</strong> (Encapsulating Security Payload — integrity + auth + encryption). Plus a key-management protocol called <strong>IKE</strong> that sets up the keys.
+</div>
+
+<div class="step">
+  <span class="step-head">6B · Transport mode vs Tunnel mode</span>
+  IPsec can run in two modes: <strong>transport</strong> (insert AH/ESP between the existing IP header and its payload — original IP addresses still visible) or <strong>tunnel</strong> (wrap the entire original packet inside a new outer IP header — original IP addresses hidden, only outer addresses visible). Tunnel mode is what makes site-to-site VPNs possible.
+</div>
+
+<div class="step">
+  <span class="step-head">6C · VPN</span>
+  A Virtual Private Network is an encrypted tunnel that makes a remote client appear "logically attached" to a private network. Two main protocol families: IPsec-based (using ESP in tunnel mode) and TLS-based (OpenVPN, Cisco AnyConnect, WireGuard). The choice is mostly about deployment context.
+</div>
+
+<div class="banner">
+  <strong class="label">The unifying mental model</strong><br>
+  Every Topic 6 concept can be answered by asking three questions:<br>
+  &nbsp;&nbsp;<strong>1. Who's involved at each end of the secure connection?</strong> Two hosts? Or a host and a gateway? Or two gateways?<br>
+  &nbsp;&nbsp;<strong>2. What protection do they need?</strong> Just integrity (use AH)? Confidentiality too (use ESP)?<br>
+  &nbsp;&nbsp;<strong>3. Should the original IP addresses be visible or hidden?</strong> Visible → transport mode. Hidden → tunnel mode.<br><br>
+  Hold this mental model as you read. You'll find every "why" question lands in one of these three buckets.
+</div>
+
+<h3>The running example for this whole document</h3>
+
+<p>To keep things concrete, we'll follow a single scenario throughout. <strong>Acme Corp</strong> has two offices:</p>
+
+<ul class="plain">
+  <li><strong>Branch A</strong> — San Francisco. Internal network <code>10.1.0.0/24</code>. Edge router/firewall has public IP <code>198.51.100.1</code>.</li>
+  <li><strong>Branch B</strong> — Berlin. Internal network <code>10.2.0.0/24</code>. Edge router/firewall has public IP <code>203.0.113.5</code>.</li>
+</ul>
+
+<p>Inside Branch A, an employee named Alice (laptop at <code>10.1.0.42</code>) needs to access a file server in Branch B (at <code>10.2.0.10</code>). The two offices are connected by the public Internet, which means anything they send between them is up for grabs unless they protect it.</p>
+
+<p>The IT teams configure the two edge routers to run IPsec between them, and any traffic from <code>10.1.0.0/24</code> destined for <code>10.2.0.0/24</code> (or the reverse) automatically gets wrapped in IPsec ESP tunnel-mode and shipped to the other side. From Alice's perspective, she's just connecting to a file server. The whole encrypted-tunnel machinery is invisible — that's the point.</p>
+
+<pre class="diagram">
+  Branch A (San Francisco)                      Branch B (Berlin)
+  ────────────────────────                      ─────────────────
+                                                                    
+   Alice's laptop                                File server        
+   10.1.0.42                                     10.2.0.10          
+        │                                              │            
+        │ (plain IP)                                   │ (plain IP)
+        ▼                                              ▼            
+   Edge router/firewall  ◄─── public Internet ───► Edge router      
+   198.51.100.1                                    203.0.113.5      
+        ║                  IPsec ESP                  ║
+        ║                  tunnel mode                ║
+        ║════════════════════════════════════════════ ║
+        ║ Encrypted, authenticated, replay-protected. ║
+        ║ Inner addresses 10.1.0.x ↔ 10.2.0.y hidden. ║
+        ║ Outer wire shows only 198.51.100.1 ↔ 203.0.113.5. ║
+</pre>
+
+<p>By the end of this document, you'll be able to explain every detail of what's happening on the wire between those two routers. Let's start with the architecture.</p>
+
+<!-- ============================================================
+     SUB-TOPIC 6A — IPsec Architecture + AH + ESP
+     ============================================================ -->
+<section id="st-arch">
+
+<div class="subtopic-banner">
+  <span class="letter">6A</span>
+  <span class="title">IPsec Architecture, plus AH and ESP</span>
+  <span class="pages">📄 pp. 355–383 &nbsp;·&nbsp; The cornerstone of Topic 6 — read this section slowly</span>
+</div>
+
+<!-- ============ 6A — STORY ============ -->
+<h2 id="arch-story">The story: what problem does IPsec actually solve?</h2>
+
+<p>Picture the Internet in the late 1980s. The protocols (IP, TCP, ICMP) had been invented for a small, trusted research network. Everyone on the network knew everyone else; "security" meant locking the computer-room door. Then the Internet went commercial, the user base exploded, and suddenly the unprotected protocols were carrying credit cards and corporate secrets across an Internet full of strangers.</p>
+
+<p>By the early 1990s, the IETF (the body that standardises Internet protocols) realised that <em>every single Layer-3 attack from Topic 2</em> — IP spoofing, TCP reset, hijacking, ICMP redirect — exists because IP packets have no cryptographic protection. A packet's source address is whatever the sender wrote in it; nothing verifies the sender actually has that address. A packet's contents are whatever bytes the sender put in; nothing detects modification in transit. A passive observer can read every byte; an active attacker can forge or modify packets as they please.</p>
+
+<p>Two reasonable responses to this problem:</p>
+
+<ol class="numbered">
+  <li><strong>Fix it per-application.</strong> Add encryption to HTTP (resulting in HTTPS via TLS). Add encryption to remote login (SSH). Add encryption to email (SMTPS, IMAPS). This works, but every application has to be updated, and traffic-flow information (who's talking to whom, at what times) still leaks.</li>
+  <li><strong>Fix it at the IP layer once and for all.</strong> Add cryptographic protection directly to IP packets, so every application gets it for free without modification.</li>
+</ol>
+
+<p>IPsec is approach (2). It's a set of standards, finalised across RFC 2401 (1998) and refined in RFC 4301 (2005), that adds confidentiality, integrity, authentication, and anti-replay to IP packets at the IP layer. The two big benefits, both spelled out on slide 370 of the lecture:</p>
+
+<ul class="plain">
+  <li><strong>Transparent to applications.</strong> The kernel applies IPsec automatically. Browsers, email clients, custom apps — none of them need to be IPsec-aware. They just open ordinary TCP sockets, and the kernel quietly wraps the resulting IP packets in IPsec on the way out.</li>
+  <li><strong>Can be deployed at gateways/firewalls.</strong> Because IPsec works on IP packets, you can run it at the edge of your network — protecting all traffic in or out — without touching the hosts inside. This is exactly the Branch A ↔ Branch B scenario from the big picture.</li>
+</ul>
+
+<div class="vocab">
+  <span class="term">IPsec</span>
+  Internet Protocol Security. An IETF framework — <em>not a single protocol</em> — that adds cryptographic protection to IP packets at the network layer. It consists of several cooperating components: a key-management protocol (IKE), two protection protocols (AH and ESP), two operation modes (transport and tunnel), and a pair of databases that hold policy and state (SPD and SAD). All of these will be unpacked over the next few sections.
+</div>
+
+<p>Now here's the part that trips beginners up: when people say "IPsec," they could mean any of four different things, depending on context.</p>
+
+<ul class="plain">
+  <li>The <em>whole framework</em> (the architecture as a system).</li>
+  <li>The <em>AH protocol</em> specifically (authentication only).</li>
+  <li>The <em>ESP protocol</em> specifically (encryption + authentication).</li>
+  <li>The <em>IKE protocol</em> for setting up keys.</li>
+</ul>
+
+<p>When in doubt, treat "IPsec" as the framework, and call out which sub-component you mean. The exam will sometimes specifically ask "AH versus ESP" — a question that only makes sense if you remember they are <em>two different protocols inside the IPsec framework</em>.</p>
+
+<!-- ============ 6A — VOCABULARY ============ -->
+<h2 id="arch-vocab">Vocabulary, introduced one at a time</h2>
+
+<p>Don't try to memorise this all at once. Read each box and let the term register; we'll use these words constantly in the next sections.</p>
+
+<div class="vocab">
+  <span class="term">Security Association (SA)</span>
+  An SA is the central concept in IPsec. Think of it as a <em>one-way contract</em> between two endpoints: <em>"For traffic going from me to you, we'll use this encryption algorithm with this key, this MAC algorithm with that key, anti-replay enabled, mode = tunnel, lifetime = 8 hours."</em><br><br>
+  Three things to remember:
+  <ul class="plain">
+    <li>An SA is <strong>simplex</strong> — one-way. Bidirectional communication needs <em>two</em> SAs (one for each direction).</li>
+    <li>An SA is uniquely identified by the triple <strong>(SPI, destination IP, AH-or-ESP)</strong>. We'll define SPI in the next box.</li>
+    <li>An SA is the cryptographic context: it has the keys, the counters, the algorithms, the mode, the lifetime — everything needed to protect a packet.</li>
+  </ul>
+</div>
+
+<div class="vocab">
+  <span class="term">Security Parameters Index (SPI)</span>
+  A 32-bit tag carried in every AH or ESP header. Its job is to tell the receiver: <em>"I'm using the SA with this SPI."</em> The receiver looks up the SA in its database, retrieves the keys, and processes the packet accordingly.<br><br>
+  The SPI alone isn't globally unique — values 0 (reserved for local use) and 1–255 (reserved by IANA) are reserved, but otherwise different peers can pick the same SPI value independently. Uniqueness comes from the full triple (SPI + destination IP + AH/ESP). Two different SAs targeting the same destination IP can share an SPI only if they use different protocols (one AH, one ESP).
+</div>
+
+<div class="vocab">
+  <span class="term">Security Association Database (SAD)</span>
+  A table inside the kernel listing every active SA. When a packet arrives, the kernel reads the SPI from the AH/ESP header, looks up the SA in the SAD, retrieves the keys, and decrypts/verifies. When a packet is being sent, the kernel finds the relevant SA, retrieves the keys, and encrypts/authenticates.<br><br>
+  Each SAD entry holds: SPI · destination IP · protocol (AH/ESP) · cipher algorithm · cipher key · MAC algorithm · MAC key · sequence-number counter · anti-replay window state · mode (transport/tunnel) · lifetime.
+</div>
+
+<div class="vocab">
+  <span class="term">Security Policy Database (SPD)</span>
+  A second table that decides <em>whether</em> a given packet should be IPsec-protected, and if so, with which SA. Each SPD entry has selectors (source IP, dest IP, protocol, ports) and an action: <strong>BYPASS</strong> (send in plaintext), <strong>DISCARD</strong> (drop), or <strong>PROTECT</strong> (use SA with such-and-such SPI).<br><br>
+  The split is important: the SPD is <em>policy</em>, the SAD is <em>state</em>. The SPD says "should this be protected, and if so, by which SA?"; the SAD says "here are the actual keys and counters for that SA right now." On packet send, the kernel consults SPD first, then (if the action is PROTECT) the SAD.
+</div>
+
+<div class="vocab">
+  <span class="term">IKE (Internet Key Exchange)</span>
+  The protocol that <em>creates</em> SAs. Before any IPsec-protected packets can flow, the two peers must run IKE to authenticate each other and negotiate the SA parameters (algorithms, keys, lifetime, mode). IKE is what runs Diffie-Hellman, what verifies certificates or pre-shared keys, what writes the resulting SAs into both peers' SADs.<br><br>
+  IKE typically runs over UDP port 500. When NAT is involved, both IKE and the encrypted ESP packets get encapsulated in UDP port 4500 ("NAT-Traversal"). IKEv2 (RFC 7296) is the modern version; IKEv1 is older and being retired.
+</div>
+
+<div class="vocab">
+  <span class="term">Authentication Header (AH)</span>
+  One of the two IPsec protection protocols. It's IP protocol number <strong>51</strong>. AH provides:
+  <ul class="plain">
+    <li><strong>Integrity</strong> — any tampering with the packet is detected.</li>
+    <li><strong>Data-origin authentication</strong> — the packet came from someone who knows the SA's MAC key.</li>
+    <li><strong>Optional anti-replay</strong> — replay attempts are detected.</li>
+  </ul>
+  AH does <strong>not</strong> encrypt. The payload remains readable on the wire. AH is rare in practice today (we'll see why); ESP-with-authentication delivers everything AH does plus encryption.
+</div>
+
+<div class="vocab">
+  <span class="term">Encapsulating Security Payload (ESP)</span>
+  The other IPsec protection protocol — IP protocol number <strong>50</strong>. ESP provides:
+  <ul class="plain">
+    <li><strong>Encryption</strong> (confidentiality) of the payload.</li>
+    <li><strong>Integrity</strong> + <strong>data-origin authentication</strong> via a MAC.</li>
+    <li><strong>Optional anti-replay</strong>.</li>
+    <li><strong>Limited traffic-flow confidentiality</strong> — but only in tunnel mode (we'll see why).</li>
+  </ul>
+  ESP is the workhorse of real-world IPsec. Almost every IPsec deployment uses ESP, not AH.
+</div>
+
+<div class="vocab">
+  <span class="term">Integrity Check Value (ICV)</span>
+  The MAC tag at the end of an AH or ESP packet — typically HMAC-SHA-256 (classic) or GMAC (when AES-GCM is used as the AEAD cipher). The receiver recomputes the ICV from the packet and the SA's MAC key; if it matches the ICV in the packet, integrity holds.<br><br>
+  AH's ICV covers immutable fields of the outer IP header plus the payload. ESP's ICV covers the ESP header and the (encrypted) payload, but <em>not</em> the outer IP header. This asymmetry is one of the biggest exam points in 6A.
+</div>
+
+<div class="vocab">
+  <span class="term">Anti-replay window</span>
+  IPsec gives every packet within an SA a sequence number, increasing with each packet. The receiver tracks recent sequence numbers in a sliding window of width W (typically 32 or 64) and:
+  <ul class="plain">
+    <li>Accepts new sequence numbers above the highest seen so far.</li>
+    <li>Accepts numbers within the window only if they haven't already been seen.</li>
+    <li>Rejects anything below the window — too old to verify.</li>
+  </ul>
+  This bounds the receiver's memory while still detecting replays. We'll work through it visually in the anti-replay section.
+</div>
+
+<div class="vocab">
+  <span class="term">Transport mode</span>
+  An IPsec mode where AH/ESP is inserted between the existing IP header and the payload. The original IP addresses remain visible. Used for end-to-end host-to-host protection. (We'll explore in 6B.)
+</div>
+
+<div class="vocab">
+  <span class="term">Tunnel mode</span>
+  An IPsec mode where the entire original IP packet (header included) becomes the inner packet inside a new outer IP header. The original IP addresses are hidden inside the encrypted blob. Used for site-to-site VPNs. (We'll explore in 6B.)
+</div>
+
+<!-- ============ 6A — THE FOUR COMPONENTS ============ -->
+<h2>The four components of IPsec, mapped to a picture</h2>
+
+<p>You've now seen the vocabulary. Let's put it on one diagram so it has a permanent home in your mental map. This is the architecture slide (p. 375 in the lecture deck) — re-drawn with annotations.</p>
+
+<pre class="diagram">
+                   ┌──────────────────────────────┐
+                   │     Applications             │   (browser, ssh, custom)
+                   └──────────────┬───────────────┘
+                                  │  TCP/UDP socket
+                   ┌──────────────┴───────────────┐
+                   │       TCP / UDP layer        │
+                   └──────────────┬───────────────┘
+                                  │  outbound IP packet
+                                  ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │              IPsec Kernel Module                                │
+   │                                                                 │
+   │   ┌──────────────┐                                              │
+   │   │  Security    │ ◄─── on every packet, ask: "should this be  │
+   │   │   Policy     │       protected? if so, which SA?"          │
+   │   │   Database   │       answer: BYPASS / DISCARD / PROTECT-X  │
+   │   │   (SPD)      │                                              │
+   │   └──────┬───────┘                                              │
+   │          │ "PROTECT with SA X"                                  │
+   │          ▼                                                      │
+   │   ┌──────────────┐                                              │
+   │   │  Security    │ ─── retrieve keys, counters, mode for SA X  │
+   │   │ Association  │                                              │
+   │   │   Database   │                                              │
+   │   │   (SAD)      │                                              │
+   │   └──────▲───────┘                                              │
+   │          │  SAs created/refreshed by                            │
+   │          │                                                      │
+   │   ┌──────┴───────┐                                              │
+   │   │  IKE / IKEv2 │ ─── runs over UDP 500/4500                   │
+   │   │  daemon      │      authenticates peers (cert or PSK)       │
+   │   │              │      runs Diffie-Hellman                     │
+   │   └──────────────┘      negotiates algorithms, lifetimes        │
+   │                                                                 │
+   │   ┌─────────────┐  ┌─────────────────────────────────────┐     │
+   │   │   AH path   │  │  ESP path                            │     │
+   │   │   ─ insert  │  │  ─ encrypt payload                   │     │
+   │   │     auth    │  │  ─ append MAC                        │     │
+   │   │     header  │  │  ─ prepend ESP header                │     │
+   │   └─────────────┘  └─────────────────────────────────────┘     │
+   │                                                                 │
+   └─────────────────────────────────┬──────────────────────────────┘
+                                     │  IPsec-wrapped IP packet
+                                     ▼
+                              physical network
+</pre>
+
+<p>So there are four moving parts:</p>
+
+<ol class="numbered">
+  <li><strong>The SPD</strong> — the policy table. Decides if and how each packet gets protected.</li>
+  <li><strong>The SAD</strong> — the state table. Holds the live cryptographic context for each active SA.</li>
+  <li><strong>AH and ESP</strong> — the two protection protocols. Whichever the SA specifies is what gets applied to the packet.</li>
+  <li><strong>IKE</strong> — the key-management daemon. Creates and refreshes SAs by negotiating with peers.</li>
+</ol>
+
+<div class="why-box">
+  <span class="lbl">Wait, why two databases instead of one?</span>
+  Because they answer different questions and change at different rates.<br><br>
+  The <strong>SPD</strong> is set by an administrator: "all traffic from 10.1.0.0/24 to 10.2.0.0/24 should be IPsec-protected with our Branch-A-to-Branch-B SA." This rarely changes; it's policy.<br><br>
+  The <strong>SAD</strong> is created and updated by IKE: "here's the actual current cipher key, here's the sequence counter, here's how many bytes have been transferred, here's when this SA expires." This changes constantly: every SA rekey, every packet sent, every SA expiry.<br><br>
+  Separating policy from state is a clean design that lets administrators specify <em>what</em> they want without having to worry about the moving parts of <em>how</em> it gets implemented.
+</div>
+
+<!-- ============ 6A — PACKET WALK-THROUGH ============ -->
+<h2 id="arch-walk">A packet's life through IPsec, beginning to end</h2>
+
+<p>Let's trace what happens when Alice's laptop in Branch A sends a single packet to the file server in Branch B. Assume IKE has already finished and two SAs exist (one for each direction). We'll focus on the outbound direction.</p>
+
+<div class="step">
+  <span class="step-head">Phase 1 — Alice's application sends data</span>
+  Alice's file-sync app calls <code>send()</code> on a TCP socket. The destination is <code>10.2.0.10:445</code> (the file server). Alice's kernel TCP stack builds a TCP segment. Alice's kernel IP stack builds an IP packet with source <code>10.1.0.42</code> and destination <code>10.2.0.10</code>. So far this is exactly normal networking — no IPsec involvement yet at Alice's laptop.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 2 — Packet leaves Alice's laptop, arrives at the edge router</span>
+  The packet routes out of Alice's laptop, across the Branch A LAN, and arrives at the edge router (<code>198.51.100.1</code> on its public side, <code>10.1.0.1</code> on its internal side). The router will be the IPsec endpoint, not Alice's laptop. This is a normal "gateway-to-gateway" topology.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 3 — Edge router consults SPD</span>
+  The edge router's IPsec module sees the outbound packet:<br><br>
+  &nbsp;&nbsp;<code>src=10.1.0.42  dst=10.2.0.10  proto=TCP  dport=445</code><br><br>
+  It searches the SPD with these selectors. Suppose the relevant rule is:
+  <ul class="plain">
+    <li><strong>Selector:</strong> any traffic from <code>10.1.0.0/24</code> to <code>10.2.0.0/24</code>.</li>
+    <li><strong>Action:</strong> PROTECT with SA #42 (an ESP-tunnel-mode SA toward 203.0.113.5, our Branch B router).</li>
+  </ul>
+  The SPD says: "Yes, protect this packet with SA #42."
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 4 — Look up SA in SAD</span>
+  The router retrieves SA #42 from its SAD. Suppose the entry says:
+  <ul class="plain">
+    <li>SPI: <code>0xCAFE0042</code></li>
+    <li>Destination IP: <code>203.0.113.5</code></li>
+    <li>Protocol: ESP</li>
+    <li>Mode: <strong>tunnel</strong></li>
+    <li>Cipher: AES-128-GCM, key = (16 bytes loaded from secure storage)</li>
+    <li>Sequence counter: currently 4087, increments on next use</li>
+    <li>Lifetime: expires at 12:34:56 UTC</li>
+  </ul>
+  The kernel grabs all this and prepares to apply ESP-tunnel-mode.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 5 — Apply ESP-tunnel-mode encryption</span>
+  Because the SA mode is <strong>tunnel</strong>, the entire original IP packet (header included) becomes the inner packet that gets encrypted and wrapped. The ESP processing pipeline:
+  <ol class="numbered">
+    <li>Take the entire original packet bytes (IP header + TCP header + data).</li>
+    <li>Append an ESP trailer (padding to align block size, padding-length byte, and the next-header byte = 4 meaning "what follows is an IP packet").</li>
+    <li>Encrypt the whole inner-packet-plus-trailer bundle with AES-128-GCM, using the SA's cipher key + a fresh IV.</li>
+    <li>Compute the ICV (integrity check value) over the ESP header + the encrypted body. With AES-GCM, this is produced as the GMAC tag during the same encryption pass.</li>
+    <li>Prepend an ESP header with SPI = <code>0xCAFE0042</code> and sequence number = 4088.</li>
+    <li>Increment the SA's sequence counter to 4088 in the SAD entry.</li>
+  </ol>
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 6 — Prepend a new outer IP header</span>
+  Because we're in tunnel mode, we now build a brand-new outer IP header: source = <code>198.51.100.1</code> (our public IP), destination = <code>203.0.113.5</code> (Branch B's public IP), protocol = 50 (ESP). We prepend this to the ESP-protected blob and send it out the public-facing interface.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 7 — The packet crosses the public Internet</span>
+  Routers on the way only look at the outer IP header to forward the packet. They see:<br><br>
+  &nbsp;&nbsp;<code>198.51.100.1 → 203.0.113.5  (proto = ESP)</code><br><br>
+  Inside is opaque encrypted data. Anyone watching only learns "Acme's San Francisco gateway is talking to its Berlin gateway." They can't see Alice, can't see the file server, can't see what's being transferred.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 8 — Branch B router receives, dispatches by SPI</span>
+  Branch B's edge router (<code>203.0.113.5</code>) receives the ESP-wrapped packet. It reads the outer IP header (proto = 50, that's ESP), then peeks at the ESP header's SPI: <code>0xCAFE0042</code>.<br><br>
+  It looks up its SAD for the matching incoming SA. Found: this is the inbound counterpart to Branch A's SA #42 — same algorithms, same keys, but in the opposite direction.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 9 — Anti-replay check, then decrypt and verify</span>
+  The router reads the sequence number from the ESP header (4088). It checks against the SA's anti-replay window: is this number above the window's highest seen value (so it's new)? Or within the window but unseen (so it's still new)? Or below the window (replay — drop)?<br><br>
+  Assuming the sequence is fresh, the router decrypts the ESP body with the SA key and verifies the GMAC tag. If verification fails, drop the packet and log. If it passes, the router has now recovered the original inner IP packet: source <code>10.1.0.42</code>, destination <code>10.2.0.10</code>, TCP segment, port 445.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 10 — Deliver inner packet to internal network</span>
+  The router strips the outer IP header and ESP wrapping, leaving the original inner packet. Then it routes it onto the internal Branch B network as if it had been received from the local LAN. The file server at <code>10.2.0.10</code> sees a normal TCP segment from <code>10.1.0.42</code> and processes it normally. From the file server's perspective, no IPsec was involved at all.
+</div>
+
+<pre class="diagram">
+   Alice's laptop          Branch A router         Branch B router        File server
+   (10.1.0.42)             (198.51.100.1 ext)     (203.0.113.5 ext)     (10.2.0.10)
+                           (10.1.0.1 int)         (10.2.0.1 int)
+        │                        │                        │                  │
+        │   plain IP packet      │                        │                  │
+        │   src=10.1.0.42        │                        │                  │
+        │   dst=10.2.0.10        │                        │                  │
+        ├───────────────────────►│                        │                  │
+        │                        │                        │                  │
+        │              [SPD lookup → SA #42]              │                  │
+        │              [SAD lookup → AES-128-GCM key]     │                  │
+        │              [encrypt entire inner packet]      │                  │
+        │              [prepend new outer IP header]      │                  │
+        │                        │                        │                  │
+        │                        │  ESP-wrapped packet    │                  │
+        │                        │  src=198.51.100.1      │                  │
+        │                        │  dst=203.0.113.5       │                  │
+        │                        │  proto=50 (ESP)        │                  │
+        │                        │  ESP hdr (SPI, SeqNo)  │                  │
+        │                        │  encrypted blob        │                  │
+        │                        │  ESP trailer + ICV     │                  │
+        │                        ├───────► public ────────►                  │
+        │                        │       Internet         │                  │
+        │                        │                        │                  │
+        │                                       [SAD lookup by SPI]          │
+        │                                       [anti-replay check]          │
+        │                                       [decrypt + verify ICV]       │
+        │                                       [strip outer hdr + ESP]      │
+        │                                                 │                  │
+        │                                                 │  recovered inner │
+        │                                                 │  src=10.1.0.42   │
+        │                                                 │  dst=10.2.0.10   │
+        │                                                 ├─────────────────►│
+</pre>
+
+<div class="why-box">
+  <span class="lbl">Wait, the file server doesn't know any of this happened?</span>
+  Correct — and this is a key feature, not a bug. The file server runs on a regular Linux box on Branch B's internal network. It sees a TCP connection from <code>10.1.0.42</code> as if Alice were on the same LAN. The IPsec tunnel is invisible to it. This means: no special software on the file server, no IPsec configuration, no certificate management. The IT team configures IPsec only on the two edge routers, and every host in both branches gets transparent secure connectivity to the other branch.<br><br>
+  This is what slide 370 means by "IPsec is transparent to applications" — it works in the kernel below the socket API, and (in the gateway-to-gateway case) doesn't even need to be present on the hosts.
+</div>
+
+<!-- ============ 6A — AH vs ESP ============ -->
+<h2 id="arch-ah-vs-esp">AH versus ESP: same framework, different protections</h2>
+
+<p>Now that you've seen ESP in action, let's contrast it with AH. They're the two protection protocols inside IPsec; you have to know what each one does, and what it doesn't.</p>
+
+<h3>The fundamental difference, in one sentence</h3>
+
+<p><strong>AH authenticates but never encrypts. ESP authenticates AND encrypts (and almost everyone uses it).</strong></p>
+
+<p>That's the headline. The interesting details are about what each protocol's MAC actually covers.</p>
+
+<h3>AH header in detail</h3>
+
+<pre class="diagram">
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +---------------+---------------+---------------+---------------+
+  |  Next Header  | Payload Len   |           RESERVED            |
+  +---------------+---------------+---------------+---------------+
+  |                Security Parameters Index (SPI)                |
+  +---------------+---------------+---------------+---------------+
+  |                    Sequence Number                            |
+  +---------------+---------------+---------------+---------------+
+  |                                                               |
+  ~              Integrity Check Value (ICV)  (variable)          ~
+  |                                                               |
+  +---------------+---------------+---------------+---------------+
+</pre>
+
+<p>The fields, in plain English:</p>
+
+<ul class="plain">
+  <li><strong>Next Header</strong> (8 bits) — what protocol follows this AH header. Common values: 6 = TCP, 17 = UDP, 4 = IP-in-IP (this would mean tunnel-mode AH with an inner IP packet). The receiver uses this to decide what to hand the payload to after stripping AH.</li>
+  <li><strong>Payload Len</strong> (8 bits) — length of AH itself in 32-bit words minus 2 (a quirky encoding from the RFC).</li>
+  <li><strong>Reserved</strong> (16 bits) — set to zero, ignored.</li>
+  <li><strong>SPI</strong> (32 bits) — identifies which SA to use, as we discussed.</li>
+  <li><strong>Sequence Number</strong> (32 bits) — anti-replay counter, increments per packet.</li>
+  <li><strong>ICV</strong> (variable, typically 12–32 bytes) — the MAC over the protected fields. With HMAC-SHA-256, it's typically truncated to 16 bytes.</li>
+</ul>
+
+<h3>What AH's ICV actually covers</h3>
+
+<p>This is the trickiest part of AH and a frequent exam target. AH's ICV is computed over:</p>
+
+<ol class="numbered">
+  <li><strong>Immutable fields of the outer IP header</strong> — fields that don't change in transit. Source IP, destination IP, version, etc.</li>
+  <li><strong>Mutable-but-predictable fields</strong> — fields that can change, but whose final value is computable in advance. Example: destination IP under source routing.</li>
+  <li><strong>The AH header itself</strong> (with the ICV field zeroed during computation, since you can't include the value you're computing).</li>
+  <li><strong>The payload</strong> (TCP/UDP/whatever follows AH).</li>
+</ol>
+
+<p>What's <em>excluded</em> (zeroed during ICV computation): the genuinely <strong>mutable, unpredictable fields</strong> of the IP header. The most important examples:</p>
+
+<ul class="plain">
+  <li><strong>TTL (Time To Live)</strong> — decremented at every router hop. Including it would invalidate the ICV at every hop.</li>
+  <li><strong>IP header checksum</strong> — recomputed at every hop because the TTL changes.</li>
+  <li><strong>Type of Service (TOS)</strong> in some configurations — sometimes rewritten by routers for QoS.</li>
+</ul>
+
+<div class="why-box">
+  <span class="lbl">Wait, why does AH bother covering the IP header at all?</span>
+  This is AH's <em>entire reason for existing</em>. ESP's MAC covers only the ESP header and the (encrypted) payload — not the outer IP header. So with ESP alone, an attacker could in principle modify the outer IP header (e.g., redirect the packet to a different address) and the receiver wouldn't catch it via cryptographic check (though normal routing would still get the packet to the destination listed in the modified header, which defeats the modification's purpose anyway).<br><br>
+  AH's covering the outer IP header is the <em>one</em> service it provides that ESP doesn't. This is also why AH is incompatible with NAT: NAT rewrites the source IP, but AH's ICV treats the source IP as immutable, so the rewrite invalidates the ICV.
+</div>
+
+<h3>ESP packet structure in detail</h3>
+
+<pre class="diagram">
+  ┌──────────────┬──────────────────────────────────┬────────────┬───────────┬────────────┐
+  │  ESP Header  │  Encrypted payload                │  Padding + │ Next Hdr  │  ICV (MAC) │
+  │  • SPI (32b) │  • In transport mode: TCP/UDP +   │  Pad Len   │           │            │
+  │  • SeqNo(32b)│    application data               │            │           │            │
+  │              │  • In tunnel mode: entire inner   │            │           │            │
+  │              │    IP packet                      │            │           │            │
+  └──────────────┴──────────────────────────────────┴────────────┴───────────┴────────────┘
+   ◄─ unencrypted ─►◄────────── encrypted ─────────────────────────────────────►
+                  ◄────── authenticated (covered by ICV) ────────────────────►
+   (NOT covered: the outer IP header sitting in front of all this)
+</pre>
+
+<p>Notable features:</p>
+
+<ul class="plain">
+  <li><strong>The ESP header is <em>not</em> encrypted</strong> — the receiver needs to read the SPI in cleartext to know which SA to use for decryption.</li>
+  <li><strong>The MAC covers only the ESP header + encrypted body</strong>, not the outer IP header. This is the asymmetry vs. AH.</li>
+  <li><strong>Padding is needed for block-cipher alignment</strong> (less of an issue with stream-style modes like GCM).</li>
+  <li><strong>"Next Header"</strong> at the end (in the trailer) — tells the receiver what's inside after decryption. 6 for TCP, 17 for UDP, <strong>4 for IP</strong> (tunnel mode).</li>
+</ul>
+
+<h3>The full AH-vs-ESP comparison</h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Property</th><th>AH (proto 51)</th><th>ESP (proto 50)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Encrypts payload?</td><td>❌ Never</td><td>✅ Yes</td></tr>
+    <tr><td>Provides integrity?</td><td>✅ Yes</td><td>✅ Yes (when ICV enabled)</td></tr>
+    <tr><td>Provides anti-replay?</td><td>✅ Optional</td><td>✅ Optional</td></tr>
+    <tr><td>Covers outer IP header in MAC?</td><td>✅ Yes (immutable fields)</td><td>❌ No</td></tr>
+    <tr><td>Provides traffic-flow confidentiality?</td><td>❌ No (never encrypts)</td><td>✅ Yes (in tunnel mode)</td></tr>
+    <tr><td>Compatible with NAT?</td><td>❌ No (NAT breaks the ICV)</td><td>✅ Yes (with NAT-T encapsulation in UDP 4500)</td></tr>
+    <tr><td>Used in real-world deployments?</td><td>Rarely</td><td>Almost always</td></tr>
+  </tbody>
+</table>
+
+<div class="common-confusion">
+  <span class="lbl">Common confusion: "AH provides confidentiality."</span>
+  No — AH never encrypts. This is one of the most common exam-trap multiple-choice answers. The mnemonic: <strong>A</strong>uthentication <strong>H</strong>eader = <em>auth only, no encryption</em>. If you see "AH provides confidentiality" or "AH encrypts the payload" on the test, mark it false.
+</div>
+
+<div class="common-confusion">
+  <span class="lbl">Common confusion: "An SA is a two-way connection."</span>
+  No — an SA is <em>simplex</em> (one-way). For bidirectional communication, two SAs are required: one for traffic going from peer A to peer B, and another for traffic going from peer B to peer A. They typically share algorithm choices but have independent keys, sequence counters, and lifetimes. This independence is intentional: each direction can be independently rekeyed without disturbing the other.
+</div>
+
+<div class="common-confusion">
+  <span class="lbl">Common confusion: "The SPI is unique globally."</span>
+  No — the SPI is unique only when paired with the destination IP and protocol (AH or ESP). Two completely separate IPsec deployments can pick the same SPI value for unrelated SAs. The full identifying triple is <strong>(SPI, destination IP, AH-or-ESP)</strong>. Memorise that triple verbatim — the lecture explicitly calls it out, and it's a frequent fill-in-the-blank.
+</div>
+
+<!-- ============ 6A — ANTI-REPLAY ============ -->
+<h2 id="arch-replay">Anti-replay: how the receiver detects duplicates</h2>
+
+<p>Imagine an attacker captures one of your IPsec packets off the wire and replays it later. They can't read it (it's encrypted), they can't modify it (the ICV would fail), but can they at least <em>retransmit</em> it and get the receiver to process it twice? For example, replaying a packet that says "transfer $100 from A to B"?</p>
+
+<p>The answer is no, because of the anti-replay service. Each SA has a per-direction sequence-number counter. The sender increments it for every outbound packet (1, 2, 3, …). The receiver tracks recent values in a sliding window and rejects anything it's already seen.</p>
+
+<h3>The sliding window, visually</h3>
+
+<p>Suppose the receiver's anti-replay window is W = 8 (small for the example; real deployments use 32 or 64). The receiver tracks two pieces of state: the highest sequence number seen so far (call it N), and a bitmap of width W telling which of the most recent W numbers have been accepted.</p>
+
+<p>Walk through it. Suppose so far the receiver has accepted packets 12, 13, 14, 15, 16, 17, 18, 19. So N = 19, and the window covers numbers 12 through 19 (the most recent 8).</p>
+
+<pre class="diagram">
+   accepted (✓) or not yet (✗)
+                                         N (highest seen)
+                                          │
+         12   13   14   15   16   17   18  ▼19
+   ──────┬────┬────┬────┬────┬────┬────┬────┬────────────► seq #
+         │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │ ✓  │
+         └────┴────┴────┴────┴────┴────┴────┴────┘
+         ◄──────── window of width W=8 ─────────►
+         lowest accepted = N − W + 1 = 12
+</pre>
+
+<p>Now four scenarios for the next packet that arrives:</p>
+
+<div class="step">
+  <span class="step-head">Scenario A — A new, fresh packet arrives with sequence number 20</span>
+  20 > N. Action: <strong>accept</strong>. Slide the window right by 1 (now covers 13–20). Update N to 20. Mark slot 20 as ✓. Marked it as 12 fell off the back.
+</div>
+
+<div class="step">
+  <span class="step-head">Scenario B — A delayed (out-of-order but legitimate) packet arrives with sequence number 14</span>
+  14 is within the window. Check the bitmap for slot 14: it's already ✓. Conclusion: this is a duplicate (or a replay). Action: <strong>discard, audit, do not deliver to the application.</strong>
+</div>
+
+<div class="step">
+  <span class="step-head">Scenario C — A delayed packet arrives with sequence number 13, but the bitmap shows ✗</span>
+  Wait, that can't happen in our example because we said all of 12–19 were accepted. But suppose at some earlier point the receiver hadn't yet seen 13 — say network reordering held it up. Then 13 is within the window and unseen. Action: <strong>accept</strong>, mark slot 13 as ✓, deliver to the application. The window doesn't slide because 13 isn't above N.
+</div>
+
+<div class="step">
+  <span class="step-head">Scenario D — A very old packet arrives with sequence number 5</span>
+  5 < (N − W + 1) = 12. It's below the window — too old to verify. We can't tell whether we already saw it or not, because we don't keep records that old. Action: <strong>discard, audit.</strong>
+</div>
+
+<p>The sliding window gives O(1) memory (just N and the W-bit bitmap) while detecting all replays of any packet still inside the window, and erring on the side of safety for very old packets.</p>
+
+<div class="why-box">
+  <span class="lbl">Wait, why discard the very old packet? What if it was just slow?</span>
+  Because the receiver has no way to know, with O(1) memory, whether it's already seen sequence number 5. Maybe it did and forgot; maybe it didn't. Discarding "very old" packets is a safe default — under normal network conditions, packets don't show up <em>that</em> late, so legitimate traffic is rarely affected. If your network is so badly reordered that 64 packets pass before a delayed one arrives, you have bigger problems than IPsec's anti-replay window.
+</div>
+
+<h3>What happens when sequence numbers run out</h3>
+
+<p>The sequence number is 32 bits — about 4 billion packets. At 1 Gbps with average 1 KB packets, you'd hit that limit in roughly 8 hours. The standard requires that, before the sender's counter wraps around, IKE establishes a fresh SA with new keys. The old SA is retired. This is one reason SAs have lifetimes.</p>
+
+<p>(IPsec extensions support 64-bit "extended sequence numbers" for very-high-throughput use, but the standard 32-bit counter is the default.)</p>
+
+<!-- ============ 6A — FAQ ============ -->
+<h2 id="arch-faq">"Wait, but what about…?" — IPsec architecture questions</h2>
+
+<h3>Why is IPsec called a "framework" instead of a protocol?</h3>
+<p>Because it's modular. AH is one piece. ESP is another. IKE is a third. Transport vs tunnel modes are independent dimensions. The cipher and MAC algorithms are pluggable (AES-GCM today, but the framework allows others). When you say "we're running IPsec," the next question is always "with which combination of these knobs?" That's why "IPsec framework" is more accurate than "IPsec protocol."</p>
+
+<h3>Where does AES-GCM fit into all this?</h3>
+<p>AES-GCM is one of the cipher algorithms IPsec ESP can use. When you negotiate ESP-with-AES-GCM, you get encryption AND integrity (the GMAC) in one pass — so the ESP "ICV" is produced as the GMAC tag during encryption, not by a separate HMAC computation. This is the same primitive TLS uses for its modern record-layer cipher suites and that WPA2/3 uses for link encryption. One mental model, several protocols.</p>
+
+<h3>Why is AH still in the standard if nobody uses it?</h3>
+<p>Two reasons. First, completeness — AH was in the original IPsec spec from 1995 and removing it would break the few legitimate deployments that use it. Second, AH is the only IPsec mechanism that authenticates the outer IP header. If you specifically need that property (paranoid scenarios where you want cryptographic proof the IP header wasn't tampered with at the IP layer), AH is your only option. In practice, almost no one needs that property strongly enough to fight NAT incompatibility, so AH stays as a niche tool.</p>
+
+<h3>How does IKE actually authenticate the peers?</h3>
+<p>Two main methods. <strong>Pre-shared keys (PSK)</strong> — both peers are configured with the same secret string, and they prove they know it during the IKE exchange. Common for small site-to-site VPNs. <strong>Certificates (X.509)</strong> — each peer has a certificate signed by a trusted CA; they verify each other's certificates and use the certificate keys to sign DH values, exactly like TLS. Common in enterprise deployments. Either way, the peer authentication happens during IKE; once IKE finishes, you have established SAs and the framework switches to using them.</p>
+
+<h3>Can a single computer run multiple IPsec connections simultaneously?</h3>
+<p>Yes. Each peer relationship is a pair of SAs (or more if multiple algorithms are used). They live in the SAD as separate entries, indexed by SPI. The kernel uses the SPD to figure out which SA applies to each outgoing packet. You can have hundreds of active SAs at once on a busy VPN concentrator — each connecting branch office or remote-access user contributes their own pair.</p>
+
+<!-- ============ 6A — SELF-QUIZ ============ -->
+<h2 id="arch-quiz">Self-quiz — IPsec architecture, AH, ESP</h2>
+
+<p>Don't peek at the answers until you've actually thought about each one. The point isn't to recognise the right answer — it's to verify your mental model. If you can't generate the answer from scratch, your understanding has a gap.</p>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q1</span> List the four IPsec services from slide 370 — what does the framework actually deliver?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>Six, actually, on slide 370:</p>
+    <ul class="plain">
+      <li><strong>Access control</strong> — only authenticated peers (via IKE) can establish SAs.</li>
+      <li><strong>Connectionless integrity</strong> — bit-level tampering is detected per packet.</li>
+      <li><strong>Data-origin authentication</strong> — proves the packet came from a peer with the SA's MAC key.</li>
+      <li><strong>Anti-replay (rejection of replayed packets)</strong> — sequence-number sliding window.</li>
+      <li><strong>Confidentiality</strong> — payload encryption (ESP only).</li>
+      <li><strong>Limited traffic-flow confidentiality</strong> — only when ESP is used in tunnel mode.</li>
+    </ul>
+    <p>Mnemonic: <strong>"AD-I-O-A-C-T"</strong> — Access control, Data Integrity, data-Origin authentication, Anti-replay, Confidentiality, Traffic-flow confidentiality.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q2</span> Without scrolling back: what triple uniquely identifies a Security Association? Why is each part of the triple necessary?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>The triple is <strong>(SPI, destination IP address, AH-or-ESP protocol)</strong>.</p>
+    <p>Why each part:</p>
+    <ul class="plain">
+      <li><strong>SPI:</strong> the receiver-chosen tag that distinguishes one SA from another for the same destination.</li>
+      <li><strong>Destination IP:</strong> different destinations can independently pick the same SPI value, so the destination has to be part of the identifier.</li>
+      <li><strong>AH or ESP:</strong> the same destination might run both an AH SA and an ESP SA toward you (rare, but legal); the protocol byte distinguishes them.</li>
+    </ul>
+    <p>Without all three, two distinct SAs could collide on a busy receiver. With the triple, each SA is uniquely addressable.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q3</span> Alice's IPsec gateway is sending packets toward Bob's gateway. The administrator at Alice's site wants to add a new firewall rule: "all DNS traffic should not be IPsec-protected — let it go in plaintext." Which of the two IPsec databases does the administrator modify, and what entry do they add?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>The administrator modifies the <strong>SPD (Security Policy Database)</strong>, since this is a policy decision about <em>whether</em> to protect certain traffic.</p>
+    <p>The new entry:</p>
+    <ul class="plain">
+      <li><strong>Selector:</strong> protocol = UDP, destination port = 53 (DNS).</li>
+      <li><strong>Action:</strong> BYPASS.</li>
+    </ul>
+    <p>This entry is consulted by the IPsec module on each outbound packet. Packets matching the selector skip IPsec entirely and go out as plain IP. The SAD doesn't need any changes — that's where active SA <em>state</em> lives, and we're not creating or destroying any SAs.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q4</span> An attacker captures an ESP-protected packet on the wire and replays it 30 minutes later. What happens at the receiver, and which security service prevents the replay from succeeding?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>The attacker can resend the bytes; the receiver accepts the packet at IP, finds the matching SA via SPI, and starts processing it. But: the ESP header includes a sequence number. The receiver checks against its sliding anti-replay window. After 30 minutes of normal traffic, the window has moved far past the captured packet's sequence number — the captured number is now well below the window. The receiver discards the packet.</p>
+    <p>If the captured packet had been replayed almost immediately, when the sequence number was still inside the window, the receiver would still detect the replay because the bitmap shows that sequence number was already seen.</p>
+    <p>Either way, the <strong>anti-replay service</strong> (sliding-window sequence-number check) prevents the attack. Without it, the attacker would have a meaningful replay primitive.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q5</span> A friend says: "I know IPsec uses AH and ESP. Can you tell me, in one sentence each, when I'd use one versus the other?"</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p><strong>Use ESP if you want any combination of encryption and authentication on a packet's payload.</strong> Almost every real-world deployment uses ESP; in modern usage with AES-GCM, ESP delivers confidentiality + integrity + authentication + anti-replay all in one.</p>
+    <p><strong>Use AH if you specifically need to authenticate the outer IP header itself</strong> (a property ESP doesn't provide), and you don't care about confidentiality, and you don't have NAT in the path. This is a niche case — almost no one uses AH today.</p>
+    <p>If the question is "do I need confidentiality?" the answer is essentially always yes, and that means ESP.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q6</span> A first-year student says: "I think I get it now — IPsec replaces TLS, since they both encrypt traffic." How would you correct them?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>They overlap but solve different problems.</p>
+    <p>IPsec runs at Layer 3 (the IP layer), so it protects all packets between two endpoints regardless of application. It's typically deployed at gateways, terminating at the edge of a network — meaning between the gateway and the actual server, traffic is no longer IPsec-protected.</p>
+    <p>TLS runs at Layer 4½ (between TCP and the application), so it protects one application's traffic end-to-end, from the user's browser/client all the way to the actual server. But it requires the application to be TLS-aware.</p>
+    <p>In practice they're complementary, not redundant. A typical secure web request from a remote employee goes: TLS (browser to webserver, end-to-end) running inside an IPsec VPN tunnel (laptop to corporate gateway). TLS protects the application data through the gateway and beyond; IPsec hides the metadata (which servers are being accessed) on the public path between laptop and gateway.</p>
+  </div></details>
+</div>
+
+<div class="banner">
+  <strong class="label">Section recap — what you should now be able to do</strong><br>
+  After working through 6A, you should be able to:
+  <ul class="plain">
+    <li>Explain in plain English why IPsec exists and what problem it solves at Layer 3.</li>
+    <li>Name the four IPsec components (SPD, SAD, AH/ESP, IKE) and explain what each does.</li>
+    <li>Trace a packet end-to-end through an IPsec gateway, from SPD lookup through SAD lookup through encryption to the wire.</li>
+    <li>State the SA-identifying triple from memory: (SPI, destination IP, AH/ESP).</li>
+    <li>Compare AH and ESP on every dimension — confidentiality, integrity, what they cover in the MAC, NAT compatibility.</li>
+    <li>Explain anti-replay's sliding-window mechanism and trace what happens for a fresh, duplicate, out-of-order, and very-old packet.</li>
+  </ul>
+  If any of those still feels shaky, the rest of Topic 6 will be hard. Re-read the relevant section before moving on to transport vs tunnel mode.
+</div>
+</section>
+<!-- ============================================================
+     SUB-TOPIC 6B — Transport vs Tunnel Mode
+     ============================================================ -->
+<section id="st-modes">
+
+<div class="subtopic-banner">
+  <span class="letter">6B</span>
+  <span class="title">Transport mode vs Tunnel mode</span>
+  <span class="pages">📄 pp. 384–388 &nbsp;·&nbsp; The instructor calls this out by name as exam material — pay attention</span>
+</div>
+
+<!-- ============ 6B — STORY ============ -->
+<h2 id="modes-story">The story: why two modes?</h2>
+
+<p>When the IPsec designers sat down to spec how AH and ESP would actually wrap an IP packet, they faced a forked requirement. Two scenarios that both deserved IPsec:</p>
+
+<ol class="numbered">
+  <li><strong>Two end hosts that both speak IPsec, talking directly to each other.</strong> They want their traffic encrypted, but they don't need to hide their own IP addresses from anyone — those addresses are how routers will deliver the packets. Example: your laptop with IPsec configured, talking to a server with IPsec configured, both on the public Internet.</li>
+  <li><strong>Two security gateways protecting whole networks behind them.</strong> The gateways want to encrypt the traffic of <em>all</em> the hosts behind them, while hiding the inner topology (which hosts are talking to which) from anyone watching the public Internet. Example: our running scenario — Branch A and Branch B routers, with the entire 10.x.x.x address space hidden inside.</li>
+</ol>
+
+<p>The first scenario only needs the original IP packet's payload protected. The IP header can stay where it is — visible, routable. The second scenario needs the whole packet (header included) hidden inside something the public Internet thinks is just "gateway-to-gateway" traffic. One mode can't serve both. So IPsec has two:</p>
+
+<ul class="plain">
+  <li><strong>Transport mode.</strong> Insert AH/ESP <em>between</em> the existing IP header and its payload. The original IP addresses remain visible.</li>
+  <li><strong>Tunnel mode.</strong> Wrap the entire original IP packet (header + payload) inside a new outer IP header. The original IP addresses go inside the encrypted blob.</li>
+</ul>
+
+<div class="vocab">
+  <span class="term">Transport mode</span>
+  An IPsec mode where AH/ESP is inserted between the existing IP header and the payload. Think of it as <em>tagging</em> an existing packet with cryptographic protection. The original IP header — including the source and destination addresses — stays visible on the wire. Used for end-to-end host-to-host protection.<br><br>
+  Instructor's verbatim quote, lecture slide 386: <em>"Transport mode: IP addresses are NOT encrypted."</em>
+</div>
+
+<div class="vocab">
+  <span class="term">Tunnel mode</span>
+  An IPsec mode where the entire original IP packet becomes the encrypted/authenticated payload of a new packet, with a new outer IP header in front. Think of it as <em>wrapping</em> the original packet inside a fresh envelope addressed gateway-to-gateway. With ESP, the inner IP header (including its addresses) is hidden inside the encrypted blob.<br><br>
+  Instructor's verbatim quote, lecture slide 387: <em>"Tunnel mode: inner IP IS encrypted."</em>
+</div>
+
+<h3>An analogy: locked envelopes vs. locked diplomatic pouches</h3>
+
+<p>Imagine sending a confidential letter from Alice in San Francisco to Bob in Berlin.</p>
+
+<div class="step">
+  <span class="step-head">Transport mode = locked letter inside a normal addressed envelope</span>
+  You take a regular envelope, write "From: Alice, 123 Mission St" and "To: Bob, Unter den Linden" on it, and mail it. Inside is your letter — locked in a tamper-evident pouch. Postmen along the way see who's sending to whom (the addresses are right on the envelope), but they can't read or modify the contents.
+</div>
+
+<div class="step">
+  <span class="step-head">Tunnel mode = locked pouch inside an addressed envelope, but the inner pouch is itself another envelope with a different address</span>
+  You write your letter, put it in an envelope addressed "Alice → Bob," then put that whole envelope inside a <em>locked diplomatic pouch</em>, and put the pouch inside an outer envelope addressed "SF Consulate → Berlin Consulate." The public postmen see only consulate-to-consulate traffic. Only the two consulates know the inner letter is "Alice → Bob." Inside the consulate's locked pouch, even the inner addressing is hidden until decrypted at the receiving consulate.
+</div>
+
+<p>The transport-mode envelope shows where the letter is going. The tunnel-mode envelope shows only the consulates. That's the metadata difference.</p>
+
+<!-- ============ 6B — FOUR PACKET SHAPES ============ -->
+<h2 id="modes-walk">The four packet shapes: AH/ESP × transport/tunnel</h2>
+
+<p>There are <strong>four</strong> ways IPsec can wrap a packet, depending on which protection protocol (AH or ESP) and which mode (transport or tunnel) the SA specifies. We'll draw each one and walk through what's protected.</p>
+
+<h3>The original (unprotected) IP packet — our baseline</h3>
+
+<p>Before any IPsec, the packet on the wire looks like this:</p>
+
+<pre class="diagram">
+  ┌────────────┬────────────────────────────────────────┐
+  │  IP hdr    │   TCP/UDP hdr + payload                │
+  │  src=A     │                                         │
+  │  dst=B     │                                         │
+  └────────────┴────────────────────────────────────────┘
+   ◄──── all visible to anyone watching the wire ──────►
+</pre>
+
+<p>Every byte is plaintext. Anyone with a packet sniffer reads it all.</p>
+
+<h3>Shape 1 — AH in transport mode</h3>
+
+<pre class="diagram">
+  ┌────────────┬──────────┬────────────────────────────────────────┐
+  │  IP hdr    │  AH hdr  │   TCP/UDP hdr + payload                 │
+  │  src=A     │  SPI,    │                                         │
+  │  dst=B     │  SeqNo,  │                                         │
+  │            │  ICV     │                                         │
+  └────────────┴──────────┴────────────────────────────────────────┘
+   ◄ AH ICV authenticates immutable IP fields + AH hdr + payload ──►
+   ◄────────── nothing encrypted; payload is plaintext ─────────────►
+</pre>
+
+<p>What you see on the wire: the original IP header is unchanged (source A, destination B, both visible). An AH header is inserted between the IP header and the TCP/UDP header. The whole thing is integrity-protected by the ICV, but nothing is encrypted. The payload — TCP/UDP headers, application data, all of it — remains plaintext.</p>
+
+<p><strong>Use case:</strong> two hosts that want bit-level integrity protection on their traffic but don't need confidentiality. Rare in practice.</p>
+
+<h3>Shape 2 — AH in tunnel mode</h3>
+
+<pre class="diagram">
+  ┌────────────┬──────────┬────────────┬────────────────────────────┐
+  │ Outer IP   │  AH hdr  │ Inner IP   │  TCP/UDP hdr + payload     │
+  │ src=GW_A   │  SPI,    │ src=A      │                             │
+  │ dst=GW_B   │  SeqNo,  │ dst=B      │                             │
+  │            │  ICV     │            │                             │
+  └────────────┴──────────┴────────────┴────────────────────────────┘
+   ◄── ICV covers entire inner IP packet + selected outer fields ──►
+   ◄────────────── nothing encrypted ──────────────────────────────►
+</pre>
+
+<p>What you see on the wire: a new outer IP header (gateway-to-gateway), then AH, then the original packet (now treated as inner data). The whole inner packet is integrity-protected. The inner IP addresses are visible to anyone with a packet sniffer — AH never encrypts. So this mode hides nothing; it only authenticates.</p>
+
+<p><strong>Use case:</strong> almost none. AH-tunnel offers no advantage over AH-transport for typical use, and certainly less than ESP-tunnel.</p>
+
+<h3>Shape 3 — ESP in transport mode</h3>
+
+<pre class="diagram">
+  ┌────────────┬──────────┬────────────────────────────┬────────────┬────────┐
+  │  IP hdr    │  ESP hdr │   TCP/UDP hdr + payload     │  ESP trail │  ICV   │
+  │  src=A     │  SPI,    │                              │  + padding │        │
+  │  dst=B     │  SeqNo   │                              │            │        │
+  └────────────┴──────────┴────────────────────────────┴────────────┴────────┘
+                          ◄────── encrypted ────────────►
+                ◄──── ICV covers ESP hdr + encrypted body ────────────►
+   ◄ outer IP header NOT covered by ICV, NOT encrypted ─►
+</pre>
+
+<p>What you see on the wire: the original IP header is unchanged. After it: ESP header (SPI + sequence number, in plaintext so the receiver can read them). Then the encrypted blob: the original payload (TCP/UDP + data) plus an ESP trailer with padding and a "next-header" byte. Then the ICV (the MAC).</p>
+
+<p>Source and destination IP addresses are visible. Port numbers and content are encrypted.</p>
+
+<p><strong>Use case:</strong> two hosts that want confidentiality of their direct communication. The classic example is two IPsec-aware servers in the same data centre.</p>
+
+<h3>Shape 4 — ESP in tunnel mode (the VPN workhorse)</h3>
+
+<pre class="diagram">
+  ┌────────────┬──────────┬────────────────────────────────────────┬────────────┬────────┐
+  │ Outer IP   │  ESP hdr │  Inner IP hdr + TCP/UDP hdr + payload    │  ESP trail │  ICV   │
+  │ src=GW_A   │  SPI,    │  src=A                                   │            │        │
+  │ dst=GW_B   │  SeqNo   │  dst=B                                   │            │        │
+  │            │          │  (entire original packet)                │            │        │
+  └────────────┴──────────┴────────────────────────────────────────┴────────────┴────────┘
+                          ◄─── entire inner IP packet encrypted ────►
+                ◄──── ICV covers ESP hdr + encrypted body ─────────────────────►
+   ◄── outer IP hdr (gateway addrs) NOT covered ───►
+</pre>
+
+<p>What you see on the wire: a new outer IP header (gateway-to-gateway), then ESP header, then a big encrypted blob containing the <em>entire</em> original packet (inner IP header included). Anyone watching sees only "Branch A gateway is talking to Branch B gateway." The fact that Alice's laptop is sending to a file server is hidden inside the encrypted blob.</p>
+
+<p><strong>Use case:</strong> every site-to-site VPN ever. This is what 99% of real-world IPsec deployments use.</p>
+
+<h3>The summary table you should memorise</h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Combination</th><th>Encrypts payload?</th><th>Hides inner IPs?</th><th>Authenticates outer IP hdr?</th><th>Real-world use</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>AH transport</td><td>❌ No</td><td>❌ No</td><td>✅ Yes (selected fields)</td><td>End-to-end integrity, very rare</td></tr>
+    <tr><td>AH tunnel</td><td>❌ No</td><td>❌ No (still visible)</td><td>✅ Yes (selected fields) + entire inner packet</td><td>Gateway-to-gateway integrity, very rare</td></tr>
+    <tr><td>ESP transport</td><td>✅ Yes</td><td>❌ No (only ports/data hidden)</td><td>❌ No</td><td>End-to-end host-to-host confidentiality</td></tr>
+    <tr><td>ESP tunnel</td><td>✅ Yes</td><td>✅ Yes</td><td>❌ No</td><td><strong>Site-to-site VPN — the default</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="why-box">
+  <span class="lbl">Wait, why exactly does ESP-tunnel hide inner IPs but ESP-transport doesn't?</span>
+  Because of where the encryption boundary falls. In <strong>transport mode</strong>, the IP header is <em>before</em> the ESP header on the wire — so the IP header was added <em>after</em> ESP processing, meaning ESP couldn't have encrypted it. In <strong>tunnel mode</strong>, the inner IP header is <em>inside</em> the encrypted ESP body — so ESP encrypted it before the outer IP header was added.<br><br>
+  Visually: in transport mode, the structure is "[IP][ESP][encrypted payload]." The IP header is outside the encryption boundary, by definition. In tunnel mode, the structure is "[outer IP][ESP][encrypted (inner IP + payload)]." The inner IP is inside the encryption boundary; the outer IP is outside.
+</div>
+
+<div class="why-box">
+  <span class="lbl">Wait, why doesn't ESP also authenticate the outer IP header?</span>
+  Two reasons. First, technical: the outer IP header is added <em>after</em> ESP processes the packet, so when ESP computes the MAC, the outer header doesn't yet exist. To include it, ESP would need a complicated two-pass design. Second, practical: NAT happens in the wild. NAT rewrites the outer IP header. If ESP authenticated it, every NAT box would invalidate the MAC, and ESP would never traverse NAT — which would make ESP useless for most home and corporate deployments. So ESP just doesn't cover the outer header, and accepts the small risk of an attacker tampering with it (which doesn't really achieve much, since the packet still has to be routable).<br><br>
+  AH covers the outer header precisely because that's its differentiator from ESP — and AH's NAT-incompatibility is the price.
+</div>
+
+<h3>Putting it on a single comparison diagram (the canonical p. 388 table)</h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Protocol</th><th>Transport Mode SA</th><th>Tunnel Mode SA</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AH</strong></td>
+      <td>Authenticates IP payload and selected portions of IP header.</td>
+      <td>Authenticates entire inner IP packet (inner header + IP payload) plus selected portions of outer IP header.</td>
+    </tr>
+    <tr>
+      <td><strong>ESP</strong> (encryption only)</td>
+      <td>Encrypts IP payload.</td>
+      <td>Encrypts entire inner IP packet.</td>
+    </tr>
+    <tr>
+      <td><strong>ESP with Authentication</strong></td>
+      <td>Encrypts IP payload. Authenticates IP payload but <em>not</em> outer IP header.</td>
+      <td>Encrypts entire inner IP packet. Authenticates entire inner packet (but not outer IP header).</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This table is reproduced almost verbatim from slide 388. It's the most quotable summary of mode behaviour in the lecture; learn the four cells in the bottom two rows.</p>
+
+<!-- ============ 6B — RUNNING-EXAMPLE WORKED PACKETS ============ -->
+<h2>Worked example: Branch A → Branch B with each mode</h2>
+
+<p>Let's go back to our running example and see exactly what bytes appear on the wire under different IPsec choices. Alice's laptop (10.1.0.42) sends a TCP segment to the file server (10.2.0.10). The two edge routers (198.51.100.1 and 203.0.113.5) are the IPsec endpoints.</p>
+
+<pre class="example">
+WORKED EXAMPLE — Same Alice→file-server packet under three IPsec configurations
+
+────────────────────────────────────────────────────────────────────
+Configuration 1: ESP TUNNEL mode, Branch-A-router ↔ Branch-B-router
+────────────────────────────────────────────────────────────────────
+Wire packet (from Branch A router toward Branch B router):
+
+  IP_outer:   src=198.51.100.1  dst=203.0.113.5  proto=50 (ESP)
+  ESP hdr:    SPI=0xCAFE0042   SeqNo=4088
+  Encrypted blob (decrypts to):
+      IP_inner: src=10.1.0.42  dst=10.2.0.10  proto=6 (TCP)
+      TCP hdr:  src_port=49152  dst_port=445
+      App data: "GET /quarterly-report.xlsx"
+  ESP trailer: padding + pad-length + next-hdr=4 (IP)
+  ICV (GMAC tag from AES-128-GCM)
+
+Public observer sees: "198.51.100.1 → 203.0.113.5, encrypted ESP."
+                       Inner addresses, ports, content all hidden.
+
+────────────────────────────────────────────────────────────────────
+Configuration 2: ESP TRANSPORT mode, Alice's laptop ↔ file server directly
+                 (would require IPsec on both, no gateway tunnel)
+────────────────────────────────────────────────────────────────────
+Wire packet (between Alice's laptop and file server, end-to-end):
+
+  IP:         src=10.1.0.42  dst=10.2.0.10  proto=50 (ESP)
+  ESP hdr:    SPI=0xBEEF1234   SeqNo=88
+  Encrypted blob (decrypts to):
+      TCP hdr:  src_port=49152  dst_port=445
+      App data: "GET /quarterly-report.xlsx"
+  ESP trailer: padding + pad-length + next-hdr=6 (TCP)
+  ICV
+
+Public observer sees: "10.1.0.42 → 10.2.0.10, encrypted ESP."
+                       IP addresses visible. Ports, content hidden.
+
+────────────────────────────────────────────────────────────────────
+Configuration 3: AH TRANSPORT mode (no encryption!)
+────────────────────────────────────────────────────────────────────
+Wire packet (between Alice's laptop and file server, AH only):
+
+  IP:         src=10.1.0.42  dst=10.2.0.10  proto=51 (AH)
+  AH hdr:     Next=6 (TCP)  Len=...  SPI=0xDEAD0001  SeqNo=12  ICV=...
+  TCP hdr:    src_port=49152  dst_port=445
+  App data:   "GET /quarterly-report.xlsx"
+
+Public observer sees: EVERYTHING — addresses, ports, full file path,
+                       even what's being requested. AH only authenticates,
+                       it does not encrypt.
+</pre>
+
+<p>Stare at those three configurations until you can predict, for any given mode/protocol combination, what an observer sees and what they don't.</p>
+
+<!-- ============ 6B — FAQ ============ -->
+<h2 id="modes-faq">"Wait, but what about…?" — mode questions</h2>
+
+<h3>Why isn't there an "ESP-with-auth-and-also-IP-header-coverage" mode?</h3>
+<p>Because that's exactly what AH does, and the IPsec designers didn't want to bake AH-style outer-header coverage into ESP. The two protocols are intentionally separate. If you genuinely need outer-IP coverage plus encryption, you can run AH and ESP together (the standard allows nesting), though almost no one does — it's slow and complicated. In modern practice, ESP alone (with its standard authentication) is treated as enough.</p>
+
+<h3>Can the same SA support both transport and tunnel mode?</h3>
+<p>No — mode is fixed when the SA is created during IKE negotiation, and stored in the SAD entry. One SA, one mode. If you need both, you create two SAs.</p>
+
+<h3>Can a host (not a gateway) use tunnel mode?</h3>
+<p>Yes. The standard says tunnel mode is <em>required</em> when at least one endpoint is a security gateway acting on behalf of others, but it's allowed (just unusual) for two end hosts to use tunnel mode. Why might a host use tunnel mode? To hide its real IP address from public observers — for example, a remote-access VPN client connecting to a corporate concentrator. The concentrator is a gateway; the laptop is a host; the SA is tunnel-mode because the concentrator is a gateway.</p>
+
+<h3>What does the "Next Header" byte at the end of the ESP trailer tell the receiver?</h3>
+<p>It tells the receiver what protocol the encrypted contents represent — i.e., what to feed the decrypted bytes into next.</p>
+<ul class="plain">
+  <li><strong>Next Header = 6:</strong> what's inside is a TCP segment. We're in transport mode (the TCP segment was the original payload).</li>
+  <li><strong>Next Header = 17:</strong> UDP segment. Transport mode.</li>
+  <li><strong>Next Header = 4:</strong> what's inside is an entire IP packet. We're in tunnel mode (the inner IP packet was the original).</li>
+</ul>
+<p>So the same ESP processing code can transparently handle both modes — it decrypts, reads the trailer's next-header byte, and dispatches accordingly.</p>
+
+<h3>If tunnel mode hides the inner IPs, isn't transport mode strictly worse?</h3>
+<p>No, it's strictly cheaper. Transport mode adds only the AH/ESP header — say, 30 bytes — while tunnel mode adds an additional outer IP header on top, doubling the overhead. For two end hosts that already have routable public IPs and don't need to hide them, transport mode is the right choice. Tunnel mode is the right choice when you're protecting a network behind a gateway and want to hide the inner topology. Different tools for different deployments.</p>
+
+<!-- ============ 6B — SELF-QUIZ ============ -->
+<h2 id="modes-quiz">Self-quiz — Transport vs Tunnel mode</h2>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q1</span> In one sentence each, state the defining difference between IPsec transport mode and tunnel mode. Then state which one your instructor's verbatim quote highlights as a memorable test question.</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p><strong>Transport mode</strong> inserts AH/ESP between the existing IP header and the payload, leaving the original IP addresses visible on the wire.</p>
+    <p><strong>Tunnel mode</strong> wraps the entire original IP packet inside a new outer IP header, hiding the original addresses (when ESP is used) inside the encrypted blob.</p>
+    <p>Instructor's verbatim quotes (worth memorising for fill-in-the-blank questions):</p>
+    <ul class="plain">
+      <li><em>"Transport mode: IP addresses are NOT encrypted."</em> — slide 386.</li>
+      <li><em>"Tunnel mode: inner IP IS encrypted."</em> — slide 387.</li>
+    </ul>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q2</span> Of the four combinations of {AH, ESP} × {transport, tunnel}, exactly one provides "limited traffic-flow confidentiality." Which one, and why?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>Only <strong>ESP in tunnel mode</strong>.</p>
+    <p>Reasoning by elimination:</p>
+    <ul class="plain">
+      <li><strong>AH never encrypts</strong>, in either mode. So both AH options leak inner addresses to anyone with a sniffer.</li>
+      <li><strong>ESP transport</strong> leaves the IP header in front of ESP, so the addresses are visible. There is no inner IP header — the original is the only one — so there's nothing inner to hide.</li>
+      <li><strong>ESP tunnel</strong> places the inner IP header inside the encrypted blob. Observers see only the outer (gateway-to-gateway) addresses. The original Alice→file-server addressing is hidden.</li>
+    </ul>
+    <p>This is why every site-to-site VPN uses ESP in tunnel mode: it's the only combination that hides the inner topology.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q3</span> An attacker captures an ESP-protected packet on the public Internet. The packet has source IP 198.51.100.1 and destination IP 203.0.113.5. What can the attacker conclude?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>The attacker can conclude:</p>
+    <ul class="plain">
+      <li>198.51.100.1 is talking to 203.0.113.5 right now (this isn't hidden by IPsec — the outer header has to be in plaintext for the packet to be routable).</li>
+      <li>The protocol number is 50 (ESP).</li>
+      <li>The SPI value (visible at the start of ESP header).</li>
+      <li>The sequence number for this SA.</li>
+      <li>The packet size (in bytes).</li>
+    </ul>
+    <p>What the attacker <strong>cannot</strong> determine:</p>
+    <ul class="plain">
+      <li>Whether the SA is in transport or tunnel mode (the outer IP header looks the same in both cases — only decryption reveals what's inside).</li>
+      <li>If tunnel mode: the inner IP addresses, the ports, the content, the application protocol.</li>
+      <li>If transport mode: the ports, the content, the application protocol — but in this case the inner-IPs question doesn't apply because there's no inner IP header.</li>
+    </ul>
+    <p>The attacker can do <em>traffic analysis</em> (correlating packet sizes and timings) but cannot read content.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q4</span> A company is setting up a site-to-site VPN between two branch offices. The CTO asks: "Should we use AH transport, AH tunnel, ESP transport, or ESP tunnel?" Explain your recommendation with three reasons.</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p><strong>Recommended: ESP in tunnel mode.</strong> Three reasons:</p>
+    <ol class="numbered">
+      <li><strong>Gateway topology requires tunnel mode.</strong> Slide 387 says: "Tunnel mode is required when at least one endpoint is a security gateway." A site-to-site VPN puts gateways at both ends — they're protecting hosts behind them, so the SA endpoints (the gateways) are different from the actual traffic endpoints (the hosts). Tunnel mode is the right encapsulation.</li>
+      <li><strong>Confidentiality requirement rules out AH.</strong> Corporate traffic on the public Internet must be unreadable to outside observers. Only ESP encrypts. AH doesn't.</li>
+      <li><strong>Hiding internal addresses is valuable.</strong> The internal subnets (10.1.0.0/24 and 10.2.0.0/24) ideally should not be inferable from the public traffic. ESP-tunnel buries the inner addresses in the encrypted body. AH-tunnel does not (no encryption); ESP-transport doesn't apply (no inner header to hide).</li>
+    </ol>
+    <p><strong>Bonus:</strong> ESP in tunnel mode is also NAT-friendly (with NAT-T encapsulating ESP in UDP 4500), which AH is not. Site-to-site VPNs often have NAT in the path.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q5</span> An exam stem says: "AH in tunnel mode encrypts the inner IP header." True or false, and explain.</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p><strong>False.</strong> AH never encrypts — in either mode. The clue is in the name: <strong>A</strong>uthentication <strong>H</strong>eader. AH only authenticates.</p>
+    <p>What AH-tunnel actually does: it wraps the original IP packet (header + payload) inside a new outer IP header, with an AH header in between. The ICV authenticates the entire inner packet and selected fields of the outer header. But every byte remains plaintext — the inner IP header is visible to anyone with a sniffer who captures the packet.</p>
+    <p>This is one of the most common exam-trap statements. If the stem mentions "AH" and "encrypt" together, it's almost certainly false.</p>
+  </div></details>
+</div>
+
+<div class="banner">
+  <strong class="label">Section recap</strong><br>
+  After 6B, you should be able to:
+  <ul class="plain">
+    <li>State both instructor verbatim quotes about transport vs tunnel mode.</li>
+    <li>Draw the four packet shapes (AH-transport, AH-tunnel, ESP-transport, ESP-tunnel) from memory and identify what each protects.</li>
+    <li>Explain why only ESP-tunnel hides inner IPs.</li>
+    <li>Explain why ESP doesn't authenticate the outer IP header.</li>
+    <li>Recognise that "AH encrypts" is always false, regardless of mode.</li>
+    <li>Justify why every site-to-site VPN uses ESP in tunnel mode.</li>
+  </ul>
+</div>
+
+</section>
+<!-- ============================================================
+     SUB-TOPIC 6C — VPN
+     ============================================================ -->
+<section id="st-vpn">
+
+<div class="subtopic-banner">
+  <span class="letter">6C</span>
+  <span class="title">Virtual Private Networks (VPN)</span>
+  <span class="pages">📄 pp. 356, 373–374, 389–391 &nbsp;·&nbsp; The practical face of IPsec — how it gets used in the real world</span>
+</div>
+
+<!-- ============ 6C — STORY ============ -->
+<h2 id="vpn-story">The story: what is a VPN, really?</h2>
+
+<p>You've probably heard the word "VPN" thrown around. Maybe you've used one at work to access internal company resources from home. Maybe a friend recommended a "VPN service" for privacy on public Wi-Fi. Maybe you saw an ad selling "military-grade encryption" with a stylised globe. The term is overloaded enough that it's worth pinning down what a VPN actually <em>is</em>, mechanistically.</p>
+
+<p>A VPN is, at its core, two simple ideas glued together:</p>
+
+<ol class="numbered">
+  <li><strong>An encrypted tunnel.</strong> Some cryptographic protocol — usually IPsec or TLS — establishes an authenticated, encrypted channel between two points across the public Internet. We've seen exactly how this works: handshake, key exchange, symmetric record/packet encryption.</li>
+  <li><strong>Routing trickery.</strong> Traffic on one end of the tunnel is rerouted through it, so that it <em>appears</em> to originate from the other end of the tunnel. The remote-access user appears to be "on the corporate network." The branch office appears to be "directly connected" to the headquarters.</li>
+</ol>
+
+<p>That's all. The "Virtual" in VPN means the network connectivity is logical rather than physical — there's no actual cable between your laptop and the office; the "Private" means it acts like a private network even though it crosses the public Internet.</p>
+
+<div class="vocab">
+  <span class="term">VPN</span>
+  Virtual Private Network. An encrypted tunnel that makes a remote endpoint appear logically attached to a private network across an untrusted infrastructure (typically the Internet). Two main protocol families: IPsec-based (using ESP in tunnel mode, set up by IKE) and TLS-based (OpenVPN, Cisco AnyConnect, WireGuard).
+</div>
+
+<h3>Three deployment types</h3>
+
+<p>The literature talks about three VPN topologies, all of which we've already implicitly seen:</p>
+
+<div class="step">
+  <span class="step-head">Site-to-site VPN — gateway-to-gateway</span>
+  Two networks (e.g., two branch offices) are connected by an encrypted tunnel between their edge routers. All hosts on both networks can transparently reach each other. Our running example (Branch A ↔ Branch B) is exactly this.
+</div>
+
+<div class="step">
+  <span class="step-head">Remote-access VPN — host-to-gateway</span>
+  An individual user's device (laptop, phone) connects to a corporate VPN gateway over the Internet. After authentication, the device gets a virtual IP on the corporate network and can access internal resources. Used by remote employees connecting to their office network.
+</div>
+
+<div class="step">
+  <span class="step-head">Extranet VPN — controlled cross-organisation</span>
+  Two distinct organisations connect specific subnets to allow controlled cross-access. Like site-to-site, but with restrictions on which traffic flows. Less common; mentioned for completeness.
+</div>
+
+<!-- ============ 6C — WHAT VPN HIDES ============ -->
+<h2>What a VPN actually hides — and what it doesn't</h2>
+
+<p>This is the part beginners most often misunderstand. To frame it concretely, let's compare what a passive observer on the public Internet sees in three scenarios: no VPN, HTTPS only, and IPsec VPN. Suppose Alice (on a coffee-shop Wi-Fi) is browsing <code>shop.example.com</code> over HTTPS, perhaps over a VPN connection.</p>
+
+<h3>Scenario 1: No VPN, plain HTTP</h3>
+
+<p>What an eavesdropper at the coffee shop sees:</p>
+
+<pre class="diagram">
+  src=Alice's_laptop_IP   dst=shop.example.com_IP    proto=TCP   dst_port=80
+  HTTP request: "GET /products HTTP/1.1
+                 Cookie: session=abc123
+                 ..."
+  HTTP response: "200 OK ... &lt;html&gt;[your shopping cart]&lt;/html&gt;"
+</pre>
+
+<p>The eavesdropper learns: who Alice is talking to, what she's reading, her cookies, her shopping cart contents. Everything.</p>
+
+<h3>Scenario 2: HTTPS, but no VPN</h3>
+
+<p>Same coffee shop, same site, but now over HTTPS:</p>
+
+<pre class="diagram">
+  src=Alice's_laptop_IP   dst=shop.example.com_IP    proto=TCP   dst_port=443
+  TLS handshake (visible: SNI = "shop.example.com")
+  Encrypted records (sizes visible, content not)
+</pre>
+
+<p>The eavesdropper now learns: Alice is visiting shop.example.com (the destination IP and SNI both leak that). They can guess from packet sizes that Alice is browsing — but they can't read what she's looking at, what her cookies are, or what's in her shopping cart.</p>
+
+<h3>Scenario 3: HTTPS plus IPsec VPN to corporate gateway</h3>
+
+<p>Now Alice is connected via VPN to her corporate VPN concentrator at <code>vpn.acme.com</code>. The HTTPS traffic to shop.example.com goes through the VPN tunnel:</p>
+
+<pre class="diagram">
+  src=Alice's_laptop_IP   dst=vpn.acme.com_IP    proto=ESP
+  Encrypted ESP blob (one giant tunnel-mode payload containing
+  the entire IP-TCP-TLS-HTTP stack)
+</pre>
+
+<p>The eavesdropper at the coffee shop now learns: Alice is connected to the Acme corporate VPN. That's it. They can't tell whether she's browsing the internal corporate intranet, or shop.example.com, or doing video calls, or downloading software updates. The VPN tunnel hides all of that, because to the public-Internet observer, it all just looks like ESP packets to vpn.acme.com.</p>
+
+<div class="why-box">
+  <span class="lbl">Wait, so what does the VPN <em>add</em> over HTTPS?</span>
+  <strong>Traffic-flow confidentiality.</strong> HTTPS hides what you say. The VPN additionally hides where you're going. With HTTPS alone, an observer knows Alice visits shop.example.com — even if they can't read the page contents. With the VPN tunnel adding to that, the observer sees only "Alice talked to vpn.acme.com" and has no idea what destinations she actually accessed inside.<br><br>
+  Many people confuse this. HTTPS is end-to-end content protection. A VPN is metadata protection on the public path. They're complementary, not redundant — using both gives you the union of their protections.
+</div>
+
+<div class="common-confusion">
+  <span class="lbl">Common confusion: "A VPN makes me anonymous."</span>
+  No, it doesn't. A VPN <em>shifts trust</em> from your ISP and Wi-Fi operator to the VPN provider. The VPN provider can see all your traffic — they're decrypting it before forwarding. They might log everything you do. They might be served with a subpoena. They might be hacked.<br><br>
+  Anonymity tools (like Tor) work fundamentally differently — they bounce traffic through multiple independently operated relays, none of which knows both your identity and your destination. A consumer VPN service is just one company in the path that sees everything. If you want anonymity, use Tor.<br><br>
+  A VPN is for: (a) reaching internal corporate resources from outside; (b) hiding your traffic from the local network's operator and your ISP; (c) appearing to be in a different geographic location. It is not for "becoming anonymous" or "hiding from the government."
+</div>
+
+<div class="common-confusion">
+  <span class="lbl">Common confusion: "Once I connect to a VPN, all my traffic is encrypted end-to-end."</span>
+  No. The VPN's encryption protects only the path between your device and the VPN gateway. After the gateway decrypts your traffic, it goes out to the actual destination on the public Internet — unencrypted, unless that destination is using its own protocol (HTTPS, etc.).<br><br>
+  So if you're using a VPN and visit <code>http://insecure-site.com</code> (plain HTTP), your traffic is encrypted from your laptop to the VPN gateway, but plaintext from the VPN gateway onward to insecure-site.com. The VPN provider sees your traffic in plaintext at the gateway. Anyone sniffing on the path between the VPN gateway and the destination also sees plaintext.<br><br>
+  For end-to-end encryption between you and the destination, you still need TLS (or whatever the destination's own security layer is). The VPN protects only the segment that goes through the tunnel.
+</div>
+
+<!-- ============ 6C — END-TO-END WALK ============ -->
+<h2 id="vpn-walk">A complete IPsec VPN session, end to end</h2>
+
+<p>Let's go back to our Branch A ↔ Branch B running example and trace the entire lifecycle: from "no VPN configured" to "Alice's first packet flows" to "VPN tear-down."</p>
+
+<div class="step">
+  <span class="step-head">Phase 1 — Configuration (out of band, by admin)</span>
+  The admins of Branch A and Branch B agree on:
+  <ul class="plain">
+    <li>Authentication method: pre-shared key "BranchAtoBranchB!2026" or X.509 certificates from a corporate CA.</li>
+    <li>IKEv2 parameters: AES-256-CBC for IKE encryption, SHA-256 for IKE integrity, DH group 14 (2048-bit) or 19 (Curve25519) for key exchange.</li>
+    <li>ESP parameters: AES-128-GCM for the data-protecting SAs, lifetime = 8 hours.</li>
+    <li>Traffic selector: "any traffic from 10.1.0.0/24 to 10.2.0.0/24" (and the reverse).</li>
+  </ul>
+  Each admin enters the configuration into their router's IPsec/IKE daemon. Nothing happens on the wire yet.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 2 — IKE handshake (when the first packet needs to flow)</span>
+  Suppose at 9:00 AM, Alice opens a connection to the file server. Her packet routes to the Branch A edge router. The router's SPD says: "PROTECT with SA toward Branch B," but no SA exists yet. So the router starts IKE.<br><br>
+  IKEv2 runs over UDP 500 (or 4500 if NAT is detected). It's a 4-message exchange (simplified):
+  <ol class="numbered">
+    <li><strong>IKE_SA_INIT request</strong> (Branch A → Branch B): cookies + supported algorithms + DH public value + nonce.</li>
+    <li><strong>IKE_SA_INIT response</strong> (Branch B → Branch A): chosen algorithms + DH public value + nonce.</li>
+    <li><strong>IKE_AUTH request</strong> (Branch A → Branch B, encrypted with the IKE-derived keys): identity + signature (or PSK MAC) + child-SA proposal (the actual ESP SAs we want).</li>
+    <li><strong>IKE_AUTH response</strong> (Branch B → Branch A, encrypted): identity + signature + child-SA acceptance.</li>
+  </ol>
+  At the end of this exchange, both peers have:
+  <ul class="plain">
+    <li>An <em>IKE SA</em> for further IKE communication (e.g., to rekey or add more child SAs later).</li>
+    <li>A pair of <em>ESP child SAs</em> — one for outbound (Branch A → Branch B), one for inbound (Branch B → Branch A). These are written into both routers' SADs.</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 3 — Alice's traffic flows through the established SAs</span>
+  Now the SADs are populated. The router's outbound IPsec module finds the matching SA, applies ESP-tunnel-mode (per the 10-step walkthrough we did in 6A), and ships encrypted packets to Branch B's router. Branch B's router decrypts, strips the outer header and ESP wrapping, delivers the inner packet to the file server. File server replies; Branch B's router applies ESP using the inbound SA's counterpart; Branch A decrypts.<br><br>
+  Both ends maintain anti-replay windows. Both keep counting bytes and packets toward the SA's lifetime threshold.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 4 — Rekeying (after lifetime threshold or 2^32 packets)</span>
+  Before the SA expires (or before the sequence number wraps), IKE runs again — this time as a "CREATE_CHILD_SA" exchange — to establish replacement ESP SAs with fresh keys and a fresh DH-derived secret. The old SAs are kept active briefly to handle in-flight packets, then deleted. The transition is invisible to Alice.
+</div>
+
+<div class="step">
+  <span class="step-head">Phase 5 — VPN tear-down</span>
+  Either side can initiate teardown by sending an IKE INFORMATIONAL exchange with a DELETE payload. Both SADs delete the relevant entries. Subsequent traffic matches no SA, so the SPD's PROTECT action kicks IKE off again to re-establish (assuming the policy is still active). If the admin wants to permanently end the VPN, they remove the SPD entries too.
+</div>
+
+<!-- ============ 6C — FAMILIES ============ -->
+<h2 id="vpn-families">Two protocol families: IPsec-based vs TLS-based</h2>
+
+<p>Slide 389 lists two main families of VPN protocols:</p>
+
+<h3>IPsec-based VPNs</h3>
+
+<p>Examples: <strong>strongSwan</strong>, <strong>Libreswan</strong>, the IPsec stacks built into Cisco/Juniper/Fortinet enterprise routers. All use IKE (typically IKEv2) for setup and ESP in tunnel mode for the data path.</p>
+
+<p>Strengths:</p>
+<ul class="plain">
+  <li><strong>Universal in enterprise gear.</strong> Every commercial-grade router supports it.</li>
+  <li><strong>Kernel-level performance.</strong> The IPsec stack is in the kernel, so encryption is near line-rate.</li>
+  <li><strong>Transparent to applications.</strong> Once the kernel is configured, applications don't need to know IPsec exists.</li>
+  <li><strong>Real Layer-3 hiding.</strong> Tunnel-mode ESP genuinely hides which inner hosts are talking.</li>
+</ul>
+
+<p>Weaknesses:</p>
+<ul class="plain">
+  <li><strong>NAT can be tricky.</strong> Need NAT-T (encapsulating ESP in UDP 4500) to traverse NATs; some restrictive firewalls still block IKE/ESP entirely.</li>
+  <li><strong>Configuration is complex.</strong> SAs, SPDs, certificates, policies — lots of moving parts.</li>
+  <li><strong>Less common for individual users.</strong> Not what consumer VPN services typically deploy.</li>
+</ul>
+
+<h3>TLS-based VPNs</h3>
+
+<p>Examples: <strong>OpenVPN</strong>, <strong>Cisco AnyConnect</strong>, plus the modern <strong>WireGuard</strong> (which uses neither IPsec nor TLS but is grouped with TLS-based VPNs in slide 389).</p>
+
+<p>How OpenVPN works mechanically: the client runs a user-space daemon. It establishes a TLS connection to the OpenVPN server, typically over UDP port 1194 (DTLS-style) or TCP port 443 for restrictive firewalls. The client kernel exposes a virtual interface called <code>tun0</code>. Routes are set up so that traffic to the corporate network (or, in "full-tunnel" mode, all traffic) is sent into <code>tun0</code>. The daemon reads packets from <code>tun0</code>, encapsulates them inside the TLS connection, and sends them to the server. The server's daemon decrypts and routes the inner packets onto its own network. Replies travel the same path in reverse.</p>
+
+<pre class="diagram">
+   Client laptop                                     OpenVPN server
+   ─────────────                                     ──────────────
+                                                                    
+   browser                                           kernel routing 
+       │                                                  │         
+       ▼                                                  ▼         
+   inner IP packet                                   destination    
+   (dst = corp.internal)                             corp.internal  
+       │                                                  ▲         
+       ▼                                                  │         
+   route to tun0 (virtual iface)                     OpenVPN daemon 
+       │                                                  ▲         
+       ▼                                                  │ decrypt 
+   OpenVPN daemon (user space)                            │         
+   reads from tun0                                   UDP 1194 ◄────┘
+   encrypts via TLS                                       ▲         
+       │                                                  │         
+       ▼                                                  │         
+   UDP 1194 ─────────► public Internet ───────────────────┘         
+   src=client_pub_IP                                                
+   dst=server_pub_IP                                                
+</pre>
+
+<p>Strengths:</p>
+<ul class="plain">
+  <li><strong>NAT-friendly out of the box.</strong> Just looks like normal UDP/TCP traffic.</li>
+  <li><strong>Firewall-friendly.</strong> TCP/443 is rarely blocked anywhere.</li>
+  <li><strong>User-space implementation.</strong> Easier to develop and update; no kernel module needed.</li>
+  <li><strong>Cross-platform.</strong> OpenVPN clients exist for every OS.</li>
+</ul>
+
+<p>Weaknesses:</p>
+<ul class="plain">
+  <li><strong>Slightly slower</strong> due to user-space overhead (less of an issue with modern hardware).</li>
+  <li><strong>Requires client software.</strong> Not built into the OS the way IPsec is.</li>
+</ul>
+
+<div class="why-box">
+  <span class="lbl">Wait, what about WireGuard?</span>
+  WireGuard is a third path — a modern, minimal VPN designed in the late 2010s. It uses neither IPsec nor TLS. Instead, it has its own streamlined cryptographic protocol based on the Noise framework, with Curve25519 for key exchange and ChaCha20-Poly1305 for AEAD encryption. The protocol is small enough to fit in a few thousand lines of kernel code.<br><br>
+  Slide 389 groups WireGuard with the TLS-based family because, like OpenVPN, it's not IPsec — but technically it's its own family. For exam purposes, treating it as the modern alternative to OpenVPN is fine.
+</div>
+
+<h3>The protocol-family comparison</h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Dimension</th><th>IPsec/IKEv2</th><th>OpenVPN (TLS-based)</th><th>WireGuard</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Layer / placement</td><td>L3, kernel</td><td>User-space daemon, tun0 virtual interface</td><td>Kernel module (Linux), user-space on others</td></tr>
+    <tr><td>Transport on the wire</td><td>UDP 500/4500 (NAT-T) or native ESP</td><td>UDP 1194 (DTLS-like) or TCP 443</td><td>UDP, configurable port</td></tr>
+    <tr><td>Setup protocol</td><td>IKEv2 (DH + auth)</td><td>TLS handshake</td><td>Noise framework</td></tr>
+    <tr><td>Auth methods</td><td>PSK or X.509 cert</td><td>X.509 cert + optional username/password</td><td>Static Curve25519 keys</td></tr>
+    <tr><td>Bulk encryption</td><td>AES-GCM (typical)</td><td>AES-GCM or ChaCha20-Poly1305</td><td>ChaCha20-Poly1305</td></tr>
+    <tr><td>NAT-friendly?</td><td>Needs NAT-T</td><td>Yes (just looks like UDP/TCP)</td><td>Yes</td></tr>
+    <tr><td>Configuration complexity</td><td>High</td><td>Medium</td><td>Low (just exchange public keys)</td></tr>
+    <tr><td>Typical use</td><td>Site-to-site enterprise, Cisco/Juniper gear</td><td>Consumer VPNs, OpenVPN Connect, Cisco AnyConnect</td><td>Modern self-hosted, Tailscale, Mullvad</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 6C — FAQ ============ -->
+<h2 id="vpn-faq">"Wait, but what about…?" — VPN questions</h2>
+
+<h3>What does "split-tunnel" vs "full-tunnel" mean?</h3>
+<p>A <strong>full-tunnel</strong> VPN routes <em>all</em> the user's traffic through the corporate VPN — even traffic to public sites like Google or YouTube. Pro: simple policy, all traffic protected. Con: routes every byte through corporate infrastructure even for traffic that doesn't need protection.</p>
+<p>A <strong>split-tunnel</strong> VPN routes only traffic destined for the corporate network through the tunnel; traffic to public sites goes directly out the user's local Internet connection. Pro: less load on corporate infrastructure, faster for general browsing. Con: more complex routing, and the VPN no longer provides traffic-flow confidentiality for public-site traffic (since it goes around the tunnel).</p>
+
+<h3>Why does my VPN occasionally drop or stutter?</h3>
+<p>Three common reasons. <strong>Rekeying:</strong> when an SA approaches its lifetime, IKE establishes a new one — usually invisible, but a brief glitch is possible if the transition is rough. <strong>Network changes:</strong> if your laptop hops between Wi-Fi and cellular, the source IP changes, and the VPN has to re-establish. <strong>NAT timeouts:</strong> NAT routers maintain mappings only as long as traffic flows; if the VPN goes idle for a few minutes, the NAT entry expires, and the next packet comes from a "different" IP/port pair, breaking the connection. Modern VPN clients send keepalive packets to prevent this.</p>
+
+<h3>Can a VPN protect me on public Wi-Fi?</h3>
+<p>Yes, and this is one of the genuinely useful applications. On public Wi-Fi, the access point operator can see all your traffic (whether they actively monitor or not). With a VPN, all the access point sees is encrypted ESP/UDP traffic to the VPN gateway. They can't tell what sites you're visiting, can't perform man-in-the-middle on HTTPS (since they don't have the VPN's keys), can't inject ads or track you. The protection extends only to the VPN gateway, but that's exactly the segment you don't trust.</p>
+
+<h3>Why do some streaming services block VPN traffic?</h3>
+<p>Because licensing deals are geographic ("show this content only to viewers in country X"). Some users tunnel their traffic through a VPN endpoint in another country to bypass the geo-restriction. Streaming services react by maintaining lists of known VPN provider IP ranges and blocking them. This is a cat-and-mouse game; the VPN provider keeps changing IPs, the streaming service keeps updating blocklists.</p>
+
+<h3>Where does the term "VPN concentrator" come from?</h3>
+<p>It's just an enterprise-marketing name for "VPN server that handles many simultaneous remote-access connections." Cisco called their dedicated VPN-server appliance a "concentrator" because it concentrates many remote-user tunnels into one device. The term stuck. Functionally it's the same as any other VPN gateway.</p>
+
+<!-- ============ 6C — SELF-QUIZ ============ -->
+<h2 id="vpn-quiz">Self-quiz — VPN</h2>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q1</span> In two sentences, define what a VPN is.</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>A VPN is an encrypted tunnel between two points across an untrusted network (typically the Internet) that makes a remote endpoint appear logically attached to a private network. The two main protocol families used to build VPNs are IPsec-based (using IKE + ESP-tunnel) and TLS-based (OpenVPN, Cisco AnyConnect), with WireGuard as a modern third option.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q2</span> Alice browses <code>https://shop.example.com</code> from a coffee shop, while connected to her corporate VPN. What can the coffee-shop Wi-Fi operator learn? What can her corporate VPN operator learn?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p><strong>Coffee-shop operator learns:</strong> Alice's device is connected to vpn.acme.com — that's it. They see only encrypted ESP (or DTLS, depending on the VPN family) packets between Alice's laptop and the VPN gateway. They cannot tell which sites she's visiting or what she's doing.</p>
+    <p><strong>Corporate VPN operator learns:</strong> Alice visits shop.example.com. They see the destination IP of her traffic after it exits the VPN tunnel. With TLS 1.2's plaintext SNI, they also see "shop.example.com" as the SNI hostname. They cannot read her HTTPS content — that's protected by TLS end-to-end between Alice's browser and shop.example.com.</p>
+    <p>This is the meaning of "VPN shifts trust": you've moved your visibility from the local Wi-Fi to the VPN provider. Choose your VPN provider as carefully as you'd choose your ISP.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q3</span> Why is "ESP in tunnel mode" the canonical choice for site-to-site VPNs?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>Three reasons:</p>
+    <ol class="numbered">
+      <li><strong>Tunnel mode is required when at least one endpoint is a security gateway.</strong> Branch routers acting on behalf of internal hosts are gateways, so transport mode wouldn't apply.</li>
+      <li><strong>ESP is required for confidentiality.</strong> AH never encrypts. Corporate traffic on the public Internet must be unreadable, so AH is out.</li>
+      <li><strong>ESP-tunnel hides inner addresses.</strong> The internal subnets behind both gateways stay hidden inside the encrypted blob; only the gateway-to-gateway traffic is visible. This is the "limited traffic-flow confidentiality" service of slide 370 — exclusive to ESP-tunnel.</li>
+    </ol>
+    <p>Bonus reason: ESP traverses NAT (with NAT-T encapsulation in UDP 4500), AH does not.</p>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q4</span> Compare an IPsec-based VPN and an OpenVPN deployment along three axes: where the crypto runs, what protocol carries the tunnel on the wire, and how each handles NAT.</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p><strong>Where crypto runs:</strong></p>
+    <ul class="plain">
+      <li>IPsec: kernel-level. The IPsec stack is in the OS kernel. Applications use ordinary sockets and the kernel transparently encrypts.</li>
+      <li>OpenVPN: user-space daemon. Reads packets from a virtual interface (tun0), encrypts them via OpenSSL, sends via UDP/TCP socket.</li>
+    </ul>
+    <p><strong>On-the-wire transport:</strong></p>
+    <ul class="plain">
+      <li>IPsec: native ESP (IP protocol 50) when no NAT, or UDP port 4500 (NAT-T) when NAT is detected.</li>
+      <li>OpenVPN: UDP port 1194 (default) or TCP 443 for restrictive firewalls.</li>
+    </ul>
+    <p><strong>NAT handling:</strong></p>
+    <ul class="plain">
+      <li>IPsec: requires NAT-T (encapsulates ESP in UDP 4500) to traverse NATs. AH variant doesn't traverse NAT at all.</li>
+      <li>OpenVPN: NAT-friendly out of the box — looks like normal UDP/TCP traffic, no special handling needed.</li>
+    </ul>
+  </div></details>
+</div>
+
+<div class="quiz-block">
+  <div><span class="qnum">Q5</span> A friend asks: "I just signed up for a VPN service that promises 'military-grade encryption' and 'total anonymity online.' Is that legitimate?" How would you respond?</div>
+  <details class="answer-block"><summary>▶ Show answer</summary>
+  <div class="answer-content">
+    <p>The encryption claim is fine — "military-grade" usually means AES-256, which is genuinely strong but is also what every modern VPN uses. It's a marketing phrase, not a meaningful differentiator.</p>
+    <p>The anonymity claim is the problem. A VPN doesn't make you anonymous; it shifts trust from your ISP to the VPN provider. The VPN provider can see all your traffic, log it, share it with law enforcement, sell metadata to advertisers, or get hacked and lose your data. There have been real cases of "no-logs" VPN providers turning over user data after court orders.</p>
+    <p>For genuine anonymity (multiple uncorrelated relays, no single party seeing both source and destination), the answer is Tor — not a VPN. For "hide my traffic from the local network and ISP," a reputable VPN is fine, but you're trusting the VPN provider as much as you previously trusted your ISP. Choose accordingly.</p>
+  </div></details>
+</div>
+
+<div class="banner">
+  <strong class="label">Section recap</strong><br>
+  After 6C, you should be able to:
+  <ul class="plain">
+    <li>Define what a VPN is in mechanism, not marketing terms.</li>
+    <li>Explain what a VPN hides versus what HTTPS hides — and why both together is more than either alone.</li>
+    <li>Explain why "VPN = anonymity" is a misconception.</li>
+    <li>Walk through an IPsec VPN session from configuration through IKE handshake through data flow through teardown.</li>
+    <li>Compare IPsec-based and TLS-based VPN families — strengths and weaknesses of each.</li>
+    <li>Recognise WireGuard as a modern third path beyond the IPsec/TLS dichotomy.</li>
+  </ul>
+</div>
+
+</section>
+<!-- ============================================================
+     TYING IT ALL TOGETHER
+     ============================================================ -->
+<h2 id="tying-together">🧩 Tying it all together</h2>
+
+<p>You've now seen all three sub-topics in detail. Let's pull back and see how they fit into the rest of the course, and what the most likely "challenge questions" on the final might look like.</p>
+
+<h3>Where Topic 6 sits in the protocol stack</h3>
+
+<p>Slide 356 places the secure-session technologies on a layered diagram. It's worth memorising:</p>
+
+<pre class="diagram">
+  ┌────────────────────────────────────────────────────────────────┐
+  │  Application layer (7)    │  SSH — remote shell, SFTP          │
+  │                            │  HTTPS — web browsing              │
+  ├───────────────────────────┼────────────────────────────────────┤
+  │  Transport layer (4½)      │  TLS / DTLS — under HTTPS, SMTPS,  │
+  │                            │  IMAPS, etc.                       │
+  ├───────────────────────────┼────────────────────────────────────┤
+  │  Network layer (3)         │  IPsec — VPN, site-to-site,        │
+  │                            │  remote-access                     │
+  ├───────────────────────────┼────────────────────────────────────┤
+  │  Link layer (2)            │  WPA2/WPA3 — Wi-Fi frame protection│
+  └────────────────────────────────────────────────────────────────┘
+</pre>
+
+<p>Each layer protects different things from different observers:</p>
+<ul class="plain">
+  <li><strong>WPA2/3</strong> protects only the wireless segment (your laptop to the access point). Past the AP, no protection.</li>
+  <li><strong>IPsec</strong> protects packets across IP networks — typically gateway-to-gateway or host-to-gateway. Hides the inner topology in tunnel mode.</li>
+  <li><strong>TLS</strong> protects an application's data end-to-end across all of the above layers. Hides content from anyone on the path, including the VPN gateway.</li>
+  <li><strong>SSH</strong> is itself an application; protects shell sessions and tunnels end-to-end.</li>
+</ul>
+
+<p>You can — and often should — stack them. Working from outside in: a remote employee's laptop connects via WPA2 to a coffee shop's Wi-Fi. From there, an IPsec VPN tunnels back to the corporate gateway. Inside that tunnel, the laptop's browser uses HTTPS (TLS) to reach an internal server. That's three layers of independent encryption, protecting against three different threat models. None of them is redundant; each addresses a different segment of the path.</p>
+
+<h3>Comparing IPsec, TLS, and SSH on the same axes</h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Property</th><th>IPsec</th><th>TLS</th><th>SSH</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Layer in the stack</td><td>3 (network)</td><td>4½ (above transport)</td><td>7 (application)</td></tr>
+    <tr><td>Where it runs</td><td>Kernel</td><td>User-space (library)</td><td>User-space (its own daemon)</td></tr>
+    <tr><td>Application transparency</td><td>Yes — apps don't need to know</td><td>No — apps must use TLS library</td><td>No — SSH is itself the application</td></tr>
+    <tr><td>Hides destination IP?</td><td>Yes (in tunnel mode)</td><td>No</td><td>No</td></tr>
+    <tr><td>Authenticates IP header?</td><td>Yes (AH only)</td><td>No</td><td>No</td></tr>
+    <tr><td>Trust model</td><td>X.509 certs or PSK (configured)</td><td>X.509 certs (global CA hierarchy)</td><td>Local <code>known_hosts</code> (TOFU)</td></tr>
+    <tr><td>Key exchange</td><td>(EC)DH inside IKE</td><td>(EC)DHE inside TLS handshake</td><td>(EC)DH inside SSH transport</td></tr>
+    <tr><td>Bulk cipher</td><td>AES-GCM</td><td>AES-GCM or ChaCha20-Poly1305</td><td>AES-GCM, ChaCha20-Poly1305</td></tr>
+    <tr><td>Typical use</td><td>Site-to-site VPN, remote-access VPN</td><td>HTTPS, secure email, etc.</td><td>Remote shell, port forwarding, SFTP</td></tr>
+  </tbody>
+</table>
+
+<p>Three protocols, three different layers, three different trust models — but the same cryptographic primitives underneath. Once you understand the four-step blueprint (authenticate → key exchange → derive keys → encrypt+MAC), every secure-session protocol you encounter for the rest of your career fits into it.</p>
+
+<!-- ============ SYNTHESIS — INTEGRATION HOOKS ============ -->
+<h3>Where Topic 6 connects to the rest of the course</h3>
+
+<p>The instructor's final-exam review notes flag specific "integration hooks" — places where Topic 6 material is likely to be combined with other topics in challenge questions. Understanding these isn't memorisation; it's seeing the cross-topic logic.</p>
+
+<div class="step">
+  <span class="step-head">Hook 1 — IPsec as the "ultimate defence" against Topic 2 attacks</span>
+  Recall the Topic 2 attacks on TCP/IP: source-IP spoofing, TCP reset injection, session hijacking via guessed sequence numbers, ARP spoofing on a LAN. The instructor's review script literally calls IPsec the <em>"ultimate way to prevent the transport layer attack."</em><br><br>
+  Why does IPsec defeat all of those? Because the TCP segment is encrypted inside ESP. An attacker who wants to inject a forged TCP RST or a hijacking segment would need to construct a valid ESP packet — which requires the SA's keys. Without those keys, the attacker can produce only random bytes; the receiver's ICV check fails and the packet is dropped before TCP ever sees it.<br><br>
+  ARP spoofing, IP spoofing, ICMP redirects — all the "manipulate-packets-on-the-LAN" attacks — fail similarly. Even if the attacker successfully redirects packets at L2, they still can't read or modify the encrypted ESP payload.<br><br>
+  Likely exam stem: <em>"Of the countermeasures you've learned for TCP attacks, which is the strongest, and why?"</em> Answer: IPsec, because it encrypts the entire transport-layer payload, so attackers without the SA keys can't construct valid forged packets.
+</div>
+
+<div class="step">
+  <span class="step-head">Hook 2 — Trust models compared across IPsec, TLS, DNSSEC, SSH</span>
+  All four protocols are public-key-based, but they anchor trust differently. Memorise this matrix:<br><br>
+  <table class="data" style="margin-top: 8px;">
+    <thead><tr><th>Protocol</th><th>Trust anchor</th><th>Failure mode if anchor compromised</th></tr></thead>
+    <tbody>
+      <tr><td>IPsec/IKE</td><td>Enterprise CA (in cert mode) or pre-shared key</td><td>All organisation's IPsec identities forgeable</td></tr>
+      <tr><td>TLS</td><td>Global CA hierarchy (browser/OS root store)</td><td>Catastrophic — any cert globally forgeable (DigiNotar 2011)</td></tr>
+      <tr><td>DNSSEC</td><td>Root DNS zone key</td><td>Entire DNS namespace forgeable</td></tr>
+      <tr><td>SSH</td><td>Local <code>known_hosts</code> file (TOFU)</td><td>Limited — only one host's identity affected</td></tr>
+    </tbody>
+  </table>
+  <br>
+  Likely exam stem: <em>"Compare the trust anchors of IPsec, TLS, and DNSSEC. What's the unique failure mode of each?"</em>
+</div>
+
+<div class="step">
+  <span class="step-head">Hook 3 — AES-GCM as the universal AEAD primitive</span>
+  Once you understand AES-GCM, you understand it everywhere:
+  <ul class="plain">
+    <li>TLS 1.2/1.3 record layer — cipher suites like <code>TLS_AES_128_GCM_SHA256</code>.</li>
+    <li>IPsec ESP — most modern deployments use AES-GCM as the AEAD mode.</li>
+    <li>WPA3-Enterprise — uses GCMP (which is AES-GCM with an 802.11-specific framing).</li>
+    <li>SSH — modern OpenSSH supports <code>aes128-gcm@openssh.com</code> as a cipher.</li>
+  </ul>
+  Likely exam stem: <em>"Name the cipher primitive that appears in TLS, IPsec, WPA3, and SSH. What services does it provide in a single pass?"</em> Answer: AES-GCM. Provides confidentiality (via AES counter mode) and integrity (via GMAC) simultaneously.
+</div>
+
+<div class="step">
+  <span class="step-head">Hook 4 — Defence-stack thinking: which layer prevents which attack?</span>
+  Likely exam stem: <em>"Given attack X, name the appropriate countermeasure at the link, network, transport, and application layers."</em> Memorise this matrix:<br><br>
+  <table class="data" style="margin-top: 8px;">
+    <thead><tr><th>Attack</th><th>Link (L2)</th><th>Network (L3)</th><th>Transport+ (L4+)</th></tr></thead>
+    <tbody>
+      <tr><td>ARP spoofing → MITM</td><td>WPA2/3, port security, DHCP snooping</td><td>IPsec AH (auths IP header)</td><td>TLS / SSH on content</td></tr>
+      <tr><td>TCP reset / hijacking</td><td>—</td><td>IPsec ESP (encrypts the TCP header)</td><td>TLS/SSH integrity</td></tr>
+      <tr><td>IP spoofing for DDoS reflection</td><td>—</td><td>Ingress filtering · IPsec authenticated SAs</td><td>TLS-authenticated apps reject amplification</td></tr>
+      <tr><td>DNS cache poisoning</td><td>—</td><td>—</td><td>DNSSEC + TLS cert validation</td></tr>
+      <tr><td>Public Wi-Fi eavesdropping</td><td>WPA2-CCMP / WPA3-SAE</td><td>IPsec tunnel (hides destinations)</td><td>TLS for payload</td></tr>
+    </tbody>
+  </table>
+  <br>
+  IPsec is the universal Layer-3 answer; pair it with a Layer-2 (WPA2) and Layer-7 (TLS/SSH) answer to cover the full stack.
+</div>
+
+<div class="step">
+  <span class="step-head">Hook 5 — VPN versus TLS coverage of metadata</span>
+  Likely exam stem: <em>"Alice is at a coffee shop browsing https://shop.example.com. Compare what a Wi-Fi attacker sees in three scenarios: (a) no protection, (b) HTTPS only, (c) HTTPS over an IPsec VPN."</em><br><br>
+  This question tests whether you understand that HTTPS hides <em>content</em> while a VPN additionally hides <em>destinations</em>. The two are complementary; the right combination depends on what you're trying to protect against.
+</div>
+
+<h3>What you should be able to do now</h3>
+
+<p>If you've worked through this entire document, you should now be able to:</p>
+
+<ul class="plain">
+  <li>Explain in plain English what IPsec is and why each of its components (IKE, SAD, SPD, AH, ESP) exists.</li>
+  <li>Walk through a packet's journey through an IPsec gateway, from SPD lookup through encryption to delivery on the other side.</li>
+  <li>State the SA-identifying triple (SPI + dest IP + protocol) from memory and explain why each component is needed.</li>
+  <li>Compare AH and ESP exhaustively: what each provides, what each protects in the MAC, why one is rare and the other ubiquitous.</li>
+  <li>Trace anti-replay's sliding-window logic for any sequence number scenario.</li>
+  <li>State both instructor verbatim quotes about transport vs tunnel mode and explain the difference mechanistically.</li>
+  <li>Draw and label the four packet shapes (AH/ESP × transport/tunnel).</li>
+  <li>Explain why ESP-tunnel is the universal choice for site-to-site VPNs.</li>
+  <li>Define a VPN in mechanistic terms, including the two protocol families and three deployment topologies.</li>
+  <li>Explain what a VPN hides versus what TLS hides, and why both together are not redundant.</li>
+  <li>Articulate the trust-shift mental model: a VPN moves visibility from your ISP to the VPN provider; it doesn't make you anonymous.</li>
+  <li>Connect Topic 6 to Topics 1, 2, 4, and 8 via the integration hooks above.</li>
+</ul>
+
+<p>If you can do all of those without consulting notes, you're ready for the reference-guide quiz. If not, identify which gap you have and re-read that section.</p>
+
+<div class="banner">
+  <strong class="label">Final encouragement</strong><br>
+  IPsec feels intimidating at first because it has so many moving parts: AH, ESP, SAD, SPD, IKE, transport, tunnel, modes, SAs, SPIs. But all of those are in service of one simple goal: <em>add cryptographic protection to IP packets at the network layer, transparently to applications.</em><br><br>
+  Once you've internalised the architecture (four components: SPD policy, SAD state, AH/ESP protection, IKE key management) and the two modes (transport visible, tunnel hidden), every IPsec question fits into that mental map. The VPN material in 6C is just IPsec deployed at gateways with some routing tricks. Topic 6 is genuinely understandable once you stop trying to memorise it as an acronym soup.
+</div>
+<!-- ============================================================
+     GLOSSARY
+     ============================================================ -->
+<h2 id="glossary">📚 Glossary</h2>
+
+<p>Quick reference for every term introduced in this document. If you've forgotten what something means, look here first.</p>
+
+<table class="data">
+  <thead>
+    <tr><th style="width: 28%;">Term</th><th>Definition</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>AEAD</strong></td><td>Authenticated Encryption with Associated Data. A class of ciphers (AES-GCM, ChaCha20-Poly1305) that provide confidentiality and integrity in a single pass.</td></tr>
+    <tr><td><strong>AES-GCM</strong></td><td>Advanced Encryption Standard in Galois/Counter Mode. The modern default AEAD cipher in IPsec ESP, TLS 1.3, WPA3, and modern SSH. Provides encryption + integrity simultaneously.</td></tr>
+    <tr><td><strong>AH</strong></td><td>Authentication Header. IPsec protocol number 51. Provides integrity, data-origin authentication, and optional anti-replay — but never encrypts. Authenticates the immutable fields of the outer IP header in addition to the payload, which is its unique service vs ESP.</td></tr>
+    <tr><td><strong>Anti-replay window</strong></td><td>A sliding-window data structure (typically 32 or 64 entries wide) the receiver maintains per SA to detect replayed packets. Tracks the highest sequence number seen and a bitmap of recently accepted numbers.</td></tr>
+    <tr><td><strong>Authentication</strong></td><td>The process of verifying that a packet (or peer) is genuinely from who it claims to be. In IPsec, achieved via MAC (per packet) or peer authentication during IKE (per session).</td></tr>
+    <tr><td><strong>CA</strong></td><td>Certificate Authority. An entity that signs X.509 certificates. IPsec can authenticate peers using CA-signed certificates as an alternative to pre-shared keys.</td></tr>
+    <tr><td><strong>ChaCha20-Poly1305</strong></td><td>A modern AEAD cipher used as an alternative to AES-GCM, especially in WireGuard and on hardware without AES acceleration. Provides confidentiality + integrity in one pass.</td></tr>
+    <tr><td><strong>Cipher suite</strong></td><td>A named bundle of algorithms used together — typically (key exchange, authentication, bulk cipher, MAC). IKE negotiates the analogous "transform set" for IPsec SAs.</td></tr>
+    <tr><td><strong>Confidentiality</strong></td><td>The property that data cannot be read by unauthorised parties. In IPsec, provided only by ESP, never by AH.</td></tr>
+    <tr><td><strong>Diffie-Hellman (DH)</strong></td><td>A cryptographic protocol for two parties to establish a shared secret over a public channel. The basis for IKE's key exchange.</td></tr>
+    <tr><td><strong>(EC)DH / ECDHE</strong></td><td>Elliptic-curve variant of Diffie-Hellman. Faster and uses smaller keys for equivalent security. Curve25519 is a popular modern choice (used in WireGuard, IKEv2 group 31).</td></tr>
+    <tr><td><strong>ESP</strong></td><td>Encapsulating Security Payload. IPsec protocol number 50. The workhorse protection protocol — provides encryption, integrity, authentication, anti-replay, and (in tunnel mode) limited traffic-flow confidentiality.</td></tr>
+    <tr><td><strong>Extranet VPN</strong></td><td>A VPN that connects two distinct organisations with controlled cross-access, exposing only specific subnets to each other.</td></tr>
+    <tr><td><strong>Full-tunnel VPN</strong></td><td>A VPN configuration where all of the user's traffic — including traffic to public Internet sites — is routed through the corporate VPN tunnel.</td></tr>
+    <tr><td><strong>Gateway / Security gateway</strong></td><td>A network device (typically an edge router or firewall) that runs IPsec on behalf of the hosts behind it. The IPsec endpoint is the gateway, not the actual hosts. Site-to-site VPNs use gateways at both ends.</td></tr>
+    <tr><td><strong>HMAC</strong></td><td>Hash-based Message Authentication Code. Used in IPsec for integrity when the SA isn't using AEAD (e.g., HMAC-SHA-256 with classic AES-CBC ESP).</td></tr>
+    <tr><td><strong>ICV</strong></td><td>Integrity Check Value. The MAC tag at the end of an AH or ESP packet. With AES-GCM ESP, this is the GMAC tag produced during encryption.</td></tr>
+    <tr><td><strong>IKE / IKEv2</strong></td><td>Internet Key Exchange. The IPsec key-management protocol that authenticates peers, runs Diffie-Hellman, and establishes SAs. IKEv2 (RFC 7296) is the modern version. Runs over UDP port 500 (or 4500 with NAT-T).</td></tr>
+    <tr><td><strong>Inbound SA</strong></td><td>An SA used by the local peer to process incoming packets — i.e., to decrypt and verify packets received from the remote peer. The remote peer's outbound SA matches it directionally.</td></tr>
+    <tr><td><strong>Integrity</strong></td><td>The property that data has not been modified in transit. Provided by both AH and ESP via the ICV (MAC).</td></tr>
+    <tr><td><strong>IP protocol number 50</strong></td><td>The protocol field value in the outer IP header that identifies an ESP packet.</td></tr>
+    <tr><td><strong>IP protocol number 51</strong></td><td>The protocol field value in the outer IP header that identifies an AH packet.</td></tr>
+    <tr><td><strong>IPsec</strong></td><td>Internet Protocol Security. An IETF framework for adding cryptographic protection (confidentiality, integrity, authentication, anti-replay) to IP packets at the network layer. Comprises AH, ESP, IKE, SPD, SAD, plus transport and tunnel modes.</td></tr>
+    <tr><td><strong>IV / Nonce</strong></td><td>Initialisation Vector / Number-used-Once. A unique value combined with the encryption key to produce ciphertext. Must never repeat for the same key, especially for AES-GCM. In ESP, derived from the sequence number plus a per-SA salt.</td></tr>
+    <tr><td><strong>Key derivation</strong></td><td>The process of expanding a shared secret (e.g., from Diffie-Hellman) into multiple working keys (encryption key, MAC key, IV salt). Done after IKE_AUTH.</td></tr>
+    <tr><td><strong>NAT-T (NAT Traversal)</strong></td><td>A technique that encapsulates ESP packets in UDP (port 4500) to traverse NAT routers, which don't handle bare ESP (IP protocol 50). Negotiated as part of IKE when NAT is detected on the path.</td></tr>
+    <tr><td><strong>Nonce</strong></td><td>See IV. In IKE, also a random value exchanged during IKE_SA_INIT to prevent replay of the handshake itself.</td></tr>
+    <tr><td><strong>OpenVPN</strong></td><td>A popular TLS-based VPN protocol. Runs in user space, uses a virtual <code>tun0</code> interface to capture traffic, encapsulates packets in TLS over UDP 1194 or TCP 443.</td></tr>
+    <tr><td><strong>Outbound SA</strong></td><td>An SA used by the local peer to process outgoing packets — i.e., to encrypt and authenticate packets sent to the remote peer. The remote peer's inbound SA matches it directionally.</td></tr>
+    <tr><td><strong>PSK (Pre-Shared Key)</strong></td><td>A symmetric secret string configured manually on both peers, used by IKE to authenticate them to each other. Common in small site-to-site deployments. Alternative to certificate-based authentication.</td></tr>
+    <tr><td><strong>Public/private key pair</strong></td><td>A mathematically linked pair where the private key signs/decrypts and the public key verifies/encrypts. Used in IKE certificate-based authentication.</td></tr>
+    <tr><td><strong>Rekeying</strong></td><td>The process of replacing an SA's keys with fresh ones before the SA expires (or before the sequence number wraps). In IKEv2, done via the CREATE_CHILD_SA exchange.</td></tr>
+    <tr><td><strong>Remote-access VPN</strong></td><td>A VPN topology where an individual user's device connects to a corporate VPN gateway over the Internet to gain access to internal resources. Host-to-gateway tunnel.</td></tr>
+    <tr><td><strong>Replay attack</strong></td><td>An attack where an adversary captures legitimate packets and resends them later, hoping to cause the receiver to process them again. Defeated in IPsec by anti-replay sequence numbers.</td></tr>
+    <tr><td><strong>RSA</strong></td><td>A public-key cryptosystem. Can be used in IKE for peer authentication via X.509 certificates (where the certificate's signature is RSA-based).</td></tr>
+    <tr><td><strong>SA (Security Association)</strong></td><td>The central concept in IPsec. A one-way (simplex) cryptographic context between two peers, holding the algorithm, keys, sequence counter, anti-replay window, mode, and lifetime needed to protect packets in one direction. Bidirectional communication needs two SAs. Identified by the triple (SPI, destination IP, AH/ESP).</td></tr>
+    <tr><td><strong>SAD (Security Association Database)</strong></td><td>The kernel table holding all active SAs and their state (keys, counters, window). Looked up on every IPsec-protected packet — by SPI on inbound, by SA ID on outbound.</td></tr>
+    <tr><td><strong>Sequence number</strong></td><td>A 32-bit counter incremented per outbound packet within an SA. Used by the receiver's anti-replay window to detect duplicates.</td></tr>
+    <tr><td><strong>Site-to-site VPN</strong></td><td>A VPN topology where two whole networks are connected by a tunnel between their edge routers. Gateway-to-gateway. Always uses tunnel mode.</td></tr>
+    <tr><td><strong>SPD (Security Policy Database)</strong></td><td>The kernel table holding policy rules: which traffic should be IPsec-protected (PROTECT with SA X), which should bypass (BYPASS), which should be dropped (DISCARD). Consulted on every outbound packet before any IPsec processing.</td></tr>
+    <tr><td><strong>SPI (Security Parameters Index)</strong></td><td>A 32-bit tag in every AH/ESP header. Tells the receiver which SA to use to process the packet. Unique only when paired with destination IP and protocol.</td></tr>
+    <tr><td><strong>Split-tunnel VPN</strong></td><td>A VPN configuration where only traffic destined for the corporate network goes through the tunnel; traffic to public sites goes directly via the user's local Internet connection.</td></tr>
+    <tr><td><strong>Symmetric encryption</strong></td><td>Encryption where the same key is used for both encryption and decryption. AES is the standard symmetric cipher. Used for bulk data protection in IPsec ESP after IKE establishes shared keys.</td></tr>
+    <tr><td><strong>TFC (Traffic-Flow Confidentiality)</strong></td><td>The property that an observer cannot infer who is talking to whom. IPsec's "limited traffic-flow confidentiality" service — provided only by ESP in tunnel mode — hides the inner IP addresses but not the outer gateway-to-gateway addresses.</td></tr>
+    <tr><td><strong>TOFU (Trust On First Use)</strong></td><td>A trust model where a peer's public key is accepted on the first connection and pinned for future use. SSH's <code>known_hosts</code> uses this. Not used by IPsec, but worth contrasting with IPsec's PSK and certificate-based approaches.</td></tr>
+    <tr><td><strong>Transport mode</strong></td><td>An IPsec mode where AH/ESP is inserted between the existing IP header and its payload. Original IP addresses remain visible. Used for end-to-end host-to-host protection.</td></tr>
+    <tr><td><strong>Tunnel mode</strong></td><td>An IPsec mode where the entire original IP packet (header included) becomes the inner packet inside a new outer IP header. Original IP addresses hidden inside the encrypted blob (when ESP is used). Used for site-to-site VPNs and remote-access VPNs.</td></tr>
+    <tr><td><strong>UDP port 500</strong></td><td>The default port for IKE/IKEv2 messages.</td></tr>
+    <tr><td><strong>UDP port 4500</strong></td><td>The port used for IKE and ESP encapsulation when NAT-T is active.</td></tr>
+    <tr><td><strong>VPN</strong></td><td>Virtual Private Network. An encrypted tunnel that makes a remote endpoint appear logically attached to a private network across an untrusted infrastructure. Two main protocol families: IPsec-based and TLS-based (with WireGuard as a modern third path).</td></tr>
+    <tr><td><strong>VPN concentrator</strong></td><td>A dedicated network appliance that terminates many simultaneous VPN connections. Cisco's marketing term for what is functionally a VPN gateway optimised for high concurrent connection counts.</td></tr>
+    <tr><td><strong>WireGuard</strong></td><td>A modern, minimal VPN protocol. Uses neither IPsec nor TLS — has its own protocol based on the Noise framework, with Curve25519 + ChaCha20-Poly1305. Runs in the kernel; very small codebase.</td></tr>
+    <tr><td><strong>X.509</strong></td><td>The standard format for digital certificates. Used by IPsec when peers authenticate via certificates rather than pre-shared keys, identical to TLS's certificate format.</td></tr>
+  </tbody>
+</table>
+
+<p style="text-align: center; color: var(--text-faint); font-style: italic; margin: 50px 0 20px 0;">
+  End of beginner deep-dive · Topic 6 · IPsec, AH/ESP, Transport vs Tunnel, VPN<br>
+  Now go work through the reference guide's exam questions. Good luck on the final.
+</p>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs548-theme';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
