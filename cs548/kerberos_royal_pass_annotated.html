@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kerberos — The Royal Pass System: Annotated Deep Dive</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+  :root {
+    --bg:        #0c0a08;
+    --bg2:       #12100d;
+    --bg3:       #1a1712;
+    --gold:      #c9963c;
+    --gold-lt:   #e8b84b;
+    --gold-dk:   #8a6522;
+    --ivory:     #f0e8d4;
+    --ivory2:    #c8bfa8;
+    --ivory3:    #7a7060;
+    --red:       #b04040;
+    --green:     #3d7a58;
+    --blue:      #3a6090;
+    --purple:    #7a558a;
+    --border:    #2a2418;
+    --border2:   #3a3020;
+    --mono:      'JetBrains Mono', monospace;
+    --serif:     'Crimson Pro', Georgia, serif;
+    --display:   'Cinzel', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ivory);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .masthead {
+    background: linear-gradient(160deg, #1a1208 0%, #0c0a06 50%, #100d08 100%);
+    border-bottom: 2px solid var(--gold-dk);
+    padding: 60px 64px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(201,150,60,0.025) 40px,
+      rgba(201,150,60,0.025) 41px
+    );
+  }
+  .masthead-inner { position: relative; max-width: 1200px; margin: 0 auto; }
+  .masthead-eyebrow {
+    font-family: var(--mono);
+    font-size: .72em;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold-dk);
+    margin-bottom: 16px;
+  }
+  .masthead h1 {
+    font-family: var(--display);
+    font-size: clamp(2em, 4vw, 3.4em);
+    font-weight: 900;
+    color: var(--gold-lt);
+    letter-spacing: .04em;
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+  .masthead-sub {
+    font-size: 1.1em;
+    color: var(--ivory2);
+    max-width: 720px;
+    font-style: italic;
+  }
+
+  /* ── PAGE ── */
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 64px 100px;
+  }
+
+  /* ── ENTITY MAP TABLE (top) ── */
+  .entity-map {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-top: 3px solid var(--gold);
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 60px;
+    overflow-x: auto;
+  }
+  .entity-map-header {
+    background: linear-gradient(90deg, #1e1810, #12100d);
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border2);
+  }
+  .entity-map-header h2 {
+    font-family: var(--display);
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .entity-map-header p {
+    font-size: .88em;
+    color: var(--ivory3);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .em-table { width: 100%; border-collapse: collapse; }
+  .em-table th {
+    background: #0f0d0a;
+    padding: 11px 16px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: .68em;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold-dk);
+    border-bottom: 1px solid var(--border2);
+    white-space: nowrap;
+  }
+  .em-table td {
+    padding: 13px 16px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border);
+    font-size: .92em;
+    line-height: 1.6;
+  }
+  .em-table tr:last-child td { border-bottom: none; }
+  .em-table tr:hover td { background: #151210; }
+  .em-table tr:nth-child(even) td { background: #100e0b; }
+  .em-table tr:nth-child(even):hover td { background: #151210; }
+  .sym {
+    font-family: var(--mono);
+    font-size: .85em;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .sym-entity  { background: #1e1810; color: #e8b84b; }
+  .sym-key     { background: #0e1820; color: #6aaddd; }
+  .sym-ticket  { background: #120e1e; color: #a88be8; }
+  .sym-ts      { background: #0e1a10; color: #5ec47a; }
+  .sym-danger  { background: #1a0e0e; color: #dd6a6a; }
+  .role-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .65em;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    margin-right: 6px;
+  }
+  .rt-client   { background: #2a1e08; color: #e8b84b; }
+  .rt-kdc      { background: #081828; color: #6aaddd; }
+  .rt-service  { background: #0e1a10; color: #5ec47a; }
+  .rt-attacker { background: #1a0808; color: #dd6a6a; }
+  .rt-key      { background: #18081e; color: #a88be8; }
+
+  /* ── STEPS ── */
+  .phase-divider {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 56px 0 32px;
+  }
+  .phase-divider::before, .phase-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dk));
+  }
+  .phase-divider::after {
+    background: linear-gradient(90deg, var(--gold-dk), transparent);
+  }
+  .phase-badge {
+    font-family: var(--display);
+    font-size: .75em;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+    padding: 6px 20px;
+    border: 1px solid var(--gold-dk);
+    border-radius: 20px;
+    background: #14100a;
+  }
+
+  /* ── STEP CARD ── */
+  .step-card {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  .step-header {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1px solid var(--border2);
+    background: linear-gradient(90deg, #1a1408 0%, #14120e 100%);
+  }
+  .step-num {
+    font-family: var(--display);
+    font-size: 1.4em;
+    font-weight: 900;
+    color: var(--gold-dk);
+    text-align: center;
+    padding: 18px 12px;
+    border-right: 1px solid var(--border2);
+  }
+  .step-title-area {
+    padding: 14px 20px;
+  }
+  .step-title {
+    font-family: var(--display);
+    font-size: .92em;
+    font-weight: 700;
+    color: var(--gold-lt);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .step-actors {
+    font-family: var(--mono);
+    font-size: .7em;
+    color: var(--ivory3);
+    margin-top: 4px;
+    letter-spacing: .04em;
+  }
+  .step-phase-tag {
+    font-family: var(--mono);
+    font-size: .62em;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    margin-right: 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    align-self: center;
+  }
+  .tag-as     { background: #1e1808; color: #e8b84b; border: 1px solid #3a2e10; }
+  .tag-tgs    { background: #081828; color: #6aaddd; border: 1px solid #10284a; }
+  .tag-svc    { background: #0e1a10; color: #5ec47a; border: 1px solid #1a3420; }
+  .tag-setup  { background: #1e0e1e; color: #c488e8; border: 1px solid #3a1e4a; }
+  .tag-threat { background: #1a0808; color: #dd6a6a; border: 1px solid #4a1010; }
+
+  /* ── TWO COLUMN LAYOUT ── */
+  .step-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  /* Story side */
+  .story-side {
+    padding: 24px 26px;
+    border-right: 1px solid var(--border2);
+    background: #0f0d0a;
+  }
+  .story-label {
+    font-family: var(--mono);
+    font-size: .62em;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-dk);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .story-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+  .story-dialogue {
+    font-style: italic;
+    color: var(--ivory2);
+    font-size: .95em;
+    line-height: 1.8;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--gold-dk);
+    padding-left: 16px;
+  }
+  .story-speaker {
+    font-family: var(--display);
+    font-size: .72em;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  .story-action {
+    color: var(--ivory3);
+    font-size: .9em;
+    line-height: 1.7;
+    margin-top: 10px;
+  }
+
+  /* Real side */
+  .real-side {
+    padding: 24px 26px;
+    background: #0c0a08;
+  }
+  .real-label {
+    font-family: var(--mono);
+    font-size: .62em;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .real-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+  /* Protocol formula */
+  .proto-block {
+    background: #08080a;
+    border: 1px solid #1e2030;
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: var(--mono);
+    font-size: .82em;
+    line-height: 2;
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+    color: #b0c8e8;
+  }
+
+  /* Annotation table */
+  .annot-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+  .annot-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #1a1812;
+    font-size: .82em;
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .annot-table tr:last-child td { border-bottom: none; }
+  .annot-sym { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+  .annot-eq  { color: var(--ivory3); text-align: center; padding: 8px 6px; white-space: nowrap; }
+  .annot-real { color: var(--ivory2); }
+  .annot-story { color: var(--ivory3); font-style: italic; }
+  .annot-why  { color: #8aaa7a; font-size: .85em; font-style: italic; }
+
+  /* WHY box */
+  .why-box {
+    background: #0c1008;
+    border: 1px solid #1a2a14;
+    border-left: 3px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    font-size: .87em;
+    color: #9abf88;
+    line-height: 1.75;
+    margin-top: 14px;
+  }
+  .why-box strong { color: #b4d498; font-weight: 600; }
+
+  /* SECURITY box */
+  .sec-box {
+    background: #0a0c14;
+    border: 1px solid #18203a;
+    border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    font-size: .87em;
+    color: #7aabcc;
+    line-height: 1.75;
+    margin-top: 10px;
+  }
+  .sec-box strong { color: #9accdd; font-weight: 600; }
+
+  /* WARNING box */
+  .warn-box {
+    background: #140808;
+    border: 1px solid #3a1010;
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    font-size: .87em;
+    color: #cc8a7a;
+    line-height: 1.75;
+    margin-top: 10px;
+  }
+
+  /* ── MAPPING LEGEND ROW ── */
+  .map-strip {
+    background: #10120a;
+    border-top: 1px solid var(--border2);
+    padding: 12px 26px;
+    font-size: .8em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+  }
+  .map-strip-label {
+    font-family: var(--mono);
+    font-size: .65em;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ivory3);
+  }
+  .map-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .85em;
+  }
+  .map-arrow { color: var(--gold-dk); font-family: var(--mono); }
+
+  /* ── FULL SYMBOL TABLE ── */
+  .symbol-master {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-top: 3px solid var(--gold-dk);
+    border-radius: 0 0 12px 12px;
+    margin-top: 60px;
+    overflow: hidden;
+  }
+  .sm-section-header {
+    background: #0f0d0a;
+    padding: 12px 24px;
+    font-family: var(--display);
+    font-size: .8em;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border2);
+  }
+  .sm-table { width: 100%; border-collapse: collapse; }
+  .sm-table th {
+    background: #0a0808;
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: .65em;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ivory3);
+    border-bottom: 1px solid var(--border2);
+    text-align: left;
+  }
+  .sm-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: .88em;
+    vertical-align: top;
+    line-height: 1.65;
+  }
+  .sm-table tr:last-child td { border-bottom: none; }
+  .sm-table tr:hover td { background: #120f0c; }
+  .sm-cat-row td {
+    background: #0f0d0a !important;
+    font-family: var(--display);
+    font-size: .72em;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gold-dk);
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  /* ── FLOW SUMMARY ── */
+  .flow-box {
+    background: #0c0a06;
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 32px 36px;
+    margin-top: 48px;
+  }
+  .flow-box h3 {
+    font-family: var(--display);
+    font-size: .95em;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border2);
+  }
+  .flow-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .flow-n {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gold-dk);
+    color: var(--bg);
+    font-family: var(--display);
+    font-size: .75em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .flow-text { font-size: .93em; color: var(--ivory2); line-height: 1.7; }
+  .flow-text strong { color: var(--ivory); }
+  .flow-arrow {
+    margin-left: 44px;
+    margin-bottom: 20px;
+    color: var(--gold-dk);
+    font-size: 1.4em;
+    line-height: 1;
+  }
+
+  /* ── SECURITY GUARANTEE SUMMARY ── */
+  .guarantee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-top: 48px;
+  }
+  .guarantee-card {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .gc-icon {
+    font-size: 1.6em;
+    margin-bottom: 10px;
+  }
+  .gc-title {
+    font-family: var(--display);
+    font-size: .8em;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .gc-body { font-size: .88em; color: var(--ivory2); line-height: 1.7; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .masthead { padding: 40px 28px 32px; }
+    .page { padding: 36px 24px 60px; }
+    .step-body { grid-template-columns: 1fr; }
+    .story-side { border-right: none; border-bottom: 1px solid var(--border2); }
+    .step-header { grid-template-columns: 48px 1fr; }
+    .step-phase-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ MASTHEAD ═══ -->
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-eyebrow">CS 448/548 Network Security · Annotated Analogy</div>
+    <h1>Kerberos — The Royal Pass System</h1>
+    <p class="masthead-sub">Every analogy element precisely mapped to its real Kerberos counterpart. Each step shows the palace story, the formal protocol notation, and a full annotation table — side by side.</p>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ═══ ENTITY MAP ═══ -->
+<div class="entity-map">
+  <div class="entity-map-header">
+    <h2>Master Entity Correspondence Table</h2>
+    <p>Read this first. Every symbol and every palace character — who they are, what they do, and why they exist — cross-referenced before any step begins.</p>
+  </div>
+  <table class="em-table">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Role Tag</th>
+        <th>Real Kerberos Entity</th>
+        <th>Palace Story Counterpart</th>
+        <th>Key Responsibility</th>
+        <th>What they know / hold</th>
+        <th>What they never know</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- PRINCIPALS -->
+      <tr>
+        <td><span class="sym sym-entity">C</span></td>
+        <td><span class="role-tag rt-client">Client</span></td>
+        <td><strong>Client Machine</strong> running the Kerberos client software on behalf of a user (e.g., Alice's laptop)</td>
+        <td><strong>Alice</strong> — the petitioner who walks into the palace seeking access to rooms</td>
+        <td>Initiates all authentication requests; carries tickets it cannot read; creates Authenticators using session keys it holds</td>
+        <td>Own long-term key <span class="sym sym-key">Kc</span> (briefly); session keys <span class="sym sym-key">Kc,tgs</span> and <span class="sym sym-key">Kc,v</span>; the opaque ticket blobs</td>
+        <td>Contents of tickets (encrypted for others); other users' keys; <span class="sym sym-key">Ktgs</span>; <span class="sym sym-key">Kv</span></td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-entity">AS</span></td>
+        <td><span class="role-tag rt-kdc">KDC / AS</span></td>
+        <td><strong>Authentication Server</strong> — the first component of the KDC. Verifies initial identity and issues TGT.</td>
+        <td><strong>Palace Front Desk</strong> — the registration desk that checks the palace's master ledger and issues permit-passes</td>
+        <td>Looks up <span class="sym sym-key">Kc</span> from database; generates <span class="sym sym-key">Kc,tgs</span>; issues TGT sealed with <span class="sym sym-key">Ktgs</span></td>
+        <td>All clients' long-term keys; <span class="sym sym-key">Ktgs</span>; all service keys <span class="sym sym-key">Kv</span></td>
+        <td>Alice's plaintext password (only the derived hash <span class="sym sym-key">Kc</span> is stored)</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-entity">TGS</span></td>
+        <td><span class="role-tag rt-kdc">KDC / TGS</span></td>
+        <td><strong>Ticket Granting Server</strong> — second KDC component. Verifies TGT and issues service tickets.</td>
+        <td><strong>Permit Office</strong> — the internal ministry that accepts permit-passes and issues room-specific access passes</td>
+        <td>Decrypts TGT with <span class="sym sym-key">Ktgs</span>; extracts <span class="sym sym-key">Kc,tgs</span>; verifies Authenticator; issues <span class="sym sym-key">Ticket_v</span></td>
+        <td><span class="sym sym-key">Ktgs</span>; all service keys <span class="sym sym-key">Kv</span>; <span class="sym sym-key">Kc,tgs</span> (extracted from TGT)</td>
+        <td>Alice's password; <span class="sym sym-key">Kc</span> (the client long-term key)</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-entity">V</span></td>
+        <td><span class="role-tag rt-service">Service</span></td>
+        <td><strong>Service Server</strong> (Verifier) — the target resource (file server, mail server, etc.)</td>
+        <td><strong>Treasury Room</strong> — the guarded room Alice wants to enter</td>
+        <td>Decrypts <span class="sym sym-key">Ticket_v</span> with <span class="sym sym-key">Kv</span>; verifies Authenticator; optionally sends mutual auth reply; serves the resource</td>
+        <td>Own long-term key <span class="sym sym-key">Kv</span>; <span class="sym sym-key">Kc,v</span> (extracted from ticket)</td>
+        <td>Alice's password; <span class="sym sym-key">Kc</span>; <span class="sym sym-key">Kc,tgs</span>; <span class="sym sym-key">Ktgs</span></td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-entity">KDC</span></td>
+        <td><span class="role-tag rt-kdc">KDC</span></td>
+        <td><strong>Key Distribution Center</strong> — the combined AS+TGS authority. Single trusted third party.</td>
+        <td><strong>The Palace Authority</strong> — the palace's entire administrative system (Front Desk + Permit Office together)</td>
+        <td>Central trust anchor. Manages all long-term keys. Only party trusted by everyone.</td>
+        <td>All long-term keys: <span class="sym sym-key">Kc</span>, <span class="sym sym-key">Ktgs</span>, <span class="sym sym-key">Kv</span></td>
+        <td>—</td>
+      </tr>
+      <!-- LONG-TERM KEYS -->
+      <tr>
+        <td><span class="sym sym-key">Kc</span></td>
+        <td><span class="role-tag rt-key">Long-term Key</span></td>
+        <td><strong>Client's long-term secret key</strong> — derived via hash of Alice's password. Never transmitted.</td>
+        <td><strong>Alice's palace membership seal</strong> — a unique wax stamp only Alice and the Front Desk can verify</td>
+        <td>Used once: to encrypt Part A of the AS reply (key delivery). Discarded immediately after.</td>
+        <td>Client + KDC/AS</td>
+        <td>TGS, Service Server, any attacker</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-key">Ktgs</span></td>
+        <td><span class="role-tag rt-key">Long-term Key</span></td>
+        <td><strong>TGS's long-term secret key</strong> — random, permanent key known only to KDC and TGS</td>
+        <td><strong>Permit Office master seal</strong> — only the Permit Office can open envelopes sealed with it</td>
+        <td>Used to encrypt/decrypt TGT. Alice carries TGT but cannot open it because she doesn't have <span class="sym sym-key">Ktgs</span>.</td>
+        <td>KDC/AS + TGS only</td>
+        <td>Client, Service Server</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-key">Kv</span></td>
+        <td><span class="role-tag rt-key">Long-term Key</span></td>
+        <td><strong>Service Server's long-term secret key</strong> — unique per service, pre-shared between KDC and that service</td>
+        <td><strong>Treasury Room master key</strong> — only the Treasury guard can open locks with it</td>
+        <td>Used by TGS to seal Ticket_v; used by Server V to open it. One key per service (file server ≠ mail server).</td>
+        <td>KDC/TGS + Service V only</td>
+        <td>Client, TGS (for other services)</td>
+      </tr>
+      <!-- SESSION KEYS -->
+      <tr>
+        <td><span class="sym sym-key">Kc,tgs</span></td>
+        <td><span class="role-tag rt-key">Session Key</span></td>
+        <td><strong>Session key between Client and TGS</strong> — freshly generated random key per login session</td>
+        <td><strong>"BlueTiger" — Alice's temporary code word</strong> shared with the Permit Office for this visit</td>
+        <td>Proves Alice's live presence to TGS (via Authenticator). Delivered to Alice encrypted in <span class="sym sym-key">Kc</span>; embedded in TGT for TGS.</td>
+        <td>Client (from decrypting Part A) + TGS (from decrypting TGT)</td>
+        <td>Service Server, other clients</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-key">Kc,v</span></td>
+        <td><span class="role-tag rt-key">Session Key</span></td>
+        <td><strong>Session key between Client and Service V</strong> — freshly generated random key per service session</td>
+        <td><strong>"GoldenKey" — Alice's temporary code word</strong> shared with the Treasury for this visit</td>
+        <td>Proves Alice's live presence to Server V. Enables mutual authentication. Encrypts all session traffic.</td>
+        <td>Client (from decrypting TGS Part A) + Service V (from decrypting Ticket_v)</td>
+        <td>TGS, AS, other services</td>
+      </tr>
+      <!-- TICKETS -->
+      <tr>
+        <td><span class="sym sym-ticket">Ticket_tgs</span></td>
+        <td><span class="role-tag rt-kdc">Ticket</span></td>
+        <td><strong>Ticket-Granting Ticket (TGT)</strong> — sealed by AS with <span class="sym sym-key">Ktgs</span>. Alice's master pass.</td>
+        <td><strong>Sealed Permit-Pass envelope</strong> — a wax-sealed letter Alice carries but cannot open; only Permit Office can read it</td>
+        <td>Contains <span class="sym sym-key">Kc,tgs</span> + Alice's identity. Alice presents it opaquely to TGS. Valid for ~8 hours (one workday).</td>
+        <td>Alice carries it (opaque); TGS reads it</td>
+        <td>Alice cannot open; no third party can forge</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-ticket">Ticket_v</span></td>
+        <td><span class="role-tag rt-service">Ticket</span></td>
+        <td><strong>Service Ticket</strong> — sealed by TGS with <span class="sym sym-key">Kv</span>. Alice's access pass for Service V.</td>
+        <td><strong>Treasury access pass</strong> — a sealed letter for the Treasury guard; Alice carries it but only the guard can open it</td>
+        <td>Contains <span class="sym sym-key">Kc,v</span> + Alice's identity. Typically shorter lifetime than TGT (1–2 hrs). One per service.</td>
+        <td>Alice carries it (opaque); Service V reads it</td>
+        <td>Alice cannot open; cannot be used at a different service</td>
+      </tr>
+      <!-- AUTHENTICATORS -->
+      <tr>
+        <td><span class="sym sym-ts">Auth_c</span></td>
+        <td><span class="role-tag rt-client">Authenticator</span></td>
+        <td><strong>Client Authenticator</strong> — freshly encrypted proof: E(session_key, ID_client ‖ AD_client ‖ Timestamp)</td>
+        <td><strong>Alice's live declaration</strong> — "I am Alice, it is exactly 12:03 PM" — written and sealed just now, not reusable</td>
+        <td>Anti-replay device. Must be fresh (±5 min). New Authenticator per request. Proves Alice is present right now.</td>
+        <td>Alice creates it; TGS or Server V verifies it</td>
+        <td>Others cannot forge without the session key</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-ts">Auth_v</span></td>
+        <td><span class="role-tag rt-service">Authenticator</span></td>
+        <td><strong>Server Authenticator</strong> — Server V's reply: E(<span class="sym sym-key">Kc,v</span>, Timestamp + 1)</td>
+        <td><strong>Treasury guard's echo</strong> — "I saw your 12:10, here is 12:11" — proving the guard opened Alice's sealed letter</td>
+        <td>Mutual authentication mechanism. Proves Server V has <span class="sym sym-key">Kv</span> (could open Ticket_v) and read Alice's Authenticator.</td>
+        <td>Server V creates it; Client verifies it</td>
+        <td>Cannot be forged without <span class="sym sym-key">Kv</span> → <span class="sym sym-key">Kc,v</span> chain</td>
+      </tr>
+      <!-- FIELDS -->
+      <tr>
+        <td><span class="sym sym-ts">IDc</span></td>
+        <td><span class="role-tag rt-client">Identity Field</span></td>
+        <td><strong>Client Identity</strong> — typically "alice@REALM.COM" in Kerberos notation</td>
+        <td><strong>Alice's name on any document</strong></td>
+        <td>Used everywhere to identify the requesting user. Cross-checked: TGT vs Authenticator must match.</td>
+        <td colspan="2">Appears in plaintext requests and inside encrypted tickets/authenticators</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-ts">ADc</span></td>
+        <td><span class="role-tag rt-client">Address Field</span></td>
+        <td><strong>Client Network Address</strong> — IP address of Alice's machine, recorded by KDC at ticket issuance</td>
+        <td><strong>Alice's house number in the palace district</strong> — written on the pass so guards know where she lives</td>
+        <td>Optional binding. Prevents ticket use from a different IP. Often disabled in modern deployments (NAT/VPN).</td>
+        <td colspan="2">Embedded in tickets; checked against source IP by TGS and Server V</td>
+      </tr>
+      <tr>
+        <td><span class="sym sym-ts">TS1, TS2</span></td>
+        <td><span class="role-tag rt-client">Timestamp</span></td>
+        <td><strong>Timestamps</strong> — current time embedded in Authenticators to prove freshness</td>
+        <td><strong>The clock time Alice writes on her declaration</strong> — a 5-minute-old declaration is rejected</td>
+        <td>Anti-replay. TGS/Server V check ±5 minutes. Each Authenticator uses a fresh reading. Requires NTP sync.</td>
+        <td colspan="2">Fresh per Authenticator; verified immediately by recipient</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PHASE 0: SETUP                       -->
+<!-- ═══════════════════════════════════ -->
+<div class="phase-divider">
+  <div class="phase-badge">Phase 0 — Pre-Setup: Before Alice Arrives</div>
+</div>
+
+<!-- STEP 0.1 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">0.1</div>
+    <div class="step-title-area">
+      <div class="step-title">KDC Registers Alice's Account</div>
+      <div class="step-actors">Actor: KDC Admin → KDC Database</div>
+    </div>
+    <div class="step-phase-tag tag-setup">Pre-Setup</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Palace Archivist (KDC Admin):</div>
+      <div class="story-dialogue">"Alice of House Pemberton has joined the palace guild. I have taken the impression of her personal seal and recorded it in the Grand Ledger. She need not carry her seal everywhere — only its impression is kept here."</div>
+      <div class="story-action">The Archivist does NOT store Alice's actual seal (her plaintext password). He stores only the wax impression — a derived copy — so that even if the Ledger is stolen, no one can impersonate Alice without her real seal.</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">Admin action (offline, not a network message):
+Kc = hash(Alice's password)
+Store Kc in KDC database under IDc</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym"><span class="sym sym-key">Kc</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Client's long-term secret key, derived from password via one-way hash</td>
+          <td class="annot-story">= Alice's seal impression in the Ledger</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-entity">IDc</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">"alice@REALM.COM" — the database lookup key</td>
+          <td class="annot-story">= Alice's name on the Ledger page</td>
+        </tr>
+      </table>
+      <div class="why-box"><strong>Why hash, not plaintext?</strong> If an attacker steals the KDC database, they get only <span class="sym sym-key">Kc</span> — a hash — not Alice's reusable password. Alice can re-derive <span class="sym sym-key">Kc</span> locally at any time: hash(password). One-way function: trivial to compute forward, computationally infeasible to reverse.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Archivist <span class="map-arrow">→</span> KDC Admin</span>
+    <span class="map-item">Grand Ledger <span class="map-arrow">→</span> KDC Database</span>
+    <span class="map-item">Seal impression <span class="map-arrow">→</span> <span class="sym sym-key">Kc</span> (hashed password key)</span>
+    <span class="map-item">Alice's actual seal <span class="map-arrow">→</span> Alice's plaintext password (never stored)</span>
+  </div>
+</div>
+
+<!-- STEP 0.2 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">0.2</div>
+    <div class="step-title-area">
+      <div class="step-title">KDC Registers Service V (Treasury)</div>
+      <div class="step-actors">Actor: KDC Admin → KDC Database + Service Server V</div>
+    </div>
+    <div class="step-phase-tag tag-setup">Pre-Setup</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Palace Archivist:</div>
+      <div class="story-dialogue">"The Treasury has its own master key. I have made two copies: one stays in the Grand Ledger, one is given directly to the Treasury Head Guard. No one else receives a copy — not Alice, not the Permit Office."</div>
+      <div class="story-action">Each room in the palace has a completely independent master key. Stealing the Treasury key does not open the Library. The key is handed to the Guard in person — never sent through the postal system.</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">Admin action (out-of-band, offline):
+Kv = random( )
+Store Kv in KDC database under IDv
+Install Kv on Server V directly (sysadmin)</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym"><span class="sym sym-key">Kv</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Service server's long-term key — purely random (not password-derived)</td>
+          <td class="annot-story">= Treasury's master key — a unique random physical key</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-entity">IDv</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">"cifs/fileserver.realm.com" — the service's identity string</td>
+          <td class="annot-story">= "The Treasury Room" — the room's official name in the Ledger</td>
+        </tr>
+      </table>
+      <div class="why-box"><strong>Why one key per service?</strong> Principle of key isolation. If the file server is compromised and <span class="sym sym-key">Kv</span> is stolen, the mail server's <span class="sym sym-key">Kv</span> is entirely unaffected — each service has its own independent key. Out-of-band installation avoids exposing <span class="sym sym-key">Kv</span> on the network at any point.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Treasury Head Guard <span class="map-arrow">→</span> Service Server V</span>
+    <span class="map-item">Treasury master key <span class="map-arrow">→</span> <span class="sym sym-key">Kv</span></span>
+    <span class="map-item">Handing key in person <span class="map-arrow">→</span> Out-of-band sysadmin installation</span>
+    <span class="map-item">Each room has its own key <span class="map-arrow">→</span> One <span class="sym sym-key">Kv</span> per service, independent</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PHASE 1: AS EXCHANGE                 -->
+<!-- ═══════════════════════════════════ -->
+<div class="phase-divider">
+  <div class="phase-badge">Phase 1 — Initial Authentication: Client ↔ Authentication Server</div>
+</div>
+
+<!-- STEP 1 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">1.1</div>
+    <div class="step-title-area">
+      <div class="step-title">Client Sends Login Request to AS</div>
+      <div class="step-actors">C → AS &nbsp;|&nbsp; Plaintext message, no credentials sent</div>
+    </div>
+    <div class="step-phase-tag tag-as">AS Exchange</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Alice (at Palace Front Desk):</div>
+      <div class="story-dialogue">"Good morning. I am Alice of House Pemberton. I wish to access palace services today. I am presenting myself now, at this precise moment."</div>
+      <div class="story-action">Alice does not hand over her personal seal. She only states her name, what she wants (a pass to the Permit Office), and the time of her arrival. Her seal never leaves her possession at this step.</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">C → AS:
+  IDc ‖ IDtgs ‖ TS1
+
+All fields sent in PLAINTEXT — no encryption.</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym"><span class="sym sym-entity">IDc</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">"alice@REALM.COM" — tells AS which account is requesting</td>
+          <td class="annot-story">= "I am Alice of House Pemberton"</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-entity">IDtgs</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">"krbtgt/REALM.COM" — tells AS the scope: I want a TGT, not a service ticket</td>
+          <td class="annot-story">= "I want a Permit Office pass" (not a specific room pass)</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ts">TS1</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Current timestamp — AS echoes this in reply so Alice can verify freshness</td>
+          <td class="annot-story">= "The time of my arrival: 12:00 noon"</td>
+        </tr>
+      </table>
+      <div class="sec-box"><strong>Critical Design Decision:</strong> No password, no key, no credential of any kind is transmitted here. The password never appears on the network in any form — not even encrypted. Verification happens implicitly in Step 1.4: only the real Alice can decrypt the reply.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Alice stating her name <span class="map-arrow">→</span> IDc in plaintext</span>
+    <span class="map-item">Requesting a Permit Office pass <span class="map-arrow">→</span> IDtgs field</span>
+    <span class="map-item">Time of arrival <span class="map-arrow">→</span> TS1 timestamp</span>
+    <span class="map-item">Seal NOT handed over <span class="map-arrow">→</span> password/Kc NOT transmitted</span>
+  </div>
+</div>
+
+<!-- STEP 1.2–1.3 (AS constructs response) -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">1.2</div>
+    <div class="step-title-area">
+      <div class="step-title">AS Generates Session Key &amp; Constructs TGT</div>
+      <div class="step-actors">AS internal — lookup Kc, generate Kc,tgs, seal TGT with Ktgs</div>
+    </div>
+    <div class="step-phase-tag tag-as">AS Exchange</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Front Desk Clerk (AS) — internal process:</div>
+      <div class="story-dialogue">"Let me check the Ledger for 'Alice of House Pemberton'... found. Now I will create a one-time code word for Alice and the Permit Office to share: 'BlueTiger'. I will seal a letter for the Permit Office containing this code word, Alice's name, and the pass expiration. Only the Permit Office can break this seal."</div>
+      <div class="story-action">The clerk creates two separate packages: Package A — a letter for Alice, sealed with Alice's own impression, containing the code word "BlueTiger". Package B — the permit-pass, sealed with the Permit Office's master seal, also containing "BlueTiger" inside (so the Permit Office learns it). Alice cannot open Package B.</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">AS internal steps:
+
+1. Lookup: retrieve Kc from database (IDc is the key)
+
+2. Generate: Kc,tgs = CSPRNG( )   ← brand new, never reused
+
+3. Build TGT (Package B — for TGS):
+   Ticket_tgs = E(Ktgs,
+       Kc,tgs ‖ IDc ‖ ADc ‖ IDtgs ‖ TS1 ‖ Lifetime)
+
+4. Build Part A (Package A — for Alice):
+   Part_A = E(Kc,
+       Kc,tgs ‖ IDtgs ‖ TS1)</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym"><span class="sym sym-key">Kc,tgs</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Fresh random session key. Never existed before. Will expire with TGT.</td>
+          <td class="annot-story">= "BlueTiger" — the one-time code word for this palace visit</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ticket">Ticket_tgs</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">TGT sealed with <span class="sym sym-key">Ktgs</span>. Alice carries this but cannot read it.</td>
+          <td class="annot-story">= Sealed permit-pass envelope — Alice is a courier, not the recipient</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-entity">Lifetime</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Ticket validity period — typically 8–10 hours (one workday). Inside encrypted content so Alice cannot extend it.</td>
+          <td class="annot-story">= "Valid until sunset today" — written inside the sealed envelope</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ts">ADc</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Alice's IP address — optionally binds the ticket to her machine</td>
+          <td class="annot-story">= Alice's house address — binds the pass to her specific residence</td>
+        </tr>
+      </table>
+      <div class="why-box"><strong>Why put Kc,tgs in BOTH packages?</strong> Alice needs it to prove herself to TGS (Part A → Alice decrypts and learns it). TGS needs it to verify Alice's Authenticator (TGT → TGS decrypts and learns it). Both parties arrive at the same session key through independent, secure channels — without ever transmitting it in plaintext.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">"BlueTiger" code word <span class="map-arrow">→</span> <span class="sym sym-key">Kc,tgs</span></span>
+    <span class="map-item">Sealed permit-pass <span class="map-arrow">→</span> <span class="sym sym-ticket">Ticket_tgs</span> (sealed with <span class="sym sym-key">Ktgs</span>)</span>
+    <span class="map-item">Permit Office's wax seal <span class="map-arrow">→</span> encryption with <span class="sym sym-key">Ktgs</span></span>
+    <span class="map-item">Alice's sealed package A <span class="map-arrow">→</span> E(<span class="sym sym-key">Kc</span>, [<span class="sym sym-key">Kc,tgs</span> ‖ ...])</span>
+    <span class="map-item">Alice cannot open the permit-pass <span class="map-arrow">→</span> she doesn't have <span class="sym sym-key">Ktgs</span></span>
+  </div>
+</div>
+
+<!-- STEP 1.3 — AS sends & Alice decrypts -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">1.3</div>
+    <div class="step-title-area">
+      <div class="step-title">AS Sends Reply → Alice Decrypts &amp; Discards Kc</div>
+      <div class="step-actors">AS → C &nbsp;|&nbsp; Client decrypts Part A, stores Kc,tgs + TGT, discards Kc</div>
+    </div>
+    <div class="step-phase-tag tag-as">AS Exchange</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Front Desk Clerk → Alice:</div>
+      <div class="story-dialogue">"Here are two items: your personal envelope (sealed with your impression — only you can open it), and the sealed permit-pass to deliver to the Permit Office."</div>
+      <div class="story-speaker">Alice (privately):</div>
+      <div class="story-dialogue">"I open my personal envelope with my seal. Inside: the code word is 'BlueTiger', and here is the sealed permit-pass. I memorise 'BlueTiger' and put the permit-pass in my satchel. I return my physical seal to its lockbox — I won't need it again today unless my pass expires."</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">AS → C:
+  Part_A = E(Kc, [Kc,tgs ‖ IDtgs ‖ TS1])
+  Ticket_tgs = E(Ktgs, [...])  ← opaque to Alice
+
+Alice's client software:
+  1. Derive Kc = hash(typed_password)
+  2. Decrypt Part_A with Kc → extract Kc,tgs, IDtgs, TS1
+  3. Verify: IDtgs == expected TGS name
+             TS1 == timestamp sent in Step 1.1
+  4. Store in credentials cache:
+       Kc,tgs  ← extracted session key
+       Ticket_tgs  ← opaque blob, forwarded later
+  5. DISCARD Kc from memory immediately</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym">Decryption</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">If Alice typed the wrong password → wrong <span class="sym sym-key">Kc</span> → Part_A decrypts to garbage → authentication fails silently</td>
+          <td class="annot-story">= Wrong seal impression → envelope won't open cleanly</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">TS1 check</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Verifies this reply is for Alice's current request, not a replayed old AS response</td>
+          <td class="annot-story">= "The clerk echoed my 12:00 arrival time — this is a fresh reply"</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Discard <span class="sym sym-key">Kc</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real"><span class="sym sym-key">Kc</span> represents Alice's permanent identity. In-memory time is minimized: derive → decrypt → discard. Survives seconds, not hours.</td>
+          <td class="annot-story">= "Return the physical seal to the lockbox" — don't carry it around all day</td>
+        </tr>
+      </table>
+      <div class="sec-box"><strong>Implicit password verification:</strong> The AS never explicitly says "right password" or "wrong password." The test is: can Alice decrypt Part_A and extract a coherent <span class="sym sym-key">Kc,tgs</span>? Only the real Alice (correct password → correct <span class="sym sym-key">Kc</span>) can pass this test.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Opening personal envelope <span class="map-arrow">→</span> Decrypt Part_A with <span class="sym sym-key">Kc</span></span>
+    <span class="map-item">Memorising "BlueTiger" <span class="map-arrow">→</span> Storing <span class="sym sym-key">Kc,tgs</span> in credentials cache</span>
+    <span class="map-item">Carrying sealed permit-pass in satchel <span class="map-arrow">→</span> Storing opaque TGT blob</span>
+    <span class="map-item">Returning seal to lockbox <span class="map-arrow">→</span> Erasing <span class="sym sym-key">Kc</span> from memory</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PHASE 2: TGS EXCHANGE               -->
+<!-- ═══════════════════════════════════ -->
+<div class="phase-divider">
+  <div class="phase-badge">Phase 2 — Service Ticket Request: Client ↔ TGS</div>
+</div>
+
+<!-- STEP 2.1 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">2.1</div>
+    <div class="step-title-area">
+      <div class="step-title">Client Sends TGS Request (Ticket + Authenticator)</div>
+      <div class="step-actors">C → TGS &nbsp;|&nbsp; IDv + Ticket_tgs (opaque) + Authenticator_c</div>
+    </div>
+    <div class="step-phase-tag tag-tgs">TGS Exchange</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Alice (at Permit Office):</div>
+      <div class="story-dialogue">"I wish to access the Treasury Room. Here is my sealed permit-pass from the Front Desk. And here is my signed declaration: 'I am Alice. The time is precisely 12:05 PM.' — I wrote and sealed it just now with our shared code word 'BlueTiger'."</div>
+      <div class="story-action">Alice presents three things: (1) what she wants — Treasury access, (2) the sealed pass she cannot open — the TGT, and (3) a fresh live declaration sealed with "BlueTiger" to prove she is Alice and that this is happening right now.</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">C → TGS:
+  IDv                          ← service wanted (in plaintext)
+  Ticket_tgs                   ← opaque blob, forwarded unchanged
+  Authenticator_c = E(Kc,tgs,
+      IDc ‖ ADc ‖ TS2)        ← freshly created right now</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym"><span class="sym sym-entity">IDv</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">The target service identifier — tells TGS which Ticket_v to issue</td>
+          <td class="annot-story">= "I want Treasury Room access" — stated openly</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ticket">Ticket_tgs</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Forwarded byte-for-byte unchanged. Alice is a courier delivering a sealed envelope.</td>
+          <td class="annot-story">= Sealed permit-pass — Alice delivers without reading</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ts">Auth_c</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">E(<span class="sym sym-key">Kc,tgs</span>, IDc ‖ ADc ‖ TS2) — fresh per request. <strong>TS2 ≠ TS1</strong>. New timestamp reading.</td>
+          <td class="annot-story">= "I am Alice, time is 12:05 PM" — written and sealed just now, not reused</td>
+        </tr>
+      </table>
+      <div class="why-box"><strong>Why is the Authenticator necessary?</strong> The TGT alone proves the KDC endorsed Alice — but it was issued hours ago. TGT theft is possible. The Authenticator proves Alice is physically present <em>right now</em> and knows <span class="sym sym-key">Kc,tgs</span>. A thief who stole only the TGT (without <span class="sym sym-key">Kc,tgs</span>) cannot forge this Authenticator.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">"I want Treasury Room" <span class="map-arrow">→</span> IDv</span>
+    <span class="map-item">Sealed permit-pass (delivered unopened) <span class="map-arrow">→</span> Ticket_tgs (opaque)</span>
+    <span class="map-item">Declaration "I am Alice, time 12:05" <span class="map-arrow">→</span> Authenticator_c = E(<span class="sym sym-key">Kc,tgs</span>, IDc ‖ TS2)</span>
+    <span class="map-item">"BlueTiger" sealing the declaration <span class="map-arrow">→</span> encrypting Authenticator with <span class="sym sym-key">Kc,tgs</span></span>
+  </div>
+</div>
+
+<!-- STEP 2.2 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">2.2</div>
+    <div class="step-title-area">
+      <div class="step-title">TGS Verifies TGT, Authenticator &amp; Issues Ticket_v</div>
+      <div class="step-actors">TGS internal: decrypt TGT → extract Kc,tgs → verify Authenticator → cross-check → issue Ticket_v</div>
+    </div>
+    <div class="step-phase-tag tag-tgs">TGS Exchange</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Permit Office Clerk (TGS):</div>
+      <div class="story-dialogue">"I break the Front Desk's seal on this permit-pass with my master key. Inside I find: code word 'BlueTiger', Alice's name, and expiration: sunset. The pass is not expired. Now I open her declaration using 'BlueTiger' — it reads 'Alice, 12:05 PM'. The time is now 12:06 PM — fresh enough. The name on the pass and the name on the declaration both say Alice. She is verified."</div>
+      <div class="story-dialogue">"Now I create a new code word 'GoldenKey' for Alice and the Treasury. I seal a Treasury pass with the Treasury's master key — only the Treasury guard can open it. I also give Alice a separate envelope containing 'GoldenKey', sealed with 'BlueTiger' so only she can open it."</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">TGS internal steps:
+
+1. Decrypt TGT with Ktgs:
+   → extract: Kc,tgs, IDc, ADc, IDtgs, TS1, Lifetime
+   → check: TS1 + Lifetime > now (not expired)
+
+2. Decrypt Authenticator_c with Kc,tgs:
+   → extract: IDc_auth, ADc_auth, TS2
+   → check A (freshness):  |now − TS2| ≤ 5 min
+   → check B (replay cache): (IDc, TS2) not seen before → add to cache
+
+3. Cross-validate: IDc(TGT) == IDc(Authenticator) ← CRITICAL
+
+4. Generate: Kc,v = CSPRNG( )   ← new session key
+
+5. Issue Ticket_v (sealed for Server V):
+   Ticket_v = E(Kv,
+       Kc,v ‖ IDc ‖ ADc ‖ IDv ‖ TS2 ‖ Lifetime_v)
+
+6. Reply to Alice:
+   Part_A = E(Kc,tgs, [Kc,v ‖ IDv ‖ TS2])
+   Ticket_v (opaque)</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym">Cross-validate Step 3</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Prevents combining a stolen TGT from Alice with a Mallory-owned Authenticator. Both pieces must name the same identity.</td>
+          <td class="annot-story">= "The pass says Alice; the declaration says Alice — both match."</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Replay cache</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">TGS records every (IDc, TS2) seen in the last 5 minutes. Duplicate = replay attack.</td>
+          <td class="annot-story">= "Has this exact declaration been presented to me already today?"</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-key">Kc,v</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Fresh random key for Alice↔Treasury session. Independent of <span class="sym sym-key">Kc,tgs</span>.</td>
+          <td class="annot-story">= "GoldenKey" — a new code word for Alice's Treasury visit</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ticket">Ticket_v</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Sealed with <span class="sym sym-key">Kv</span>. Alice carries it opaquely to Server V. Cannot be used at a different service.</td>
+          <td class="annot-story">= Treasury pass sealed with Treasury's master key — only the Treasury guard can open it</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Breaking seal with master key <span class="map-arrow">→</span> Decrypt TGT with <span class="sym sym-key">Ktgs</span></span>
+    <span class="map-item">Opening declaration with "BlueTiger" <span class="map-arrow">→</span> Decrypt Auth_c with <span class="sym sym-key">Kc,tgs</span></span>
+    <span class="map-item">Both items name "Alice" <span class="map-arrow">→</span> Cross-validate IDc(TGT) == IDc(Auth)</span>
+    <span class="map-item">"GoldenKey" <span class="map-arrow">→</span> <span class="sym sym-key">Kc,v</span> — new session key for Alice↔Treasury</span>
+    <span class="map-item">Treasury pass sealed with Treasury key <span class="map-arrow">→</span> Ticket_v = E(<span class="sym sym-key">Kv</span>, [...])</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PHASE 3: SERVICE ACCESS             -->
+<!-- ═══════════════════════════════════ -->
+<div class="phase-divider">
+  <div class="phase-badge">Phase 3 — Service Access: Client ↔ Server V (Mutual Authentication)</div>
+</div>
+
+<!-- STEP 3.1 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">3.1</div>
+    <div class="step-title-area">
+      <div class="step-title">Client Sends Service Request (Ticket_v + New Authenticator)</div>
+      <div class="step-actors">C → V &nbsp;|&nbsp; Ticket_v (opaque) + Authenticator_c' with Kc,v</div>
+    </div>
+    <div class="step-phase-tag tag-svc">Service Access</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Alice (at Treasury door):</div>
+      <div class="story-dialogue">"Treasury Guard, here is my sealed Treasury pass from the Permit Office. And here is my fresh declaration: 'I am Alice. The time is precisely 12:10 PM.' — sealed now with our shared code word 'GoldenKey'."</div>
+      <div class="story-action">This is a different sealed declaration than before. The old "BlueTiger" declaration cannot be reused here — it was sealed with "BlueTiger", but this door requires "GoldenKey." Alice must create a new declaration sealed specifically with "GoldenKey".</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">C → V:
+  Ticket_v                          ← opaque, forwarded unchanged
+  Authenticator_c' = E(Kc,v,
+      IDc ‖ ADc ‖ TS3)             ← new timestamp TS3, sealed with Kc,v</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ticket">Ticket_v</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">The sealed service ticket from TGS. Server V decrypts it with <span class="sym sym-key">Kv</span> to learn <span class="sym sym-key">Kc,v</span> and IDc.</td>
+          <td class="annot-story">= Treasury pass — Alice hands it over; the Guard opens it with the Treasury key</td>
+        </tr>
+        <tr>
+          <td class="annot-sym"><span class="sym sym-ts">Auth_c'</span></td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">New Authenticator using <span class="sym sym-key">Kc,v</span> (not <span class="sym sym-key">Kc,tgs</span>). TS3 is a third fresh timestamp.</td>
+          <td class="annot-story">= "I am Alice, time 12:10" — sealed with "GoldenKey" (not "BlueTiger")</td>
+        </tr>
+      </table>
+      <div class="sec-box"><strong>Why is Auth_c' (Phase 3) cryptographically incompatible with Auth_c (Phase 2)?</strong> Phase 2 Authenticator was sealed with <span class="sym sym-key">Kc,tgs</span>. Phase 3 Authenticator is sealed with <span class="sym sym-key">Kc,v</span>. Server V uses <span class="sym sym-key">Kc,v</span> to verify — it cannot be fooled by replaying Auth_c from Phase 2. Each phase uses its own dedicated session key, making inter-phase replay impossible.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Handing Treasury pass to guard <span class="map-arrow">→</span> Forwarding Ticket_v</span>
+    <span class="map-item">"GoldenKey" sealing new declaration <span class="map-arrow">→</span> Auth_c' = E(<span class="sym sym-key">Kc,v</span>, IDc ‖ TS3)</span>
+    <span class="map-item">TS3 ≠ TS2 ≠ TS1 <span class="map-arrow">→</span> Each Authenticator uses a brand-new timestamp reading</span>
+  </div>
+</div>
+
+<!-- STEP 3.2 -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">3.2</div>
+    <div class="step-title-area">
+      <div class="step-title">Server V Verifies Ticket_v &amp; Authenticator → Grants Access</div>
+      <div class="step-actors">V internal: decrypt Ticket_v → verify Auth_c' → cross-check → grant access</div>
+    </div>
+    <div class="step-phase-tag tag-svc">Service Access</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Treasury Head Guard (Server V):</div>
+      <div class="story-dialogue">"I open the Treasury pass with my master key. Inside: code word 'GoldenKey', Alice's name, valid until 2 PM today. Not expired. Now I open her declaration using 'GoldenKey' — it reads 'Alice, 12:10 PM'. The time is 12:11 — fresh. Both say Alice. She is who she claims."</div>
+      <div class="story-dialogue">"Alice is permitted entry. But wait — has Alice seen a real Treasury Guard? Or an impostor? Let me prove I am genuine."</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">V internal steps:
+
+1. Decrypt Ticket_v with Kv:
+   → extract: Kc,v, IDc, ADc, IDv, TS2, Lifetime_v
+   → check: IDv == own service name (prevents ticket misdirection)
+   → check: TS2 + Lifetime_v > now (not expired)
+   → check: ADc == actual source IP (if enabled)
+
+2. Decrypt Authenticator_c' with Kc,v:
+   → extract: IDc_auth, ADc_auth, TS3
+   → freshness: |now − TS3| ≤ 5 min
+   → replay cache: (IDc, TS3) not seen before
+
+3. Cross-validate: IDc(Ticket_v) == IDc(Auth_c')
+
+4. Grant access — Alice is authenticated.
+   Perform authorization check (ACL lookup).
+
+5. [Optional mutual auth reply]:
+   V → C: E(Kc,v, [TS3 + 1])</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym">IDv check (Step 1)</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Ticket_v contains IDv inside the <span class="sym sym-key">Kv</span>-encrypted content. Server V checks this matches its own name. Prevents using a file-server ticket at the mail server.</td>
+          <td class="annot-story">= "This pass says Treasury Room — yes, that's where I am."</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Server's own replay cache</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Server V maintains its <em>own independent</em> replay cache. Auth_c' has never been shown to TGS — it's a new Authenticator for a new relationship.</td>
+          <td class="annot-story">= The Treasury guard's own logbook of recent declarations seen</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">No KDC contact</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Server V verifies everything offline using <span class="sym sym-key">Kv</span>. Zero network calls to KDC or TGS at this step. Fully decentralized.</td>
+          <td class="annot-story">= The Treasury guard doesn't call the Front Desk — he verifies with his own key</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Opening Treasury pass with Treasury key <span class="map-arrow">→</span> Decrypt Ticket_v with <span class="sym sym-key">Kv</span></span>
+    <span class="map-item">Opening declaration with "GoldenKey" <span class="map-arrow">→</span> Decrypt Auth_c' with <span class="sym sym-key">Kc,v</span></span>
+    <span class="map-item">"This pass is for the Treasury" check <span class="map-arrow">→</span> IDv == own service name</span>
+    <span class="map-item">Guard's own logbook <span class="map-arrow">→</span> Server V's independent replay cache</span>
+  </div>
+</div>
+
+<!-- STEP 3.3 — MUTUAL AUTH -->
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">3.3</div>
+    <div class="step-title-area">
+      <div class="step-title">Mutual Authentication — Server Proves Its Identity to Alice</div>
+      <div class="step-actors">V → C &nbsp;|&nbsp; E(Kc,v, [TS3 + 1]) — Alice verifies the server is genuine</div>
+    </div>
+    <div class="step-phase-tag tag-svc">Mutual Auth</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Treasury Head Guard → Alice:</div>
+      <div class="story-dialogue">"You declared the time as 12:10 PM. Here is my reply: 12:11 PM — one minute later — sealed with 'GoldenKey'. Only a guard who actually opened your Treasury pass and read your declaration could know your exact time. This proves I am the real Treasury."</div>
+      <div class="story-speaker">Alice:</div>
+      <div class="story-dialogue">"Correct. I declared 12:10. He echoed 12:11 — exactly one more than mine, sealed with 'GoldenKey'. He must have opened the Treasury pass (only he can do that) to learn 'GoldenKey'. This is the genuine Treasury. I trust this room."</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Real Kerberos Protocol</div>
+      <div class="proto-block">V → C (optional mutual auth):
+  Authenticator_v = E(Kc,v, [TS3 + 1])
+
+Alice verifies:
+  1. Decrypt Authenticator_v with Kc,v
+  2. Check: decrypted value == TS3 + 1
+  3. Check: TS3 was her OWN timestamp from Auth_c'
+
+→ Mutual authentication complete.
+→ Both parties have now authenticated each other.</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym">TS3 + 1</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">The +1 convention proves Server V read Alice's specific Auth_c' (extracting TS3) and is not replaying a captured old mutual-auth response from a different session.</td>
+          <td class="annot-story">= "I saw YOUR 12:10 and added one minute" — proves the Guard read Alice's specific declaration</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Why it proves identity</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">An impostor server cannot produce this. It would need to: (a) know <span class="sym sym-key">Kv</span> to decrypt Ticket_v, (b) extract <span class="sym sym-key">Kc,v</span>, (c) decrypt Auth_c' to learn TS3, (d) encrypt TS3+1 with <span class="sym sym-key">Kc,v</span>. Missing <span class="sym sym-key">Kv</span> breaks the entire chain at step (a).</td>
+          <td class="annot-story">= Only the real Treasury Guard has the Treasury master key to open the pass and learn "GoldenKey"</td>
+        </tr>
+      </table>
+      <div class="sec-box"><strong>Full Mutual Authentication Achieved:</strong> Server V authenticated Alice in Steps 3.1–3.2. Alice authenticated Server V in Step 3.3. Both parties have now verified each other's identity using <em>only symmetric cryptography</em> and the KDC as a trusted third party — no certificates, no PKI, no asymmetric operations.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Guard echoes "12:11" sealed with "GoldenKey" <span class="map-arrow">→</span> E(<span class="sym sym-key">Kc,v</span>, [TS3+1])</span>
+    <span class="map-item">Only real Guard knows "GoldenKey" <span class="map-arrow">→</span> only real Server V has <span class="sym sym-key">Kv</span> → can extract <span class="sym sym-key">Kc,v</span></span>
+    <span class="map-item">Alice recognises the correct echo <span class="map-arrow">→</span> Alice decrypts and checks TS3+1 == her own TS3 incremented</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PHASE 4: REPLAY ATTACK              -->
+<!-- ═══════════════════════════════════ -->
+<div class="phase-divider">
+  <div class="phase-badge">Phase 4 — Attack Scenario: Why Replay Fails</div>
+</div>
+
+<div class="step-card">
+  <div class="step-header">
+    <div class="step-num">4.1</div>
+    <div class="step-title-area">
+      <div class="step-title">Replay Attack — Why an Old Ticket + Authenticator Fails</div>
+      <div class="step-actors">Attacker role-tag: Mallory</div>
+    </div>
+    <div class="step-phase-tag tag-threat">Threat Model</div>
+  </div>
+  <div class="step-body">
+    <div class="story-side">
+      <div class="story-label">Palace Story</div>
+      <div class="story-speaker">Mallory (Attacker), the next morning:</div>
+      <div class="story-dialogue">"Yesterday I copied Alice's Treasury pass and her declaration from when she visited. Today I will try to use them to enter the Treasury myself."</div>
+      <div class="story-speaker">Treasury Head Guard (reading the copied declaration):</div>
+      <div class="story-dialogue">"This declaration says 12:10 PM yesterday. The current time is 9:00 AM today. That is nearly 21 hours old. Rejected — stale declaration. Also, this Treasury pass expired at sunset yesterday. Rejected — expired pass. Guards! Remove this impostor."</div>
+    </div>
+    <div class="real-side">
+      <div class="real-label">Why Replay Fails — Multiple Independent Defenses</div>
+      <div class="proto-block">Mallory presents (stolen yesterday):
+  Ticket_v_old         ← from Alice's session yesterday
+  Authenticator_old = E(Kc,v, IDc ‖ ADc ‖ TS_old)
+
+Server V checks:
+
+Defense 1 — Ticket expiry:
+  TS2 + Lifetime_v < now
+  → Ticket_v_old is EXPIRED
+  → Rejected immediately
+
+Defense 2 — Authenticator freshness:
+  |now − TS_old| >> 5 minutes
+  → Rejected (stale timestamp)
+
+Defense 3 — Replay cache:
+  (IDc, TS_old) already in cache from yesterday
+  → Rejected (duplicate)
+
+Defense 4 — Without Kc,v:
+  Mallory can't create a NEW Authenticator either
+  (doesn't have Kc,v — expired with the ticket)</div>
+      <table class="annot-table">
+        <tr>
+          <td class="annot-sym">Defense 1: Lifetime</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Ticket_v expires automatically (typically 1–2 hours). Stolen ticket becomes worthless without revocation infrastructure.</td>
+          <td class="annot-story">= The Treasury pass expired at sunset — it says so on the pass (inside the sealed content Alice cannot alter)</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Defense 2: TS freshness</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Any Authenticator older than ±5 minutes is automatically rejected. No window for slow-replay attacks.</td>
+          <td class="annot-story">= Declaration timestamped 21 hours ago — the guard rejects it as stale</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Defense 3: Replay cache</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Even within the 5-minute window, the exact (IDc, TS) pair can only be used once. Simultaneous replay also blocked.</td>
+          <td class="annot-story">= Guard's logbook: "This exact declaration was already used yesterday"</td>
+        </tr>
+        <tr>
+          <td class="annot-sym">Defense 4: No Kc,v</td>
+          <td class="annot-eq">≡</td>
+          <td class="annot-real">Even if Ticket_v were still valid, Mallory cannot create a new Authenticator without knowing <span class="sym sym-key">Kc,v</span>. The session key expired along with the ticket.</td>
+          <td class="annot-story">= Mallory doesn't know "GoldenKey" — can't write a valid fresh declaration</td>
+        </tr>
+      </table>
+      <div class="warn-box"><strong>Pass-the-Ticket (real threat):</strong> If Mallory steals BOTH Ticket_v AND Kc,v from Alice's machine memory (e.g., Mimikatz on Windows) WHILE the ticket is still valid, she can impersonate Alice until expiry. Defense: Credential Guard (hardware-isolated memory), short ticket lifetimes, Protected Users group.</div>
+    </div>
+  </div>
+  <div class="map-strip">
+    <span class="map-strip-label">Mappings:</span>
+    <span class="map-item">Expired Treasury pass <span class="map-arrow">→</span> Lifetime_v exceeded</span>
+    <span class="map-item">21-hour-old declaration <span class="map-arrow">→</span> TS_old outside ±5 min freshness window</span>
+    <span class="map-item">Declaration already in guard's logbook <span class="map-arrow">→</span> (IDc, TS) pair in replay cache</span>
+    <span class="map-item">Mallory doesn't know "GoldenKey" <span class="map-arrow">→</span> Cannot forge new Authenticator without <span class="sym sym-key">Kc,v</span></span>
+  </div>
+</div>
+
+
+<!-- ═══ COMPLETE SYMBOL TABLE ═══ -->
+<div class="symbol-master" style="margin-top:60px;">
+  <div class="entity-map-header">
+    <h2>Complete Symbol & Entity Reference</h2>
+    <p>Every notation used in this document — symbol, type, palace analogy, security role, and scope of knowledge.</p>
+  </div>
+  <table class="sm-table">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Type</th>
+        <th>Full Name</th>
+        <th>Palace Analogue</th>
+        <th>Who Knows It</th>
+        <th>Lifetime</th>
+        <th>Security Property</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="sm-cat-row"><td colspan="7">Principals (Protocol Participants)</td></tr>
+      <tr><td><span class="sym sym-entity">C</span></td><td>Principal</td><td>Client machine (on behalf of user Alice)</td><td>Alice, the petitioner</td><td>—</td><td>—</td><td>Requests all tickets; carries opaque blobs it cannot open</td></tr>
+      <tr><td><span class="sym sym-entity">AS</span></td><td>KDC component</td><td>Authentication Server — first login gate</td><td>Palace Front Desk clerk</td><td>—</td><td>—</td><td>Sole issuer of TGTs; holds all client long-term keys</td></tr>
+      <tr><td><span class="sym sym-entity">TGS</span></td><td>KDC component</td><td>Ticket Granting Server — service pass issuer</td><td>Palace Permit Office</td><td>—</td><td>—</td><td>Issues service tickets without client re-entering password</td></tr>
+      <tr><td><span class="sym sym-entity">KDC</span></td><td>Authority</td><td>Key Distribution Center = AS + TGS combined</td><td>The entire Palace Authority</td><td>—</td><td>—</td><td>Universal trusted third party; single point of failure</td></tr>
+      <tr><td><span class="sym sym-entity">V</span></td><td>Principal</td><td>Service Server (Verifier) — the target resource</td><td>Treasury Room & Head Guard</td><td>—</td><td>—</td><td>Fully offline verification; no KDC contact at access time</td></tr>
+
+      <tr class="sm-cat-row"><td colspan="7">Long-Term Keys (High Value — Minimal Use)</td></tr>
+      <tr><td><span class="sym sym-key">Kc</span></td><td>Long-term key</td><td>Client's secret key = hash(password)</td><td>Alice's personal seal impression in the Ledger</td><td>Client + KDC/AS only</td><td>Permanent (until password change)</td><td>Never transmitted; discarded from memory immediately after AS decryption</td></tr>
+      <tr><td><span class="sym sym-key">Ktgs</span></td><td>Long-term key</td><td>TGS's secret key — random, not password-derived</td><td>Permit Office master seal</td><td>KDC/AS + TGS only</td><td>Permanent (rotated by admin)</td><td>Used only to seal/open TGTs; unknown to clients and service servers</td></tr>
+      <tr><td><span class="sym sym-key">Kv</span></td><td>Long-term key</td><td>Service server's secret key — one per service</td><td>Treasury Room master key</td><td>KDC/TGS + Server V only</td><td>Permanent (rotated by admin)</td><td>Compromise of one Kv doesn't affect other services</td></tr>
+
+      <tr class="sm-cat-row"><td colspan="7">Session Keys (Short-Term — Expire with Tickets)</td></tr>
+      <tr><td><span class="sym sym-key">Kc,tgs</span></td><td>Session key</td><td>Session key for Client↔TGS communication</td><td>"BlueTiger" — visit code word for Permit Office</td><td>Client (from Part_A) + TGS (from TGT)</td><td>Same as TGT lifetime (~8 hrs)</td><td>Proves live presence to TGS; seals Authenticators in Phase 2</td></tr>
+      <tr><td><span class="sym sym-key">Kc,v</span></td><td>Session key</td><td>Session key for Client↔Service V communication</td><td>"GoldenKey" — visit code word for Treasury</td><td>Client (from TGS Part_A) + Server V (from Ticket_v)</td><td>Same as Ticket_v lifetime (~1-2 hrs)</td><td>Proves live presence to Server V; enables mutual auth; encrypts session</td></tr>
+
+      <tr class="sm-cat-row"><td colspan="7">Tickets (Sealed Passes — Opaque to Carrier)</td></tr>
+      <tr><td><span class="sym sym-ticket">Ticket_tgs</span></td><td>Ticket / TGT</td><td>Ticket-Granting Ticket — master pass for one login session</td><td>Sealed permit-pass from Front Desk (Alice is the courier)</td><td>Carried by Client (opaque); opened by TGS</td><td>~8–10 hours</td><td>Client cannot read or modify; TGS verifies KDC issued it</td></tr>
+      <tr><td><span class="sym sym-ticket">Ticket_v</span></td><td>Service Ticket</td><td>Service ticket — access pass for one specific service</td><td>Sealed Treasury pass (Alice carries; Guard opens)</td><td>Carried by Client (opaque); opened by Server V</td><td>~1–2 hours</td><td>Cannot be used at a different service (IDv check inside)</td></tr>
+
+      <tr class="sm-cat-row"><td colspan="7">Authenticators (Freshness Proofs — Single Use)</td></tr>
+      <tr><td><span class="sym sym-ts">Auth_c</span></td><td>Authenticator</td><td>Client Authenticator for TGS = E(Kc,tgs, IDc ‖ ADc ‖ TS2)</td><td>Alice's signed declaration to Permit Office ("Alice, 12:05 PM")</td><td>Created by Client; verified by TGS</td><td>Single use, ±5 min window</td><td>Anti-replay; proves Client is present now and holds Kc,tgs</td></tr>
+      <tr><td><span class="sym sym-ts">Auth_c'</span></td><td>Authenticator</td><td>Client Authenticator for Server V = E(Kc,v, IDc ‖ ADc ‖ TS3)</td><td>Alice's signed declaration to Treasury Guard ("Alice, 12:10 PM")</td><td>Created by Client; verified by Server V</td><td>Single use, ±5 min window</td><td>Phase 2 Authenticator cannot be replayed here (wrong key: Kc,tgs ≠ Kc,v)</td></tr>
+      <tr><td><span class="sym sym-ts">Auth_v</span></td><td>Authenticator</td><td>Server Authenticator = E(Kc,v, [TS3 + 1])</td><td>Treasury Guard's echo: "I saw 12:10, here is 12:11"</td><td>Created by Server V; verified by Client</td><td>Single use</td><td>Proves Server V has Kv (could open Ticket_v to learn Kc,v)</td></tr>
+
+      <tr class="sm-cat-row"><td colspan="7">Identity & Address Fields</td></tr>
+      <tr><td><span class="sym sym-entity">IDc</span></td><td>Identity field</td><td>Client identity = "alice@REALM.COM"</td><td>Alice's name on every document</td><td>Public</td><td>Permanent</td><td>Cross-checked between TGT and Authenticator to prevent ticket combination attacks</td></tr>
+      <tr><td><span class="sym sym-entity">IDtgs</span></td><td>Identity field</td><td>TGS identifier = "krbtgt/REALM.COM"</td><td>"Permit Office" — which office Alice is addressing</td><td>Public</td><td>Permanent</td><td>Scopes the TGT to the TGS; prevents misuse at other services</td></tr>
+      <tr><td><span class="sym sym-entity">IDv</span></td><td>Identity field</td><td>Service identifier = "cifs/fileserver.realm.com"</td><td>"Treasury Room" — which room the pass is for</td><td>Public (in request); encrypted inside ticket</td><td>Permanent</td><td>Server V checks IDv inside Ticket_v matches its own name</td></tr>
+      <tr><td><span class="sym sym-ts">ADc</span></td><td>Address field</td><td>Client network address (IP) — optional binding</td><td>Alice's house number in the palace district</td><td>Inside tickets and authenticators</td><td>Per session</td><td>Optional IP binding; often disabled due to NAT/VPN; binds ticket to specific machine</td></tr>
+
+      <tr class="sm-cat-row"><td colspan="7">Temporal Controls</td></tr>
+      <tr><td><span class="sym sym-ts">TS1, TS2, TS3</span></td><td>Timestamp</td><td>Current clock readings — fresh value per Authenticator</td><td>The exact time written on Alice's declarations</td><td>Inside Authenticators; echoed by AS in reply</td><td>Valid ±5 min</td><td>Anti-replay; requires NTP synchronization across all Kerberos hosts</td></tr>
+      <tr><td><span class="sym sym-ts">Lifetime</span></td><td>Duration field</td><td>Ticket validity period — embedded inside encrypted ticket content</td><td>"Valid until sunset" — written inside the sealed envelope</td><td>Inside tickets (encrypted; client cannot alter)</td><td>Set by KDC admin</td><td>Automatic expiry without revocation infrastructure; client cannot extend it</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ═══ FLOW SUMMARY ═══ -->
+<div class="flow-box">
+  <h3>One-Line Memory Flow — From Login to Service Access</h3>
+  <div class="flow-step">
+    <div class="flow-n">0</div>
+    <div class="flow-text"><strong>Setup (offline):</strong> KDC stores Kc = hash(Alice's password). KDC stores Kv per service. KDC/TGS holds Ktgs. All out-of-band — no network messages.</div>
+  </div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step">
+    <div class="flow-n">1</div>
+    <div class="flow-text"><strong>AS Exchange:</strong> Alice sends IDc + IDtgs + TS1 in plaintext. AS replies with E(Kc,[Kc,tgs]) + TGT=E(Ktgs,[Kc,tgs ‖ IDc ‖ ...]). Alice decrypts Part_A → learns Kc,tgs → discards Kc.</div>
+  </div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step">
+    <div class="flow-n">2</div>
+    <div class="flow-text"><strong>TGS Exchange:</strong> Alice sends IDv + TGT (opaque) + Auth_c=E(Kc,tgs,[IDc ‖ TS2]). TGS decrypts TGT → extracts Kc,tgs → verifies Auth_c → cross-checks IDc → generates Kc,v → replies with E(Kc,tgs,[Kc,v]) + Ticket_v=E(Kv,[Kc,v ‖ IDc ‖ ...]).</div>
+  </div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step">
+    <div class="flow-n">3</div>
+    <div class="flow-text"><strong>Service Access:</strong> Alice sends Ticket_v (opaque) + Auth_c'=E(Kc,v,[IDc ‖ TS3]). Server V decrypts Ticket_v → extracts Kc,v → verifies Auth_c' → grants access → optionally replies with E(Kc,v,[TS3+1]) for mutual auth.</div>
+  </div>
+  <div class="flow-arrow">↓</div>
+  <div class="flow-step">
+    <div class="flow-n">✓</div>
+    <div class="flow-text"><strong>Mutual trust established.</strong> Alice knows Server V is genuine (TS3+1 proof). Server V knows Alice is genuine (two-layer ticket+authenticator check). All communication encrypted with Kc,v. KDC is entirely out of the critical path.</div>
+  </div>
+</div>
+
+<!-- ═══ SECURITY GUARANTEES ═══ -->
+<div class="guarantee-grid">
+  <div class="guarantee-card">
+    <div class="gc-icon">🔐</div>
+    <div class="gc-title">Password Never Transmitted</div>
+    <div class="gc-body">Alice's password never leaves her machine in any form — not even encrypted. Verification is implicit: only Alice can derive the correct Kc to decrypt the AS reply. The password is the "key to the key."</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">🎟️</div>
+    <div class="gc-title">Tickets Are Opaque Couriers</div>
+    <div class="gc-body">Alice carries TGT and Ticket_v but cannot read either. She is a courier, not a creator. This prevents her from modifying lifetimes, identities, or session keys embedded inside — all content is under KDC authority.</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">⏱️</div>
+    <div class="gc-title">Automatic Expiry — No Revocation Needed</div>
+    <div class="gc-body">Tickets expire by design. A stolen TGT is useless after ~8 hours; a stolen Ticket_v after ~1 hour. No CRL, no OCSP, no manual revocation infrastructure required for this time-bounded guarantee.</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">🔄</div>
+    <div class="gc-title">Anti-Replay: Three Independent Defenses</div>
+    <div class="gc-body">Ticket lifetime expiry + Authenticator ±5 minute freshness window + per-server replay cache. All three must fail simultaneously for a replay attack to succeed — defense in depth at the protocol level.</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">🤝</div>
+    <div class="gc-title">Mutual Authentication</div>
+    <div class="gc-body">Server V proves to Alice it holds Kv (by producing E(Kc,v,[TS3+1])), which required opening Ticket_v. Alice proves to Server V she holds Kc,v (by producing Auth_c'). Neither can be impersonated by a third party.</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">🏝️</div>
+    <div class="gc-title">Key Isolation Per Service</div>
+    <div class="gc-body">Each service has its own independent Kv. Each session has its own independent Kc,v. Compromise of the file server's keys has zero impact on the mail server's session — blast radius is a single service.</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">📴</div>
+    <div class="gc-title">Fully Offline Service Verification</div>
+    <div class="gc-body">Server V makes zero network calls to KDC or TGS at access time. Everything is verified locally using Kv. The KDC is only involved at login (AS) and at ticket refresh (TGS) — not in every service request.</div>
+  </div>
+  <div class="guarantee-card">
+    <div class="gc-icon">🔑</div>
+    <div class="gc-title">Symmetric Cryptography Only</div>
+    <div class="gc-body">Kerberos achieves all goals — authentication, key distribution, mutual auth — using only symmetric encryption (AES in modern deployments). No asymmetric operations, no certificates, no PKI required.</div>
+  </div>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
