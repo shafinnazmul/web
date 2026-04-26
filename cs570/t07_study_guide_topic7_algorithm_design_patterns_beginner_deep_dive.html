@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 Final Exam · Topic 7 (Beginner Deep-Dive): Algorithm Design Patterns Unpacked</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d27;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+    --topic-accent: #1565c0;
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+    --code-bg: #0a0c14;
+    --code-text: #a8d8a8;
+  }
+
+  [data-theme="light"] {
+    --bg: #f5f7fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f7;
+    --surface: #e4e8f2;
+    --text: #1a1d2e;
+    --text-dim: #4a5068;
+    --text-faint: #8890a8;
+    --border: #d0d5e8;
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+    --topic-accent: #0d47a1;
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+    --code-bg: #eef1f7;
+    --code-text: #1b5e20;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; border-color: var(--accent); }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg,rgba(13,71,161,0.05),rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(21,101,192,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(13,71,161,0.05); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg,rgba(13,71,161,0.05),rgba(26,95,224,0.05)); }
+  [data-theme="light"] .step { background: #eef1f7; }
+  [data-theme="light"] .misconception { background: #eef1f7; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f7; }
+
+  .top-bar {
+    position: fixed; top: 0; left: 240px; right: 0; height: 44px;
+    background: var(--bg-elev); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 0 28px; gap: 10px; z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em; color: var(--text-faint); font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px; margin-right: auto; user-select: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label { font-size: 0.75em; color: var(--text-faint); font-family: 'Consolas', monospace; letter-spacing: 0.5px; user-select: none; flex-shrink: 0; }
+  .theme-pill {
+    display: flex; align-items: center; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px; padding: 3px; gap: 2px; cursor: pointer; flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt { display: flex; align-items: center; justify-content: center; width: 28px; height: 22px; border-radius: 16px; font-size: 12px; transition: background 0.2s, color 0.2s; color: var(--text-faint); user-select: none; }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+  [data-theme="light"] .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.7; padding-left: 240px; padding-top: 44px; transition: background 0.22s ease, color 0.22s ease; }
+  code, pre, .mono { font-family: 'Consolas', 'Courier New', 'Menlo', monospace; }
+  h1, h2, h3, h4 { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 600; letter-spacing: 0.2px; }
+  h1 { font-size: 2.1em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.55em; color: var(--topic-accent); margin: 36px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.2em; color: #fff; margin: 26px 0 10px 0; }
+  h4 { color: var(--text-dim); margin: 18px 0 8px 0; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.82em; }
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  nav.sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+    background: var(--bg-elev); border-right: 1px solid var(--border);
+    padding: 22px 18px; overflow-y: auto; font-size: 0.88em; z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title { font-weight: 700; color: var(--topic-accent); text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.74em; margin-bottom: 14px; }
+  nav.sidebar a { display: block; padding: 6px 10px; margin: 2px 0; border-radius: 4px; color: var(--text-dim); border-left: 2px solid transparent; transition: background 0.18s, color 0.18s, border-color 0.18s; }
+  nav.sidebar a:hover { background: var(--bg-elev2); color: var(--text); border-left-color: var(--topic-accent); text-decoration: none; }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar { top: 44px; width: 100%; height: 52px; bottom: auto; display: flex; overflow-x: auto; overflow-y: hidden; padding: 8px 12px; gap: 6px; align-items: center; }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  main { max-width: 1100px; padding: 40px 48px 80px 48px; }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  .doc-header { border-left: 4px solid var(--topic-accent); padding: 4px 0 4px 22px; margin-bottom: 32px; }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.9em; margin-top: 6px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(21,101,192,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border); border-left: 3px solid var(--topic-accent);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0; font-size: 0.94em; transition: background 0.22s ease;
+  }
+  .banner strong.label { color: var(--topic-accent); text-transform: uppercase; letter-spacing: 1px; font-size: 0.78em; }
+
+  .subtopic-banner { background: var(--bg-elev); border-top: 3px solid var(--topic-accent); border-radius: 4px; padding: 14px 22px; margin: 28px 0 18px 0; }
+  .subtopic-banner .letter { display: inline-block; background: var(--topic-accent); color: #fff; font-weight: 700; font-family: 'Consolas', monospace; padding: 2px 10px; border-radius: 4px; margin-right: 10px; font-size: 0.88em; letter-spacing: 1px; }
+  .subtopic-banner .title { font-size: 1.12em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages { display: block; margin-top: 4px; font-family: 'Consolas', monospace; font-size: 0.82em; color: var(--text-faint); }
+
+  .pdf-ref { display: inline-block; background: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 4px; padding: 1px 7px; font-size: 0.78em; font-family: 'Consolas', 'Courier New', monospace; white-space: nowrap; margin: 0 3px; cursor: default; vertical-align: baseline; }
+  .asgn-ref { display: inline-block; background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 1px 7px; font-size: 0.78em; font-family: 'Consolas', monospace; white-space: nowrap; margin: 0 3px; vertical-align: baseline; }
+
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong { color: var(--orange); font-weight: bold; }
+  .signal-moderate { color: var(--yellow); }
+  .exam-star { color: var(--gold); font-weight: bold; }
+
+  section.topic { border-left: 3px solid var(--topic-accent); padding-left: 22px; margin-bottom: 40px; }
+  div.section-block { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 8px; padding: 20px 26px; margin: 22px 0; transition: background 0.22s ease, border-color 0.22s ease; }
+  .pages-coverage { display: inline-block; background: var(--bg-elev2); border: 1px dashed var(--accent); color: var(--accent-text); padding: 6px 14px; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 0.82em; margin: 0 0 14px 0; }
+
+  table.page-index { width: 100%; border-collapse: collapse; margin: 12px 0 18px 0; font-size: 0.92em; }
+  table.page-index th { background: var(--accent-soft); color: var(--blue-text); text-align: left; padding: 10px 14px; border: 1px solid var(--border); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.8px; }
+  table.page-index td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child { font-family: 'Consolas', monospace; color: var(--accent-text); white-space: nowrap; }
+
+  table.data { width: 100%; border-collapse: collapse; margin: 12px 0 18px 0; font-size: 0.92em; }
+  table.data th { background: var(--accent-soft); color: var(--blue-text); text-align: left; padding: 10px 12px; border: 1px solid var(--border); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.6px; }
+  table.data td { padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  table.trace-table { border-collapse: collapse; font-family: 'Consolas', monospace; font-size: 0.82rem; width: 100%; margin: 12px 0; }
+  table.trace-table th { background: var(--accent-soft); color: var(--blue-text); padding: 8px 10px; border: 1px solid var(--border); }
+  table.trace-table td { border: 1px solid var(--border); padding: 7px 10px; vertical-align: top; }
+  table.trace-table tr.highlight { background: var(--bg-elev2); }
+
+  pre.diagram { background: var(--bg-elev2); border: 1px solid var(--accent); border-radius: 6px; padding: 16px 20px; overflow-x: auto; font-size: 0.86em; line-height: 1.5; color: #dce3f0; margin: 14px 0; transition: background 0.22s ease, color 0.22s ease; }
+  pre.pseudocode { background: var(--code-bg); color: var(--code-text); font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; padding: 16px 20px; border-radius: 6px; border-left: 3px solid var(--topic-accent); overflow-x: auto; white-space: pre; margin: 14px 0; }
+  .diagram-source { font-size: 0.85em; color: var(--text-faint); margin: -6px 0 16px 0; font-style: italic; }
+
+  .proof-block { background: var(--bg-elev); border-left: 4px solid var(--gold); padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0; transition: background 0.22s ease; }
+  .proof-block .proof-step { margin: 8px 0; padding-left: 16px; }
+  .proof-block .proof-label { color: var(--gold); font-weight: bold; font-size: 0.9em; }
+
+  .step { background: var(--bg-elev2); border-left: 3px solid var(--topic-accent); padding: 12px 18px; margin: 10px 0; border-radius: 0 6px 6px 0; transition: background 0.22s ease; }
+  .step .step-head { color: var(--topic-accent); font-weight: 600; font-size: 0.95em; }
+  .step .step-detail { margin-top: 6px; font-size: 0.93em; color: var(--text-dim); }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 130px; }
+
+  .misconception { background: var(--bg-elev2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; transition: background 0.22s ease, border-color 0.22s ease; }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+  .misconception .trap { color: var(--orange); font-weight: 600; }
+
+  .complexity-box { background: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent); border-radius: 6px; padding: 10px 14px; font-family: monospace; display: inline-block; margin: 4px 0; }
+
+  .question-block { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 6px; padding: 16px 20px; margin: 16px 0; transition: background 0.22s ease, border-color 0.22s ease; }
+  .question-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .q-format { background: var(--surface); color: var(--text-dim); padding: 2px 9px; border-radius: 4px; font-size: 0.78em; font-family: 'Consolas', monospace; font-weight: 600; letter-spacing: 0.8px; }
+  .question-stem { font-weight: 500; font-size: 1.02em; margin: 6px 0 10px 0; color: #fff; }
+  ol.mcq-options { margin: 4px 0 6px 0; padding-left: 26px; }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block { margin-top: 10px; border-left: 3px solid var(--green); padding-left: 14px; }
+  details.answer-block summary { cursor: pointer; color: var(--green); font-weight: bold; padding: 4px 0; list-style: none; user-select: none; }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-warmup { background: #1a2a1a; color: #a5d6a7; border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; border: 1px solid #2a4a2a; }
+
+  .cheat-sheet { background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(21,101,192,0.04)); border: 1px solid var(--gold); border-radius: 8px; padding: 22px 26px; margin: 16px 0; transition: background 0.22s ease, border-color 0.22s ease; }
+  .cheat-sheet h4 { color: var(--gold); font-size: 0.82em; margin-top: 14px; }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  .callout { border-left: 3px solid var(--orange); background: rgba(255,152,0,0.05); padding: 10px 16px; margin: 14px 0; border-radius: 0 6px 6px 0; font-size: 0.95em; transition: background 0.22s ease; }
+  .callout.quote { border-left-color: var(--topic-accent); background: rgba(21,101,192,0.06); }
+  .callout.warning { border-left-color: var(--red); background: rgba(255,82,82,0.05); }
+  .callout strong.lbl { display: block; color: var(--orange); text-transform: uppercase; letter-spacing: 1px; font-size: 0.74em; margin-bottom: 4px; }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  .challenge-banner { background: rgba(255,215,0,0.07); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 12px; font-size: 0.82em; color: var(--gold); font-family: 'Consolas', monospace; display: inline-block; margin-bottom: 8px; }
+
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram, pre.pseudocode { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">🔷 Topic 7 ⓓ</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#warmup">🧗 Warm-up Glossary</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 What &amp; Why (Plain English)</a>
+  <a href="#section-1-1" class="sub">→ 1.1 The fundamental problem</a>
+  <a href="#section-1-2" class="sub">→ 1.2 Four pattern taxonomy</a>
+  <a href="#section-1-3" class="sub">→ 1.3 The recipe framing</a>
+  <a href="#section-1-4" class="sub">→ 1.4 Technical definition</a>
+  <a href="#section-1-5" class="sub">→ 1.5 Key Terms Table</a>
+  <a href="#section-2">§2 How — Worked Examples</a>
+  <a href="#section-2a" class="sub">→ 2a · Sliding Window (fully traced)</a>
+  <a href="#section-2b" class="sub">→ 2b · Sorting + Linear Scan</a>
+  <a href="#section-2c" class="sub">→ 2c · Bit Manipulation (Hamming)</a>
+  <a href="#section-2d" class="sub">→ 2d · Modified Dijkstra (Prob Path)</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#warmup-checks">🧗 Warm-up Checks</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ (4 questions)</a>
+  <a href="#section-4-proof" class="sub">→ Proof (3 questions)</a>
+  <a href="#section-4-trace" class="sub">→ Trace / Analysis (3 questions)</a>
+  <a href="#section-4-pseudo" class="sub">→ Pseudocode / Design (3 questions)</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 570 · Final Exam · <strong>Topic 7 (Deep-Dive) · Algorithm Design Patterns Unpacked</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 7 (Beginner Deep-Dive)</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">Algorithm Design Patterns Unpacked — Sliding Window · Sorting + Scan · Bit Manipulation · Modified Dijkstra, with every step traced on real arrays and real numbers</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final (Quiz 2) — April 30, 2026 · Class hours · Closed-book, one cheat sheet<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lec1_27_all-combined-densed-ocr.pdf</span> (Lectures 1–27, Spring 2026)<br>
+    <strong>Companion to:</strong> <span class="mono">study_guide_topic7_algorithm_design_patterns.html</span> (the condensed exam-prep version — read this deep-dive FIRST)<br>
+    <strong>Audience:</strong> Designed for a student who can follow the assignment solutions but is not yet confident writing them independently. We define every term on first use, trace each algorithm step-by-step on the exact assignment examples, and explain why each design decision was made.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">How to use this deep-dive</strong><br>
+  <strong>Step 1.</strong> Read the <a href="#warmup">🧗 Warm-up Glossary</a> to confirm you know the prerequisite vocabulary (arrays, Big-O, bits, heaps, graphs with weights).<br>
+  <strong>Step 2.</strong> Read §1 (What &amp; Why) and §2 (How) carefully — re-trace every example from the assignments on paper, cell by cell.<br>
+  <strong>Step 3.</strong> Take the <a href="#warmup-checks">§3.5 Warm-up Understanding Checks</a> to confirm you absorbed §1–2 before attempting exam-style questions.<br>
+  <strong>Step 4.</strong> Tackle §3 (Exam Intelligence), §4 (Practice Questions), and §5 (Cheat Sheet) as final review — these mirror the graded assignment and exam format exactly.
+</div>
+
+<!-- ============================================================
+     WARM-UP GLOSSARY
+     ============================================================ -->
+<h2 id="warmup">🧗 Warm-up Glossary — Vocabulary You Need Before §1</h2>
+<p style="color: var(--text-dim);">
+  Algorithm Design Patterns assumes you know some vocabulary that CS 570 uses without always re-defining it. None of these are
+  hard — they just need to be stated plainly before we use them. If you know all of these already, skip to <a href="#section-1">§1</a>.
+</p>
+
+<div class="section-block">
+
+<h3>What is a "contiguous subarray"? <span class="pdf-ref">📄 p. 23</span></h3>
+<p>
+  An array is a list of values at numbered positions. A <strong>contiguous subarray</strong> is a slice of consecutive elements — you
+  pick a start index and an end index, and take everything in between, without skipping.
+</p>
+<p>
+  <strong>Example:</strong> Array = [1, 12, -5, -6, 50, 3]. A contiguous subarray of length 4 starting at index 1 is [12, -5, -6, 50].
+  You cannot take [1, 50] — those are not consecutive. <span class="pdf-ref">📄 p. 23</span>
+</p>
+
+<h3>What does "O(n)" or "Big-O" mean, really? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  <strong>Big-O notation</strong> describes how the running time of an algorithm grows as the input size n grows.
+  O(n) means: "if the input doubles in size, the running time roughly doubles too."
+  O(n²) means: "if the input doubles, the running time quadruples." The key insight: we ignore constants and lower-order terms.
+</p>
+<p>
+  <strong>Example:</strong> An algorithm that does 3n + 100 operations is still O(n) — for large n, the 3n term dominates and the 100 is negligible. <span class="pdf-ref">📄 p. 39</span>
+</p>
+
+<h3>What is a "bit"? What does "bit position i" mean? <span class="pdf-ref">📄 p. 35</span></h3>
+<p>
+  A <strong>bit</strong> is a single binary digit — either 0 or 1. Every integer stored on a computer is represented as a sequence of bits.
+  For example, the number 4 in binary is <code>0100</code> (four bits: position 3 is 0, position 2 is 1, position 1 is 0, position 0 is 0).
+</p>
+<p>
+  <strong>Bit position i</strong> refers to the i-th digit from the right (0-indexed). The expression <code>(num >> i) & 1</code> in Python
+  extracts the bit at position i: shift the number right by i places, then check if the last bit is 1.
+</p>
+<pre class="diagram">
+  num = 14 = binary 1110
+
+  Position:  3  2  1  0
+  Bits:      1  1  1  0
+
+  (14 >> 0) & 1 = (1110 >> 0) & 1 = 1110 & 0001 = 0   (bit 0 is 0)
+  (14 >> 1) & 1 = (0111) & 1 = 1                        (bit 1 is 1)
+  (14 >> 2) & 1 = (0011) & 1 = 1                        (bit 2 is 1)
+  (14 >> 3) & 1 = (0001) & 1 = 1                        (bit 3 is 1)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 35</span></div>
+
+<h3>What is the "Hamming distance" between two integers? <span class="pdf-ref">📄 p. 35</span></h3>
+<p>
+  The <strong>Hamming distance</strong> between two integers is the number of bit positions where they differ.
+</p>
+<p>
+  <strong>Example:</strong> 4 = 0100, 14 = 1110. Compare bit by bit: position 3: 0 vs 1 (different); position 2: 1 vs 1 (same); position 1: 0 vs 1 (different); position 0: 0 vs 0 (same). Total differences = 2. So HammingDistance(4, 14) = 2. <span class="pdf-ref">📄 p. 35</span>
+</p>
+
+<h3>What is a "priority queue" (or "heap")? <span class="pdf-ref">📄 p. 169</span></h3>
+<p>
+  A <strong>priority queue</strong> is a data structure that always gives you the highest-priority element when you ask for one.
+  In a <em>min-heap</em>, the smallest element comes out first. In a <em>max-heap</em>, the largest comes out first.
+</p>
+<p>
+  <strong>Why it matters:</strong> Inserting or extracting from a heap takes O(log n) time — much faster than scanning through a list (O(n)).
+  Dijkstra's algorithm uses a min-heap to always process the node with the smallest current distance next. <span class="pdf-ref">📄 p. 169</span>
+</p>
+
+<h3>What does "sorting" give you, exactly? <span class="pdf-ref">📄 p. 63</span></h3>
+<p>
+  After sorting an array, the elements are in order from smallest to largest (ascending) or largest to smallest (descending).
+  The key benefit: once sorted, you can scan once from left to right and be guaranteed you're seeing elements in order.
+  Standard sorting (like Python's <code>sort()</code>) runs in O(n log n) time. <span class="pdf-ref">📄 pp. 63–90</span>
+</p>
+
+<h3>What is a "greedy algorithm"? <span class="pdf-ref">📄 p. 169</span></h3>
+<p>
+  A <strong>greedy algorithm</strong> makes the locally best choice at each step — it picks the option that looks best right now,
+  without reconsidering past choices. It works only when the locally best choice leads to a globally optimal solution.
+  Dijkstra's algorithm is greedy: at each step, it commits to the node with the smallest tentative distance. <span class="pdf-ref">📄 p. 169</span>
+</p>
+
+<h3>What does "modular arithmetic" mean for time problems? <span class="pdf-ref">📄 p. ?? verify</span></h3>
+<p>
+  When working with circular quantities like times on a clock, we use <strong>modular arithmetic</strong>.
+  A 24-hour clock has 24 × 60 = 1440 total minutes. After 23:59 comes 00:00, so the circular distance from
+  23:59 to 00:01 is 2 minutes, not 1438 minutes.
+</p>
+<p>
+  <strong>Formula for circular difference:</strong> After sorting all times, compare consecutive differences AND the "wrap-around"
+  difference: (first_time + 1440 - last_time). The minimum of all these is the answer. <span class="pdf-ref">📄 p. ?? verify</span>
+</p>
+
+<h3>What is an "adjacency list" representation of a graph? <span class="pdf-ref">📄 pp. 105–110</span></h3>
+<p>
+  An <strong>adjacency list</strong> stores for each vertex a list of its neighbors and (for weighted graphs) the edge weights.
+  For example, if vertex 0 connects to vertex 1 with probability 0.5, and to vertex 2 with probability 0.2, the adjacency list for vertex 0 is: [(1, 0.5), (2, 0.2)]. <span class="pdf-ref">📄 pp. 105–110</span>
+</p>
+
+<h3>What is "path probability" vs "path length"? <span class="pdf-ref">📄 p. 169</span></h3>
+<p>
+  In a standard shortest-path problem, the cost of a path is the <strong>sum</strong> of edge weights.
+  In a maximum-probability path problem, the "value" of a path is the <strong>product</strong> of edge probabilities.
+  For example, if edges have probabilities 0.5 and 0.5, the path probability is 0.5 × 0.5 = 0.25. We want to maximize this product. <span class="pdf-ref">📄 p. 169</span>
+</p>
+
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 7 spans Assignments 4 and 6 (the graded 20-point pseudocode questions), plus in-class Python sessions across many lectures. The page index below mirrors the condensed guide — use it to jump to the exact PDF page for any concept.
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Graded Pseudocode Patterns — A4 (60 pts) <span class="pdf-ref">📄 pp. 23–35</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Sliding window max-average (window size k) <span class="exam-star">⭐</span></td><td>pp. 23–35</td><td><span class="asgn-ref">📋 A4 Q7</span></td></tr>
+    <tr><td>Minimum time difference (sort + circular diff) <span class="exam-star">⭐</span></td><td>pp. 23–35</td><td><span class="asgn-ref">📋 A4 Q8</span></td></tr>
+    <tr><td>Hamming distance sum — bit-position counting <span class="exam-star">⭐</span></td><td>pp. 23–35</td><td><span class="asgn-ref">📋 A4 Q9</span></td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Graded Pseudocode Patterns — A6 (60 pts) <span class="pdf-ref">📄 p. ?? verify</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Star graph center identification <span class="exam-star">⭐</span></td><td>p. ?? verify</td><td><span class="asgn-ref">📋 A6 Q7</span></td></tr>
+    <tr><td>Arithmetic progression check (sort + constant diff) <span class="exam-star">⭐</span></td><td>p. ?? verify</td><td><span class="asgn-ref">📋 A6 Q8</span></td></tr>
+    <tr><td>Max-probability path (modified Dijkstra) <span class="exam-star">⭐</span></td><td>p. ?? verify</td><td><span class="asgn-ref">📋 A6 Q9</span></td></tr>
+    <tr><td>Binary search for median of two databases <span class="exam-star">⭐</span></td><td>p. ?? verify</td><td><span class="asgn-ref">📋 A6 Q5</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: WHAT & WHY (PLAIN ENGLISH)
+     ============================================================ -->
+<h2 id="section-1">§1 — What &amp; Why, in Plain English</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 23–35 (Lectures 4–9) + Assignments 4 &amp; 6</div>
+
+<div class="section-block">
+
+<h3 id="section-1-1">1.1 The fundamental problem — why design patterns matter <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<p>
+  You have been given a programming problem. The brute-force approach (try everything, compare all pairs, use nested loops) gives you a
+  working answer but runs in O(n²) or O(n³) — too slow for large inputs. The challenge is: can you do it in O(n) or O(n log n)?
+</p>
+<p>
+  Algorithm design patterns are <em>reusable strategic templates</em> that transform slow brute-force solutions into fast ones.
+  Think of them like cooking techniques: once you know how to "sauté" or "poach," you don't reinvent the technique for every new ingredient.
+  Once you know the <strong>sliding window</strong> pattern, you can solve dozens of "find the best contiguous subarray" problems instantly.
+  <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+<p>
+  This topic matters enormously on the CS 570 exam because <em>three of the six 20-point questions in Assignment 4 and three of the six 20-point questions in Assignment 6 are pseudocode design problems</em>. Every question asks for:
+  (1) pseudocode, (2) step-wise English explanation, and (3) time and space complexity. Mastering the core patterns lets you answer all six. <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+
+<h3 id="section-1-2">1.2 The four pattern taxonomy <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<p>
+  CS 570's assignments reveal four core patterns. Let's name them and connect each to its assignment question:
+</p>
+
+<table class="data">
+  <thead>
+    <tr><th>Pattern</th><th>Core Idea</th><th>When to Use</th><th>Time Complexity</th><th>Key Assignment</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Sliding Window</strong></td>
+      <td>Maintain a moving window over array; update incrementally instead of recomputing</td>
+      <td>Fixed-size or variable-size subarray questions; "best window of length k"</td>
+      <td>O(n)</td>
+      <td><span class="asgn-ref">📋 A4 Q7</span></td>
+    </tr>
+    <tr>
+      <td><strong>Sort + Linear Scan</strong></td>
+      <td>Sort first, then a single pass finds the answer</td>
+      <td>Any "minimum difference," "arithmetic progression," or "find element matching criterion" problem</td>
+      <td>O(n log n)</td>
+      <td><span class="asgn-ref">📋 A4 Q8</span>, <span class="asgn-ref">📋 A6 Q8</span></td>
+    </tr>
+    <tr>
+      <td><strong>Bit Manipulation</strong></td>
+      <td>Process each bit position independently across all numbers; count 1s and 0s per position</td>
+      <td>Hamming distance sums, parity problems, XOR-based questions</td>
+      <td>O(32n) = O(n)</td>
+      <td><span class="asgn-ref">📋 A4 Q9</span></td>
+    </tr>
+    <tr>
+      <td><strong>Modified Dijkstra</strong></td>
+      <td>Adapt Dijkstra by changing the objective function (max product instead of min sum)</td>
+      <td>Graph path problems with non-standard edge "values" (probabilities, reliability)</td>
+      <td>O((V+E) log E)</td>
+      <td><span class="asgn-ref">📋 A6 Q9</span></td>
+    </tr>
+  </tbody>
+</table>
+<p style="color: var(--text-dim); font-size: 0.88em; margin-top: -6px;">Also in this topic: Binary Search on Answer <span class="asgn-ref">📋 A6 Q5</span> and Star Graph Center <span class="asgn-ref">📋 A6 Q7</span>. <span class="pdf-ref">📄 pp. 23–35</span></p>
+
+<h3 id="section-1-3">1.3 A second framing — the "efficiency multiplier" lens <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<p>
+  Here's another way to think about design patterns: they are <em>efficiency multipliers</em> on brute force.
+</p>
+<p>
+  <strong>Sliding window:</strong> The naive approach to "maximum average of subarray of length k" computes the sum of every window from scratch — O(n×k) total. The sliding window avoids recomputing: instead of summing k elements fresh each time, we slide the window by subtracting the element leaving and adding the element entering. That's 2 operations instead of k — an efficiency multiplier of k. The algorithm goes from O(nk) to O(n). <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+<p>
+  <strong>Bit manipulation:</strong> The naive approach to "sum of Hamming distances between all pairs" checks every pair — O(n²) pairs, each taking O(32) bit comparisons = O(32n²). The bit-counting trick flips the order of thinking: instead of "per pair, count differing bits," we think "per bit position, count how many pairs differ." This collapses the O(n²) into O(32n) = O(n). An efficiency multiplier of n. <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+
+<h3 id="section-1-4">1.4 Technical definition — what the exam expects <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<p>
+  The exam asks you to solve a problem in three parts: (1) write Python-like pseudocode, (2) provide a step-wise English explanation of the approach including complexity analysis. These are the exact requirements from A4 Q7, Q8, Q9 and A6 Q7, Q8, Q9.
+</p>
+<p>
+  <strong>What counts as "Python-like pseudocode"?</strong> You don't need perfect Python syntax. You need:
+  variable names that make the intent clear, <code>for</code>/<code>while</code> loops with their bounds stated,
+  meaningful variable updates, and a clear <code>return</code> statement. Comments explaining key lines earn points. <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+<p>
+  <strong>What counts as complexity analysis?</strong> State the time complexity with justification (e.g., "the outer loop runs n times; each iteration does O(1) work; total O(n)") AND the space complexity (e.g., "only constant extra variables; O(1) space"). Missing space complexity is a common point deduction. <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+
+<h3 id="section-1-5">1.5 Key Terms Table <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Term</th><th>Plain-English Meaning</th><th>Example / Mental Image</th><th>📄 Page</th><th>Textbook Ref</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Sliding window</strong></td><td>A fixed-size view into the array that moves one step at a time</td><td>A camera lens panning across a row of people — you see k people at once, add one to the right, drop one from the left</td><td>p. 23</td><td>[KT] Ch.1</td></tr>
+    <tr><td><strong>Window sum</strong></td><td>The sum of all elements currently in the window</td><td>For window [12, -5, -6, 50]: sum = 12 + (-5) + (-6) + 50 = 51</td><td>p. 23</td><td>[KT] Ch.1</td></tr>
+    <tr><td><strong>Incremental update</strong></td><td>Updating the sum by adding one element and subtracting one, instead of summing all k</td><td>New sum = old sum - nums[i-k] + nums[i]</td><td>p. 23</td><td>[KT] Ch.1</td></tr>
+    <tr><td><strong>Circular difference</strong></td><td>The "wrap-around" gap when comparing times modulo 1440</td><td>(00:01 - 23:59) = (1 + 1440 - 1439) = 2 minutes</td><td>p. ?? verify</td><td>[KT] Ch.1</td></tr>
+    <tr><td><strong>Bit position i</strong></td><td>The i-th digit from the right in the binary representation</td><td>In 0100 (=4), bit position 2 is 1; all others shown are 0</td><td>p. 35</td><td>[CLRS] Ch.2</td></tr>
+    <tr><td><strong>Bit extraction</strong></td><td>Getting the value (0 or 1) at a specific bit position</td><td>(num >> i) &amp; 1 extracts bit i from num</td><td>p. 35</td><td>[CLRS] Ch.2</td></tr>
+    <tr><td><strong>Hamming distance</strong></td><td>Count of bit positions where two integers differ</td><td>HammingDist(4=0100, 14=1110) = 2 (positions 3 and 1 differ)</td><td>p. 35</td><td>[CLRS] Ch.2</td></tr>
+    <tr><td><strong>Bit-position counting</strong></td><td>For each bit position, count how many numbers have a 1 there (call it p); the contribution to total Hamming distance is p × (n-p)</td><td>For 3 numbers with bit position 2: p=2 ones, q=1 zero. Pairs = 2×1=2</td><td>p. 35</td><td>[CLRS] Ch.2</td></tr>
+    <tr><td><strong>Modified Dijkstra</strong></td><td>Dijkstra's algorithm where the objective is changed from "minimize sum" to "maximize product"</td><td>Edge weights are probabilities; multiply instead of add; use max-heap instead of min-heap</td><td>p. 169</td><td>[KT] Ch.4</td></tr>
+    <tr><td><strong>Max-heap</strong></td><td>A priority queue where the element with the largest value comes out first</td><td>Push (0.25, node2) and (0.5, node1); popping gives (0.5, node1) first</td><td>p. 169</td><td>[CLRS] Ch.6</td></tr>
+    <tr><td><strong>Path relaxation</strong></td><td>Updating the best-known distance/probability to a node if a new path is better</td><td>prob[v] = max(prob[v], prob[u] × edge_prob(u,v))</td><td>p. 169</td><td>[KT] Ch.4</td></tr>
+    <tr><td><strong>Star graph</strong></td><td>A graph with one center node connected to all others; every edge touches the center</td><td>A wheel hub: one hub, n-1 spokes radiating outward</td><td>p. ?? verify</td><td>[KT] Ch.3</td></tr>
+    <tr><td><strong>Arithmetic progression (AP)</strong></td><td>A sequence where consecutive elements differ by the same constant d</td><td>[1, 3, 5, 7]: d = 2 (all consecutive pairs differ by 2)</td><td>p. ?? verify</td><td>[CLRS] Ch.1</td></tr>
+    <tr><td><strong>Binary search on answer</strong></td><td>Use binary search not to find a value in an array, but to find the correct split point for a logical question</td><td>Median of two databases: search for the partition index i such that A[i] ≤ B[j+1] and B[j] ≤ A[i+1]</td><td>p. 55</td><td>[KT] Ch.5</td></tr>
+    <tr><td><strong>Stale entry (in heap)</strong></td><td>An outdated heap entry: a node was already processed with a better probability, so we skip this one</td><td>If curr_prob &lt; prob[u], the entry is stale — skip it</td><td>p. 169</td><td>[KT] Ch.4</td></tr>
+    <tr><td><strong>Auxiliary space</strong></td><td>Extra memory the algorithm uses beyond the input itself</td><td>Sorting in-place: O(1) aux space. Storing a sorted copy: O(n) aux space.</td><td>p. 63</td><td>[CLRS] Ch.2</td></tr>
+    <tr><td><strong>O(1) time</strong></td><td>Constant time — the operation takes the same amount of time regardless of input size</td><td>Accessing array element by index: nums[i] is always one operation</td><td>p. 39</td><td>[KT] Ch.2</td></tr>
+    <tr><td><strong>Step-wise English explanation</strong></td><td>A numbered list of plain-English sentences describing what the algorithm does, matching the pseudocode</td><td>"Step 1: Sort the array. Step 2: Compute the initial sum of the first k elements..."</td><td>p. 23</td><td>Assignment 4 format</td></tr>
+    <tr><td><strong>Common difference d</strong></td><td>The constant gap between consecutive elements in an arithmetic progression</td><td>In [1, 3, 5]: d = arr[1]-arr[0] = 2; check arr[2]-arr[1] = 2 ✓</td><td>p. ?? verify</td><td>[CLRS] Ch.1</td></tr>
+    <tr><td><strong>Greedy correctness</strong></td><td>A greedy algorithm is correct when the locally best choice always leads to a globally optimal solution</td><td>Dijkstra: settling the minimum-distance node first is correct because all edges are non-negative</td><td>p. 169</td><td>[KT] Ch.4</td></tr>
+    <tr><td><strong>Query complexity</strong></td><td>The number of database queries or comparisons made (for binary search problems)</td><td>O(log n) queries: each iteration halves the search space</td><td>p. ?? verify</td><td>[KT] Ch.5</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Point of Confusion — Sliding Window vs Re-computation</strong>
+  Many students write a nested loop (O(nk)) when a sliding window (O(n)) is called for. The telltale sign that sliding window applies:
+  the problem asks about a <em>fixed-size contiguous window</em> (length k) that moves across the array. If the window is variable-size or non-contiguous, a different pattern applies. The key question to ask yourself: "Does adding one element and removing one element give me what I need?" If yes — sliding window. <span class="pdf-ref">📄 pp. 23–35</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     SECTION 2: HOW — WORKED EXAMPLES
+     ============================================================ -->
+<h2 id="section-2">§2 — How: Worked Examples from Scratch</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 23–35 + Assignments 4 &amp; 6 worked solutions</div>
+
+<p style="color: var(--text-dim);">
+  Each sub-section follows the same recipe: <strong>(1) Intuition</strong> — what is the core insight?
+  <strong>(2) Mechanism</strong> — the actual algorithm step by step.
+  <strong>(3) Worked Example</strong> — we trace through the exact assignment example with real numbers, every iteration.
+</p>
+
+<!-- 2a: SLIDING WINDOW -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span>
+  <span class="title">Sliding Window — Maximum Average Subarray</span>
+  <span class="pages">Assignment 4 Q7 (20 pts, graded) · <span class="asgn-ref">📋 A4 Q7</span> · Lecture PDF: pp. 23–35</span>
+</div>
+
+<h3>Intuition: The window slides, not restarts <span class="pdf-ref">📄 pp. 23–35</span></h3>
+<p>
+  Imagine you're looking at an array through a window that shows k elements at once. The brute force approach:
+  each time you move the window one step right, you compute the sum of all k elements inside — k operations per step,
+  n-k+1 steps total → O(nk). That's slow.
+</p>
+<p>
+  The sliding window insight: the new window shares k-1 elements with the old window. So the new sum is just:
+  <strong>old sum - (element leaving the left) + (element entering the right)</strong>. That's 2 operations instead of k — hence O(n) total. <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+
+<h3>Mechanism: The sliding window template <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<div class="step">
+  <div class="step-head">Step 1: Initialize the window on the first k elements</div>
+  <div class="step-detail">Compute the sum of nums[0..k-1]. Save this as both window_sum and max_sum. This is O(k).</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 2: Slide the window from index k to n-1</div>
+  <div class="step-detail">For each index i from k to n-1:
+    new window_sum = old window_sum - nums[i-k] + nums[i].
+    Update max_sum if window_sum &gt; max_sum.
+    Each step is O(1).
+  </div>
+</div>
+<div class="step">
+  <div class="step-head">Step 3: Return max_sum / k</div>
+  <div class="step-detail">The maximum average is the maximum sum divided by k. O(1).</div>
+</div>
+
+<pre class="pseudocode">
+def findMaxAverage(nums, k):
+    # Step 1: Initialize window on first k elements
+    window_sum = 0
+    for i in range(k):
+        window_sum += nums[i]      # sum nums[0..k-1]
+    max_sum = window_sum           # best sum seen so far
+
+    # Step 2: Slide window from index k to n-1
+    for i in range(k, len(nums)):
+        window_sum = window_sum - nums[i - k] + nums[i]
+        #           ^remove left              ^add right
+        max_sum = max(max_sum, window_sum)
+
+    # Step 3: Return average
+    return max_sum / k
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span> (A4 Q7 solution)</div>
+
+<h3>Worked Example: nums = [1, 12, -5, -6, 50, 3], k = 4 <span class="pdf-ref">📄 pp. 23–35</span> <span class="asgn-ref">📋 A4 Q7</span></h3>
+
+<pre class="diagram">
+  Array: [1,  12,  -5,  -6,  50,  3]
+  Index:  0    1    2    3    4    5
+  k = 4 (window size)
+
+  Step 1: Initialize window on indices 0..3
+  window_sum = 1 + 12 + (-5) + (-6) = 2
+  max_sum = 2
+
+  Step 2: Slide
+  ─────────────────────────────────────────────────────────────
+  i=4: Remove nums[4-4]=nums[0]=1, Add nums[4]=50
+       window_sum = 2 - 1 + 50 = 51
+       max_sum = max(2, 51) = 51      ← window is [12,-5,-6,50]
+  ─────────────────────────────────────────────────────────────
+  i=5: Remove nums[5-4]=nums[1]=12, Add nums[5]=3
+       window_sum = 51 - 12 + 3 = 42
+       max_sum = max(51, 42) = 51     ← window is [-5,-6,50,3]
+  ─────────────────────────────────────────────────────────────
+
+  Step 3: Return max_sum / k = 51 / 4 = 12.75
+
+  Answer: 12.75 ✓ (matches expected output)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span></div>
+
+<p><strong>Why didn't we recompute the sum each iteration?</strong> The key insight is that the window [12, -5, -6, 50] is just the previous window [1, 12, -5, -6] with 1 removed and 50 added. We used this to avoid recomputing the sum from scratch (saving k-2 = 2 additions per step). For large k, this savings becomes enormous.</p>
+
+<h3>Complexity Analysis <span class="pdf-ref">📄 pp. 23–35</span></h3>
+<table class="trace-table">
+  <thead><tr><th>Step</th><th>Operations</th><th>Complexity</th></tr></thead>
+  <tbody>
+    <tr><td>Initialize window on first k elements</td><td>k additions</td><td>O(k)</td></tr>
+    <tr class="highlight"><td>Slide window (n-k iterations, O(1) each)</td><td>n-k subtractions + additions</td><td>O(n-k)</td></tr>
+    <tr><td>Total</td><td>O(k) + O(n-k) = O(n)</td><td><strong>O(n)</strong></td></tr>
+    <tr><td>Space (extra variables only)</td><td>window_sum, max_sum, i</td><td><strong>O(1)</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Beginner Mistake — Nested Loop</strong>
+  A common wrong answer writes: <code>for i in range(n-k+1): for j in range(i, i+k): sum += nums[j]</code>.
+  This is O(n×k) — for k=1000 and n=1,000,000 that's a billion operations. The sliding window does it in n operations.
+  Always ask: "do I need to recompute from scratch, or can I update incrementally?" <span class="pdf-ref">📄 pp. 23–35</span>
+</div>
+
+<!-- 2b: SORT + SCAN -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span>
+  <span class="title">Sort + Linear Scan — Minimum Time Difference &amp; Arithmetic Progression</span>
+  <span class="pages">A4 Q8 (min time diff) + A6 Q8 (AP check) · <span class="asgn-ref">📋 A4 Q8</span> <span class="asgn-ref">📋 A6 Q8</span></span>
+</div>
+
+<h3>Intuition: Sorting makes patterns visible <span class="pdf-ref">📄 p. 63</span></h3>
+<p>
+  The brute-force approach to "find minimum difference between any two times" compares all pairs — O(n²) work.
+  The sorting insight: <em>the minimum difference always occurs between adjacent elements in the sorted order</em>.
+  Once sorted, a single pass from left to right finds the minimum in O(n). So sort first (O(n log n)), then scan (O(n)), total O(n log n). <span class="pdf-ref">📄 p. 63</span>
+</p>
+<p>
+  The circular twist for time problems: after sorting, also check the "wrap-around" difference between the last element and the first element (adding 1440 minutes to handle the midnight boundary). <span class="pdf-ref">📄 p. 63</span>
+</p>
+
+<h3>Mechanism: Minimum Time Difference (A4 Q8) <span class="pdf-ref">📄 p. ?? verify</span></h3>
+
+<div class="step">
+  <div class="step-head">Step 1: Convert "HH:MM" strings to total minutes</div>
+  <div class="step-detail">"23:59" → 23×60 + 59 = 1439 minutes. "00:01" → 1 minute. Now we have a list of integers.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 2: Sort the minutes list in ascending order</div>
+  <div class="step-detail">Python's sort() uses Timsort: O(n log n).</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 3: Compare adjacent pairs</div>
+  <div class="step-detail">For i from 1 to n-1: diff = minutes[i] - minutes[i-1]. Track the minimum.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 4: Handle the circular wrap-around</div>
+  <div class="step-detail">circular_diff = (minutes[0] + 1440) - minutes[-1]. Compare with current minimum.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 5: Return the minimum found</div>
+</div>
+
+<h3>Worked Example: timePoints = ["23:59", "00:00"] <span class="pdf-ref">📄 p. ?? verify</span> <span class="asgn-ref">📋 A4 Q8</span></h3>
+
+<pre class="diagram">
+  Input: ["23:59", "00:00"]
+
+  Step 1: Convert to minutes
+    "23:59" → 23×60 + 59 = 1439
+    "00:00" → 0×60 + 0  = 0
+    minutes = [1439, 0]
+
+  Step 2: Sort
+    minutes = [0, 1439]
+
+  Step 3: Compare adjacent pairs
+    diff = 1439 - 0 = 1439       ← way too big
+
+  Step 4: Circular wrap-around
+    circular_diff = (0 + 1440) - 1439 = 1   ← 1 minute from 23:59 to 00:00!
+
+  min_diff = min(1439, 1) = 1
+
+  Output: 1 ✓ (matches expected output)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. ?? verify</span></div>
+
+<h3>Worked Example: Arithmetic Progression Check (A6 Q8) — arr = [3, 5, 1] <span class="pdf-ref">📄 p. ?? verify</span> <span class="asgn-ref">📋 A6 Q8</span></h3>
+
+<pre class="diagram">
+  Input: arr = [3, 5, 1]
+
+  Step 1: Sort
+    arr = [1, 3, 5]
+
+  Step 2: Compute expected common difference
+    d = arr[1] - arr[0] = 3 - 1 = 2
+
+  Step 3: Verify all consecutive differences equal d
+    arr[2] - arr[1] = 5 - 3 = 2 = d ✓
+
+  Step 4: All differences match d → return True
+
+  Output: True ✓ (elements can be reordered as [1, 3, 5] with diff 2)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. ?? verify</span></div>
+
+<pre class="pseudocode">
+def canMakeArithmeticProgression(arr):
+    n = len(arr)
+    if n < 2:
+        return True               # trivially an AP
+
+    arr.sort()                    # O(n log n)
+    d = arr[1] - arr[0]           # expected common difference
+
+    for i in range(2, n):         # verify all consecutive diffs
+        if arr[i] - arr[i - 1] != d:
+            return False          # found a mismatch
+
+    return True                   # all diffs matched
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. ?? verify</span> (A6 Q8 solution)</div>
+
+<h3>Complexity Analysis for Sort + Scan <span class="pdf-ref">📄 p. 63</span></h3>
+<table class="trace-table">
+  <thead><tr><th>Problem</th><th>Sort</th><th>Scan</th><th>Total Time</th><th>Space</th></tr></thead>
+  <tbody>
+    <tr><td>Min Time Difference (A4 Q8)</td><td>O(m log m)</td><td>O(m) + O(1) circular</td><td>O(m log m)</td><td>O(m) for minutes array</td></tr>
+    <tr class="highlight"><td>AP Check (A6 Q8)</td><td>O(n log n)</td><td>O(n)</td><td>O(n log n)</td><td>O(1) auxiliary (in-place sort)</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Don't Forget the Circular Difference</strong>
+  For the time difference problem: the answer might be the "wrap-around" gap — from the last time point to the first,
+  crossing midnight. If you only check adjacent pairs without the circular gap, you miss cases like ["23:59", "00:00"].
+  Always add: <code>circular_diff = (minutes[0] + 1440) - minutes[-1]</code>. <span class="pdf-ref">📄 p. ?? verify</span>
+</div>
+
+<!-- 2c: BIT MANIPULATION -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span>
+  <span class="title">Bit Manipulation — Total Hamming Distance Sum</span>
+  <span class="pages">Assignment 4 Q9 (20 pts, graded) · <span class="asgn-ref">📋 A4 Q9</span> · Lecture PDF: pp. 35</span>
+</div>
+
+<h3>Intuition: Stop thinking about pairs; think about positions <span class="pdf-ref">📄 p. 35</span></h3>
+<p>
+  The brute-force approach: for each pair (i, j), compute HammingDistance(nums[i], nums[j]) by comparing all 32 bits.
+  That's O(n²) pairs × O(32) per pair = O(32n²) = O(n²). Too slow for large n.
+</p>
+<p>
+  The bit-position insight: instead of thinking "how many bits differ between these two specific numbers?", think
+  "for bit position 2, how many pairs of numbers differ at that position?"
+</p>
+<p>
+  <strong>Key formula:</strong> If p numbers have a 1 at bit position i, and q = n - p numbers have a 0 at bit position i,
+  then exactly p × q pairs differ at that position (one number from the 1-group, one from the 0-group).
+  Sum p × q over all 32 bit positions to get the total Hamming distance sum. This is O(32n) = O(n). <span class="pdf-ref">📄 p. 35</span>
+</p>
+
+<h3>Mechanism: Bit-position counting <span class="pdf-ref">📄 p. 35</span></h3>
+
+<div class="step">
+  <div class="step-head">Step 1: Initialize total = 0</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 2: For each bit position i from 0 to 31</div>
+  <div class="step-detail">
+    Count p = how many numbers in nums have a 1 at bit position i.
+    Compute q = n - p (numbers with a 0 at position i).
+    Add p × q to total.
+  </div>
+</div>
+<div class="step">
+  <div class="step-head">Step 3: Return total</div>
+</div>
+
+<pre class="pseudocode">
+def totalHammingDistance(nums):
+    total = 0
+    n = len(nums)
+
+    for bit in range(32):         # for each of the 32 bit positions
+        p = 0
+        for num in nums:
+            if (num >> bit) & 1:  # is bit 'bit' set to 1 in num?
+                p += 1
+        q = n - p                 # numbers with 0 at this position
+        total += p * q            # pairs that differ at this bit position
+
+    return total
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 35</span> (A4 Q9 solution)</div>
+
+<h3>Worked Example: nums = [4, 14, 2] <span class="pdf-ref">📄 p. 35</span> <span class="asgn-ref">📋 A4 Q9</span></h3>
+
+<pre class="diagram">
+  nums = [4, 14, 2]
+  n = 3
+
+  Binary representations (showing 4 bits for simplicity):
+    4  = 0100
+    14 = 1110
+    2  = 0010
+
+  For each bit position (right to left = positions 0,1,2,3):
+
+  ─────────────────────────────────────────────────────────
+  Bit position 0 (rightmost bit):
+    4  = 0100 → bit 0 = 0
+    14 = 1110 → bit 0 = 0
+    2  = 0010 → bit 0 = 0
+    p = 0 (zero ones),  q = 3 (three zeros)
+    contribution = 0 × 3 = 0
+  ─────────────────────────────────────────────────────────
+  Bit position 1:
+    4  = 0100 → bit 1 = 0
+    14 = 1110 → bit 1 = 1
+    2  = 0010 → bit 1 = 1
+    p = 2 (two ones),  q = 1 (one zero)
+    contribution = 2 × 1 = 2
+  ─────────────────────────────────────────────────────────
+  Bit position 2:
+    4  = 0100 → bit 2 = 1
+    14 = 1110 → bit 2 = 1
+    2  = 0010 → bit 2 = 0
+    p = 2 (two ones),  q = 1 (one zero)
+    contribution = 2 × 1 = 2
+  ─────────────────────────────────────────────────────────
+  Bit position 3:
+    4  = 0100 → bit 3 = 0
+    14 = 1110 → bit 3 = 1
+    2  = 0010 → bit 3 = 0
+    p = 1 (one one),   q = 2 (two zeros)
+    contribution = 1 × 2 = 2
+  ─────────────────────────────────────────────────────────
+  Positions 4 through 31: all bits are 0 for all three numbers.
+    contribution = 0 × 3 = 0 each.
+
+  Total = 0 + 2 + 2 + 2 + 0 + ... + 0 = 6
+
+  Output: 6 ✓ (matches: HammDist(4,14)=2 + HammDist(4,2)=2 + HammDist(14,2)=2 = 6)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 35</span></div>
+
+<h3>Verify manually: HammingDistance(4, 14) <span class="pdf-ref">📄 p. 35</span></h3>
+<pre class="diagram">
+  4  = 0100
+  14 = 1110
+  XOR= 1010  (XOR is 1 where bits differ, 0 where they match)
+
+  Position 3: 0 vs 1 → differ ← counted as 1
+  Position 2: 1 vs 1 → same
+  Position 1: 0 vs 1 → differ ← counted as 1
+  Position 0: 0 vs 0 → same
+
+  HammingDistance(4, 14) = 2 ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 35</span></div>
+
+<h3>Complexity Analysis <span class="pdf-ref">📄 p. 35</span></h3>
+<table class="trace-table">
+  <thead><tr><th>Component</th><th>Work</th><th>Complexity</th></tr></thead>
+  <tbody>
+    <tr><td>Outer loop: 32 bit positions</td><td>32 iterations</td><td>O(32) = O(1)</td></tr>
+    <tr class="highlight"><td>Inner loop: scan n numbers per bit position</td><td>n checks per position × 32 positions</td><td>O(32n)</td></tr>
+    <tr><td>Total time</td><td>32n operations</td><td><strong>O(n)</strong> (32 is a constant)</td></tr>
+    <tr><td>Space: variables only (total, p, q, bit, num)</td><td>constant number of integers</td><td><strong>O(1)</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Why 32 Bit Positions?</strong>
+  The problem says integers are standard 32-bit values (or the problem bounds imply it). The outer loop runs exactly 32 times — always. So O(32n) is the same as O(n). Many students write O(32n) in their analysis, which is fine, but they should note that 32 is a constant and simplify to O(n). <span class="pdf-ref">📄 p. 35</span>
+</div>
+
+<!-- 2d: MODIFIED DIJKSTRA -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span>
+  <span class="title">Modified Dijkstra — Maximum Probability Path</span>
+  <span class="pages">Assignment 6 Q9 (20 pts, graded) · <span class="asgn-ref">📋 A6 Q9</span> · Lecture PDF: pp. 169–178</span>
+</div>
+
+<h3>Intuition: Same structure, different objective <span class="pdf-ref">📄 pp. 169–178</span></h3>
+<p>
+  Standard Dijkstra's algorithm finds the shortest path — it minimizes the sum of edge weights. But what if edge weights are
+  probabilities, and we want to <em>maximize</em> the probability of reaching the destination?
+</p>
+<p>
+  Path probability works differently from path length: it's a <strong>product</strong> (not a sum). If edge (0→1) has probability 0.5 and
+  edge (1→2) has probability 0.5, the path 0→1→2 has probability 0.5 × 0.5 = 0.25. <span class="pdf-ref">📄 p. 169</span>
+</p>
+<p>
+  The modified Dijkstra makes two key changes from the standard version:
+  (1) Replace "minimize sum" with "maximize product" (update rule: prob[v] = max(prob[v], prob[u] × edge_prob)).
+  (2) Use a <em>max-heap</em> (priority queue sorted by highest probability) instead of a min-heap.
+  Everything else is identical to standard Dijkstra! <span class="pdf-ref">📄 pp. 169–178</span>
+</p>
+
+<h3>Mechanism: Modified Dijkstra for max probability <span class="pdf-ref">📄 pp. 169–178</span></h3>
+
+<div class="step">
+  <div class="step-head">Step 1: Build the adjacency list with edge probabilities</div>
+  <div class="step-detail">For each edge [u, v] with probability p: add (v, p) to graph[u] and (u, p) to graph[v] (undirected graph).</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 2: Initialize prob[] array to 0 for all nodes; set prob[start] = 1.0</div>
+  <div class="step-detail">prob[i] represents the maximum probability of reaching node i from start. We start with probability 1.0 at the source (we're definitely there).</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 3: Push (1.0, start) onto the max-heap</div>
+  <div class="step-detail">Python's heapq is a min-heap, so we negate probabilities: push (-1.0, start) and treat the most negative as the largest.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 4: While heap is not empty: pop the node with maximum probability</div>
+  <div class="step-detail">Extract (neg_p, u). curr_prob = -neg_p. If curr_prob &lt; prob[u], this is a stale entry — skip it.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 5: Relax all neighbors</div>
+  <div class="step-detail">For each (v, edge_prob) in graph[u]: new_prob = curr_prob × edge_prob. If new_prob &gt; prob[v]: update prob[v] = new_prob, push (-new_prob, v) to heap.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 6: Return prob[end]</div>
+  <div class="step-detail">If end was never reached, prob[end] remains 0.0.</div>
+</div>
+
+<pre class="pseudocode">
+def maxProbability(n, edges, succProb, start, end):
+    # Build adjacency list
+    graph = defaultdict(list)
+    for i in range(len(edges)):
+        u, v = edges[i][0], edges[i][1]
+        p = succProb[i]
+        graph[u].append((v, p))
+        graph[v].append((u, p))        # undirected
+
+    # Initialize probabilities
+    prob = [0.0] * n
+    prob[start] = 1.0
+
+    # Max-heap via negation (Python heapq is min-heap)
+    max_heap = [(-1.0, start)]
+
+    while max_heap:
+        neg_p, u = heappop(max_heap)
+        curr_prob = -neg_p
+
+        if curr_prob < prob[u]:        # stale entry: skip
+            continue
+
+        if u == end:
+            return curr_prob           # found best path to end!
+
+        for (v, edge_prob) in graph[u]:
+            new_prob = curr_prob * edge_prob
+            if new_prob > prob[v]:
+                prob[v] = new_prob
+                heappush(max_heap, (-new_prob, v))
+
+    return prob[end]                   # 0.0 if end unreachable
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 169–178</span> (A6 Q9 solution)</div>
+
+<h3>Worked Example: n=3, edges=[[0,1],[1,2],[0,2]], succProb=[0.5,0.5,0.2], start=0, end=2 <span class="pdf-ref">📄 p. 169</span> <span class="asgn-ref">📋 A6 Q9</span></h3>
+
+<pre class="diagram">
+  Graph:
+    0 --(0.5)-- 1 --(0.5)-- 2
+    |                           |
+    +---------(0.2)---------+
+
+  Two paths from 0 to 2:
+    Path 0→2 (direct): prob = 0.2
+    Path 0→1→2:        prob = 0.5 × 0.5 = 0.25
+
+  Maximum = 0.25 → answer is 0.25
+
+  Algorithm trace:
+  ─────────────────────────────────────────────────────────
+  Initial: prob = [1.0, 0.0, 0.0]
+  Heap = [(-1.0, 0)]
+
+  Iteration 1: Pop (-1.0, 0) → curr_prob=1.0, u=0
+    curr_prob=1.0 ≥ prob[0]=1.0 → not stale
+    Neighbors of 0: (1, 0.5), (2, 0.2)
+      v=1: new_prob = 1.0 × 0.5 = 0.5 > prob[1]=0.0 → update!
+           prob[1] = 0.5, push (-0.5, 1)
+      v=2: new_prob = 1.0 × 0.2 = 0.2 > prob[2]=0.0 → update!
+           prob[2] = 0.2, push (-0.2, 2)
+  prob = [1.0, 0.5, 0.2]
+  Heap = [(-0.5, 1), (-0.2, 2)]
+
+  Iteration 2: Pop (-0.5, 1) → curr_prob=0.5, u=1
+    curr_prob=0.5 ≥ prob[1]=0.5 → not stale
+    Neighbors of 1: (0, 0.5), (2, 0.5)
+      v=0: new_prob = 0.5 × 0.5 = 0.25 < prob[0]=1.0 → no update
+      v=2: new_prob = 0.5 × 0.5 = 0.25 > prob[2]=0.2 → update!
+           prob[2] = 0.25, push (-0.25, 2)
+  prob = [1.0, 0.5, 0.25]
+  Heap = [(-0.25, 2), (-0.2, 2)]
+
+  Iteration 3: Pop (-0.25, 2) → curr_prob=0.25, u=2
+    u == end (2) → return curr_prob = 0.25 ✓
+  ─────────────────────────────────────────────────────────
+  Output: 0.25 ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 169–178</span></div>
+
+<h3>Why is the stale entry check needed? <span class="pdf-ref">📄 pp. 169–178</span></h3>
+<p>
+  In iteration 3, the heap contains both (-0.25, 2) and (-0.2, 2) — two entries for node 2. We popped (-0.25, 2) first (max-heap), which is correct. Later, when (-0.2, 2) is popped, curr_prob = 0.2 &lt; prob[2] = 0.25 — this is a stale entry from before we updated prob[2]. The stale check <code>if curr_prob &lt; prob[u]: continue</code> skips it safely. <span class="pdf-ref">📄 pp. 169–178</span>
+</p>
+
+<h3>Complexity Analysis <span class="pdf-ref">📄 pp. 169–178</span></h3>
+<table class="trace-table">
+  <thead><tr><th>Component</th><th>Work</th><th>Complexity</th></tr></thead>
+  <tbody>
+    <tr><td>Build adjacency list</td><td>Scan all E edges</td><td>O(|E|)</td></tr>
+    <tr class="highlight"><td>Heap operations (each edge causes at most one push)</td><td>|E| push/pop operations, each O(log |E|)</td><td>O(|E| log |E|)</td></tr>
+    <tr><td>Relaxation per edge</td><td>O(1) per edge, |E| total</td><td>O(|E|)</td></tr>
+    <tr><td>Total time</td><td>Build + heap ops</td><td><strong>O((|V|+|E|) log |E|)</strong></td></tr>
+    <tr><td>Space: prob array + heap + adj list</td><td>O(|V|) + O(|E|) + O(|V|+|E|)</td><td><strong>O(|V|+|E|)</strong></td></tr>
+  </tbody>
+</table>
+
+<h3>§2 Synthesis: Pattern Selection Table <span class="pdf-ref">📄 pp. 23–35, 169–178</span></h3>
+<table class="data">
+  <thead><tr><th>Pattern</th><th>Signal to use it</th><th>Core transformation</th><th>Time</th><th>Space</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Sliding Window</strong></td><td>Fixed-size window of length k; maximize/minimize some property of the window</td><td>Incremental update: new = old - left + right</td><td>O(n)</td><td>O(1)</td></tr>
+    <tr><td><strong>Sort + Linear Scan</strong></td><td>Minimum/maximum difference between any two elements; check if a sorted property holds</td><td>Sort O(n log n), then single pass O(n)</td><td>O(n log n)</td><td>O(n) or O(1)</td></tr>
+    <tr><td><strong>Bit Manipulation</strong></td><td>Sum of pairwise distances at bit level; XOR-based problems; Hamming distance</td><td>Count 1s per bit position p; contribution = p × (n-p)</td><td>O(n)</td><td>O(1)</td></tr>
+    <tr><td><strong>Modified Dijkstra</strong></td><td>Weighted graph, non-standard objective (max product, min product, max-min)</td><td>Replace + with ×; replace min-heap with max-heap; keep relaxation structure</td><td>O((V+E) log E)</td><td>O(V+E)</td></tr>
+    <tr><td><strong>Binary Search on Answer</strong></td><td>Find partition point in sorted structure; median of two sorted arrays/databases</td><td>Binary search on the partition index, not on values</td><td>O(log n)</td><td>O(1)</td></tr>
+    <tr><td><strong>O(1) Observation</strong></td><td>Structure of problem makes a direct calculation possible (star graph center)</td><td>Check only the first two edges; the common node is the center</td><td>O(1)</td><td>O(1)</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 PRIMARY SOURCE: Graded Assignments 4 and 6 (the definitive exam question templates)</div>
+
+<div class="section-block">
+
+<h3>Exam Patterns — What the Questions Will Look Like <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<table class="data">
+  <thead><tr><th>#</th><th>Question Stem Pattern</th><th>Required Answer Elements</th><th>Most Common Error</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>"Write pseudocode for [sliding window problem]. Include English explanation and complexity."</td>
+      <td>Initialize first window; sliding update formula (new = old - left + right); return result/k; time O(n), space O(1)</td>
+      <td>Writing a nested loop O(nk) instead of the O(n) sliding update</td>
+      <td><span class="pdf-ref">📄 p. 23</span> / <span class="asgn-ref">📋 A4 Q7</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>"Write pseudocode for [min difference between any two times]. Include English explanation and complexity."</td>
+      <td>Convert to minutes; sort; compare consecutive pairs; circular wrap-around formula; time O(m log m), space O(m)</td>
+      <td>Forgetting the circular wrap-around (comparing last to first across midnight)</td>
+      <td><span class="pdf-ref">📄 p. ?? verify</span> / <span class="asgn-ref">📋 A4 Q8</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>"Write pseudocode for total Hamming distance. Include English explanation and complexity."</td>
+      <td>32 bit positions outer loop; count p = ones at position i; q = n-p; total += p*q; time O(n), space O(1)</td>
+      <td>Trying O(n²) brute force (all pairs) instead of per-bit-position counting</td>
+      <td><span class="pdf-ref">📄 p. 35</span> / <span class="asgn-ref">📋 A4 Q9</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>"Write pseudocode for max probability path. Include English explanation and complexity."</td>
+      <td>Build adj list with probs; prob[] initialized to 0 (prob[start]=1); max-heap; multiply probs (not add); stale check; return prob[end]</td>
+      <td>Using min-heap instead of max-heap; adding probabilities instead of multiplying</td>
+      <td><span class="pdf-ref">📄 p. 169</span> / <span class="asgn-ref">📋 A6 Q9</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>"What is the time complexity of [algorithm X]? Justify."</td>
+      <td>State O(n) or O(n log n) or O((V+E) log E); justify each step: outer loop, inner loop, per-step cost</td>
+      <td>Stating the answer without justification (loses most of the marks)</td>
+      <td><span class="pdf-ref">📄 pp. 23–35</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>"Find the star graph center given an edge list."</td>
+      <td>The center appears in both edges[0] and edges[1]; check which node is common; return it; O(1)</td>
+      <td>Sorting or scanning all edges when just checking the first two edges suffices</td>
+      <td><span class="pdf-ref">📄 p. ?? verify</span> / <span class="asgn-ref">📋 A6 Q7</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>"Write the pseudocode answer template for any 20-point question."</td>
+      <td>English overview (step-wise numbered), pseudocode, time complexity with justification, space complexity with justification</td>
+      <td>Missing space complexity analysis (always state it separately from time)</td>
+      <td><span class="pdf-ref">📄 pp. 23–35</span> / A4+A6 format</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>"Is [algorithm] greedy? Justify why greedy works here."</td>
+      <td>Dijkstra is greedy; state the greedy choice (always extend from current max probability); justify correctness (probabilities ≤1, so extending cannot improve)</td>
+      <td>Saying "greedy works because it's fast" rather than explaining why the local choice is globally optimal</td>
+      <td><span class="pdf-ref">📄 p. 169</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Assignment Replay: A4 Q7, Q8, Q9 &amp; A6 Q7, Q8, Q9 <span class="asgn-ref">📋 A4</span> <span class="asgn-ref">📋 A6</span></h3>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q7</span> <strong>Find contiguous subarray of length k with max average.</strong> Input: nums=[1,12,-5,-6,50,3], k=4. Output: 12.75</p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Core idea:</strong> Initialize window sum on first k elements; slide by subtracting the departing element and adding the arriving element. Track max_sum. Return max_sum / k. <span class="pdf-ref">📄 pp. 23–35</span></li>
+        <li><strong>Critical line:</strong> <code>window_sum = window_sum - nums[i-k] + nums[i]</code>. The index <code>i-k</code> is the element leaving the left side of the window. <span class="pdf-ref">📄 pp. 23–35</span></li>
+        <li><strong>Complexity:</strong> Time O(n) — one pass after O(k) initialization. Space O(1) — only 3 variables. <span class="pdf-ref">📄 pp. 23–35</span></li>
+        <li><strong>Common mistake:</strong> Returning window_sum / k instead of max_sum / k — you need the max, not the final window's average. <span class="pdf-ref">📄 pp. 23–35</span></li>
+        <li><strong>Exam variant:</strong> The sliding window could ask for minimum sum, or a different window-size formula (e.g., variable-size). The update rule is always the same. <span class="pdf-ref">📄 pp. 23–35</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q8</span> <strong>Minimum time difference between any two time points in "HH:MM" format.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Step 1:</strong> Convert each "HH:MM" string to minutes = hours × 60 + minutes. This normalizes all times to integers in [0, 1439]. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Step 2:</strong> Sort the minutes list — this ensures minimum gaps are between adjacent elements. <span class="pdf-ref">📄 p. 63</span></li>
+        <li><strong>Step 3:</strong> Scan adjacent pairs: diff = minutes[i] - minutes[i-1]. Track minimum. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Step 4 (critical):</strong> Circular wrap: circular_diff = minutes[0] + 1440 - minutes[-1]. Include this in the minimum. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Complexity:</strong> Time O(m log m) dominated by sort. Space O(m) for the minutes array. <span class="pdf-ref">📄 p. 63</span></li>
+        <li><strong>Exam insight:</strong> The circular difference is almost always the tricky part that separates full-credit answers from partial-credit ones. <span class="pdf-ref">📄 p. ?? verify</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q9</span> <strong>Total Hamming distance between all pairs in nums.</strong> Input: [4,14,2]. Output: 6.</p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Core insight:</strong> Don't count pairs — count per bit position. For bit i: p = count of 1s, q = n-p = count of 0s. Pairs differing at position i = p × q. <span class="pdf-ref">📄 p. 35</span></li>
+        <li><strong>Bit extraction:</strong> <code>(num >> bit) & 1</code> gives 1 if bit position 'bit' is set, else 0. <span class="pdf-ref">📄 p. 35</span></li>
+        <li><strong>Complexity:</strong> Time O(32n) = O(n) since 32 is constant. Space O(1). <span class="pdf-ref">📄 p. 35</span></li>
+        <li><strong>Why 32?</strong> Standard 32-bit integers. The outer loop always runs exactly 32 times regardless of n. <span class="pdf-ref">📄 p. 35</span></li>
+        <li><strong>Exam variant:</strong> Could ask "parity of XOR" or "count pairs with bit difference 1" — the per-bit-position counting pattern applies to any of these. <span class="pdf-ref">📄 p. 35</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q9</span> <strong>Max probability path from start to end.</strong> Input: n=3, edges=[[0,1],[1,2],[0,2]], succProb=[0.5,0.5,0.2], start=0, end=2. Output: 0.25.</p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Key differences from standard Dijkstra:</strong> Use max-heap (not min-heap); multiply probabilities (not add distances); update if new_prob &gt; prob[v] (not &lt;). <span class="pdf-ref">📄 p. 169</span></li>
+        <li><strong>Python max-heap trick:</strong> heapq is a min-heap. To simulate a max-heap, negate the probabilities: push -prob, pop gives the most negative = highest probability. <span class="pdf-ref">📄 p. 169</span></li>
+        <li><strong>Stale entry check:</strong> <code>if curr_prob &lt; prob[u]: continue</code>. Because the heap may have outdated entries for nodes whose prob was already updated with a better value. <span class="pdf-ref">📄 p. 169</span></li>
+        <li><strong>Complexity:</strong> Time O((V+E) log E) same as standard Dijkstra with binary heap. Space O(V+E). <span class="pdf-ref">📄 p. 169</span></li>
+        <li><strong>Exam variant:</strong> Any problem asking for "maximize product along a path" or "maximize min-weight edge along a path" uses this exact template. <span class="pdf-ref">📄 pp. 169–178</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q7</span> <strong>Find center of star graph.</strong> Input: edges=[[1,2],[2,3],[4,2]]. Output: 2.</p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Key observation:</strong> In a star graph, the center appears in EVERY edge. A leaf appears in exactly ONE edge. So the center is the node common to edges[0] and edges[1]. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Algorithm:</strong> Check if edges[0][0] appears in edges[1]. If so, return it. Otherwise return edges[0][1]. Two comparisons total. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Complexity:</strong> Time O(1) (constant number of comparisons, no loops). Space O(1). This is an "observation-based" O(1) solution. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Common mistake:</strong> Counting the degree of every node (O(n)) instead of using the O(1) insight. <span class="pdf-ref">📄 p. ?? verify</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q8</span> <strong>Can array be rearranged to form arithmetic progression?</strong> Input: arr=[3,5,1]. Output: True.</p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Core idea:</strong> After sorting, an AP must have all consecutive differences equal to the same d. Sort, compute d = arr[1]-arr[0], then verify all remaining consecutive differences. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Trivial case:</strong> If n &lt; 2, return True (trivially an AP). <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Complexity:</strong> Time O(n log n) for sort + O(n) for verification = O(n log n). Space O(1) auxiliary if in-place sort. <span class="pdf-ref">📄 p. 63</span></li>
+        <li><strong>Negative d works too:</strong> If sorted in ascending order and d &lt; 0, the check still works — just verifies all pairs have the same (negative) difference. <span class="pdf-ref">📄 p. ?? verify</span></li>
+        <li><strong>Exam variant:</strong> "Is this array sorted?" "Find the missing element from an AP" — all use sort + scan. <span class="pdf-ref">📄 p. ?? verify</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3>Misconception Cards <span class="pdf-ref">📄 pp. 23–35, 169–178</span></h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Sliding window only works for subarrays with positive numbers."</p>
+  <p><span class="reality">✅ Reality:</span> Sliding window works for any fixed-size contiguous subarray regardless of sign. The example in A4 Q7 contains -5 and -6, and the algorithm still correctly finds the window [12,-5,-6,50] with sum 51. <span class="pdf-ref">📄 pp. 23–35</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "For Hamming distance, I need to compare all pairs."</p>
+  <p><span class="reality">✅ Reality:</span> The bit-position counting technique avoids all pairwise comparison. For each of the 32 bit positions, count ones (p) and zeros (q=n-p); add p×q to the total. This is O(n), not O(n²). <span class="pdf-ref">📄 p. 35</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Modified Dijkstra adds probabilities just like standard Dijkstra adds distances."</p>
+  <p><span class="reality">✅ Reality:</span> Probabilities are multiplied, not added. The path probability is the PRODUCT of edge probabilities along the path. This changes the update rule from <code>dist[v] = min(dist[v], dist[u]+w)</code> to <code>prob[v] = max(prob[v], prob[u]*p)</code>. <span class="pdf-ref">📄 pp. 169–178</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Space complexity O(1) means the algorithm uses no memory."</p>
+  <p><span class="reality">✅ Reality:</span> O(1) space means a constant amount of <em>extra</em> memory, regardless of input size. The input itself (the array) doesn't count. Variables like window_sum, max_sum, and loop counters are O(1) extra space. <span class="pdf-ref">📄 pp. 23–35</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "The star graph center is always the first node in the edge list."</p>
+  <p><span class="reality">✅ Reality:</span> The center is the node that appears in BOTH edges[0] and edges[1]. Check both endpoints of edges[0] against both endpoints of edges[1]. The common node is the center. It may be at position [0] or [1] in either edge. <span class="pdf-ref">📄 p. ?? verify</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "O(n log n) is always slower than O(n), so sorting should be avoided."</p>
+  <p><span class="reality">✅ Reality:</span> O(n log n) is slower than O(n) asymptotically, but for many problems (like min time difference or AP check), sorting is the KEY that enables the O(n) scan afterward. Without sorting, the scan alone would be O(n²). Sorting + O(n) scan = O(n log n) overall, which is MUCH better than O(n²). <span class="pdf-ref">📄 p. 63</span></p>
+</div>
+
+<h3>Memory Aids &amp; Mnemonics <span class="pdf-ref">📄 pp. 23–35, 169–178</span></h3>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 1: Sliding Window — "Subtract Left, Add Right"</strong>
+  Whenever you slide the window one step right: you subtract the element that just left the window on the left (nums[i-k]) and add the element that just entered on the right (nums[i]). Three words: <strong>Subtract-Left, Add-Right</strong> = the entire sliding window update. <span class="pdf-ref">📄 pp. 23–35</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 2: Sort + Scan — "Sort First, Think Later"</strong>
+  Any problem involving "minimum gap between any two elements" or "check if some ordered property holds" — sort the array first. After sorting, the answer becomes a single left-to-right pass. Sort first → the hard work is done; the scan is trivial. <span class="pdf-ref">📄 p. 63</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 3: Bit Counting — "p ones, q zeros, p×q pairs"</strong>
+  For Hamming distances: for each bit position, count p = numbers with a 1. The number with a 0 is q = n - p. Every 1-bit number pairs with every 0-bit number at this position: p × q pairs differ. Sum over all 32 positions. Formula: total += p × (n - p). <span class="pdf-ref">📄 p. 35</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 4: Modified Dijkstra — "Three Changes from Standard"</strong>
+  Standard Dijkstra → Modified Dijkstra for max probability:
+  (1) min-heap → MAX-heap (negate probabilities in Python's heapq).
+  (2) dist + weight → prob × edge_prob (add → multiply).
+  (3) update if new &lt; old → update if new &gt; old (minimize → maximize).
+  Everything else: same structure, same stale check, same algorithm. <span class="pdf-ref">📄 pp. 169–178</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 5: Answer Template — "CESP"</strong>
+  Every 20-point pseudocode question in A4 and A6 requires four components. Remember CESP:
+  <strong>C</strong>ore idea (one sentence English).
+  <strong>E</strong>nglish step-wise explanation (numbered steps).
+  <strong>S</strong>ource (pseudocode — the actual code).
+  <strong>P</strong>erformance (time AND space complexity, each with justification).
+  Missing any of CESP means losing points. <span class="pdf-ref">📄 pp. 23–35</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     WARM-UP UNDERSTANDING CHECKS
+     ============================================================ -->
+<h2 id="warmup-checks">🧗 Warm-up Understanding Checks</h2>
+<p style="color: var(--text-dim);">Five conceptual checks — not exam-style. Confirm you absorbed §1–2 before tackling the graded practice questions in §4.</p>
+
+<!-- WC-1 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">CONCEPTUAL</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+  </div>
+  <p class="question-stem">WC-1. A classmate says: "Sliding window is just a fancy name for a nested loop — you still look at k elements each iteration, so it must be O(nk)." Explain precisely what they got wrong and what the correct complexity is.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What they got wrong:</strong> The sliding window does NOT recompute the sum of k elements each iteration. It uses the old sum and makes exactly 2 adjustments: subtract the element leaving the left edge, add the element entering the right edge. This is O(1) work per iteration, not O(k). <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>The correct complexity:</strong> O(k) to initialize the first window + O(n-k) to slide it = O(n) total. See the trace in §2a where n=6, k=4: we do 4 additions to initialize, then 2 slide steps (each O(1)) — total 6 = n operations. <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-2 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">TRACING</span>
+    <span class="pdf-ref">📄 p. 35</span>
+  </div>
+  <p class="question-stem">WC-2. For nums = [1, 3], compute the total Hamming distance using the bit-position counting technique. Show the table of bit positions 0, 1, and 2 with the counts of 1s (p) and 0s (q) for each position.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Binary representations:</strong> 1 = 01 (bit1=0, bit0=1); 3 = 11 (bit1=1, bit0=1). <span class="pdf-ref">📄 p. 35</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Bit position</th><th>1 (binary)</th><th>3 (binary)</th><th>p (count of 1s)</th><th>q = 2-p</th><th>contribution p×q</th></tr></thead>
+        <tbody>
+          <tr><td>0 (rightmost)</td><td>1</td><td>1</td><td>2</td><td>0</td><td>2×0 = 0</td></tr>
+          <tr class="highlight"><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1×1 = 1</td></tr>
+          <tr><td>2 and above</td><td>0</td><td>0</td><td>0</td><td>2</td><td>0×2 = 0</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Total = 0 + 1 + 0 = 1.</strong> Verify: HammingDistance(1=01, 3=11) = bit position 1 differs (0 vs 1) → 1 different bit → Hamming distance = 1. ✓ <span class="pdf-ref">📄 p. 35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-3 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PATTERN RECOGNITION</span>
+    <span class="pdf-ref">📄 pp. 23–35, 169–178</span>
+  </div>
+  <p class="question-stem">WC-3. For each of the following problem descriptions, identify which pattern applies: Sliding Window, Sort + Scan, Bit Manipulation, or Modified Dijkstra.
+  (a) "Given an array, find the maximum sum of any k consecutive elements."
+  (b) "In a road network where each road has a success probability, find the path from A to B maximizing success probability."
+  (c) "Given a list of meeting start/end times, find the minimum gap between any two meetings."
+  (d) "Given an integer array, for each element find how many other elements it differs from in exactly 2 bit positions."</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>(a) Sliding Window.</strong> Fixed-size window of k consecutive elements; maximize a window property. Initialize sum on first k elements, slide incrementally. O(n). <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>(b) Modified Dijkstra.</strong> Weighted graph; maximize product of edge weights along a path; use max-heap, multiply probabilities (not add). O((V+E) log E). <span class="pdf-ref">📄 pp. 169–178</span></p>
+      <p><strong>(c) Sort + Scan.</strong> Minimum gap between any two elements; after sorting, the minimum gap is between adjacent pairs. Scan once after sorting. O(n log n). <span class="pdf-ref">📄 p. 63</span></p>
+      <p><strong>(d) Bit Manipulation.</strong> Comparing bit patterns between pairs of numbers; per-bit-position analysis. For "exactly 2 bit positions differ" — this is a Hamming distance constraint. O(n × 32) = O(n). <span class="pdf-ref">📄 p. 35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-4 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PSEUDOCODE READING</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+  </div>
+  <p class="question-stem">WC-4. Read the following pseudocode and state its time complexity with justification. Is it O(n), O(n log n), O(nk), or something else?
+  <pre style="background: var(--bg-elev2); padding: 12px; border-radius: 6px; font-family: monospace; font-size: 0.88em; margin-top: 8px; color: var(--text-dim);">
+def mystery(nums, k):
+    result = []
+    window_sum = sum(nums[:k])      # sum first k elements
+    result.append(window_sum / k)
+    for i in range(k, len(nums)):   # n-k iterations
+        window_sum += nums[i] - nums[i-k]   # O(1) per iteration
+        result.append(window_sum / k)
+    return result</pre></p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Time complexity: O(n).</strong></p>
+      <p>Justification: The initial <code>sum(nums[:k])</code> takes O(k) time (sums k elements). The loop runs n-k times, each iteration doing O(1) work (one addition, one subtraction, one division, one append). Total: O(k) + O(n-k) = O(n). <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Space complexity: O(n).</strong> The result list stores n-k+1 averages, which is O(n). If we only needed the maximum (as in A4 Q7), we'd use O(1) space instead. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p>This is a sliding window computing the average of EVERY window, not just the maximum. It's the natural extension of A4 Q7. <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-5 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">MISCONCEPTION PUNCTURE</span>
+    <span class="pdf-ref">📄 pp. 169–178</span>
+  </div>
+  <p class="question-stem">WC-5. Your classmate says: "Modified Dijkstra for max probability doesn't need a max-heap — I can use a min-heap with regular (positive) probabilities and just look for the node with the largest prob array value instead of popping from the heap." Explain why this approach fails.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Why it fails:</strong> The efficiency of Dijkstra's algorithm depends on the priority queue always giving you the next node to process in the correct order. If you use a min-heap with positive probabilities, the smallest probability comes out first — but we want the LARGEST probability (most likely path so far). Processing nodes in wrong order breaks the greedy correctness argument. <span class="pdf-ref">📄 pp. 169–178</span></p>
+      <p><strong>The alternative they describe</strong> — scanning the prob array for the maximum each iteration — works correctly but takes O(n) per iteration to find the maximum, giving O(n²) total. That's worse than the O((V+E) log E) heap approach. <span class="pdf-ref">📄 pp. 169–178</span></p>
+      <p><strong>The correct fix:</strong> Negate probabilities when pushing to Python's min-heap: <code>heappush(heap, (-prob, node))</code>. Popping gives the most negative = most probable node. This correctly extracts the max-probability node in O(log n) time per operation. <span class="pdf-ref">📄 pp. 169–178</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 4: PRACTICE QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Practice Questions</h2>
+<div class="pages-coverage">📘 13 exam-style questions: 4 MCQ + 3 PROOF + 3 TRACE + 3 PSEUDOCODE</div>
+
+<h3 id="section-4-mcq">MCQ — Multiple Choice (4 Questions)</h3>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+    <span class="asgn-ref">📋 A4 Q7</span>
+  </div>
+  <p class="question-stem">Q1. The sliding window algorithm for finding the maximum average subarray of length k achieves O(n) time by:</p>
+  <ol class="mcq-options" type="A">
+    <li>Computing the sum of each window from scratch in O(k) time per window</li>
+    <li>Updating the window sum by subtracting one element and adding one element — O(1) per slide</li>
+    <li>Sorting the array first and then scanning for the best k elements</li>
+    <li>Using a priority queue to track the k largest elements</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>The key is incremental update: new_sum = old_sum - nums[i-k] + nums[i]. One subtraction and one addition — O(1) per slide. Over n-k slides, total O(n). <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p>Why A is wrong: that's the O(nk) brute-force approach — precisely what sliding window avoids.</p>
+      <p>Why C is wrong: sorting would give O(n log n) and doesn't help find contiguous subarrays.</p>
+      <p>Why D is wrong: a priority queue helps with "top-k elements anywhere" but not with fixed contiguous windows.</p>
+      <p><em>Exam Tip:</em> The one-word identifier for sliding window is "incremental" — incremental update instead of recomputation. <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 p. 35</span>
+    <span class="asgn-ref">📋 A4 Q9</span>
+  </div>
+  <p class="question-stem">Q2. For the total Hamming distance problem with n numbers, the bit-position counting technique achieves O(n) by:</p>
+  <ol class="mcq-options" type="A">
+    <li>Comparing all pairs of numbers — O(n²) pairs, each in O(1)</li>
+    <li>For each of 32 bit positions, counting p ones and computing p×(n-p)</li>
+    <li>Sorting the numbers by their Hamming distance from 0</li>
+    <li>Using XOR of all numbers to find common bits</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>For each of 32 bit positions: count p = numbers with a 1, compute q = n-p. Contribution = p×q. Sum over 32 positions. Total: O(32n) = O(n). <span class="pdf-ref">📄 p. 35</span></p>
+      <p>Why A is wrong: that's O(n²) brute force — exactly what this technique avoids.</p>
+      <p>Why C is wrong: sorting by Hamming distance from 0 doesn't help compute pairwise distances.</p>
+      <p>Why D is wrong: XOR of all numbers gives you a single value, not the sum of pairwise distances.</p>
+      <p><em>Exam Tip:</em> The insight is "per position, not per pair" — swap the order of the nested loops mentally. <span class="pdf-ref">📄 p. 35</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 169–178</span>
+    <span class="asgn-ref">📋 A6 Q9</span>
+  </div>
+  <p class="question-stem">Q3. In the modified Dijkstra algorithm for maximum probability path, what is the correct update condition for relaxing edge (u, v) with probability p?</p>
+  <ol class="mcq-options" type="A">
+    <li>if prob[u] + p &gt; prob[v]: update prob[v] = prob[u] + p</li>
+    <li>if prob[u] × p &gt; prob[v]: update prob[v] = prob[u] × p</li>
+    <li>if prob[u] + p &lt; prob[v]: update prob[v] = prob[u] + p</li>
+    <li>if prob[u] × p &lt; prob[v]: update prob[v] = prob[u] × p</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>Probabilities multiply along a path (prob = product of edge probs). We want to maximize the path probability, so we update when the new path is BETTER (higher probability). The update: if prob[u] × p &gt; prob[v]: prob[v] = prob[u] × p. <span class="pdf-ref">📄 pp. 169–178</span></p>
+      <p>Why A/C are wrong: addition is for standard Dijkstra shortest paths — probabilities multiply, they don't add.</p>
+      <p>Why D is wrong: we want to maximize (update when new is LARGER), not minimize (update when new is smaller).</p>
+      <p><em>Exam Tip:</em> The two changes from standard Dijkstra: × instead of +, and &gt; instead of &lt; in the update condition. <span class="pdf-ref">📄 pp. 169–178</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 23–35, 169–178</span>
+  </div>
+  <p class="question-stem">Q4. Which algorithm achieves the best asymptotic time complexity for finding the minimum difference between any two times in a list of m time points in "HH:MM" format?</p>
+  <ol class="mcq-options" type="A">
+    <li>O(m²) — compare all pairs</li>
+    <li>O(m log m) — convert to minutes, sort, compare adjacent + circular gap</li>
+    <li>O(m) — sliding window on sorted times</li>
+    <li>O(1) — all time differences are at most 1440 minutes</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — O(m log m)</strong></p>
+      <p>Convert to minutes: O(m). Sort: O(m log m). Compare adjacent pairs + circular gap: O(m). Total: O(m log m) dominated by sort. <span class="pdf-ref">📄 p. 63</span></p>
+      <p>Why A is wrong: O(m²) is the brute-force approach — this is the baseline, not optimal.</p>
+      <p>Why C is wrong: sliding window requires the array to already be sorted; the sort itself takes O(m log m), so the overall complexity cannot be O(m).</p>
+      <p>Why D is wrong: O(1) is only possible if m is bounded by a constant (like m ≤ 1440), but m time points need to be examined — the algorithm must read all m inputs.</p>
+      <p><em>Exam Tip:</em> The O(m log m) is optimal for comparison-based sorting. This cannot be improved to O(m) without additional constraints. <span class="pdf-ref">📄 p. 63</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-proof">Proof Questions (3 Questions)</h3>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+    <span class="asgn-ref">📋 A4 Q7</span>
+  </div>
+  <p class="question-stem">Q5. Claim: "The sliding window algorithm for finding the maximum average subarray of length k is correct — it never misses the optimal window." Prove this claim.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove by exhaustive case analysis.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Direct Proof: Sliding Window Correctness</div>
+        <div class="proof-step"><strong>Step 1 [What we're proving].</strong> The algorithm examines every contiguous subarray of length k exactly once and tracks the maximum sum seen. <span class="pdf-ref">📄 pp. 23–35</span></div>
+        <div class="proof-step"><strong>Step 2 [Windows examined].</strong> The initialization computes the sum of window [0..k-1]. The loop at i=k computes [1..k], at i=k+1 computes [2..k+1], ..., at i=n-1 computes [n-k..n-1]. This is every window of length k starting at indices 0, 1, 2, ..., n-k. Together these are ALL n-k+1 windows of length k. <span class="pdf-ref">📄 pp. 23–35</span></div>
+        <div class="proof-step"><strong>Step 3 [Sum correctness].</strong> We prove by induction that window_sum at each step i equals sum(nums[i-k..i-1]). Base case: after initialization, window_sum = sum(nums[0..k-1]) ✓. Inductive step: window_sum at step i = (window_sum at step i-1) - nums[i-k] + nums[i] = sum(nums[i-k-1..i-2]) - nums[i-k-1] + ... (the algebra confirms the telescoping update maintains the invariant). ✓ <span class="pdf-ref">📄 pp. 23–35</span></div>
+        <div class="proof-step"><strong>Step 4 [Conclusion].</strong> Since we examine every window and correctly compute its sum, max_sum correctly holds the maximum sum over all windows. Dividing by k gives the maximum average. ∎ <span class="pdf-ref">📄 pp. 23–35</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Stated that all n-k+1 windows are examined. <span class="pdf-ref">📄 pp. 23–35</span></li>
+        <li>☐ Showed or argued that window_sum correctly tracks the current window's sum. <span class="pdf-ref">📄 pp. 23–35</span></li>
+        <li>☐ Concluded that max_sum is the maximum over all windows. <span class="pdf-ref">📄 pp. 23–35</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 p. 35</span>
+    <span class="asgn-ref">📋 A4 Q9</span>
+  </div>
+  <p class="question-stem">Q6. Claim: "For p numbers having a 1 at bit position i, and q = n-p numbers having a 0, exactly p×q pairs differ at bit position i." Prove this claim.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Direct counting proof.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Direct Proof: p × q Pairs Formula</div>
+        <div class="proof-step"><strong>Step 1 [Setup].</strong> Partition the n numbers into two groups: Group A = {numbers with a 1 at bit position i}, |A| = p. Group B = {numbers with a 0 at bit position i}, |B| = q = n-p. <span class="pdf-ref">📄 p. 35</span></div>
+        <div class="proof-step"><strong>Step 2 [Which pairs differ?]</strong> A pair (x, y) differs at bit position i if and only if one is in Group A and the other is in Group B. Proof: if both are in A (both have bit 1) → they agree at position i; if both are in B (both have bit 0) → they agree; if one is in A and one in B → they disagree. <span class="pdf-ref">📄 p. 35</span></div>
+        <div class="proof-step"><strong>Step 3 [Count such pairs].</strong> The number of pairs (x, y) where x ∈ A and y ∈ B is |A| × |B| = p × q. (For each of the p numbers in A, we can pair it with each of the q numbers in B — giving p × q distinct pairs.) <span class="pdf-ref">📄 p. 35</span></div>
+        <div class="proof-step"><strong>Step 4 [Conclusion].</strong> Therefore, exactly p × q pairs of numbers differ at bit position i. Summing over all 32 bit positions gives the total Hamming distance sum. ∎ <span class="pdf-ref">📄 p. 35</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Defined Group A (1s) and Group B (0s) and their sizes p and q. <span class="pdf-ref">📄 p. 35</span></li>
+        <li>☐ Showed pairs in the same group agree; pairs across groups disagree. <span class="pdf-ref">📄 p. 35</span></li>
+        <li>☐ Counted cross-group pairs as p × q. <span class="pdf-ref">📄 p. 35</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 169–178</span>
+    <span class="asgn-ref">📋 A6 Q9</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 7 (Algorithm Design Patterns) + Topic 5 (Dijkstra Correctness)</div>
+  <p class="question-stem">Q7. Claim: "The modified Dijkstra algorithm (for maximum probability path) is correct: when a node u is popped from the max-heap with probability curr_prob, curr_prob equals the true maximum probability path from start to u." Prove this claim by induction on the order of extraction from the max-heap.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Proof by induction on extraction order.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Inductive Proof: Modified Dijkstra Correctness</div>
+        <div class="proof-step"><strong>Base case [First extraction].</strong> The first node extracted is start with probability 1.0. Since prob[start] = 1.0 (we're definitely there), this is the correct maximum probability to start. ✓ <span class="pdf-ref">📄 pp. 169–178</span></div>
+        <div class="proof-step"><strong>Inductive hypothesis (IH).</strong> Assume that for all nodes extracted from the max-heap so far, their extracted probability equals the true maximum path probability from start. <span class="pdf-ref">📄 pp. 169–178</span></div>
+        <div class="proof-step"><strong>Inductive step.</strong> Let u be the next node extracted with probability curr_prob = prob[u]. We claim curr_prob is the true maximum path probability to u. Suppose not — suppose there's a better path via some unextracted node v with probability prob_better &gt; prob[u]. But prob_better ≤ prob[v] (v hasn't been extracted, so its probability could only increase when we extract it). Since we extract in max order, prob[u] ≥ prob[v] (u was extracted before v). So prob_better ≤ prob[v] ≤ prob[u]. Contradiction. ✓ <span class="pdf-ref">📄 pp. 169–178</span></div>
+        <div class="proof-step"><strong>Key ingredient [Edge probabilities ≤ 1].</strong> This proof holds because probabilities are in (0,1]. Since edge probs ≤ 1, multiplying along any path never increases the probability. Hence any path through an unextracted node v (with prob[v] ≤ prob[u]) cannot yield a better path to u than prob[u]. ✓ <span class="pdf-ref">📄 pp. 169–178</span></div>
+        <div class="proof-step"><strong>Conclusion.</strong> By induction, every extracted node has the correct maximum probability. ∎ <span class="pdf-ref">📄 pp. 169–178</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Base case: start node extracted with probability 1.0 (correct). <span class="pdf-ref">📄 p. 169</span></li>
+        <li>☐ IH stated for all previously extracted nodes. <span class="pdf-ref">📄 p. 169</span></li>
+        <li>☐ Key argument: any better path must go through an unextracted node, but extraction order ensures prob[u] ≥ prob[v] for unextracted v. <span class="pdf-ref">📄 pp. 169–178</span></li>
+        <li>☐ Critical note: requires edge probabilities ≤ 1 (so paths cannot improve by adding more edges). <span class="pdf-ref">📄 pp. 169–178</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-trace">Algorithm Trace / Analysis (3 Questions)</h3>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+    <span class="asgn-ref">📋 A4 Q7</span>
+  </div>
+  <p class="question-stem">Q8. Trace the sliding window algorithm on nums = [5, 1, 8, 3, 7, 2], k = 3. Show the window_sum and max_sum at each step.</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <table class="trace-table">
+        <thead><tr><th>Step</th><th>Window (indices)</th><th>Elements</th><th>window_sum</th><th>max_sum</th></tr></thead>
+        <tbody>
+          <tr><td>Init</td><td>[0..2]</td><td>5, 1, 8</td><td>5+1+8 = 14</td><td>14</td></tr>
+          <tr class="highlight"><td>i=3</td><td>[1..3]</td><td>1, 8, 3</td><td>14 - 5 + 3 = 12</td><td>max(14,12) = 14</td></tr>
+          <tr><td>i=4</td><td>[2..4]</td><td>8, 3, 7</td><td>12 - 1 + 7 = 18</td><td>max(14,18) = 18</td></tr>
+          <tr class="highlight"><td>i=5</td><td>[3..5]</td><td>3, 7, 2</td><td>18 - 8 + 2 = 12</td><td>max(18,12) = 18</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Return max_sum / k = 18 / 3 = 6.0.</strong> The best window is [8, 3, 7] at indices 2-4 with average 6.0. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p>📝 <strong>Complexity:</strong> Time O(n) = O(6). Space O(1). <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 p. 35</span>
+    <span class="asgn-ref">📋 A4 Q9</span>
+  </div>
+  <p class="question-stem">Q9. Trace the bit-position counting algorithm on nums = [1, 2, 3] to find the total Hamming distance. Show the table for bit positions 0, 1, and 2.</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p>Binary: 1 = 001, 2 = 010, 3 = 011. n = 3. <span class="pdf-ref">📄 p. 35</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Bit Position</th><th>1 (001)</th><th>2 (010)</th><th>3 (011)</th><th>p (ones)</th><th>q = 3-p</th><th>p×q</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>2</td><td>1</td><td>2</td></tr>
+          <tr class="highlight"><td>1</td><td>0</td><td>1</td><td>1</td><td>2</td><td>1</td><td>2</td></tr>
+          <tr><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td><td>0</td></tr>
+          <tr><td>3-31</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Total = 2 + 2 + 0 + 0 + ... = 4.</strong> <span class="pdf-ref">📄 p. 35</span></p>
+      <p>Verify: HammDist(1,2)=2 + HammDist(1,3)=1 + HammDist(2,3)=1 = 4 ✓</p>
+      <p>📝 <strong>Complexity:</strong> Time O(32n) = O(n). Space O(1). <span class="pdf-ref">📄 p. 35</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 169–178</span>
+    <span class="asgn-ref">📋 A6 Q9</span>
+  </div>
+  <p class="question-stem">Q10. Trace the modified Dijkstra algorithm for maximum probability path on: n=4, edges=[[0,1],[0,2],[1,3],[2,3]], succProb=[0.8,0.4,0.6,0.9], start=0, end=3. Show the prob[] array and heap state at each iteration.</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p>Graph: 0-(0.8)-1-(0.6)-3 and 0-(0.4)-2-(0.9)-3. <span class="pdf-ref">📄 pp. 169–178</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Iter</th><th>Popped</th><th>curr_prob</th><th>Stale?</th><th>prob[] after</th><th>Heap after</th></tr></thead>
+        <tbody>
+          <tr><td>Init</td><td>-</td><td>-</td><td>-</td><td>[1.0, 0.0, 0.0, 0.0]</td><td>[(-1.0, 0)]</td></tr>
+          <tr class="highlight"><td>1</td><td>(-1.0, 0)</td><td>1.0</td><td>No</td><td>[1.0, 0.8, 0.4, 0.0]</td><td>[(-0.8,1),(-0.4,2)]</td></tr>
+          <tr><td>2</td><td>(-0.8, 1)</td><td>0.8</td><td>No</td><td>[1.0, 0.8, 0.4, 0.48]</td><td>[(-0.48,3),(-0.4,2)]</td></tr>
+          <tr class="highlight"><td>3</td><td>(-0.48, 3)</td><td>0.48</td><td>No (u==end)</td><td>-</td><td>Return 0.48</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Output: 0.48.</strong> Path 0→1→3: 0.8 × 0.6 = 0.48. Path 0→2→3: 0.4 × 0.9 = 0.36. Maximum = 0.48. ✓ <span class="pdf-ref">📄 pp. 169–178</span></p>
+      <p>📝 <strong>Complexity:</strong> Time O((V+E) log E) = O(7 log 4) for this example. Space O(V+E) = O(8). <span class="pdf-ref">📄 pp. 169–178</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-pseudo">Pseudocode / Design (3 Questions)</h3>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 p. ?? verify</span>
+    <span class="asgn-ref">📋 A6 Q7</span>
+  </div>
+  <p class="question-stem">Q11. Write pseudocode to find the center node of a star graph. Input: edges (a 2D array where edges[i] = [u, v] is an undirected edge). The center appears in every edge. Provide English explanation and complexity analysis.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+def findCenter(edges):
+    # Key observation: the center appears in BOTH edges[0] and edges[1].
+    # Leaves appear in only one edge.
+    u0, v0 = edges[0][0], edges[0][1]    # endpoints of first edge
+    u1, v1 = edges[1][0], edges[1][1]    # endpoints of second edge
+
+    if u0 == u1 or u0 == v1:
+        return u0      # u0 is common to both edges
+    else:
+        return v0      # v0 must be the common node
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. ?? verify</span> (A6 Q7 solution)</div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li><strong>Key observation:</strong> In a star graph, every edge connects the center to a leaf. The center appears in every edge; a leaf appears in exactly one edge.</li>
+        <li><strong>Check first two edges:</strong> The center must appear in both edges[0] = [u0, v0] and edges[1] = [u1, v1]. So either u0 or v0 is the center — whichever also appears in edges[1].</li>
+        <li><strong>Two comparisons:</strong> If u0 == u1 or u0 == v1, then u0 is the center. Otherwise v0 is the center.</li>
+        <li><strong>Return the center.</strong></li>
+      </ol>
+      <p><strong>📝 Complexity:</strong> Time = <span class="complexity-box">O(1)</span> — only 2 comparisons regardless of n. Space = <span class="complexity-box">O(1)</span> — only 4 variables. <span class="pdf-ref">📄 p. ?? verify</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 p. ?? verify</span>
+    <span class="asgn-ref">📋 A6 Q8</span>
+  </div>
+  <p class="question-stem">Q12. Write pseudocode to check if an array can be rearranged to form an arithmetic progression. Return True or False. Input: arr = [1, 5, 3, 7]. Provide English explanation and complexity analysis.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+def canMakeArithmeticProgression(arr):
+    n = len(arr)
+    if n < 2:
+        return True             # trivially an AP with 0 or 1 elements
+
+    arr.sort()                  # sort ascending: O(n log n)
+
+    # Compute expected common difference
+    d = arr[1] - arr[0]
+
+    # Verify all consecutive differences equal d
+    for i in range(2, n):       # n-2 iterations
+        if arr[i] - arr[i - 1] != d:
+            return False        # mismatch found
+
+    return True                 # all differences match
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. ?? verify</span> (A6 Q8 solution)</div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li><strong>Handle trivial case:</strong> Arrays of size 0 or 1 are trivially arithmetic progressions.</li>
+        <li><strong>Sort:</strong> In an AP, elements must appear in order with a constant gap. Sorting places them in the right order to check this.</li>
+        <li><strong>Compute d:</strong> The expected common difference is d = arr[1] - arr[0] after sorting.</li>
+        <li><strong>Verify:</strong> For each consecutive pair from index 1 to n-1, check if the difference equals d. If any pair differs, return False.</li>
+        <li><strong>Return True</strong> if all pairs have the same difference d.</li>
+      </ol>
+      <p>Trace on [1, 5, 3, 7]: Sort → [1, 3, 5, 7]. d = 3-1 = 2. Check: 5-3=2 ✓, 7-5=2 ✓. Return True. <span class="pdf-ref">📄 p. ?? verify</span></p>
+      <p><strong>📝 Complexity:</strong> Time = <span class="complexity-box">O(n log n)</span> (sort dominates; scan is O(n)). Space = <span class="complexity-box">O(1)</span> auxiliary (in-place sort). <span class="pdf-ref">📄 p. 63</span></p>
+    </div>
+  </details>
+</div>
+
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 23–35, 169–178</span>
+    <span class="asgn-ref">📋 A4 Q7</span> <span class="asgn-ref">📋 A6 Q9</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 7 (Sliding Window) + Topic 5 (Dijkstra) + Topic 2 (Complexity Analysis)</div>
+  <p class="question-stem">Q13. A "maximum reliability window" problem: you have n network nodes. Each node i has reliability r[i] ∈ [0,1]. You want to find the contiguous window of k nodes that maximizes the PRODUCT of reliabilities (not the sum). Write pseudocode, provide English explanation, and analyze complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Key Insight:</strong> We cannot use the standard sliding window (which uses additive increment: new = old - left + right). Products don't support this simple increment — dividing by the departing element works only if all values are non-zero. For general r[i] ∈ [0, 1], we use log-transform: since log(a×b) = log(a) + log(b), transform to logs and then sliding window works additively! Or, since values are in [0,1] and can be zero, we explicitly compute the product of each window.</p>
+      <pre class="pseudocode">
+def maxReliabilityWindow(r, k):
+    n = len(r)
+    if n == 0 or k > n:
+        return 0.0
+
+    # Option A: Direct product (works even with zeros)
+    # Initialize product of first window
+    window_prod = 1.0
+    for i in range(k):
+        window_prod *= r[i]         # O(k)
+    max_prod = window_prod
+
+    # Slide window: divide by departing, multiply by entering
+    # (Only safe if no zeros; else use Option B)
+    for i in range(k, n):
+        if r[i - k] != 0:
+            window_prod = window_prod / r[i - k] * r[i]   # O(1)
+        else:
+            # Recompute from scratch if zero leaves
+            window_prod = 1.0
+            for j in range(i - k + 1, i + 1):
+                window_prod *= r[j]                        # O(k) — rare
+        max_prod = max(max_prod, window_prod)
+
+    return max_prod
+
+# Option B (simpler, always correct): log-transform if no zeros allowed
+def maxReliabilityWindowLog(r, k):
+    import math
+    logs = [math.log(ri) for ri in r]    # transform to log space
+    # Now use standard sliding window on logs (sum = log of product)
+    window_log_sum = sum(logs[:k])        # O(k)
+    max_log_sum = window_log_sum
+    for i in range(k, len(r)):
+        window_log_sum = window_log_sum - logs[i-k] + logs[i]   # O(1)
+        max_log_sum = max(max_log_sum, window_log_sum)
+    return math.exp(max_log_sum)          # convert back
+</pre>
+      <div class="diagram-source">SOURCE: Integrates <span class="pdf-ref">📄 pp. 23–35</span> (sliding window) + <span class="pdf-ref">📄 p. 169</span> (product along path)</div>
+      <p><strong>English Explanation (Option B — log transform):</strong></p>
+      <ol>
+        <li>Transform: compute log of each reliability. log(product) = sum of logs — so maximizing the product is equivalent to maximizing the sum of logs.</li>
+        <li>Sliding window on log values: initialize on first k logs, slide by subtracting departing log and adding arriving log. O(n).</li>
+        <li>Transform back: exp(max_log_sum) gives the maximum product. O(1).</li>
+      </ol>
+      <p><strong>📝 Complexity (Option B):</strong> Time = <span class="complexity-box">O(n)</span> (log transform O(n) + sliding window O(n) + exp O(1)). Space = <span class="complexity-box">O(n)</span> for the logs array. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Cross-topic insight:</strong> The log trick appears in the modified Dijkstra too — maximizing probability products can be converted to maximizing sum of log-probabilities, allowing standard min-cost Dijkstra (negated logs = min-sum = max probability). <span class="pdf-ref">📄 pp. 169–178</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Cheat Sheet</h2>
+<div class="pages-coverage">📘 SOURCE: Assignments 4 and 6 (graded) · Lectures 4–9, 17–18 · pp. 23–35, 169–178</div>
+
+<div class="cheat-sheet">
+
+<h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+<p class="oneliner">
+  Algorithm design patterns are reusable strategies (sliding window, sort+scan, bit manipulation, modified Dijkstra) that transform
+  O(n²) brute-force solutions into O(n) or O(n log n) solutions — and every 20-point pseudocode question on the CS 570 exam uses one of these patterns.
+  <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+
+<h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+<ol>
+  <li><strong>Sliding window formula:</strong> window_sum = window_sum - nums[i-k] + nums[i]. Returns max_sum / k. Time O(n), Space O(1). <span class="pdf-ref">📄 pp. 23–35</span></li>
+  <li><strong>Bit counting formula:</strong> For each of 32 positions: p = count of 1s; total += p × (n-p). Bit extraction: (num >> bit) &amp; 1. Time O(n), Space O(1). <span class="pdf-ref">📄 p. 35</span></li>
+  <li><strong>Modified Dijkstra changes:</strong> min-heap → max-heap; dist + w → prob × p; update if new &lt; old → update if new &gt; old. Time O((V+E) log E). <span class="pdf-ref">📄 pp. 169–178</span></li>
+</ol>
+
+<h4>KEY FORMULAS / STRUCTURES:</h4>
+<table class="data">
+  <thead><tr><th>Pattern</th><th>Core Formula</th><th>Time</th><th>Space</th><th>Page</th></tr></thead>
+  <tbody>
+    <tr><td>Sliding Window</td><td>new_sum = old_sum - nums[i-k] + nums[i]; return max_sum / k</td><td>O(n)</td><td>O(1)</td><td><span class="pdf-ref">📄 pp. 23–35</span></td></tr>
+    <tr><td>Min Time Diff</td><td>to_minutes(t); sort; min(consecutive diffs, (first+1440-last))</td><td>O(m log m)</td><td>O(m)</td><td><span class="pdf-ref">📄 p. ?? verify</span></td></tr>
+    <tr><td>Hamming Dist Sum</td><td>for bit in 32: p = count of 1s; total += p*(n-p)</td><td>O(n)</td><td>O(1)</td><td><span class="pdf-ref">📄 p. 35</span></td></tr>
+    <tr><td>AP Check</td><td>sort; d = arr[1]-arr[0]; verify all consecutive diffs = d</td><td>O(n log n)</td><td>O(1)</td><td><span class="pdf-ref">📄 p. ?? verify</span></td></tr>
+    <tr><td>Star Center</td><td>node common to edges[0] and edges[1]</td><td>O(1)</td><td>O(1)</td><td><span class="pdf-ref">📄 p. ?? verify</span></td></tr>
+    <tr><td>Max Prob Path</td><td>Max-heap Dijkstra; prob[v] = max(prob[v], prob[u]*p)</td><td>O((V+E) log E)</td><td>O(V+E)</td><td><span class="pdf-ref">📄 pp. 169–178</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE CANONICAL ALGORITHM (Sliding Window — A4 Q7):</h4>
+<pre class="pseudocode">
+def findMaxAverage(nums, k):
+    window_sum = sum(nums[:k])         # init: sum first k elements O(k)
+    max_sum = window_sum
+    for i in range(k, len(nums)):      # slide: O(n-k) iterations
+        window_sum = window_sum - nums[i-k] + nums[i]   # O(1)
+        max_sum = max(max_sum, window_sum)
+    return max_sum / k                 # O(1)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span></div>
+<p>Time: O(n). Space: O(1). When to use: fixed-size contiguous window, maximize/minimize window property.</p>
+
+<h4>ASSIGNMENTS THAT TEST THIS TOPIC (QUICK REFERENCE):</h4>
+<table class="data">
+  <thead><tr><th>Assignment</th><th>Question</th><th>What It Tests</th><th>Graded?</th></tr></thead>
+  <tbody>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q7 (20 pts)</td><td>Sliding window max-average</td><td><span class="exam-star">⭐ YES</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q8 (20 pts)</td><td>Min time difference (sort + circular)</td><td><span class="exam-star">⭐ YES</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q9 (20 pts)</td><td>Total Hamming distance (bit counting)</td><td><span class="exam-star">⭐ YES</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q5 (8 pts)</td><td>Binary search median of two databases</td><td><span class="exam-star">⭐ YES</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q7 (20 pts)</td><td>Star graph center (O(1) observation)</td><td><span class="exam-star">⭐ YES</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q8 (20 pts)</td><td>Arithmetic progression check</td><td><span class="exam-star">⭐ YES</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q9 (20 pts)</td><td>Max probability path (modified Dijkstra)</td><td><span class="exam-star">⭐ YES</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE #1 MISTAKE ON EXAM QUESTIONS ABOUT THIS TOPIC:</h4>
+<p>
+  Missing the <strong>space complexity analysis</strong> in the pseudocode answer. Every 20-point question requires BOTH time complexity AND space complexity, each with justification. Students often state "Time: O(n)" and stop — losing points because they never stated "Space: O(1) auxiliary since only a constant number of variables are used." State both, always, separately. <span class="pdf-ref">📄 pp. 23–35</span>
+</p>
+
+<h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+<p class="remember">
+  The four patterns + their signals: Sliding Window (fixed-k window, incremental update); Sort+Scan (min gap between elements, sort first); Bit Counting (Hamming distance, per-position p×q); Modified Dijkstra (graph path, maximize product, max-heap). Every 20-point exam pseudocode question is one of these. <span class="pdf-ref">📄 pp. 23–35, 169–178</span>
+</p>
+
+<h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS IN THE LECTURE PDF:</h4>
+<table class="data">
+  <thead><tr><th>If you want to review...</th><th>Go to PDF page(s)...</th><th>Also in...</th></tr></thead>
+  <tbody>
+    <tr><td>Sliding window: max average (A4 Q7 problem)</td><td>pp. 23–35</td><td>[KT] Ch.1</td></tr>
+    <tr><td>Sliding window pseudocode + complexity</td><td>pp. 23–35</td><td>Assignment 4 solution p. 33</td></tr>
+    <tr><td>Min time difference (A4 Q8)</td><td>p. ?? verify</td><td>Assignment 4 solution p. 34</td></tr>
+    <tr><td>Circular difference formula (first+1440-last)</td><td>p. ?? verify</td><td>Assignment 4 solution p. 34</td></tr>
+    <tr><td>Hamming distance definition</td><td>p. 35</td><td>Assignment 4 solution p. 35</td></tr>
+    <tr><td>Bit extraction (num >> bit) &amp; 1</td><td>p. 35</td><td>[CLRS] Ch.2</td></tr>
+    <tr><td>Total Hamming distance — bit counting formula</td><td>p. 35</td><td>Assignment 4 solution p. 35</td></tr>
+    <tr><td>Standard Dijkstra's algorithm</td><td>pp. 169–178</td><td>[KT] Ch.4</td></tr>
+    <tr><td>Modified Dijkstra (max probability)</td><td>pp. 169–178</td><td>Assignment 6 solution p. 53</td></tr>
+    <tr><td>Star graph center (A6 Q7)</td><td>p. ?? verify</td><td>Assignment 6 solution p. 51</td></tr>
+    <tr><td>Arithmetic progression check (A6 Q8)</td><td>p. ?? verify</td><td>Assignment 6 solution p. 52</td></tr>
+    <tr><td>Binary search on answer / median (A6 Q5)</td><td>p. ?? verify</td><td>Assignment 6 solution p. 50</td></tr>
+  </tbody>
+</table>
+
+<h4>15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM):</h4>
+<ol>
+  <li>Write from memory: the sliding window update formula and the 3-step structure (init, slide, return). Verify on nums=[1,12,-5,-6,50,3], k=4. <span class="pdf-ref">📄 pp. 23–35</span></li>
+  <li>Write from memory: the bit-counting formula total += p × (n-p). Verify on [4, 14, 2] getting total = 6. <span class="pdf-ref">📄 p. 35</span></li>
+  <li>State the three changes from standard Dijkstra to max-probability Dijkstra (heap type, update operator, update direction). <span class="pdf-ref">📄 pp. 169–178</span></li>
+  <li>Write the CESP template: Core idea, English step-wise, Source (pseudocode), Performance (time + space). <span class="pdf-ref">📄 pp. 23–35</span></li>
+  <li>State the circular difference formula for the time problem: (minutes[0] + 1440) - minutes[-1]. Verify on ["23:59","00:00"] giving 1. <span class="pdf-ref">📄 p. ?? verify</span></li>
+  <li>Star graph: center = node common to edges[0] and edges[1]. Write 3-line pseudocode from memory. O(1). <span class="pdf-ref">📄 p. ?? verify</span></li>
+  <li>AP check: sort, d = arr[1]-arr[0], verify all consecutive diffs = d. Write 6-line pseudocode from memory. O(n log n). <span class="pdf-ref">📄 p. ?? verify</span></li>
+  <li>For each of the 6 graded 20-pt questions: quickly write the first line of pseudocode (the setup). If you can write the first line, the rest will follow. <span class="pdf-ref">📄 pp. 23–35</span></li>
+</ol>
+
+</div>
+
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This deep-dive covers <strong>only Topic 7 — Algorithm Design Patterns (Pseudocode)</strong> as listed in the CS 570 final exam appendix.
+  Companion guides cover the other 8 topics: Mathematical Proof Techniques (Topic 6), Asymptotic Analysis (Topic 2),
+  Recurrences &amp; Master Theorem (Topic 3), Graph Algorithms BFS/DFS (Topic 4), Shortest Paths (Topic 5),
+  NP-Completeness &amp; Reductions (Topic 1), Divide &amp; Conquer (Topic 8), and Dynamic Programming &amp; DAGs (Topic 9).
+  Read this deep-dive first, then use the condensed
+  <span class="mono">study_guide_topic7_algorithm_design_patterns.html</span> guide for final exam review.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs570-dd-topic7';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active', isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>

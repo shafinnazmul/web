@@ -1,0 +1,2749 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 Final Exam · Topic 4 (Beginner Deep-Dive): Graph Representations, BFS &amp; DFS Unpacked</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE — DARK MODE (default)
+     Topic 4 deep-dive: Sky-blue accent (Graph algorithms)
+     ================================================================ */
+  :root {
+    --bg: #0d1117;
+    --bg-elev: #161b22;
+    --bg-elev2: #1c2128;
+    --surface: #21262d;
+    --text: #e6edf3;
+    --text-dim: #9198a1;
+    --text-faint: #6e7681;
+    --border: #30363d;
+
+    --accent: #2f81f7;
+    --accent-soft: #0d2044;
+    --accent-text: #79c0ff;
+
+    --topic-accent: #03a9f4;  /* Sky-blue — Topic 4 deep-dive (Graph/BFS/DFS) */
+
+    --red: #ff6b6b;
+    --orange: #f0883e;
+    --yellow: #e3b341;
+    --gold: #ffd700;
+    --green: #3fb950;
+    --green-soft: #0d2d1a;
+    --green-text: #7ee787;
+    --blue-soft: #0c2d6b;
+    --blue-text: #79c0ff;
+    --purple-soft: #2d1b69;
+    --purple-text: #d2a8ff;
+    --code-bg: #090d12;
+    --code-text: #7ee7c4;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f5;
+    --surface: #e4e9f0;
+    --text: #1f2328;
+    --text-dim: #4b5563;
+    --text-faint: #8b949e;
+    --border: #d0d7de;
+
+    --accent: #0969da;
+    --accent-soft: #dbeafe;
+    --accent-text: #0550ae;
+
+    --topic-accent: #0277bd;  /* Deep-blue for light mode */
+
+    --red: #d1242f;
+    --orange: #bc4c00;
+    --yellow: #9a6700;
+    --gold: #7d5a00;
+    --green: #1a7f37;
+    --green-soft: #dafbe1;
+    --green-text: #116329;
+    --blue-soft: #dbeafe;
+    --blue-text: #0550ae;
+    --purple-soft: #fbefff;
+    --purple-text: #6e40c9;
+    --code-bg: #eef1f5;
+    --code-text: #116329;
+  }
+
+  [data-theme="light"] strong { color: #0d1117; }
+  [data-theme="light"] h1 { color: #0d1117; }
+  [data-theme="light"] h3 { color: #0d1117; }
+  [data-theme="light"] .question-stem { color: #0d1117; }
+  [data-theme="light"] pre.diagram { color: #1f2328; background: #eef1f5; border-color: var(--topic-accent); }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(2,119,189,0.05), rgba(9,105,218,0.04)); }
+  [data-theme="light"] .callout { background: rgba(188,76,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(2,119,189,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(209,36,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(2,119,189,0.05), rgba(9,105,218,0.05)); }
+  [data-theme="light"] .step { background: #eef1f5; }
+  [data-theme="light"] .misconception { background: #eef1f5; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #1a7f37; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f5; }
+
+  /* ================================================================
+     THEME TOGGLE — FIXED IN THE TOP BAR
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono { font-family: 'Consolas', 'Courier New', 'Menlo', monospace; }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  h1 { font-size: 2.1em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.55em; color: var(--topic-accent); margin: 36px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.2em; color: #fff; margin: 26px 0 10px 0; }
+  h4 { color: var(--text-dim); margin: 18px 0 8px 0; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.82em; }
+
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     SIDEBAR NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar {
+      top: 44px; width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main { max-width: 1100px; padding: 40px 48px 80px 48px; }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.9em; margin-top: 6px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(3,169,244,0.08), rgba(47,129,247,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title { font-size: 1.12em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  .asgn-ref {
+    display: inline-block;
+    background: var(--purple-soft);
+    color: var(--purple-text);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & TOPIC CONTAINERS
+     ================================================================ */
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+  }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  table.trace-table {
+    border-collapse: collapse;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82rem;
+    width: 100%;
+    margin: 12px 0;
+  }
+  table.trace-table th { background: var(--accent-soft); color: var(--blue-text); padding: 8px 10px; border: 1px solid var(--border); }
+  table.trace-table td { border: 1px solid var(--border); padding: 7px 10px; vertical-align: top; }
+  table.trace-table tr.highlight { background: var(--bg-elev2); }
+
+  /* ================================================================
+     ASCII DIAGRAM
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #c9d1d9;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  pre.pseudocode {
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 16px 20px;
+    border-radius: 6px;
+    border-left: 3px solid var(--topic-accent);
+    overflow-x: auto;
+    white-space: pre;
+    margin: 14px 0;
+  }
+
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Proof blocks */
+  .proof-block {
+    background: var(--bg-elev);
+    border-left: 4px solid var(--gold);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .proof-block .proof-step { margin: 8px 0; padding-left: 16px; }
+  .proof-block .proof-label { color: var(--gold); font-weight: bold; font-size: 0.9em; }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head { color: var(--topic-accent); font-weight: 600; font-size: 0.95em; }
+  .step .step-detail { margin-top: 6px; font-size: 0.93em; color: var(--text-dim); }
+
+  /* Myth / reality blocks */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+
+  /* Complexity box */
+  .complexity-box {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: monospace;
+    display: inline-block;
+    margin: 4px 0;
+  }
+
+  /* ================================================================
+     QUESTION BLOCKS
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options { margin: 4px 0 6px 0; padding-left: 26px; }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #3fb950; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-warmup { background: #0d2d1a; color: #7ee787; border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; border: 1px solid #1a4d2a; }
+
+  /* ================================================================
+     CHEAT SHEET
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(3,169,244,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 { color: var(--gold); font-size: 0.82em; margin-top: 14px; }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(240,136,62,0.06);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-accent);
+    background: rgba(3,169,244,0.06);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,107,107,0.06);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  /* Challenge banner */
+  .challenge-banner {
+    background: rgba(255,215,0,0.07);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 0.82em;
+    color: var(--gold);
+    font-family: 'Consolas', monospace;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    details summary::before { content: "Answer: "; color: #000; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; border-color: #aaa; background: #fff; color: #000; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram, pre.pseudocode { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">🔵 Topic 4 ⓓ</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#warmup">🧗 Warm-up Glossary</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 What &amp; Why (Plain English)</a>
+  <a href="#section-1-1" class="sub">→ 1.1 The fundamental problem</a>
+  <a href="#section-1-2" class="sub">→ 1.2 Representations taxonomy</a>
+  <a href="#section-1-3" class="sub">→ 1.3 BFS vs DFS analogy</a>
+  <a href="#section-1-4" class="sub">→ 1.4 Technical definitions</a>
+  <a href="#section-1-5" class="sub">→ 1.5 Key Terms Table</a>
+  <a href="#section-2">§2 How — Worked Examples</a>
+  <a href="#section-2a" class="sub">→ 2a · BFS Traced Step-by-Step</a>
+  <a href="#section-2b" class="sub">→ 2b · DFS Traced Step-by-Step</a>
+  <a href="#section-2c" class="sub">→ 2c · Degree &amp; G² Computation</a>
+  <a href="#section-2d" class="sub">→ 2d · Graph Connectivity Proof</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#warmup-checks">🧗 Warm-up Checks</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ (4 questions)</a>
+  <a href="#section-4-proof" class="sub">→ Proof (3 questions)</a>
+  <a href="#section-4-trace" class="sub">→ Trace / Analysis (3 questions)</a>
+  <a href="#section-4-pseudo" class="sub">→ Pseudocode / Design (3 questions)</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 570 · Final Exam · <strong>Topic 4 (Deep-Dive) · Graph Representations, BFS &amp; DFS Unpacked</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>Topic 4 (Beginner Deep-Dive)</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">Graph Representations, BFS &amp; DFS Unpacked — Adjacency Matrix · Adjacency List · Breadth-First Search · Depth-First Search · Pre/Post Numbering · Connectivity · Graph Squaring, with complete step-by-step traces and concrete 6-node examples</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final (Quiz 2) — April 30, 2026 · Class hours · Closed-book, one cheat sheet<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lec1_27_all-combined-densed-ocr.pdf</span> (Lectures 1–27, Spring 2026)<br>
+    <strong>Companion to:</strong> <span class="mono">study_guide_topic4_graph_bfs_dfs.html</span> — read this deep-dive FIRST, then use the condensed guide for review.<br>
+    <strong>Audience:</strong> Designed for a student who can follow the assignment solutions but is not yet confident implementing BFS/DFS from scratch, analyzing adjacency representations, or constructing graph-connectivity proofs independently.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">How to use this deep-dive</strong><br>
+  <strong>Step 1.</strong> Read the <a href="#warmup">🧗 Warm-up Glossary</a> — it defines graphs, queues, stacks, and adjacency concepts you may know casually but need precisely.<br>
+  <strong>Step 2.</strong> Read §1 (What &amp; Why) and §2 (How) with pencil and paper — trace every BFS/DFS step on the concrete 6-node graph we draw for you.<br>
+  <strong>Step 3.</strong> Take the <a href="#warmup-checks">§3.5 Warm-up Understanding Checks</a> — five conceptual checks before the exam-style questions.<br>
+  <strong>Step 4.</strong> Tackle §3 Exam Intelligence, §4 Practice Questions, and §5 Cheat Sheet as final review.
+</div>
+
+<!-- ============================================================
+     WARM-UP GLOSSARY
+     ============================================================ -->
+<h2 id="warmup">🧗 Warm-up Glossary — Vocabulary You Need Before §1</h2>
+<p style="color: var(--text-dim);">
+  Graph algorithms use many terms casually ("visit", "neighbor", "path") that have precise meanings in this context.
+  Misunderstanding even one can cascade into confusion about BFS vs DFS behavior. Clear these up now.
+</p>
+
+<div class="section-block">
+
+<h3>What is a graph? <span class="pdf-ref">📄 p. 105</span></h3>
+<p>
+  A <strong>graph</strong> G = (V, E) has two ingredients: <em>V</em> is a set of <strong>vertices</strong> (nodes — draw them as circles),
+  and <em>E</em> is a set of <strong>edges</strong> (draw them as lines connecting circles).
+  An edge (u, v) connects vertex u to vertex v.
+</p>
+<pre class="diagram">
+  Example: 6-vertex graph (the one we'll use throughout this guide)
+
+       1 ——— 2 ——— 5
+       |     |
+       3 ——— 4 ——— 6
+
+  V = {1, 2, 3, 4, 5, 6}
+  E = {(1,2), (1,3), (2,4), (2,5), (3,4), (4,6)}
+
+  Vertex 2 is "adjacent to" (a neighbor of): 1, 4, 5
+  Vertex 4 is "adjacent to": 2, 3, 6
+  Vertex 5 and 6 are "leaf" nodes — they connect to only one other vertex.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 105–110</span></div>
+
+<h3>Directed vs Undirected graphs <span class="pdf-ref">📄 p. 105</span></h3>
+<p>
+  In an <strong>undirected</strong> graph, edges have no direction: (u,v) and (v,u) are the same edge.
+  If you can travel from u to v, you can also travel from v to u.
+</p>
+<p>
+  In a <strong>directed</strong> graph (digraph), edges have arrows: (u,v) means there is an arrow FROM u TO v.
+  This does NOT automatically mean there is an arrow from v to u.
+  Most BFS/DFS introductions assume undirected; the lectures cover both. <span class="pdf-ref">📄 p. 105</span>
+</p>
+
+<h3>What is the "degree" of a vertex? <span class="pdf-ref">📄 p. 227</span></h3>
+<p>
+  The <strong>degree</strong> of vertex v (written deg(v)) is the number of edges touching v — i.e., the number of its neighbors.
+</p>
+<p>
+  <strong>Example:</strong> In our 6-vertex graph above, deg(2) = 3 (neighbors: 1, 4, 5), deg(5) = 1 (neighbor: 2 only), deg(4) = 3 (neighbors: 2, 3, 6).
+</p>
+<p>
+  In directed graphs: <strong>out-degree</strong> = number of arrows leaving v; <strong>in-degree</strong> = number of arrows arriving at v. <span class="pdf-ref">📄 p. 227</span>
+</p>
+
+<h3>What is a "path" in a graph? <span class="pdf-ref">📄 p. 105</span></h3>
+<p>
+  A <strong>path</strong> from vertex s to vertex t is a sequence of vertices s = v₀, v₁, v₂, ..., v_k = t
+  where each consecutive pair (v_i, v_{i+1}) is an edge. The <strong>length</strong> of the path is the number of edges, k.
+</p>
+<p>
+  <strong>Example:</strong> In our graph, a path from 1 to 6 is: 1 → 2 → 4 → 6 (length 3). Another path: 1 → 3 → 4 → 6 (also length 3).
+  There is NO path from 5 to 6 without going through vertex 2 or 1.
+</p>
+
+<h3>What does "connected" mean? <span class="pdf-ref">📄 p. 110</span></h3>
+<p>
+  A graph is <strong>connected</strong> if there exists a path between every pair of vertices.
+  Our 6-vertex example above IS connected — you can get from any vertex to any other.
+</p>
+<p>
+  If some vertices cannot be reached from others, the graph is <strong>disconnected</strong> and splits into
+  <strong>connected components</strong> — groups of mutually reachable vertices.
+</p>
+
+<h3>What is a queue (FIFO)? <span class="pdf-ref">📄 p. 110</span></h3>
+<p>
+  A <strong>queue</strong> is a data structure that follows <em>First In, First Out (FIFO)</em>:
+  the first element added is the first element removed.
+  Think of a line at a coffee shop — the person who arrived first is served first.
+</p>
+<p>
+  Operations: <strong>enqueue</strong> (add to the back), <strong>dequeue</strong> (remove from the front).
+  BFS uses a queue to process vertices in the order they are discovered.
+</p>
+<pre class="diagram">
+  Queue state visualization:
+
+  FRONT [  1  |  2  |  3  |  4  ] BACK
+
+  dequeue() → removes 1 from FRONT
+  enqueue(5) → adds 5 to BACK
+  Result: FRONT [  2  |  3  |  4  |  5  ] BACK
+</pre>
+
+<h3>What is a stack (LIFO)? <span class="pdf-ref">📄 p. 129</span></h3>
+<p>
+  A <strong>stack</strong> is a data structure that follows <em>Last In, First Out (LIFO)</em>:
+  the most recently added element is the first to be removed.
+  Think of a stack of plates — you always take from the top.
+</p>
+<p>
+  Operations: <strong>push</strong> (add to top), <strong>pop</strong> (remove from top).
+  DFS uses a stack (either explicitly or implicitly through recursion).
+</p>
+
+<h3>What does "visited" mean in graph traversal? <span class="pdf-ref">📄 p. 110</span></h3>
+<p>
+  Algorithms use a boolean array <code>visited[]</code> (sometimes called <code>discovered[]</code> or <code>marked[]</code>)
+  to track which vertices have already been seen. This prevents infinite loops: without this bookkeeping,
+  BFS/DFS on a cycle would run forever.
+</p>
+<p>
+  <strong>Example:</strong> <code>visited = [F, F, F, F, F, F, F]</code> at start (all False for vertices 0–6).
+  When we visit vertex 2, we set <code>visited[2] = True</code>. We never re-process vertex 2.
+</p>
+
+<h3>What is an adjacency matrix? <span class="pdf-ref">📄 pp. 106–108</span></h3>
+<p>
+  An <strong>adjacency matrix</strong> A is an n × n matrix where A[i][j] = 1 if there is an edge from i to j,
+  and A[i][j] = 0 otherwise. (n = number of vertices)
+</p>
+<p>
+  <strong>Key property:</strong> You can check "is j a neighbor of i?" in O(1) time — just look up A[i][j].
+  But you must always allocate n² space regardless of how many edges exist.
+</p>
+
+<h3>What is an adjacency list? <span class="pdf-ref">📄 pp. 108–110</span></h3>
+<p>
+  An <strong>adjacency list</strong> stores, for each vertex v, a list of its neighbors.
+  It uses space proportional to the number of edges (O(V + E)) rather than V².
+  To find all neighbors of v, just iterate over Adj[v].
+</p>
+
+<h3>What is a "parent" pointer in BFS/DFS? <span class="pdf-ref">📄 p. 118</span></h3>
+<p>
+  When BFS/DFS visits vertex k by traversing an edge from vertex j,
+  we record <code>parent[k] = j</code>. Following parent pointers from any vertex back to the source
+  reconstructs the shortest path (in BFS) or the exploration tree (in DFS).
+</p>
+
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 4 spans Lectures 12–15 (pp. 105–156). This index mirrors the condensed guide — jump to any lecture slide for any concept.
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Graph Representations <span class="pdf-ref">📄 pp. 105–115</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Adjacency matrix: space O(n²), neighbor-check O(1) <span class="exam-star">⭐</span></td><td>pp. 106–108</td><td><span class="asgn-ref">📋 A4 Q6</span></td></tr>
+    <tr><td>Adjacency list: space O(n+m), neighbor-scan O(deg(v)) <span class="exam-star">⭐</span></td><td>pp. 108–110</td><td><span class="asgn-ref">📋 A4 Q6</span></td></tr>
+    <tr><td>Comparing representations: which to use when <span class="exam-star">⭐</span></td><td>pp. 108–110</td><td><span class="asgn-ref">📋 A4 Q6</span></td></tr>
+    <tr><td>Out-degree: len(Adj[u]) per vertex → O(|V|+|E|) <span class="exam-star">⭐</span></td><td>p. 227</td><td><span class="asgn-ref">📋 A6 Q4</span></td></tr>
+    <tr><td>In-degree: scan all lists → O(|V|+|E|) <span class="exam-star">⭐</span></td><td>p. 227</td><td><span class="asgn-ref">📋 A6 Q4</span></td></tr>
+    <tr><td>Graph-squaring G²: adj-matrix O(|V|³); adj-list O(|E||V|) <span class="exam-star">⭐</span></td><td>pp. 108–110</td><td><span class="asgn-ref">📋 A4 Q6</span></td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">BFS Algorithm &amp; Properties <span class="pdf-ref">📄 pp. 110–128</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>BFS algorithm: queue-based, O(n²) matrix / O(n+m) list <span class="exam-star">⭐</span></td><td>pp. 110–118</td><td><span class="asgn-ref">📋 A4 Q3</span></td></tr>
+    <tr><td>BFS vs DFS: node count to reach goal node <span class="exam-star">⭐</span></td><td>pp. 110–128</td><td><span class="asgn-ref">📋 A4 Q3</span></td></tr>
+    <tr><td>BFS level[] and parent[] arrays (shortest path reconstruction)</td><td>pp. 118–128</td><td>Lec 12–14</td></tr>
+    <tr><td>BFS computes shortest path by edge count (unweighted graphs)</td><td>pp. 118–128</td><td>Lec 14</td></tr>
+    <tr><td>BFS complexity: O(n²) with adjacency matrix, O(n+m) with adj. list</td><td>pp. 114–118</td><td>Lec 12</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">DFS Algorithm &amp; Properties <span class="pdf-ref">📄 pp. 129–156</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>DFS recursive algorithm; O(n²) matrix / O(n+m) list <span class="exam-star">⭐</span></td><td>pp. 129–140</td><td><span class="asgn-ref">📋 A4 Q3</span></td></tr>
+    <tr><td>DFS pre/post numbering and its uses</td><td>pp. 141–148</td><td>Lec 15</td></tr>
+    <tr><td>Directed cycle detection: back edge iff pre/post intervals nest</td><td>pp. 141–148</td><td>Lec 15</td></tr>
+    <tr><td>Edge classification: Tree, Forward, Backward, Cross</td><td>pp. 141–148</td><td>Lec 15</td></tr>
+    <tr><td>Strongly Connected Components (SCCs) via DFS</td><td>pp. 148–156</td><td>Lec 15</td></tr>
+    <tr><td>Graph connectivity: deg(v) ≥ n/2 ∀v → G is connected <span class="exam-star">⭐</span></td><td>p. 110</td><td><span class="asgn-ref">📋 A4 Q5</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: WHAT & WHY (PLAIN ENGLISH)
+     ============================================================ -->
+<h2 id="section-1">§1 — What &amp; Why, in Plain English</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 105–156 (Lectures 12–15)</div>
+
+<div class="section-block">
+
+<h3 id="section-1-1">1.1 The fundamental problem — How does a computer "look at" a graph? <span class="pdf-ref">📄 p. 105</span></h3>
+
+<p>
+  Imagine you're a city planner with a map of roads (edges) and intersections (vertices).
+  A human can glance at the map and immediately see if two cities are connected. But a computer cannot "glance" —
+  it must be given the map in a precise format, and then it must follow a systematic rule to explore it.
+</p>
+
+<p>
+  This is the core challenge of this topic: <strong>How do you store a graph in memory?</strong> and
+  <strong>How do you systematically explore it?</strong>
+  The answers to these two questions shape everything — from how fast your search runs to whether you can
+  even find a path at all. <span class="pdf-ref">📄 p. 105</span>
+</p>
+
+<p>
+  The two storage methods (adjacency matrix and adjacency list) trade off space efficiency vs access speed.
+  The two exploration strategies (BFS and DFS) trade off finding the shortest path vs finding any path quickly.
+  Neither choice is universally "better" — the right answer depends on what your graph looks like and what
+  you need to find. <span class="pdf-ref">📄 pp. 105–110</span>
+</p>
+
+<h3 id="section-1-2">1.2 The core taxonomy — four decisions that define this topic <span class="pdf-ref">📄 pp. 105–140</span></h3>
+
+<p><strong>Decision 1: How to represent the graph?</strong></p>
+<table class="data">
+  <thead><tr><th>Representation</th><th>Stores</th><th>Space</th><th>Check "is (i,j) an edge?"</th><th>List all neighbors of i</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Adjacency Matrix</strong></td>
+      <td>n×n grid of 0s and 1s</td>
+      <td>O(n²) — always</td>
+      <td>O(1) — just look at A[i][j]</td>
+      <td>O(n) — scan entire row i</td>
+    </tr>
+    <tr>
+      <td><strong>Adjacency List</strong></td>
+      <td>Per-vertex list of neighbors</td>
+      <td>O(n+m) — proportional to edges</td>
+      <td>O(deg(i)) — scan i's list</td>
+      <td>O(deg(i)) — iterate the list</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Decision 2: Which traversal strategy?</strong></p>
+<table class="data">
+  <thead><tr><th>Algorithm</th><th>Data Structure</th><th>Order of Exploration</th><th>Finds</th><th>Complexity (adj. list)</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>BFS</strong></td>
+      <td>Queue (FIFO)</td>
+      <td>Level by level (close vertices first)</td>
+      <td>Shortest path (fewest edges)</td>
+      <td>O(n + m)</td>
+    </tr>
+    <tr>
+      <td><strong>DFS</strong></td>
+      <td>Stack / Recursion (LIFO)</td>
+      <td>Deep first (dive before backtrack)</td>
+      <td>Any path; cycle detection; SCCs</td>
+      <td>O(n + m)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="section-1-3">1.3 A vivid analogy — exploring a cave system <span class="pdf-ref">📄 pp. 110–140</span></h3>
+
+<p>
+  Imagine a network of underground caves connected by tunnels. You start at the entrance (the source vertex).
+  Your goal: find all caves.
+</p>
+
+<p>
+  <strong>BFS is like exploring with a flood.</strong> You fill the cave system with water from the entrance.
+  Water spreads outward uniformly — the caves one tunnel away flood first, then two tunnels away, and so on.
+  Every cave that CAN be reached will be flooded, and the water reaches each cave by the shortest possible route.
+  <span class="pdf-ref">📄 pp. 110–118</span>
+</p>
+
+<p>
+  <strong>DFS is like exploring with a spelunker following string.</strong> You walk into the first tunnel,
+  then take the first fork, then the first fork again — diving as deep as possible.
+  When you hit a dead end, you backtrack on your string to the last unexplored fork.
+  This finds all caves efficiently but does NOT guarantee the shortest route to any cave.
+  <span class="pdf-ref">📄 pp. 129–140</span>
+</p>
+
+<div class="callout quote">
+  <strong class="lbl">📌 Key Intuition</strong>
+  BFS guarantees the <em>shortest</em> path (measured in edges) to every reachable vertex.
+  DFS does NOT guarantee shortest paths — but it reveals structural properties like cycles, strongly connected components, and
+  topological orderings that BFS cannot. <span class="pdf-ref">📄 pp. 118, 141</span>
+</div>
+
+<h3 id="section-1-4">1.4 Technical definitions <span class="pdf-ref">📄 pp. 105–140</span></h3>
+
+<p><strong>Adjacency matrix:</strong> For a graph G = (V, E) with n = |V| vertices, the adjacency matrix A is an n × n matrix where
+A[i][j] = 1 if (i,j) ∈ E and A[i][j] = 0 otherwise. For undirected graphs, A is symmetric: A[i][j] = A[j][i]. <span class="pdf-ref">📄 pp. 106–108</span></p>
+
+<p><strong>Adjacency list:</strong> An array Adj of n lists, where Adj[v] contains all vertices u such that (v,u) ∈ E.
+Total space = O(|V| + |E|) = O(n + m). <span class="pdf-ref">📄 pp. 108–110</span></p>
+
+<p><strong>BFS(s):</strong> Starting from source vertex s, BFS uses a queue to visit all vertices reachable from s,
+in order of increasing distance (edge count) from s. Sets <code>visited[v] = True</code> when v is first discovered,
+and records <code>parent[v]</code> and <code>level[v]</code>. <span class="pdf-ref">📄 pp. 110–118</span></p>
+
+<p><strong>DFS(s):</strong> Starting from source vertex s, DFS recursively explores as far as possible before backtracking.
+Records <code>pre[v]</code> (time when v is first entered) and <code>post[v]</code> (time when v's exploration finishes).
+These timestamps reveal cycle structure and component membership. <span class="pdf-ref">📄 pp. 129–148</span></p>
+
+<p><strong>G² (graph square):</strong> The square of G = (V, E) is a new graph G² = (V, E') where (u, w) ∈ E' if and only if
+there exists a vertex v such that both (u,v) ∈ E and (v,w) ∈ E — i.e., u and w are connected by a path of length ≤ 2 in G.
+<span class="pdf-ref">📄 pp. 108–110</span></p>
+
+<h3 id="section-1-5">1.5 Key Terms Table <span class="pdf-ref">📄 pp. 105–156</span></h3>
+<table class="data">
+  <thead>
+    <tr><th>Term</th><th>Plain-English Meaning</th><th>Example / Mental Image</th><th>📄 Page</th><th>Textbook Ref</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Graph G = (V,E)</strong></td><td>A set of nodes (V) connected by edges (E)</td><td>Cities (V) connected by roads (E)</td><td>p. 105</td><td>[KT] Ch.3, [CLRS] Ch.22</td></tr>
+    <tr><td><strong>Adjacency matrix</strong></td><td>n×n table; A[i][j]=1 means edge (i,j) exists</td><td>Spreadsheet of yes/no connections</td><td>pp. 106–108</td><td>[CLRS] §22.1</td></tr>
+    <tr><td><strong>Adjacency list</strong></td><td>Per-vertex list of neighbors</td><td>Phone contacts — each person's list of friends</td><td>pp. 108–110</td><td>[CLRS] §22.1</td></tr>
+    <tr><td><strong>Degree deg(v)</strong></td><td>Number of edges touching vertex v</td><td>Number of people you're directly connected to</td><td>p. 227</td><td>[CLRS] §22.1</td></tr>
+    <tr><td><strong>Out-degree (directed)</strong></td><td>Number of edges leaving v</td><td>Number of Twitter accounts you follow</td><td>p. 227</td><td>[CLRS] §22.1</td></tr>
+    <tr><td><strong>In-degree (directed)</strong></td><td>Number of edges arriving at v</td><td>Number of followers on Twitter</td><td>p. 227</td><td>[CLRS] §22.1</td></tr>
+    <tr><td><strong>BFS</strong></td><td>Explore graph level by level from a source; queue-based</td><td>Flood filling a cave from one entrance</td><td>pp. 110–118</td><td>[KT] §3.2, [CLRS] §22.2</td></tr>
+    <tr><td><strong>DFS</strong></td><td>Explore as deep as possible before backtracking; stack/recursion</td><td>Spelunker with string diving deep first</td><td>pp. 129–140</td><td>[KT] §3.3, [CLRS] §22.3</td></tr>
+    <tr><td><strong>Queue (FIFO)</strong></td><td>First-in-first-out data structure; used in BFS</td><td>Coffee shop line — first person served first</td><td>p. 110</td><td>[CLRS] §10.1</td></tr>
+    <tr><td><strong>Stack (LIFO)</strong></td><td>Last-in-first-out; used in iterative DFS</td><td>Stack of plates — take from top</td><td>p. 129</td><td>[CLRS] §10.1</td></tr>
+    <tr><td><strong>visited[] array</strong></td><td>Boolean array tracking which vertices have been seen</td><td>Checkboxes on a map — mark each visited city</td><td>p. 110</td><td>[KT] §3.2</td></tr>
+    <tr><td><strong>parent[] array</strong></td><td>For each vertex v, parent[v] = the vertex that discovered v</td><td>Family tree — each node knows its direct parent</td><td>p. 118</td><td>[KT] §3.2</td></tr>
+    <tr><td><strong>level[] array (BFS)</strong></td><td>level[v] = shortest distance (in edges) from source to v</td><td>Number of stops on the subway from your station</td><td>pp. 118–128</td><td>[KT] §3.2</td></tr>
+    <tr><td><strong>pre[v] (DFS)</strong></td><td>Counter value when DFS first ENTERS vertex v</td><td>Timestamp when you walk into a room</td><td>pp. 141–148</td><td>[KT] §3.3, [CLRS] §22.3</td></tr>
+    <tr><td><strong>post[v] (DFS)</strong></td><td>Counter value when DFS finishes ALL exploration from v</td><td>Timestamp when you finish exploring and leave a room</td><td>pp. 141–148</td><td>[KT] §3.3, [CLRS] §22.3</td></tr>
+    <tr><td><strong>Tree edge (DFS)</strong></td><td>Edge (u,v) traversed during DFS that discovers v for the first time</td><td>The first time you open a new door</td><td>pp. 141–148</td><td>[CLRS] §22.3</td></tr>
+    <tr><td><strong>Back edge (DFS)</strong></td><td>Edge (u,v) where v is an ancestor of u in the DFS tree</td><td>A tunnel that loops back to a cave you already left</td><td>pp. 141–148</td><td>[CLRS] §22.3</td></tr>
+    <tr><td><strong>Connected graph</strong></td><td>A path exists between every pair of vertices</td><td>Every city is reachable from every other city</td><td>p. 110</td><td>[KT] §3.1</td></tr>
+    <tr><td><strong>Connected component</strong></td><td>A maximal subset of vertices where all pairs are connected</td><td>An island — no roads off it</td><td>p. 110</td><td>[KT] §3.1</td></tr>
+    <tr><td><strong>Graph square G²</strong></td><td>New graph where (u,w) is an edge iff u and w have a common neighbor in G</td><td>Friends-of-friends network — two-hop connections</td><td>pp. 108–110</td><td>A4 Q6</td></tr>
+    <tr><td><strong>SCC (Strongly Connected Component)</strong></td><td>Maximal subset of vertices where every pair has a path in both directions</td><td>Group where anyone can reach anyone via directed roads</td><td>pp. 148–156</td><td>[KT] §3.5</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Point of Confusion — Know This Before §2</strong>
+  BFS and DFS are NOT interchangeable for all tasks. BFS <em>guarantees the shortest path</em> (by edge count) because it explores level by level. DFS does NOT guarantee shortest paths — it explores depth-first, so it may take a long winding route even when a short one exists. Conversely, DFS reveals cycle structure and pre/post numbers that BFS cannot. <span class="pdf-ref">📄 pp. 118, 141</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     SECTION 2: HOW — WORKED EXAMPLES
+     ============================================================ -->
+<h2 id="section-2">§2 — How: Worked Examples from Scratch</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 105–156 (Lectures 12–15)</div>
+
+<p style="color: var(--text-dim);">
+  Each sub-section follows the recipe: <strong>(1) Intuition</strong> — what is this algorithm doing and why?
+  <strong>(2) Mechanism</strong> — the pseudocode and structural rules.
+  <strong>(3) Worked Example</strong> — a complete trace on our concrete 6-vertex graph.
+  Trace these with pencil and paper — one vertex at a time.
+</p>
+
+<!-- Our running graph - displayed for reference -->
+<div class="section-block">
+<h3>Our running graph — use this throughout §2 <span class="pdf-ref">📄 p. 105</span></h3>
+<pre class="diagram">
+  Graph G — 6 vertices, 6 edges (undirected):
+
+       1 ——— 2 ——— 5
+       |     |
+       3 ——— 4 ——— 6
+
+  Adjacency list:
+    1: [2, 3]
+    2: [1, 4, 5]
+    3: [1, 4]
+    4: [2, 3, 6]
+    5: [2]
+    6: [4]
+
+  Adjacency matrix (rows/cols = vertex 1..6):
+
+       1  2  3  4  5  6
+    1 [0, 1, 1, 0, 0, 0]
+    2 [1, 0, 0, 1, 1, 0]
+    3 [1, 0, 0, 1, 0, 0]
+    4 [0, 1, 1, 0, 0, 1]
+    5 [0, 1, 0, 0, 0, 0]
+    6 [0, 0, 0, 1, 0, 0]
+
+  NOTE: For BFS/DFS, assume neighbors are processed in numerical order
+  (left-most first), matching the "choose leftmost node first" rule from A4 Q3.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 105–110</span></div>
+</div>
+
+<!-- ─── 2a ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span>
+  <span class="title">BFS (Breadth-First Search) — Complete Step-by-Step Trace</span>
+  <span class="pages">Lecture PDF: pp. 110–128 · Assignment 4 Q3 <span class="asgn-ref">📋 A4 Q3</span></span>
+</div>
+
+<h3>Intuition: Level-by-level flooding <span class="pdf-ref">📄 p. 110</span></h3>
+<p>
+  BFS answers the question: "What is the shortest path (fewest edges) from source s to every other vertex?"
+  It works by processing vertices in waves — first all vertices at distance 1, then all at distance 2, etc.
+</p>
+<p>
+  The queue is the secret: when you discover a new vertex, you add it to the BACK of the queue.
+  When you process a vertex, you take it from the FRONT. This FIFO order guarantees that vertices
+  at distance d are all processed before any vertex at distance d+1. <span class="pdf-ref">📄 pp. 110–118</span>
+</p>
+
+<h3>Mechanism: BFS pseudocode <span class="pdf-ref">📄 pp. 110–114</span></h3>
+<pre class="pseudocode">
+function BFS(G, s):
+    # Initialize: all vertices unvisited, infinite distance
+    for each vertex i in G:
+        visited[i] = False
+        parent[i]  = -1
+        level[i]   = infinity
+
+    # Seed the source
+    visited[s] = True
+    level[s]   = 0
+    Queue = [s]             # enqueue the source
+
+    while Queue is not empty:
+        j = dequeue(Queue)  # take from FRONT
+        for each neighbor k of j (from adjacency list):
+            if visited[k] == False:
+                visited[k] = True
+                parent[k]  = j
+                level[k]   = level[j] + 1
+                enqueue(Queue, k)   # add to BACK
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 110–114</span></div>
+
+<h3>Worked Example: BFS from vertex 1 on our 6-vertex graph <span class="pdf-ref">📄 pp. 110–128</span> <span class="asgn-ref">📋 A4 Q3</span></h3>
+
+<pre class="diagram">
+  Graph reminder:
+       1 ——— 2 ——— 5
+       |     |
+       3 ——— 4 ——— 6
+
+  Adjacency list (neighbors in numerical order):
+    1: [2, 3]    2: [1, 4, 5]    3: [1, 4]
+    4: [2, 3, 6]    5: [2]    6: [4]
+
+  INITIALIZATION:
+    visited = [F, F, F, F, F, F, F]  (indices 0..6; we use 1..6)
+    level   = [∞, ∞, ∞, ∞, ∞, ∞, ∞]
+    parent  = [-1, -1, -1, -1, -1, -1, -1]
+
+  Seed source vertex 1:
+    visited[1] = True,  level[1] = 0
+    Queue = [1]
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 110–118</span></div>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Step</th><th>Dequeue</th><th>Neighbors of dequeued</th><th>Newly visited</th><th>Queue after step</th><th>level[]</th></tr>
+  </thead>
+  <tbody>
+    <tr class="highlight"><td>Start</td><td>-</td><td>-</td><td>1 (seed)</td><td>[1]</td><td>1:0, others ∞</td></tr>
+    <tr>
+      <td>1</td><td><strong>1</strong></td>
+      <td>Adj[1] = [2, 3]<br>2: unvisited → mark, enqueue<br>3: unvisited → mark, enqueue</td>
+      <td>2 (level=1), 3 (level=1)</td><td>[2, 3]</td><td>1:0, 2:1, 3:1</td>
+    </tr>
+    <tr class="highlight">
+      <td>2</td><td><strong>2</strong></td>
+      <td>Adj[2] = [1, 4, 5]<br>1: already visited (skip)<br>4: unvisited → mark, enqueue<br>5: unvisited → mark, enqueue</td>
+      <td>4 (level=2), 5 (level=2)</td><td>[3, 4, 5]</td><td>1:0, 2:1, 3:1, 4:2, 5:2</td>
+    </tr>
+    <tr>
+      <td>3</td><td><strong>3</strong></td>
+      <td>Adj[3] = [1, 4]<br>1: already visited (skip)<br>4: already visited (skip)</td>
+      <td>(none)</td><td>[4, 5]</td><td>unchanged</td>
+    </tr>
+    <tr class="highlight">
+      <td>4</td><td><strong>4</strong></td>
+      <td>Adj[4] = [2, 3, 6]<br>2: already visited (skip)<br>3: already visited (skip)<br>6: unvisited → mark, enqueue</td>
+      <td>6 (level=3)</td><td>[5, 6]</td><td>1:0, 2:1, 3:1, 4:2, 5:2, 6:3</td>
+    </tr>
+    <tr>
+      <td>5</td><td><strong>5</strong></td>
+      <td>Adj[5] = [2]<br>2: already visited (skip)</td>
+      <td>(none)</td><td>[6]</td><td>unchanged</td>
+    </tr>
+    <tr class="highlight">
+      <td>6</td><td><strong>6</strong></td>
+      <td>Adj[6] = [4]<br>4: already visited (skip)</td>
+      <td>(none)</td><td>[] (empty)</td><td>unchanged</td>
+    </tr>
+    <tr>
+      <td>Done</td><td colspan="5">Queue empty. All 6 vertices visited. BFS complete.</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre class="diagram">
+  BFS RESULT SUMMARY:
+  Vertex: 1    2    3    4    5    6
+  Level:  0    1    1    2    2    3
+  Parent: -1   1    1    2    2    4
+
+  BFS TREE (edges used to discover each vertex):
+       1 (level 0)
+      / \
+     2   3   (level 1)
+    / \
+   4   5     (level 2)
+   |
+   6          (level 3)
+
+  Shortest path from 1 to 6: follow parents backward: 6→4→2→1
+  Path: 1 → 2 → 4 → 6  (length 3)
+
+  Vertices visited in BFS order: 1, 2, 3, 4, 5, 6
+  Total vertices processed before reaching 6: 5 (vertices 1,2,3,4,5 before 6 is dequeued)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 118–128</span></div>
+
+<h3>BFS Complexity Analysis <span class="pdf-ref">📄 pp. 114–118</span></h3>
+
+<div class="step">
+  <div class="step-head">Why O(n²) with adjacency matrix</div>
+  <div class="step-detail">
+    Each vertex j is dequeued exactly once. When processing j, we scan its entire row in the matrix — n entries.
+    With n vertices, total work = n × n = O(n²). <span class="pdf-ref">📄 p. 114</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-head">Why O(n + m) with adjacency list</div>
+  <div class="step-detail">
+    Each vertex is dequeued once — O(n) total. For each vertex j, we examine Adj[j] — that's deg(j) operations.
+    Summing over all vertices: Σ deg(v) = 2m (each edge counted twice in undirected graphs).
+    Total: O(n + 2m) = O(n + m). <span class="pdf-ref">📄 p. 114</span>
+  </div>
+</div>
+
+<div class="callout">
+  <strong class="lbl">💡 A4 Q3 Connection</strong>
+  Assignment 4 Q3 asks: "Starting from the green node, which algorithm visits FEWER nodes before reaching the goal?"
+  BFS explores level-by-level, so if the goal is "close" (short path), BFS finds it quickly.
+  DFS may go deep in the wrong direction first. In A4 Q3, BFS visited 5 nodes vs DFS visiting 10 nodes before the goal. <span class="pdf-ref">📄 pp. 110–128</span>
+</div>
+
+<!-- ─── 2b ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span>
+  <span class="title">DFS (Depth-First Search) — Complete Step-by-Step Trace with Pre/Post Numbers</span>
+  <span class="pages">Lecture PDF: pp. 129–156 · Assignment 4 Q3 <span class="asgn-ref">📋 A4 Q3</span></span>
+</div>
+
+<h3>Intuition: Dive deep, then backtrack <span class="pdf-ref">📄 p. 129</span></h3>
+<p>
+  DFS explores by committing fully to one direction before trying others.
+  When vertex j is being explored, DFS immediately recursively explores each unvisited neighbor of j —
+  going as deep as possible before returning. <span class="pdf-ref">📄 pp. 129–140</span>
+</p>
+<p>
+  Two counters — <code>pre[v]</code> and <code>post[v]</code> — record when DFS enters and exits each vertex.
+  These timestamps are surprisingly powerful: they reveal whether the graph has cycles, which edges are "back edges,"
+  and whether one vertex is an ancestor of another in the DFS tree. <span class="pdf-ref">📄 pp. 141–148</span>
+</p>
+
+<h3>Mechanism: DFS pseudocode (recursive) <span class="pdf-ref">📄 pp. 129–140</span></h3>
+<pre class="pseudocode">
+# Global counter for pre/post timestamps
+count = 0
+
+function DFS_all(G):
+    for each vertex i in G:
+        visited[i] = False
+        parent[i]  = -1
+
+    for each vertex i in G:
+        if visited[i] == False:
+            DFS(i)           # start a new DFS tree
+
+function DFS(i):
+    visited[i] = True
+    pre[i] = count;  count += 1    # ENTER vertex i
+
+    for each neighbor j of i (in adjacency list order):
+        if visited[j] == False:
+            parent[j] = i
+            DFS(j)                  # RECURSE into j
+
+    post[i] = count;  count += 1   # EXIT vertex i (done exploring from i)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 129–148</span></div>
+
+<h3>Worked Example: DFS from vertex 1 on our 6-vertex graph <span class="pdf-ref">📄 pp. 129–148</span></h3>
+
+<pre class="diagram">
+  Graph reminder:
+       1 ——— 2 ——— 5
+       |     |
+       3 ——— 4 ——— 6
+
+  Adjacency list (neighbors in numerical order):
+    1: [2, 3]    2: [1, 4, 5]    3: [1, 4]
+    4: [2, 3, 6]    5: [2]    6: [4]
+
+  Start DFS at vertex 1. count = 0.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 129–140</span></div>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Action</th><th>Vertex</th><th>Event</th><th>count before</th><th>pre/post</th><th>Call stack</th></tr>
+  </thead>
+  <tbody>
+    <tr class="highlight"><td>Enter</td><td><strong>1</strong></td><td>DFS(1) called; mark visited</td><td>0</td><td>pre[1]=0</td><td>[DFS(1)]</td></tr>
+    <tr><td>Explore</td><td>1→<strong>2</strong></td><td>Neighbor 2 unvisited; call DFS(2)</td><td>1</td><td>pre[2]=1</td><td>[DFS(1), DFS(2)]</td></tr>
+    <tr class="highlight"><td>Explore</td><td>2→<strong>1</strong></td><td>Neighbor 1 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1), DFS(2)]</td></tr>
+    <tr><td>Explore</td><td>2→<strong>4</strong></td><td>Neighbor 4 unvisited; call DFS(4)</td><td>2</td><td>pre[4]=2</td><td>[DFS(1), DFS(2), DFS(4)]</td></tr>
+    <tr class="highlight"><td>Explore</td><td>4→<strong>2</strong></td><td>Neighbor 2 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1), DFS(2), DFS(4)]</td></tr>
+    <tr><td>Explore</td><td>4→<strong>3</strong></td><td>Neighbor 3 unvisited; call DFS(3)</td><td>3</td><td>pre[3]=3</td><td>[DFS(1), DFS(2), DFS(4), DFS(3)]</td></tr>
+    <tr class="highlight"><td>Explore</td><td>3→<strong>1</strong></td><td>Neighbor 1 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1), DFS(2), DFS(4), DFS(3)]</td></tr>
+    <tr><td>Explore</td><td>3→<strong>4</strong></td><td>Neighbor 4 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1), DFS(2), DFS(4), DFS(3)]</td></tr>
+    <tr class="highlight"><td><strong>EXIT</strong></td><td><strong>3</strong></td><td>DFS(3) done; all neighbors explored</td><td>4</td><td>post[3]=4</td><td>[DFS(1), DFS(2), DFS(4)]</td></tr>
+    <tr><td>Explore</td><td>4→<strong>6</strong></td><td>Neighbor 6 unvisited; call DFS(6)</td><td>5</td><td>pre[6]=5</td><td>[DFS(1), DFS(2), DFS(4), DFS(6)]</td></tr>
+    <tr class="highlight"><td>Explore</td><td>6→<strong>4</strong></td><td>Neighbor 4 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1), DFS(2), DFS(4), DFS(6)]</td></tr>
+    <tr><td><strong>EXIT</strong></td><td><strong>6</strong></td><td>DFS(6) done</td><td>6</td><td>post[6]=6</td><td>[DFS(1), DFS(2), DFS(4)]</td></tr>
+    <tr class="highlight"><td><strong>EXIT</strong></td><td><strong>4</strong></td><td>DFS(4) done; all neighbors explored</td><td>7</td><td>post[4]=7</td><td>[DFS(1), DFS(2)]</td></tr>
+    <tr><td>Explore</td><td>2→<strong>5</strong></td><td>Neighbor 5 unvisited; call DFS(5)</td><td>8</td><td>pre[5]=8</td><td>[DFS(1), DFS(2), DFS(5)]</td></tr>
+    <tr class="highlight"><td>Explore</td><td>5→<strong>2</strong></td><td>Neighbor 2 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1), DFS(2), DFS(5)]</td></tr>
+    <tr><td><strong>EXIT</strong></td><td><strong>5</strong></td><td>DFS(5) done</td><td>9</td><td>post[5]=9</td><td>[DFS(1), DFS(2)]</td></tr>
+    <tr class="highlight"><td><strong>EXIT</strong></td><td><strong>2</strong></td><td>DFS(2) done; all neighbors explored</td><td>10</td><td>post[2]=10</td><td>[DFS(1)]</td></tr>
+    <tr><td>Explore</td><td>1→<strong>3</strong></td><td>Neighbor 3 already visited; skip</td><td>-</td><td>-</td><td>[DFS(1)]</td></tr>
+    <tr class="highlight"><td><strong>EXIT</strong></td><td><strong>1</strong></td><td>DFS(1) done; all neighbors explored</td><td>11</td><td>post[1]=11</td><td>[] empty</td></tr>
+  </tbody>
+</table>
+
+<pre class="diagram">
+  DFS RESULT SUMMARY:
+  Vertex:  1     2     3     4     5     6
+  pre[]:   0    1     3     2     8     5
+  post[]: 11    10    4     7     9     6
+
+  DFS TREE (solid lines = tree edges, used to first discover a vertex):
+
+       1 (pre=0, post=11)
+       |
+       2 (pre=1, post=10)
+      / \
+     4   5  (pre=2,post=7)  (pre=8,post=9)
+    / \
+   3   6   (pre=3,post=4)  (pre=5,post=6)
+
+  NOTE: DFS visited vertices in order: 1, 2, 4, 3, 6, 5
+  This is the order they were ENTERED, not dequeued.
+
+  EDGE CLASSIFICATION (using pre/post intervals):
+  - (1,2): tree edge → DFS used this to discover 2
+  - (2,4): tree edge → discovered 4 from 2
+  - (4,3): tree edge → discovered 3 from 4
+  - (4,6): tree edge → discovered 6 from 4
+  - (2,5): tree edge → discovered 5 from 2
+  - (3,1): back edge → 1's interval [0,11] CONTAINS 3's interval [3,4]
+             interval nesting: [0,11] ⊃ [3,4] → 1 is ancestor of 3 → BACK EDGE
+             (This means there IS a cycle! 1→2→4→3→1)
+  - (3,4): cross edge or back edge? [2,7] ⊃ [3,4] → 4 is ancestor of 3 → BACK EDGE
+             (Another cycle: 2→4→3→... but note 3 was discovered FROM 4)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–148</span></div>
+
+<h3>How pre/post intervals reveal edge types <span class="pdf-ref">📄 pp. 141–148</span></h3>
+<p>
+  For an edge (u, v) in a directed graph, the relationship between [pre(u), post(u)] and [pre(v), post(v)] tells you the edge type:
+</p>
+<table class="data">
+  <thead><tr><th>Edge Type</th><th>Interval Relationship</th><th>Plain English</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Tree Edge</strong></td><td>[pre(u),post(u)] ⊃ [pre(v),post(v)] and (u,v) directly explored</td><td>v was first discovered by traversing (u,v)</td></tr>
+    <tr><td><strong>Forward Edge</strong></td><td>[pre(u),post(u)] ⊃ [pre(v),post(v)]</td><td>Non-tree path to a descendant</td></tr>
+    <tr><td><strong>Back Edge</strong></td><td>[pre(v),post(v)] ⊃ [pre(u),post(u)]</td><td>Points to an ancestor → indicates a CYCLE</td></tr>
+    <tr><td><strong>Cross Edge</strong></td><td>Intervals are disjoint (neither contains the other)</td><td>Connects unrelated subtrees</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Key Fact for Cycle Detection</strong>
+  A directed graph has a cycle if and only if DFS reveals at least one <em>back edge</em>.
+  Back edges are exactly the edges (u,v) where v's interval contains u's interval —
+  meaning v is an ancestor of u, and the edge creates a loop back. <span class="pdf-ref">📄 p. 141</span>
+</div>
+
+<!-- ─── 2c ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span>
+  <span class="title">Degree Computation &amp; Graph Squaring (G²)</span>
+  <span class="pages">Lecture PDF: pp. 108–110, p. 227 · Assignments A4 Q6, A6 Q4 <span class="asgn-ref">📋 A4 Q6</span> <span class="asgn-ref">📋 A6 Q4</span></span>
+</div>
+
+<h3>Intuition: Degree computation <span class="pdf-ref">📄 p. 227</span></h3>
+<p>
+  The <strong>degree</strong> of a vertex is the count of its neighbors.
+  In an undirected graph, every edge (u,v) contributes 1 to deg(u) and 1 to deg(v).
+  In a directed graph, we distinguish out-degree (arrows leaving) from in-degree (arrows arriving).
+</p>
+<p>
+  Computing degrees seems trivial — just count edges. The interesting question for the exam is:
+  <em>what is the time complexity</em>, and how does the graph representation change it? <span class="pdf-ref">📄 p. 227</span>
+</p>
+
+<h3>Mechanism: Degree computation algorithms <span class="pdf-ref">📄 p. 227</span></h3>
+<pre class="pseudocode">
+# ── OUT-DEGREE using adjacency list ──────────────────────────────
+# out_degree[v] = number of arrows leaving v = length of Adj[v]
+function computeOutDegrees(G):
+    for each vertex v in G.vertices:                # O(|V|) iterations
+        out_degree[v] = len(G.adjacency[v])         # O(1) per vertex
+    return out_degree
+# Total: O(|V|)
+
+# ── IN-DEGREE using adjacency list ───────────────────────────────
+# Count how many times each vertex appears as a neighbor
+function computeInDegrees(G):
+    for each vertex v in G.vertices:
+        in_degree[v] = 0                            # initialize
+
+    for each vertex u in G.vertices:                # iterate all vertices
+        for each v in G.adjacency[u]:               # iterate u's out-edges
+            in_degree[v] += 1                       # v has one more incoming
+
+    return in_degree
+# Total: O(|V| + |E|) — each edge traversed once
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<h3>Worked Example: Degree computation on our 6-vertex graph <span class="pdf-ref">📄 p. 227</span> <span class="asgn-ref">📋 A6 Q4</span></h3>
+
+<pre class="diagram">
+  Adjacency list:
+    1: [2, 3]       2: [1, 4, 5]     3: [1, 4]
+    4: [2, 3, 6]    5: [2]           6: [4]
+
+  OUT-DEGREE (= length of adjacency list):
+    out_degree[1] = 2    out_degree[2] = 3    out_degree[3] = 2
+    out_degree[4] = 3    out_degree[5] = 1    out_degree[6] = 1
+
+  IN-DEGREE (count appearances across all lists):
+    Scanning all lists:
+      1's list: 2 → in_deg[2]++, 3 → in_deg[3]++
+      2's list: 1 → in_deg[1]++, 4 → in_deg[4]++, 5 → in_deg[5]++
+      3's list: 1 → in_deg[1]++, 4 → in_deg[4]++
+      4's list: 2 → in_deg[2]++, 3 → in_deg[3]++, 6 → in_deg[6]++
+      5's list: 2 → in_deg[2]++
+      6's list: 4 → in_deg[4]++
+
+    in_degree[1] = 2    in_degree[2] = 3    in_degree[3] = 2
+    in_degree[4] = 3    in_degree[5] = 1    in_degree[6] = 1
+
+  NOTE: in this undirected graph, in_degree = out_degree = degree.
+  For directed graphs they would differ!
+
+  COMPLEXITY:
+    Out-degree: O(|V|) — just len() of each list
+    In-degree:  O(|V| + |E|) — each edge traversed once
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<h3>Graph Squaring (G²) — Intuition <span class="pdf-ref">📄 pp. 108–110</span></h3>
+<p>
+  The square of a graph G, written G², adds a new edge between every pair of vertices that are
+  at most 2 hops apart in G. Two vertices u and w are "2-hop connected" if they share a common neighbor v.
+</p>
+<p>
+  <strong>Real-world analogy:</strong> G is your direct LinkedIn connections. G² adds everyone who is a
+  "friend of a friend" — your 2nd-degree connections. <span class="pdf-ref">📄 pp. 108–110</span>
+</p>
+
+<h3>Mechanism: Computing G² <span class="pdf-ref">📄 pp. 108–110</span></h3>
+<pre class="pseudocode">
+# ── G² using adjacency list ─────────────────────────────────────
+# Add edge (u, w) to G² if u and w share a common neighbor
+function computeGSquared_adjList(G):
+    G2 = empty graph with same vertices as G
+
+    for each vertex u in G.vertices:           # O(|V|)
+        for each neighbor v in G.adjacency[u]: # O(deg(u))
+            for each neighbor w in G.adjacency[v]:  # O(deg(v))
+                if w != u and (u, w) not in G2:
+                    G2.addEdge(u, w)
+
+    return G2
+# Total: O(|V| × max_deg²)  ≈  O(|E| × |V|)  in worst case
+# Using adjacency matrix: O(|V|³) via matrix multiplication A² = A×A
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 108–110</span></div>
+
+<h3>Worked Example: Compute G² for our 6-vertex graph <span class="pdf-ref">📄 pp. 108–110</span> <span class="asgn-ref">📋 A4 Q6</span></h3>
+
+<pre class="diagram">
+  Original G edges: (1,2),(1,3),(2,4),(2,5),(3,4),(4,6)
+  Adjacency list:
+    1: [2, 3]    2: [1, 4, 5]    3: [1, 4]
+    4: [2, 3, 6]    5: [2]    6: [4]
+
+  COMPUTING G²:
+  For each vertex u, walk 2 hops: u → v → w.
+  Add edge (u, w) to G² if u ≠ w and edge doesn't already exist.
+
+  Start with u=1:
+    1→2→1 (same as u, skip)
+    1→2→4 → add (1,4) to G²  ← NEW edge!
+    1→2→5 → add (1,5) to G²  ← NEW edge!
+    1→3→1 (same as u, skip)
+    1→3→4 → (1,4) already added
+
+  u=2:
+    2→1→2 (same as u, skip)
+    2→1→3 → add (2,3) to G²  ← NEW edge!
+    2→4→2 (same as u, skip)
+    2→4→3 → add (2,3)? already there
+    2→4→6 → add (2,6) to G²  ← NEW edge!
+    2→5→2 (same as u, skip)
+
+  u=3:
+    3→1→2 → add (3,2)? = (2,3) already there
+    3→1→3 (same as u, skip)
+    3→4→2 → (2,3) already there
+    3→4→3 (same as u, skip)
+    3→4→6 → add (3,6) to G²  ← NEW edge!
+
+  u=4:
+    4→2→1 → add (4,1)? = (1,4) already there
+    4→2→4 (same as u, skip)
+    4→2→5 → add (4,5) to G²  ← NEW edge!
+    4→3→1 → (1,4) already there
+    4→3→4 (same as u, skip)
+    4→6→4 (same as u, skip)
+
+  u=5:
+    5→2→1 → add (5,1)? = (1,5) already there
+    5→2→4 → add (5,4)? = (4,5) already there
+    5→2→5 (same as u, skip)
+
+  u=6:
+    6→4→2 → add (6,2)? = (2,6) already there
+    6→4→3 → add (6,3)? = (3,6) already there
+    6→4→6 (same as u, skip)
+
+  RESULT — G² contains all G edges PLUS:
+  New edges: (1,4), (1,5), (2,3), (2,6), (3,6), (4,5)
+
+  G² adjacency:
+    1: [2,3,4,5]   2: [1,3,4,5,6]   3: [1,2,4,6]
+    4: [1,2,3,5,6] 5: [1,2,4]        6: [2,3,4]
+
+  G² is much denser than G — many more edges!
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 108–110</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Error in G² construction</strong>
+  Students often forget to include the ORIGINAL edges of G in G². G² includes ALL edges where distance ≤ 2 — this means distance-1 (original edges) AND distance-2 (shared neighbors). Every edge in G is also in G². <span class="pdf-ref">📄 pp. 108–110</span>
+</div>
+
+<!-- ─── 2d ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span>
+  <span class="title">Graph Connectivity Proof: deg(v) ≥ n/2 → G is Connected</span>
+  <span class="pages">Lecture PDF: p. 110 · Assignment 4 Q5 <span class="asgn-ref">📋 A4 Q5</span></span>
+</div>
+
+<h3>Intuition: Why high degree forces connectivity <span class="pdf-ref">📄 p. 110</span></h3>
+<p>
+  Imagine n people at a party. If every person knows at least n/2 other people, can two strangers always find a
+  mutual acquaintance? Yes! And stronger: the entire party is one connected group — there are no isolated cliques.
+</p>
+<p>
+  The key insight: if the graph were disconnected, some component would be "small" (fewer than n/2 vertices).
+  But any vertex in that small component can only know others in the same component — giving it degree less than n/2.
+  This contradicts our assumption. <span class="pdf-ref">📄 p. 110</span>
+</p>
+
+<h3>Mechanism: Proof by contradiction <span class="pdf-ref">📄 p. 110</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">THEOREM: If every vertex v has deg(v) ≥ n/2, then G is connected.</div>
+  <div class="proof-step">Proof technique: contradiction. We assume the graph is disconnected and derive an impossibility.</div>
+</div>
+
+<h3>Worked Example: Full proof with concrete n = 6 <span class="pdf-ref">📄 p. 110</span> <span class="asgn-ref">📋 A4 Q5</span></h3>
+
+<pre class="diagram">
+  Setup: n = 6 vertices. Every vertex must have degree ≥ n/2 = 3.
+
+  Assume (for contradiction) that G is DISCONNECTED.
+  Then G splits into at least 2 connected components.
+  Let C be the SMALLEST component.
+  Since there are at least 2 components and |V| = 6:
+    |C| ≤ ⌊6/2⌋ = 3  (at most half the vertices — otherwise the other component would be smaller)
+
+  Now take any vertex v in C.
+  v can ONLY have edges to other vertices IN C (edges cannot cross component boundaries — that would connect C to another component, contradicting the definition of a component).
+
+  Therefore: deg(v) ≤ |C| - 1  (at most connected to all OTHER vertices in C)
+             deg(v) ≤ 3 - 1 = 2
+
+  But our assumption says deg(v) ≥ n/2 = 3 for ALL vertices.
+  CONTRADICTION: deg(v) ≤ 2 AND deg(v) ≥ 3 is impossible.
+
+  Therefore our assumption (G is disconnected) was FALSE.
+  G must be connected. ✓ □
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 110</span></div>
+
+<h3>Full structured proof (for exam writing) <span class="pdf-ref">📄 p. 110</span></h3>
+
+<div class="step">
+  <div class="step-head">Step 1 [Proof Type]: Proof by contradiction.</div>
+  <div class="step-detail">We assume the negation: G is NOT connected. We derive an impossibility from this assumption. <span class="pdf-ref">📄 p. 110</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Step 2 [Assumption]: Assume G is disconnected.</div>
+  <div class="step-detail">Then G has at least two connected components. Let C be the smallest connected component, with |C| = k vertices. Since there are at least two components: k ≤ ⌊n/2⌋ (the smallest component has at most half the vertices). So k &lt; n/2 or k = n/2.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 3 [Key observation]: Edges cannot cross component boundaries.</div>
+  <div class="step-detail">By definition of a connected component, no edge connects a vertex inside C to a vertex outside C. If such an edge existed, those vertices would be in the same component — contradicting C being a separate component. <span class="pdf-ref">📄 p. 110</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Step 4 [Degree bound]: Any vertex v ∈ C has degree at most k − 1.</div>
+  <div class="step-detail">Since v can only connect to other vertices inside C (by Step 3), and there are only k − 1 other vertices in C: deg(v) ≤ k − 1 &lt; k ≤ n/2. So deg(v) &lt; n/2. <span class="pdf-ref">📄 p. 110</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Step 5 [Contradiction].</div>
+  <div class="step-detail">We assumed deg(v) ≥ n/2 for ALL vertices (given condition). But Step 4 shows deg(v) &lt; n/2 for any v ∈ C. This is a contradiction. <span class="pdf-ref">📄 p. 110</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Step 6 [Conclusion]: Our assumption in Step 2 was false.</div>
+  <div class="step-detail">Therefore G must be connected. ∎ <span class="pdf-ref">📄 p. 110</span></div>
+</div>
+
+<h3>§2 Synthesis: BFS vs DFS — When to pick which <span class="pdf-ref">📄 pp. 110–156</span></h3>
+<table class="data">
+  <thead>
+    <tr><th>Task</th><th>Use BFS or DFS?</th><th>Why</th><th>Complexity</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Shortest path (unweighted)</td><td><strong>BFS</strong></td><td>Level-by-level exploration guarantees minimum edges</td><td>O(n+m)</td></tr>
+    <tr><td>Find ANY path between s and t</td><td>Either</td><td>Both work; DFS often simpler to implement recursively</td><td>O(n+m)</td></tr>
+    <tr><td>Detect a cycle in a directed graph</td><td><strong>DFS</strong></td><td>Back edges (pre/post intervals) reveal cycles</td><td>O(n+m)</td></tr>
+    <tr><td>Topological sort of a DAG</td><td><strong>DFS</strong></td><td>Post-order gives reverse topological order</td><td>O(n+m)</td></tr>
+    <tr><td>Find all connected components</td><td>Either</td><td>Run BFS/DFS from each unvisited vertex</td><td>O(n+m)</td></tr>
+    <tr><td>Strongly connected components</td><td><strong>DFS (twice)</strong></td><td>Kosaraju's or Tarjan's algorithm uses DFS pre/post</td><td>O(n+m)</td></tr>
+    <tr><td>Check reachability (can s reach t?)</td><td>Either</td><td>Both mark visited correctly; BFS guarantees shortest route</td><td>O(n+m)</td></tr>
+    <tr><td>Find path with fewest hops through layers</td><td><strong>BFS</strong></td><td>Level = hop count; BFS computes all hop counts at once</td><td>O(n+m)</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 PRIMARY SOURCE: Graded Assignments A4 (Q3, Q5, Q6) and A6 (Q4), Lectures 12–15, Quiz 1 patterns</div>
+
+<div class="section-block">
+
+<h3>Exam Patterns — What the Questions Will Look Like <span class="pdf-ref">📄 pp. 105–156</span></h3>
+<table class="data">
+  <thead>
+    <tr><th>#</th><th>Question Stem Pattern</th><th>Required Answer Elements</th><th>Most Common Error</th><th>Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>"BFS vs DFS — how many nodes visited before reaching the goal?" (A4 Q3 style)</td>
+      <td>Trace both algorithms step by step; count nodes dequeued/explored before goal is processed; state which is better and why</td>
+      <td>Stopping at "goal discovered" instead of "goal dequeued/processed" — BFS discovers goal as soon as it's enqueued, but visits = when dequeued</td>
+      <td><span class="pdf-ref">📄 pp. 110–140</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>"Prove: if deg(v) ≥ n/2 for all v, then G is connected" (A4 Q5)</td>
+      <td>State proof by contradiction; assume disconnected; find smallest component k &lt; n/2; show deg ≤ k-1 &lt; n/2; contradiction; conclude connected</td>
+      <td>Not explicitly stating why edges can't cross component boundaries; or not using the "smallest component" bound carefully</td>
+      <td><span class="pdf-ref">📄 p. 110</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>"Adjacency matrix vs adjacency list: complexity of [operation]?" (A4 Q6 style)</td>
+      <td>State both representations; give O-notation for the operation; explain WHY (scan the row / scan the list)</td>
+      <td>Forgetting the n+m vs n² distinction; or claiming "check if edge (i,j) exists = O(1)" is wrong for adjacency list</td>
+      <td><span class="pdf-ref">📄 pp. 106–110</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>"Compute G² of this graph and state its complexity"</td>
+      <td>List all new edges added; state that G² includes original edges too; state O(|E||V|) for adj-list or O(n³) for matrix</td>
+      <td>Forgetting to include original G edges in G²; or confusing "share a neighbor" with "have distance exactly 2"</td>
+      <td><span class="pdf-ref">📄 pp. 108–110</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>"Compute in-degree and out-degree of each vertex using adjacency list" (A6 Q4)</td>
+      <td>Out-degree: O(1) per vertex (just count list length), O(V) total. In-degree: scan all lists once, O(V+E) total. Show the algorithm and result.</td>
+      <td>Claiming in-degree is O(V) like out-degree — it requires scanning ALL adjacency lists, hence O(V+E)</td>
+      <td><span class="pdf-ref">📄 p. 227</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>"Trace BFS on this graph starting from vertex X. Show queue states."</td>
+      <td>Complete trace table: step, dequeued vertex, newly visited vertices, queue state; final level[] and parent[] arrays</td>
+      <td>Not maintaining visited[] correctly (re-adding already-queued vertices); wrong order of enqueuing neighbors</td>
+      <td><span class="pdf-ref">📄 pp. 110–128</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>"Trace DFS on this graph. Compute pre[] and post[] numbers."</td>
+      <td>Recursive call stack trace; pre[] values (enter order); post[] values (exit order); classify any designated edge</td>
+      <td>Incrementing count at wrong time (pre should be on ENTRY, post should be on EXIT after all recursion)</td>
+      <td><span class="pdf-ref">📄 pp. 129–148</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>"Does this graph have a cycle? Use DFS to justify."</td>
+      <td>Run DFS; identify back edges (edge (u,v) where v's interval contains u's); if any back edge exists → cycle; name the cycle</td>
+      <td>Saying "cycle detected" without identifying the specific back edge and the cycle it creates</td>
+      <td><span class="pdf-ref">📄 pp. 141–148</span></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>"Why is BFS O(n+m) with adjacency list but O(n²) with adjacency matrix?"</td>
+      <td>Explain that with adj-list, processing vertex j costs O(deg(j)); summing = O(2m). With adj-matrix, scanning row j costs O(n); summing = O(n²).</td>
+      <td>Confusing m (edges) with n (vertices); or saying BFS is O(nm) with adjacency list (wrong)</td>
+      <td><span class="pdf-ref">📄 pp. 114–118</span></td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>"Classify the given edge (u,v) as tree/forward/back/cross using DFS."</td>
+      <td>State the interval rule; compute pre/post for u and v; apply the containment test; name the edge type and its meaning</td>
+      <td>Forgetting to run DFS first to get actual pre/post numbers; guessing edge type from graph structure alone</td>
+      <td><span class="pdf-ref">📄 pp. 141–148</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Assignment Replay: A4 &amp; A6 Worked Solutions <span class="asgn-ref">📋 A4</span> <span class="asgn-ref">📋 A6</span></h3>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q3</span> <strong>BFS vs DFS node count — which visits fewer nodes before reaching the goal?</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>The question setup:</strong> Given a specific graph with a start (green) node and goal (yellow) node, both algorithms choose the left-most neighbor first. Count how many nodes are processed before the goal is dequeued (BFS) or returned from (DFS). <span class="pdf-ref">📄 pp. 110–140</span></li>
+        <li><strong>BFS result in A4:</strong> BFS visited 5 nodes before reaching the goal. BFS explores level-by-level — if the goal is at level d, it processes all nodes at levels 0, 1, ..., d-1 first, PLUS earlier nodes at level d. <span class="pdf-ref">📄 pp. 110–128</span></li>
+        <li><strong>DFS result in A4:</strong> DFS visited 10 nodes. DFS dove deep into a wrong subtree first, processed many nodes before backtracking to find the goal. <span class="pdf-ref">📄 pp. 129–140</span></li>
+        <li><strong>Key insight:</strong> BFS is better when the goal is "nearby" (short path). DFS can be much worse if it picks the wrong branch first. However, DFS is simpler and uses O(depth) stack space vs BFS's O(n) queue space. <span class="pdf-ref">📄 pp. 110–140</span></li>
+        <li><strong>Grading criterion (100%):</strong> Show the step-by-step trace, not just the final count. The grader wants to see the queue/stack states. <span class="pdf-ref">📄 pp. 110–140</span></li>
+        <li><strong>Exam variant:</strong> "On a specific graph, does BFS or DFS visit the goal first? What is the exact count?" Always trace; never just guess. <span class="pdf-ref">📄 pp. 110–140</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q5</span> <strong>Prove: degree ≥ n/2 for all vertices implies G is connected.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Proof structure:</strong> Contradiction. Assume disconnected → smallest component C has k ≤ n/2 vertices → any v ∈ C has deg(v) ≤ k-1 &lt; n/2 → contradicts deg(v) ≥ n/2. <span class="pdf-ref">📄 p. 110</span></li>
+        <li><strong>The critical step:</strong> You must explicitly state WHY edges can't cross component boundaries. "By definition of connected component, all edges from a vertex in C go to other vertices in C." This is often stated too quickly on exams. <span class="pdf-ref">📄 p. 110</span></li>
+        <li><strong>The size bound:</strong> k ≤ ⌊n/2⌋ because C is the SMALLEST component, and there must be at least one other component. The two components together have n vertices, so the smaller one has ≤ n/2. <span class="pdf-ref">📄 p. 110</span></li>
+        <li><strong>Grading criterion (100%):</strong> Must name proof technique (contradiction), assume disconnected, bound component size, apply degree inequality, derive contradiction, conclude. Six steps = full marks. <span class="pdf-ref">📄 p. 110</span></li>
+        <li><strong>Common partial credit:</strong> Students often write "there exists a vertex with degree &lt; n/2" without carefully bounding the component size. The bound k ≤ n/2 is essential. <span class="pdf-ref">📄 p. 110</span></li>
+        <li><strong>Exam variant:</strong> "Prove that if deg(v) ≥ n/2 for all v, then any two vertices in G have a common neighbor." This requires a slightly extended argument but uses the same component-crossing principle. <span class="pdf-ref">📄 p. 110</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q6</span> <strong>Graph-squaring G²: construction and complexity.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>What G² is:</strong> Add edge (u,w) whenever u and w share a common neighbor v (are within 2 hops). G² includes all original G edges plus new 2-hop edges. <span class="pdf-ref">📄 pp. 108–110</span></li>
+        <li><strong>Adjacency list approach:</strong> For each u, for each neighbor v of u, for each neighbor w of v: add (u,w) to G². Total work = O(|V| × max_degree²) which is O(|E| × |V|) in worst case. <span class="pdf-ref">📄 pp. 108–110</span></li>
+        <li><strong>Adjacency matrix approach:</strong> Compute A² = A × A (matrix multiplication). Entry (A²)[i][j] &gt; 0 means there's a path of length ≤ 2. Complexity: O(|V|³). <span class="pdf-ref">📄 p. 108</span></li>
+        <li><strong>Key mistake to avoid:</strong> G² does NOT drop original G edges. Every edge in G is also in G² (it's a path of length 1, which is ≤ 2). <span class="pdf-ref">📄 p. 108</span></li>
+        <li><strong>Grading criterion (100%):</strong> State the definition; list ALL new edges (systematically, not just a sample); state both construction complexities; note G edges are included. <span class="pdf-ref">📄 pp. 108–110</span></li>
+        <li><strong>Exam variant:</strong> "Is G³ (3-hop connections) computable in O(|V|⁴) time? State the algorithm." Yes — apply the same approach one more time: O(|V| × |E|) per new level. <span class="pdf-ref">📄 p. 108</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q4</span> <strong>Compute out-degree and in-degree of all vertices using an adjacency list.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Out-degree:</strong> out_degree[v] = len(Adj[v]). This is O(1) per vertex since the length of the list is known. Total: O(|V|). <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>In-degree:</strong> Initialize all in_degree to 0. Then for each vertex u and each neighbor v in Adj[u]: in_degree[v]++. Total: O(|V| + |E|) — each edge is traversed exactly once across all adjacency lists. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>The asymmetry insight:</strong> Out-degree is faster (O(V)) because the information is immediately available as the list length. In-degree requires scanning EVERY list to count arrivals — hence O(V+E). <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Grading criterion (100%):</strong> State both algorithms separately, give the pseudocode or clear English description, state time complexity for each with justification. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Exam variant:</strong> "Can you compute in-degree in O(V) time?" No — you MUST scan all adjacency lists, giving O(V+E). Unless you explicitly maintain an in-degree array at the cost of O(1) per edge insertion. <span class="pdf-ref">📄 p. 227</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3>Misconception Cards <span class="pdf-ref">📄 pp. 105–156</span></h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "BFS always visits FEWER nodes than DFS."</p>
+  <p><span class="reality">✅ Reality:</span> BFS visits fewer nodes when the goal is near the source (short path). But if the goal is deep in the graph and BFS must explore many wide levels, it may visit MORE nodes than a DFS that happens to take the right deep branch first. BFS is only guaranteed to be OPTIMAL in path length, not in nodes visited. <span class="pdf-ref">📄 pp. 110–140</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "DFS always visits the same vertices in the same order as BFS, just differently timed."</p>
+  <p><span class="reality">✅ Reality:</span> BFS and DFS can discover vertices in completely different orders. BFS levels are determined by hop count from source. DFS order is determined by the recursive dive — vertices far from source can be visited early if they're reached via a deep chain. <span class="pdf-ref">📄 pp. 110–140</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Adjacency list is always better than adjacency matrix because it uses less space."</p>
+  <p><span class="reality">✅ Reality:</span> Adjacency list is space-efficient for <em>sparse</em> graphs (few edges). But for <em>dense</em> graphs (many edges), O(n+m) ≈ O(n²) anyway, so the space advantage disappears. And adjacency matrix gives O(1) edge existence checks vs O(deg) for lists. The right choice depends on the graph density and the operations needed. <span class="pdf-ref">📄 pp. 108–110</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "BFS and DFS both run in O(n) time."</p>
+  <p><span class="reality">✅ Reality:</span> Both run in O(n + m) with adjacency lists, where m = |E| is the number of edges. If the graph has m = O(n²) edges (dense graph), then complexity is O(n²). If sparse (m = O(n)), complexity is O(n). Never just say "O(n)" without qualifying. <span class="pdf-ref">📄 pp. 114–140</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "pre[v] is the order in which vertices are added to the queue in BFS."</p>
+  <p><span class="reality">✅ Reality:</span> pre[] and post[] are exclusively DFS concepts. BFS uses level[] (hop count from source) and the order of dequeuing. pre[v] records when DFS ENTERS vertex v for the first time. post[v] records when DFS FINISHES exploring v (all recursive calls have returned). These two timestamps together uniquely characterize the DFS tree structure. <span class="pdf-ref">📄 pp. 141–148</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "A back edge means there's a back-and-forth (bidirectional) edge in the graph."</p>
+  <p><span class="reality">✅ Reality:</span> A back edge in DFS is an edge (u,v) where v is an ANCESTOR of u in the DFS tree — meaning DFS visited v before u, and now u has an edge pointing back to v. This creates a directed cycle. It has nothing to do with the original graph being bidirectional. <span class="pdf-ref">📄 pp. 141–148</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "If G is disconnected, BFS will still visit all vertices."</p>
+  <p><span class="reality">✅ Reality:</span> BFS(s) starting from vertex s only visits all vertices in s's connected component. To visit all vertices in a disconnected graph, you must run BFS (or DFS) repeatedly from each unvisited vertex, just as the outer loop in DFS_all() does. <span class="pdf-ref">📄 p. 110</span></p>
+</div>
+
+<h3>Memory Aids &amp; Mnemonics <span class="pdf-ref">📄 pp. 105–156</span></h3>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 1: BFS vs DFS — "BFS Breadth → Belly of the cave; DFS Depth → Dive first"</strong>
+  <strong>B</strong>FS = <strong>B</strong>elly-of-cave (explore all nearby, THEN go deeper). Uses a <strong>Q</strong>ueue.
+  <strong>D</strong>FS = <strong>D</strong>ive first (go as deep as you can, then backtrack). Uses a <strong>S</strong>tack (or recursion).
+  Queue → Breadth; Stack → Depth. <span class="pdf-ref">📄 pp. 110–140</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 2: Adjacency representation complexity — "Matrix = n-squared; List = n plus m"</strong>
+  Every operation on adjacency <strong>matrix</strong> costs at least O(n) (scan a row) → algorithms become O(n²).
+  Every operation on adjacency <strong>list</strong> costs O(deg(v)) → algorithms become O(n+m).
+  Dense graph (m = n²): both representations give O(n²). Sparse graph (m = n): lists give O(n), matrix gives O(n²). <span class="pdf-ref">📄 pp. 106–118</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 3: Degree calculation — "Out = O(1) per vertex; In = O(1) per EDGE"</strong>
+  Out-degree = just count the list = O(1) per vertex = O(V) total.
+  In-degree = count appearances = O(1) per edge traversed = O(V+E) total.
+  Sum: "out is quick, in is thorough." <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 4: Pre/Post intervals and edge types — "Contains = ancestor; Disjoint = cross"</strong>
+  If [pre(v), post(v)] CONTAINS [pre(u), post(u)]: v is an ancestor of u → edge (u,v) is a BACK edge (u points to ancestor v) or forward edge.
+  If the intervals are DISJOINT: the vertices are in unrelated subtrees → edge is a CROSS edge.
+  Back edges = cycles. <span class="pdf-ref">📄 pp. 141–148</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 5: Connectivity proof skeleton — "ASSUME SMALLEST CONTRADICTION"</strong>
+  To prove "property P implies connected": (1) <strong>ASSUME</strong> disconnected, (2) find the <strong>SMALLEST</strong> component (k vertices), (3) show any vertex there has degree &lt; n/2 — <strong>CONTRADICTION</strong>. Three words = three steps. <span class="pdf-ref">📄 p. 110</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     WARM-UP UNDERSTANDING CHECKS
+     ============================================================ -->
+<h2 id="warmup-checks">🧗 Warm-up Understanding Checks</h2>
+<p style="color: var(--text-dim);">Five conceptual checks to confirm you absorbed §1–2 before attempting the graded practice questions. These are NOT exam-style — they're designed to build confidence.</p>
+
+<!-- WC-1 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">CONCEPTUAL</span>
+    <span class="pdf-ref">📄 pp. 110–140</span>
+  </div>
+  <p class="question-stem">WC-1. A classmate says: "BFS and DFS both find paths between vertices, so they're basically the same algorithm just with different data structures." Explain what they got right, what they got wrong, and give one task where BFS is strictly better and one where DFS is strictly better.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What they got right:</strong> Both BFS and DFS do explore graphs from a source, both mark visited vertices, both reconstruct paths using parent[], and both run in O(n+m) with adjacency lists. The data structure difference (queue vs stack) is real. <span class="pdf-ref">📄 pp. 110–140</span></p>
+      <p><strong>What they got wrong:</strong> The data structure difference creates fundamentally different exploration orders with different guarantees. BFS explores level-by-level (near vertices first), guaranteeing shortest path by edge count. DFS explores depth-first (may go far before backtracking), providing NO shortest-path guarantee. They also reveal different structural information. <span class="pdf-ref">📄 pp. 110–140</span></p>
+      <p><strong>BFS strictly better:</strong> Finding the shortest path (fewest edges) between two vertices. DFS might find a longer path first. <span class="pdf-ref">📄 p. 118</span></p>
+      <p><strong>DFS strictly better:</strong> Detecting cycles in a directed graph using pre/post numbers and back edges. BFS cannot efficiently detect directed cycles. <span class="pdf-ref">📄 pp. 141–148</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-2 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">ALGORITHM LABELING</span>
+    <span class="pdf-ref">📄 pp. 110–118</span>
+  </div>
+  <p class="question-stem">WC-2. Below is a BFS trace with the labels removed. Fill in the blanks: what is dequeued at each step, and what is the queue state after that step? Graph: V={A,B,C,D,E}, E={(A,B),(A,C),(B,D),(C,D),(D,E)}. BFS starting from A. Neighbors in alphabetical order.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <table class="trace-table">
+        <thead><tr><th>Step</th><th>Dequeue</th><th>Neighbors enqueued</th><th>Queue after</th><th>Level[]</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td>Seed</td><td>-</td><td>A (seed)</td><td>[A]</td><td>A:0</td></tr>
+          <tr><td>1</td><td>A</td><td>B (level=1), C (level=1)</td><td>[B, C]</td><td>B:1, C:1</td></tr>
+          <tr class="highlight"><td>2</td><td>B</td><td>D (level=2); A already visited</td><td>[C, D]</td><td>D:2</td></tr>
+          <tr><td>3</td><td>C</td><td>D already queued; A already visited</td><td>[D]</td><td>(no new)</td></tr>
+          <tr class="highlight"><td>4</td><td>D</td><td>E (level=3); B,C already visited</td><td>[E]</td><td>E:3</td></tr>
+          <tr><td>5</td><td>E</td><td>D already visited</td><td>[] empty</td><td>(done)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Key insight:</strong> When C is dequeued in Step 3, D is already in the queue (added from B in step 2). C sees D and finds it already visited — this is why we mark as "visited" when ENQUEUED, not when DEQUEUED. <span class="pdf-ref">📄 pp. 110–118</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-3 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">REPRESENTATION CHOICE</span>
+    <span class="pdf-ref">📄 pp. 106–110</span>
+  </div>
+  <p class="question-stem">WC-3. A graph has n = 1000 vertices and m = 2000 edges. (a) How much space does an adjacency matrix use? (b) How much space does an adjacency list use? (c) If you need to check "is there an edge between vertex 7 and vertex 999?" thousands of times per second, which representation is better and why?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>(a) Adjacency matrix space:</strong> n² = 1000² = 1,000,000 entries. Each entry is 1 bit (or 1 byte). So approximately 1 MB (or up to 1 million bytes). This is FIXED regardless of how many edges there are. <span class="pdf-ref">📄 pp. 106–108</span></p>
+      <p><strong>(b) Adjacency list space:</strong> O(n + m) = O(1000 + 2000) = O(3000) entries. Only ~3,000 entries vs 1,000,000 — 333× more space-efficient for this sparse graph. <span class="pdf-ref">📄 pp. 108–110</span></p>
+      <p><strong>(c) Checking edge existence repeatedly:</strong> Use the <strong>adjacency matrix</strong>. A[7][999] takes O(1) — one array lookup. With the adjacency list, you'd need to scan vertex 7's list (up to deg(7) entries) each time — potentially much slower if the check is repeated millions of times. When edge-existence queries dominate, matrix wins despite the space cost. <span class="pdf-ref">📄 pp. 106–110</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-4 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PRE/POST INTERPRETATION</span>
+    <span class="pdf-ref">📄 pp. 141–148</span>
+  </div>
+  <p class="question-stem">WC-4. After running DFS on a directed graph, you find: pre[u]=3, post[u]=8, pre[v]=5, post[v]=6. Is there a directed edge (u,v), a directed edge (v,u), or can you not determine this? Classify the edge if it exists.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Interval analysis:</strong> [pre(u), post(u)] = [3, 8] and [pre(v), post(v)] = [5, 6]. <span class="pdf-ref">📄 pp. 141–148</span></p>
+      <p>Does [3,8] contain [5,6]? Yes — 3 &lt; 5 &lt; 6 &lt; 8. So u's interval CONTAINS v's interval. This means: u was entered before v, and u was exited after v. v is a <em>descendant</em> of u in the DFS tree.</p>
+      <p><strong>Edge (u,v):</strong> If this edge exists and u's interval contains v's interval, the edge goes from ancestor to descendant → this is a <strong>tree edge</strong> (if DFS used this edge to discover v) or <strong>forward edge</strong> (if v was already discovered another way).</p>
+      <p><strong>Edge (v,u):</strong> If this edge exists and u's interval contains v's interval, then v points to its ancestor u → this is a <strong>back edge</strong>, indicating a cycle! <span class="pdf-ref">📄 pp. 141–148</span></p>
+      <p><strong>Conclusion:</strong> From intervals alone, you cannot determine which edge exists — you need to know the actual graph edges. BUT you CAN classify any given edge: (u,v) would be a tree/forward edge; (v,u) would be a back edge (cycle indicator). <span class="pdf-ref">📄 pp. 141–148</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-5 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">MISCONCEPTION PUNCTURE</span>
+    <span class="pdf-ref">📄 p. 110</span>
+  </div>
+  <p class="question-stem">WC-5. Your classmate tries to prove "G is connected" on a graph where deg(v) ≥ 2 for all v (with n = 10 vertices). They say: "Every vertex has at least 2 neighbors, so you can always walk from any vertex to any other vertex." Identify the flaw in their reasoning and give a counterexample.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>The flaw:</strong> "Can walk from any vertex to any other" does not follow just from each vertex having ≥2 neighbors. Having many local neighbors does not prevent the graph from being split into isolated clusters where each cluster is internally well-connected but disconnected from others. <span class="pdf-ref">📄 p. 110</span></p>
+      <p><strong>Counterexample:</strong> Take two separate 5-cycles (pentagons): C₅ = {A,B,C,D,E} with edges (A,B),(B,C),(C,D),(D,E),(E,A) and a second C₅ = {F,G,H,I,J} with edges (F,G),(G,H),(H,I),(I,J),(J,F). Every vertex has degree exactly 2. But the graph is DISCONNECTED — there's no edge between the two cycles. You cannot walk from A to F. <span class="pdf-ref">📄 p. 110</span></p>
+      <p><strong>Why does deg ≥ n/2 work but deg ≥ 2 doesn't?</strong> The threshold n/2 is the critical point where a small component can no longer sustain high-degree vertices. With n=10 and n/2=5: any component with fewer than 5 vertices cannot have vertices with degree ≥ 5. This forces the whole graph to be one component. deg ≥ 2 is far too weak a condition. <span class="pdf-ref">📄 p. 110</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 4: PRACTICE QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Practice Questions</h2>
+<div class="pages-coverage">📘 13 exam-style questions: 4 MCQ + 3 PROOF + 3 TRACE + 3 PSEUDOCODE</div>
+
+<h3 id="section-4-mcq">MCQ — Multiple Choice (4 Questions)</h3>
+
+<!-- Q1 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 106–110</span>
+    <span class="asgn-ref">📋 A4 Q6</span>
+  </div>
+  <p class="question-stem">Q1. A graph has n = 500 vertices and m = 1000 edges. You need to frequently check "is there an edge between vertex i and vertex j?" (thousands of queries per second) but rarely list all neighbors of a vertex. Which representation is most efficient for this workload?</p>
+  <ol class="mcq-options" type="A">
+    <li>Adjacency matrix — O(1) edge check, O(n²) space</li>
+    <li>Adjacency list — O(deg) edge check, O(n+m) space</li>
+    <li>Both have O(1) edge check, so adjacency list is better due to space</li>
+    <li>Neither — use a hash set for edges</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: A — Adjacency matrix</strong></p>
+      <p>When the dominant operation is checking edge existence, the adjacency matrix's O(1) lookup (A[i][j]) far outweighs its O(n²) = O(250,000) space cost. For thousands of queries per second, the constant-time check is worth the space. <span class="pdf-ref">📄 pp. 106–108</span></p>
+      <p>Why B is wrong: Adjacency list edge-check requires scanning i's entire neighbor list — O(deg(i)) per query. For high-degree vertices or frequent queries, this is much slower.</p>
+      <p>Why C is wrong: Adjacency list does NOT give O(1) edge check.</p>
+      <p>Why D is wrong: While hash sets can give O(1) average-case edge checks, this is not presented as one of the two representations studied in CS 570.</p>
+      <p><em>Exam Tip:</em> Matrix = O(1) check, O(n²) space, O(n) neighbor-listing. List = O(deg) check, O(n+m) space, O(deg) neighbor-listing. <span class="pdf-ref">📄 pp. 106–110</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 110–140</span>
+    <span class="asgn-ref">📋 A4 Q3</span>
+  </div>
+  <p class="question-stem">Q2. On an unweighted graph with n=10, m=15, BFS from source s finds vertex t at level 3. Which statement about DFS from the same source s is NECESSARILY true?</p>
+  <ol class="mcq-options" type="A">
+    <li>DFS will also find t at depth 3 (same as BFS)</li>
+    <li>DFS will find t at depth ≥ 3 (possibly longer path)</li>
+    <li>DFS will find t at depth ≤ 3 (possibly shorter path)</li>
+    <li>DFS cannot guarantee finding t at all</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — DFS finds t at depth ≥ 3</strong></p>
+      <p>BFS guarantees the SHORTEST path (fewest edges) from s to any vertex. If BFS finds t at level (distance) 3, then the true shortest path from s to t is exactly 3 edges. DFS may find t via a longer path (depth &gt; 3), but it CANNOT find t at depth &lt; 3 — that would require a path shorter than the BFS-guaranteed shortest. Hence depth ≥ 3. <span class="pdf-ref">📄 pp. 110–128</span></p>
+      <p>Why A is wrong: DFS does not guarantee finding the shortest path; it may take a longer route.</p>
+      <p>Why C is wrong: DFS cannot find a path shorter than BFS's shortest (BFS is optimal).</p>
+      <p>Why D is wrong: DFS will always find t if t is reachable — it explores all reachable vertices.</p>
+      <p><em>Exam Tip:</em> BFS level = exact shortest path. DFS depth = some path, ≥ shortest. <span class="pdf-ref">📄 p. 118</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 MCQ INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 141–148</span>
+  </div>
+  <p class="question-stem">Q3. After DFS on a directed graph, vertex u has pre[u]=4, post[u]=9 and vertex v has pre[v]=6, post[v]=7. The directed edge (u,v) exists. What type of edge is (u,v)?</p>
+  <ol class="mcq-options" type="A">
+    <li>Back edge — because u's interval [4,9] contains v's interval [6,7]</li>
+    <li>Tree or Forward edge — because u's interval [4,9] contains v's interval [6,7]</li>
+    <li>Cross edge — because the intervals are disjoint</li>
+    <li>Cannot be determined without knowing when v was first discovered</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — Tree or Forward edge</strong></p>
+      <p>u's interval [4,9] contains v's interval [6,7] (since 4 &lt; 6 &lt; 7 &lt; 9). This means u was active when v was first discovered — u is an ANCESTOR of v in the DFS tree. An edge from ancestor (u) to descendant (v) is either a tree edge (if u directly discovered v) or a forward edge (if v was discovered through a different path). Both have ancestor→descendant direction. <span class="pdf-ref">📄 pp. 141–148</span></p>
+      <p>Why A is wrong: A back edge goes from descendant to ancestor (v's interval would contain u's interval). Here it's the opposite — u contains v.</p>
+      <p>Why C is wrong: Cross edges have DISJOINT intervals, not nested ones.</p>
+      <p>Why D is wrong: The interval relationship alone is sufficient to classify; the rule doesn't require additional information.</p>
+      <p><em>Exam Tip:</em> u contains v → u is ancestor → edge goes ancestor→descendant = tree/forward. v contains u → u is descendant → edge goes descendant→ancestor = BACK (cycle!). <span class="pdf-ref">📄 pp. 141–148</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 MCQ ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 108–118</span>
+    <span class="asgn-ref">📋 A4 Q6</span>
+  </div>
+  <p class="question-stem">Q4. Let G be a directed graph with n vertices and m edges, stored as an adjacency list. You want to compute G² (add edges for all pairs reachable within 2 hops). Which is the TIGHTEST asymptotic bound for this using the adjacency list approach?</p>
+  <ol class="mcq-options" type="A">
+    <li>O(n + m)</li>
+    <li>O(n² + m)</li>
+    <li>O(n · m) or equivalently O(|V| · |E|)</li>
+    <li>O(n³)</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: C — O(n · m)</strong></p>
+      <p>The algorithm: for each vertex u (n vertices), for each neighbor v of u (O(m) total across all u), for each neighbor w of v (O(deg(v)) per v). The total work is Σ_{u} Σ_{v ∈ Adj[u]} deg(v). In the worst case (a star graph), this is O(n · m). More precisely: for each of the m edges (u,v), we scan v's adjacency list of size deg(v). Total = Σ_{(u,v) ∈ E} deg(v) ≤ m · max_deg ≤ m · n = O(nm). <span class="pdf-ref">📄 pp. 108–110</span></p>
+      <p>Why A is wrong: O(n+m) would mean we only look at each vertex and edge once — but we need to look at neighbors-of-neighbors.</p>
+      <p>Why B is wrong: O(n²+m) would be correct only if deg(v) were always O(n/m), which isn't guaranteed.</p>
+      <p>Why D is wrong: O(n³) is the complexity for the ADJACENCY MATRIX approach (matrix multiplication A×A). The adjacency list approach is faster for sparse graphs.</p>
+      <p><em>Exam Tip:</em> G² via adjacency list = O(|E| × |V|) = O(nm). G² via adjacency matrix = O(n³). <span class="pdf-ref">📄 p. 108</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-proof">Proof Questions (3 Questions)</h3>
+
+<!-- Q5 PROOF BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 p. 110</span>
+    <span class="asgn-ref">📋 A4 Q5</span>
+  </div>
+  <p class="question-stem">Q5. Prove: If every vertex v in an undirected graph G with n vertices has degree deg(v) ≥ n/2, then G is connected.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove by contradiction.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Proof by Contradiction</div>
+        <div class="proof-step"><strong>Step 1 [Assumption].</strong> Assume for contradiction that G is NOT connected. <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Step 2 [Component structure].</strong> Since G is disconnected, it has at least two connected components. Let C be the smallest connected component, with |C| = k vertices. Since there are at least two components sharing n vertices, we have k ≤ ⌊n/2⌋, so k ≤ n/2. <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Step 3 [No cross-component edges].</strong> By definition of a connected component, no edge in G connects a vertex inside C to a vertex outside C. If such an edge existed, both endpoints would be in the same component — contradicting C being a separate component. <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Step 4 [Degree upper bound].</strong> Let v be any vertex in C. Every edge incident to v must connect v to another vertex inside C (by Step 3). There are at most k − 1 other vertices in C. Therefore: deg(v) ≤ k − 1 ≤ n/2 − 1 &lt; n/2. <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Step 5 [Contradiction].</strong> Step 4 gives deg(v) &lt; n/2. But our given condition states deg(v) ≥ n/2 for every vertex v. This is a contradiction. <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Step 6 [Conclusion].</strong> Our assumption (G is disconnected) leads to a contradiction. Therefore G must be connected. ∎ <span class="pdf-ref">📄 p. 110</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Named proof technique: contradiction. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Assumed G is disconnected. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Identified smallest component C with k ≤ n/2 vertices. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Stated no edges cross component boundaries. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Derived deg(v) ≤ k−1 &lt; n/2 for v ∈ C. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Stated contradiction with deg(v) ≥ n/2 condition. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Concluded G must be connected. <span class="pdf-ref">📄 p. 110</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 PROOF INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 141–148</span>
+  </div>
+  <p class="question-stem">Q6. Prove: A directed graph G has a directed cycle if and only if DFS on G reveals at least one back edge (an edge (u,v) where v is an ancestor of u in the DFS tree).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove both directions of the iff.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Direction (→): If G has a directed cycle, then DFS reveals a back edge.</div>
+        <div class="proof-step">Let v₀ → v₁ → v₂ → ... → v_k → v₀ be a directed cycle in G. Consider DFS starting from v₀ (or any vertex from which v₀ is reachable). When DFS first visits v₀ (pre[v₀] is set), it will eventually explore the cycle. At some point, DFS will be at v_k and attempt to traverse edge (v_k, v₀). At this point, v₀ was already visited (it was visited first in the cycle) and v₀ is still active (post[v₀] has not been set — DFS is still within v₀'s subtree, exploring through the cycle). So pre[v₀] &lt; pre[v_k] &lt; post[v_k] &lt; post[v₀], meaning v₀'s interval contains v_k's interval. The edge (v_k, v₀) goes from descendant (v_k) to ancestor (v₀) — a BACK EDGE. <span class="pdf-ref">📄 pp. 141–148</span></div>
+      </div>
+      <div class="proof-block">
+        <div class="proof-label">Direction (←): If DFS reveals a back edge (u,v), then G has a directed cycle.</div>
+        <div class="proof-step">Suppose DFS finds a back edge (u,v) where v is an ancestor of u in the DFS tree. Since v is an ancestor of u, there exists a directed path from v to u in the DFS tree: v → ... → u (following tree edges). Combined with the back edge u → v, this forms a directed cycle: v → ... → u → v. <span class="pdf-ref">📄 pp. 141–148</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Proved both (→) and (←) directions. <span class="pdf-ref">📄 pp. 141–148</span></li>
+        <li>☐ For (→): Identified the back edge from the cycle; used interval containment argument. <span class="pdf-ref">📄 pp. 141–148</span></li>
+        <li>☐ For (←): Identified the tree path from v to u; combined with back edge to get cycle. <span class="pdf-ref">📄 pp. 141–148</span></li>
+        <li>☐ Used pre/post interval notation correctly. <span class="pdf-ref">📄 pp. 141–148</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 PROOF ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 106–118</span>
+    <span class="asgn-ref">📋 A4 Q5</span>
+  </div>
+  <p class="question-stem">Q7. Let G be an undirected connected graph with n vertices and m edges. Prove that if G is stored as an adjacency list, then BFS runs in O(n + m) time. Specifically prove (a) each vertex is enqueued at most once, and (b) the total work across all vertices is proportional to n + m.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Full Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Full complexity proof for BFS with adjacency list.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Part (a): Each vertex is enqueued at most once.</div>
+        <div class="proof-step"><strong>Proof:</strong> When vertex v is enqueued, we immediately set visited[v] = True. Subsequently, whenever any vertex u is dequeued and we consider v as a neighbor, the check "if visited[v] == False" will fail, so we never enqueue v again. Thus every vertex is enqueued at most once and dequeued at most once. The total enqueue/dequeue operations are O(n). <span class="pdf-ref">📄 pp. 110–114</span></div>
+      </div>
+      <div class="proof-block">
+        <div class="proof-label">Part (b): Total work is O(n + m).</div>
+        <div class="proof-step"><strong>Initialization:</strong> Setting visited[], parent[], level[] for all vertices = O(n). <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Outer while loop:</strong> From Part (a), each vertex is dequeued at most once → the loop runs at most n times. Each dequeue is O(1). Total dequeue cost: O(n). <span class="pdf-ref">📄 p. 110</span></div>
+        <div class="proof-step"><strong>Inner for loop (processing neighbors):</strong> When vertex j is dequeued, we iterate over Adj[j] — exactly deg(j) neighbors. Across ALL vertex dequeue operations: Σ_{j=1}^{n} deg(j) = 2m (each undirected edge (j,k) is counted once in Adj[j] and once in Adj[k], so each edge contributes exactly 2 to the total). Total neighbor-processing cost: O(2m) = O(m). <span class="pdf-ref">📄 pp. 114–118</span></div>
+        <div class="proof-step"><strong>Conclusion:</strong> Total = O(n) [init] + O(n) [dequeues] + O(m) [neighbor processing] = O(n + m). ∎ <span class="pdf-ref">📄 pp. 114–118</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Proved each vertex enqueued ≤ once (via visited[] flag). <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Stated outer loop runs O(n) times. <span class="pdf-ref">📄 p. 110</span></li>
+        <li>☐ Applied handshaking lemma: Σ deg(j) = 2m. <span class="pdf-ref">📄 pp. 114–118</span></li>
+        <li>☐ Concluded neighbor processing total = O(m). <span class="pdf-ref">📄 p. 114</span></li>
+        <li>☐ Stated overall O(n+m). <span class="pdf-ref">📄 p. 114</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-trace">Algorithm Trace / Analysis (3 Questions)</h3>
+
+<!-- Q8 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 110–148</span>
+    <span class="asgn-ref">📋 A4 Q3</span>
+  </div>
+  <p class="question-stem">Q8. Given the graph below, run BOTH BFS (starting at vertex 1) and DFS (starting at vertex 1). Assume neighbors are processed in numerical order. For BFS, show the queue state after each step. For DFS, record pre[] and post[] numbers. Compare: how many vertices are visited before vertex 6 is first encountered by each algorithm?</p>
+  <pre class="diagram">
+  Graph: V={1,2,3,4,5,6}, E={(1,2),(2,3),(2,4),(3,5),(4,5),(5,6),(1,6)}
+  Adjacency: 1:[2,6]  2:[1,3,4]  3:[2,5]  4:[2,5]  5:[3,4,6]  6:[1,5]
+  </pre>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>BFS from vertex 1:</strong> <span class="pdf-ref">📄 pp. 110–128</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Step</th><th>Dequeue</th><th>Neighbors → Newly visited</th><th>Queue</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td>Seed</td><td>-</td><td>1 (seed, level=0)</td><td>[1]</td></tr>
+          <tr><td>1</td><td>1</td><td>2(level=1), 6(level=1)</td><td>[2, 6]</td></tr>
+          <tr class="highlight"><td>2</td><td>2</td><td>3(level=2), 4(level=2); 1 visited</td><td>[6, 3, 4]</td></tr>
+          <tr><td>3</td><td>6</td><td>5(level=2); 1 visited</td><td>[3, 4, 5]</td></tr>
+        </tbody>
+      </table>
+      <p><strong>BFS encounters vertex 6 in Step 1</strong> (enqueued when vertex 1 is dequeued). Vertices processed before 6 is DEQUEUED: {1, 2} → 2 vertices dequeued before 6 is processed. Vertices visited (enqueued) before 6 is discovered: only {1} → 1 vertex before 6 is enqueued. </p>
+      <p>Note: 6 is at BFS level 1 (distance 1 from source 1 via edge (1,6)).</p>
+      <p><strong>DFS from vertex 1:</strong> (process neighbors in order: 1→[2,6], 2→[1,3,4], etc.) <span class="pdf-ref">📄 pp. 129–148</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Action</th><th>Vertex</th><th>count</th><th>pre/post</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td>Enter</td><td>1</td><td>0</td><td>pre[1]=0</td></tr>
+          <tr><td>Enter via 1→2</td><td>2</td><td>1</td><td>pre[2]=1</td></tr>
+          <tr class="highlight"><td>Enter via 2→3</td><td>3</td><td>2</td><td>pre[3]=2</td></tr>
+          <tr><td>Enter via 3→5</td><td>5</td><td>3</td><td>pre[5]=3</td></tr>
+          <tr class="highlight"><td>3→4 skip (adj 2 is in 3's adj-list? No. Let me re-check: 3→[2,5]. 2 visited. So 3→5.)</td><td colspan="3">Correct: 3's adj = [2,5]. 2 visited, explore 5.</td></tr>
+          <tr><td>Enter via 5→6</td><td>6</td><td>4</td><td>pre[6]=4</td></tr>
+          <tr class="highlight"><td>6's adj=[1,5]: 1 visited, 5 visited. Exit 6.</td><td>6</td><td>5</td><td>post[6]=5</td></tr>
+          <tr><td>Exit 5 (next: 4 in adj)</td><td>Enter 4</td><td>6</td><td>pre[4]=6</td></tr>
+          <tr class="highlight"><td>4→[2,5]: both visited. Exit 4.</td><td>4</td><td>7</td><td>post[4]=7</td></tr>
+          <tr><td>Exit 5.</td><td>5</td><td>8</td><td>post[5]=8</td></tr>
+          <tr class="highlight"><td>Exit 3.</td><td>3</td><td>9</td><td>post[3]=9</td></tr>
+          <tr><td>2→next: 4 visited. Exit 2.</td><td>2</td><td>10</td><td>post[2]=10</td></tr>
+          <tr class="highlight"><td>1→next: 6 visited. Exit 1.</td><td>1</td><td>11</td><td>post[1]=11</td></tr>
+        </tbody>
+      </table>
+      <p><strong>DFS encounters vertex 6 at pre[6]=4.</strong> Vertices visited (entered) before 6: {1(pre=0), 2(pre=1), 3(pre=2), 5(pre=3)} → <strong>4 vertices</strong> visited before reaching 6.</p>
+      <p><strong>Comparison:</strong> BFS found 6 much faster (just 1 hop from source). DFS had to dive deep through 2→3→5 before discovering 6. BFS = 1 vertex processed before 6; DFS = 4 vertices visited before 6. <span class="pdf-ref">📄 pp. 110–148</span></p>
+      <p>📝 <strong>Pre/Post Summary:</strong> pre/post = [1:0/11, 2:1/10, 3:2/9, 4:6/7, 5:3/8, 6:4/5].</p>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 141–148</span>
+  </div>
+  <p class="question-stem">Q9. Run DFS on the directed graph below. Compute pre[] and post[] for all vertices. Then classify each directed edge as Tree, Forward, Back, or Cross. Does the graph have a cycle?</p>
+  <pre class="diagram">
+  Directed graph: V={1,2,3,4}, directed edges: (1,2),(1,3),(2,4),(3,4),(4,1)
+  Adjacency: 1:[2,3]  2:[4]  3:[4]  4:[1]
+  </pre>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>DFS trace (start from vertex 1, count=0):</strong> <span class="pdf-ref">📄 pp. 141–148</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Event</th><th>Vertex</th><th>count before</th><th>pre/post</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td>Enter DFS(1)</td><td>1</td><td>0</td><td>pre[1]=0</td></tr>
+          <tr><td>1→2: unvisited, recurse</td><td>2</td><td>1</td><td>pre[2]=1</td></tr>
+          <tr class="highlight"><td>2→4: unvisited, recurse</td><td>4</td><td>2</td><td>pre[4]=2</td></tr>
+          <tr><td>4→1: vertex 1 IS visited and pre[1]=0 &lt; pre[4]=2. Interval check: [pre(1),post(1)] contains [pre(4),post(4)]? Need post[1]. 1 is still active (open). So YES — 1 is ancestor of 4. BACK EDGE! Skip recursion.</td><td>-</td><td>-</td><td>BACK EDGE (4,1)</td></tr>
+          <tr class="highlight"><td>Exit DFS(4)</td><td>4</td><td>3</td><td>post[4]=3</td></tr>
+          <tr><td>Exit DFS(2)</td><td>2</td><td>4</td><td>post[2]=4</td></tr>
+          <tr class="highlight"><td>1→3: unvisited, recurse</td><td>3</td><td>5</td><td>pre[3]=5</td></tr>
+          <tr><td>3→4: vertex 4 IS visited. Check: is 4 an ancestor of 3? pre[4]=2, post[4]=3. pre[3]=5. Is [2,3] containing [5,?]? No — [2,3] is already closed (post[4]=3 &lt; pre[3]=5). Intervals DISJOINT → CROSS EDGE.</td><td>-</td><td>-</td><td>CROSS EDGE (3,4)</td></tr>
+          <tr class="highlight"><td>Exit DFS(3)</td><td>3</td><td>6</td><td>post[3]=6</td></tr>
+          <tr><td>Exit DFS(1)</td><td>1</td><td>7</td><td>post[1]=7</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Pre/Post Summary:</strong> pre=[1:0, 2:1, 3:5, 4:2] | post=[1:7, 2:4, 3:6, 4:3]</p>
+      <p><strong>Edge Classification:</strong></p>
+      <table class="trace-table">
+        <thead><tr><th>Edge</th><th>Interval (u)</th><th>Interval (v)</th><th>Relationship</th><th>Type</th></tr></thead>
+        <tbody>
+          <tr><td>(1,2)</td><td>[0,7]</td><td>[1,4]</td><td>[0,7] ⊃ [1,4]</td><td>Tree Edge (2 first discovered via 1)</td></tr>
+          <tr class="highlight"><td>(1,3)</td><td>[0,7]</td><td>[5,6]</td><td>[0,7] ⊃ [5,6]</td><td>Tree Edge (3 first discovered via 1)</td></tr>
+          <tr><td>(2,4)</td><td>[1,4]</td><td>[2,3]</td><td>[1,4] ⊃ [2,3]</td><td>Tree Edge (4 first discovered via 2)</td></tr>
+          <tr class="highlight"><td>(3,4)</td><td>[5,6]</td><td>[2,3]</td><td>Disjoint (3&lt;5)</td><td><strong>Cross Edge</strong></td></tr>
+          <tr><td>(4,1)</td><td>[2,3]</td><td>[0,7]</td><td>[0,7] ⊃ [2,3] → 1 is ancestor of 4</td><td><strong>Back Edge ← CYCLE!</strong></td></tr>
+        </tbody>
+      </table>
+      <p><strong>Cycle:</strong> YES — the back edge (4,1) reveals a cycle: 1 → 2 → 4 → 1. <span class="pdf-ref">📄 pp. 141–148</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 TRACE ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 108–118</span>
+    <span class="asgn-ref">📋 A4 Q6</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 4 (Graph Representations) + Topic 2 (Asymptotic Analysis)</div>
+  <p class="question-stem">Q10. Consider the complete graph K₅ (5 vertices, every pair connected — 10 edges total). (a) Draw the adjacency matrix. (b) How many entries does G² add over G? Show the G² construction. (c) State the complexity of BFS on K₅ using both representations and explain the asymptotic difference. (d) For K_n (complete graph on n vertices), what is the relationship between adjacency matrix and list complexity for BFS?</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>(a) K₅ Adjacency Matrix:</strong> <span class="pdf-ref">📄 pp. 106–108</span></p>
+      <pre class="pseudocode">
+     1  2  3  4  5
+  1 [0, 1, 1, 1, 1]
+  2 [1, 0, 1, 1, 1]
+  3 [1, 1, 0, 1, 1]
+  4 [1, 1, 1, 0, 1]
+  5 [1, 1, 1, 1, 0]
+  Space: 5×5 = 25 entries (with symmetry: 10 unique 1s + 5 diagonal 0s + 10 mirror 1s)
+      </pre>
+      <p><strong>(b) G² for K₅:</strong> <span class="pdf-ref">📄 pp. 108–110</span></p>
+      <p>K₅ is already the densest possible graph — every pair of vertices is already directly connected (distance 1). So every pair is also at distance ≤ 2. G² = K₅ (no new edges are added — all edges already exist). Number of new edges: <strong>0</strong>.</p>
+      <p><strong>(c) BFS on K₅:</strong> <span class="pdf-ref">📄 pp. 114–118</span></p>
+      <p>K₅ has n=5, m=10. With adjacency matrix: O(n²) = O(25). With adjacency list: O(n+m) = O(15). For K₅ specifically, both are small. But the key insight is that for K_n: m = n(n-1)/2 = Θ(n²), so O(n+m) = O(n+n²) = O(n²). For the complete graph, both representations give O(n²)!</p>
+      <p><strong>(d) For K_n (dense graph):</strong> <span class="pdf-ref">📄 pp. 114–118</span></p>
+      <p>m = n(n-1)/2 = Θ(n²). Adjacency matrix BFS: O(n²). Adjacency list BFS: O(n + m) = O(n + n²) = O(n²). For a COMPLETE graph, both representations yield the SAME asymptotic complexity O(n²)! The advantage of adjacency lists (O(n+m)) materializes only for SPARSE graphs where m = o(n²). For dense graphs where m = Θ(n²), adjacency lists provide no asymptotic benefit. <span class="pdf-ref">📄 pp. 114–118</span></p>
+      <p>📝 <strong>Complexity Summary:</strong> Sparse graph (m = O(n)): matrix=O(n²), list=O(n) — list wins by n factor. Dense graph (m = Θ(n²)): matrix=O(n²), list=O(n²) — same! Representation choice matters most for sparse graphs. <span class="pdf-ref">📄 pp. 108–118</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-pseudo">Pseudocode / Design (3 Questions)</h3>
+
+<!-- Q11 PSEUDO BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 110–128</span>
+    <span class="asgn-ref">📋 A4 Q3</span>
+  </div>
+  <p class="question-stem">Q11. Write pseudocode for BFS starting from source vertex s in an undirected graph G stored as an adjacency list. Your pseudocode should track visited[], parent[], and level[]. Then analyze time and space complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function BFS(G, s):
+    # --- INITIALIZATION ---
+    for each vertex v in G.vertices:   # O(|V|) setup
+        visited[v] = False
+        parent[v]  = -1                # -1 = no parent (root)
+        level[v]   = infinity          # unknown distance
+
+    # --- SEED THE SOURCE ---
+    visited[s] = True
+    level[s]   = 0
+    Queue      = new Queue()
+    Queue.enqueue(s)
+
+    # --- MAIN LOOP ---
+    while Queue is not empty:
+        j = Queue.dequeue()           # take from FRONT — FIFO
+        for each neighbor k in G.adjacency[j]:   # O(deg(j)) per vertex
+            if visited[k] == False:
+                visited[k] = True     # mark BEFORE enqueuing
+                parent[k]  = j        # j discovered k
+                level[k]   = level[j] + 1
+                Queue.enqueue(k)      # add to BACK
+
+    return (visited, parent, level)
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 110–114</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Initialize all vertices as unvisited with no parent and infinite distance.</li>
+        <li>Mark the source as visited (distance 0) and add it to the queue.</li>
+        <li>While the queue is not empty: dequeue a vertex j, examine all its neighbors. For each unvisited neighbor k: mark it visited, record j as its parent and set its level to j's level + 1, then enqueue k.</li>
+        <li>When the queue empties, all reachable vertices have been visited with their shortest distances recorded.</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Initialization = O(|V|). Each vertex enqueued/dequeued at most once = O(|V|). Total neighbor scans = Σ deg(v) = 2|E| = O(|E|). Total: <span class="complexity-box">O(|V| + |E|)</span>. <span class="pdf-ref">📄 pp. 114–118</span></p>
+      <p><strong>Space:</strong> visited[], parent[], level[] arrays = O(|V|) each. Queue can hold at most all vertices at once = O(|V|). Total: <span class="complexity-box">O(|V|)</span> extra space (beyond the graph). <span class="pdf-ref">📄 p. 110</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 PSEUDO INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 129–148</span>
+    <span class="asgn-ref">📋 A4 Q3</span>
+  </div>
+  <p class="question-stem">Q12. Write pseudocode for DFS that computes pre[] and post[] timestamps for every vertex. Then describe how to use these timestamps to detect a directed cycle (without needing to explicitly classify every edge type). Analyze time and space complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+# Global variables
+count = 0
+has_cycle = False
+
+function DFS_all(G):
+    for each vertex v in G.vertices:
+        visited[v] = False
+        parent[v]  = -1
+
+    for each vertex v in G.vertices:
+        if visited[v] == False:
+            DFS(v)               # start new DFS tree from unvisited v
+
+    return has_cycle, pre, post
+
+function DFS(i):
+    global count, has_cycle
+
+    visited[i] = True
+    pre[i]     = count;  count += 1       # ENTER vertex i
+
+    for each neighbor j in G.adjacency[i]:
+        if visited[j] == False:
+            parent[j] = i
+            DFS(j)                        # RECURSE — tree edge
+        else:
+            # j is already visited — check if j is still active (an ancestor)
+            if post[j] not yet set:       # j's interval is still open
+                has_cycle = True          # j is ancestor of i → BACK EDGE → CYCLE!
+
+    post[i] = count;  count += 1          # EXIT vertex i (all neighbors explored)
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 129–148</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Initialize all vertices as unvisited. Start DFS from each unvisited vertex to handle disconnected graphs.</li>
+        <li>When entering vertex i: record pre[i] = current count, increment count.</li>
+        <li>For each neighbor j of i: if unvisited, recurse. If already visited and still active (post[j] not set yet — j is an ancestor on the current path), record a cycle.</li>
+        <li>When exiting vertex i: record post[i] = current count, increment count.</li>
+      </ol>
+      <p><strong>Cycle detection insight:</strong> A back edge (i,j) exists when j is already visited AND j is still active (its post[] hasn't been set). This means j is still on the current DFS call stack — j is an ancestor of i. The path from j to i via tree edges, plus the edge back to j, forms a cycle. <span class="pdf-ref">📄 pp. 141–148</span></p>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Each vertex entered/exited once = O(|V|). Total neighbor scans = Σ deg(v) = 2|E| = O(|E|). Total: <span class="complexity-box">O(|V| + |E|)</span>. <span class="pdf-ref">📄 pp. 129–140</span></p>
+      <p><strong>Space:</strong> pre[], post[], visited[], parent[] = O(|V|) each. Recursion call stack depth = O(|V|) worst case (linear graph). Total: <span class="complexity-box">O(|V|)</span>. <span class="pdf-ref">📄 p. 129</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 PSEUDO ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 105–156</span>
+    <span class="asgn-ref">📋 A4 Q6</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 4 (Graph Representations + BFS) + Topic 5 (Shortest Paths)</div>
+  <p class="question-stem">Q13. Design an algorithm to compute the SECOND-SHORTEST path (by edge count) from source s to every vertex t, where the second-shortest path must be strictly longer than the shortest path. Write pseudocode, explain your approach, and analyze time and space complexity. Hint: can you extend BFS?</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Approach: Two-pass BFS with relaxed visited tracking.</strong></p>
+      <p><strong>Key insight:</strong> Standard BFS computes the first-shortest distance (dist₁[v]). For the second-shortest, we track an additional distance array dist₂[v] = second-shortest distance. A vertex can be "visited" twice: once for its shortest path, once more for its second-shortest. <span class="pdf-ref">📄 pp. 110–128</span></p>
+      <pre class="pseudocode">
+function secondShortestPaths(G, s):
+    # dist1[v] = shortest distance from s to v
+    # dist2[v] = second-shortest (must be > dist1[v])
+    for each vertex v:
+        dist1[v] = infinity
+        dist2[v] = infinity
+
+    dist1[s] = 0
+    Queue = new PriorityQueue()  # or regular queue since BFS = unweighted
+    Queue.enqueue( (s, 0) )     # (vertex, distance)
+
+    while Queue is not empty:
+        (u, d) = Queue.dequeue()
+
+        # If d exceeds even dist2[u], this path is useless — skip
+        if d > dist2[u]:
+            continue
+
+        for each neighbor v in G.adjacency[u]:
+            new_dist = d + 1              # unit edge weights
+
+            if new_dist < dist1[v]:
+                # Found a new shortest path to v
+                dist2[v] = dist1[v]       # demote old shortest to second
+                dist1[v] = new_dist
+                Queue.enqueue( (v, new_dist) )
+
+            elif new_dist > dist1[v] and new_dist < dist2[v]:
+                # Found a new second-shortest path to v
+                dist2[v] = new_dist
+                Queue.enqueue( (v, new_dist) )
+            # If new_dist == dist1[v]: same length as shortest, skip
+            # If new_dist >= dist2[v]: already have a better second, skip
+
+    return (dist1, dist2)
+</pre>
+      <div class="diagram-source">SOURCE: Extended from <span class="pdf-ref">📄 pp. 110–128</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Initialize dist1[s]=0, all others infinity.</li>
+        <li>BFS-style: dequeue (u, d). If d exceeds even the second-shortest known distance to u, skip — this path is useless.</li>
+        <li>For each neighbor v: compute new_dist = d+1. Update dist1[v] if new_dist is shorter (push old shortest to dist2). Update dist2[v] if new_dist is strictly between dist1[v] and dist2[v].</li>
+        <li>Each vertex can be enqueued at most twice (once for shortest, once for second-shortest).</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Each vertex processed at most twice → 2|V| dequeue operations. Each dequeue scans the neighbor list → Σ 2·deg(v) = 2·2|E| = O(|E|). Total: <span class="complexity-box">O(|V| + |E|)</span>. <span class="pdf-ref">📄 pp. 114–118</span></p>
+      <p><strong>Space:</strong> dist1[], dist2[] = O(|V|) each. Queue holds at most 2|V| entries = O(|V|). Total: <span class="complexity-box">O(|V|)</span>. <span class="pdf-ref">📄 p. 110</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Cheat Sheet</h2>
+<div class="pages-coverage">📘 SOURCE: Lectures 12–15, pp. 105–156 · Assignments A4 Q3, Q5, Q6 and A6 Q4</div>
+
+<div class="cheat-sheet">
+
+<h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+<p class="oneliner">
+  Graph algorithms need the right representation (matrix vs list) and the right traversal strategy (BFS for shortest paths, DFS for structure discovery) — both ultimately run in O(n+m) with adjacency lists, but serve fundamentally different purposes.
+  <span class="pdf-ref">📄 pp. 105–156</span>
+</p>
+
+<h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+<ol>
+  <li><strong>Representations:</strong> Matrix = O(1) edge check, O(n²) space, O(n) neighbor-list. List = O(deg) edge check, O(n+m) space, O(deg) neighbor-list. BFS/DFS on list = O(n+m); on matrix = O(n²). <span class="pdf-ref">📄 pp. 106–118</span></li>
+  <li><strong>BFS vs DFS:</strong> BFS (queue, level-by-level) guarantees shortest paths. DFS (stack/recursion, depth-first) gives pre/post timestamps for cycle detection and topological sort. Both O(n+m) with adjacency list. <span class="pdf-ref">📄 pp. 110–148</span></li>
+  <li><strong>Connectivity proof skeleton:</strong> Assume disconnected → smallest component k ≤ n/2 → edges can't cross component → deg ≤ k-1 &lt; n/2 → contradiction with deg ≥ n/2 → G is connected. <span class="pdf-ref">📄 p. 110</span></li>
+</ol>
+
+<h4>KEY FORMULAS / STRUCTURES:</h4>
+<table class="data">
+  <thead><tr><th>Operation / Fact</th><th>Adjacency Matrix</th><th>Adjacency List</th><th>Page</th></tr></thead>
+  <tbody>
+    <tr><td>Space</td><td>O(n²)</td><td>O(n + m)</td><td><span class="pdf-ref">📄 pp. 106–110</span></td></tr>
+    <tr><td>Check edge (i,j)</td><td>O(1)</td><td>O(deg(i))</td><td><span class="pdf-ref">📄 p. 108</span></td></tr>
+    <tr><td>List all neighbors of i</td><td>O(n)</td><td>O(deg(i))</td><td><span class="pdf-ref">📄 p. 108</span></td></tr>
+    <tr><td>BFS complexity</td><td>O(n²)</td><td>O(n + m)</td><td><span class="pdf-ref">📄 p. 114</span></td></tr>
+    <tr><td>DFS complexity</td><td>O(n²)</td><td>O(n + m)</td><td><span class="pdf-ref">📄 p. 129</span></td></tr>
+    <tr><td>Out-degree computation</td><td>O(n) per vertex scan</td><td>O(1): len(Adj[v]); total O(V)</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>In-degree computation</td><td>O(n) per column scan</td><td>O(V+E): scan all lists</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>G² via matrix</td><td>O(n³) matrix multiplication</td><td>O(|E|·|V|)</td><td><span class="pdf-ref">📄 p. 108</span></td></tr>
+    <tr><td>Σ deg(v) over all v</td><td>= 2m (handshaking lemma)</td><td>= 2m</td><td><span class="pdf-ref">📄 p. 114</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE CANONICAL ALGORITHM — BFS:</h4>
+<pre class="pseudocode">
+function BFS(G, s):
+    for each v: visited[v]=False; parent[v]=-1; level[v]=∞
+    visited[s]=True; level[s]=0; Q=[s]
+    while Q not empty:
+        j = dequeue(Q)
+        for each k in Adj[j]:
+            if not visited[k]:
+                visited[k]=True; parent[k]=j; level[k]=level[j]+1
+                enqueue(Q, k)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 110–114</span></div>
+<p>Time: O(n+m) with adjacency list. Space: O(n). When to use: shortest path (unweighted), connectivity, level discovery.</p>
+
+<h4>THE CANONICAL ALGORITHM — DFS:</h4>
+<pre class="pseudocode">
+count = 0
+function DFS(i):
+    visited[i]=True; pre[i]=count; count+=1
+    for each j in Adj[i]:
+        if not visited[j]:
+            parent[j]=i; DFS(j)
+    post[i]=count; count+=1
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 129–148</span></div>
+<p>Time: O(n+m) with adjacency list. Space: O(n) stack. When to use: cycle detection (back edges), topological sort (reverse post order), SCCs.</p>
+
+<h4>PRE/POST EDGE CLASSIFICATION RULES:</h4>
+<table class="data">
+  <thead><tr><th>Edge (u,v)</th><th>Interval Condition</th><th>Type</th><th>Implies</th></tr></thead>
+  <tbody>
+    <tr><td>(u,v)</td><td>[pre(u),post(u)] ⊃ [pre(v),post(v)]</td><td>Tree or Forward</td><td>v is a descendant of u</td></tr>
+    <tr><td>(u,v)</td><td>[pre(v),post(v)] ⊃ [pre(u),post(u)]</td><td>Back Edge</td><td>CYCLE exists: v→...→u→v</td></tr>
+    <tr><td>(u,v)</td><td>Intervals disjoint</td><td>Cross Edge</td><td>Unrelated subtrees</td></tr>
+  </tbody>
+</table>
+
+<h4>ASSIGNMENTS THAT TEST THIS TOPIC (QUICK REFERENCE):</h4>
+<table class="data">
+  <thead><tr><th>Assignment</th><th>Question</th><th>What It Tests</th><th>Graded?</th></tr></thead>
+  <tbody>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q3</td><td>BFS vs DFS node count — which visits fewer before goal?</td><td>YES (A4) <span class="exam-star">⭐</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q5</td><td>Proof: deg ≥ n/2 → G connected (contradiction proof)</td><td>YES (A4) <span class="exam-star">⭐</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q6</td><td>Graph-squaring G²: construction + complexity</td><td>YES (A4) <span class="exam-star">⭐</span></td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q4</td><td>Out-degree and in-degree computation via adjacency list</td><td>YES (A6) <span class="exam-star">⭐</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE #1 MISTAKE ON EXAM QUESTIONS ABOUT THIS TOPIC:</h4>
+<p>
+  Confusing when to mark a vertex as "visited." In BFS, you MUST set visited[v] = True when you ENQUEUE v (not when you dequeue it). If you mark as visited only upon dequeuing, the same vertex can be enqueued multiple times from different neighbors, causing incorrect behavior and overcounting. In DFS, mark visited upon ENTERING the function. <span class="pdf-ref">📄 pp. 110–140</span>
+</p>
+
+<h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+<p class="remember">
+  BFS = Queue = Shortest path guaranteed. DFS = Stack/Recursion = Pre/post timestamps = Cycle detection.
+  Adjacency List: O(n+m) for traversal. Adjacency Matrix: O(n²) for traversal, O(1) for edge check.
+  Degree ≥ n/2 → connected: assume disconnected, smallest component k ≤ n/2, deg ≤ k-1 &lt; n/2, contradiction.
+  <span class="pdf-ref">📄 pp. 105–156</span>
+</p>
+
+<h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS IN THE LECTURE PDF:</h4>
+<table class="data">
+  <thead><tr><th>If you want to review...</th><th>Go to PDF page(s)...</th><th>Also in...</th></tr></thead>
+  <tbody>
+    <tr><td>Graph definition and notation</td><td>p. 105</td><td>[KT] §3.1, [CLRS] §B.4</td></tr>
+    <tr><td>Adjacency matrix definition</td><td>pp. 106–108</td><td>[CLRS] §22.1</td></tr>
+    <tr><td>Adjacency list definition</td><td>pp. 108–110</td><td>[CLRS] §22.1</td></tr>
+    <tr><td>Comparing representations (table)</td><td>pp. 108–110</td><td>[KT] §3.1</td></tr>
+    <tr><td>Graph-squaring G²</td><td>pp. 108–110</td><td>A4 Q6 solution</td></tr>
+    <tr><td>Graph connectivity, connected components</td><td>p. 110</td><td>[KT] §3.1</td></tr>
+    <tr><td>BFS algorithm pseudocode</td><td>pp. 110–114</td><td>[KT] §3.2, [CLRS] §22.2</td></tr>
+    <tr><td>BFS complexity analysis (O(n+m))</td><td>pp. 114–118</td><td>[CLRS] §22.2</td></tr>
+    <tr><td>BFS level[] and parent[] arrays</td><td>pp. 118–128</td><td>[KT] §3.2</td></tr>
+    <tr><td>DFS algorithm pseudocode</td><td>pp. 129–140</td><td>[KT] §3.3, [CLRS] §22.3</td></tr>
+    <tr><td>DFS pre[] and post[] numbering</td><td>pp. 141–148</td><td>[KT] §3.3</td></tr>
+    <tr><td>Edge classification (tree/forward/back/cross)</td><td>pp. 141–148</td><td>[CLRS] §22.3</td></tr>
+    <tr><td>Directed cycle detection via DFS</td><td>pp. 141–148</td><td>[KT] §3.5, [CLRS] §22.3</td></tr>
+    <tr><td>Strongly connected components</td><td>pp. 148–156</td><td>[KT] §3.5, [CLRS] §22.5</td></tr>
+    <tr><td>deg(v) ≥ n/2 connectivity proof</td><td>p. 110</td><td>A4 Q5 solution</td></tr>
+    <tr><td>Out-degree and in-degree computation</td><td>p. 227</td><td>A6 Q4 solution</td></tr>
+  </tbody>
+</table>
+
+<h4>15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM):</h4>
+<ol>
+  <li>Write from memory the BFS pseudocode (10 lines). Check that you enqueue at the right time and use FIFO. <span class="pdf-ref">📄 pp. 110–114</span></li>
+  <li>Write from memory the DFS pseudocode with pre/post timestamps (8 lines). Check count increments on ENTER and EXIT. <span class="pdf-ref">📄 pp. 129–148</span></li>
+  <li>Recite the complexity table from memory: Matrix BFS = O(n²); List BFS = O(n+m); edge check: matrix=O(1), list=O(deg). <span class="pdf-ref">📄 pp. 106–118</span></li>
+  <li>Practice the connectivity proof skeleton from memory in 60 seconds: "Assume disconnected → k ≤ n/2 → deg ≤ k-1 &lt; n/2 → contradiction." <span class="pdf-ref">📄 p. 110</span></li>
+  <li>Recall the edge-type classification rule: "contains = ancestor (tree/forward); v contains u = back edge = cycle; disjoint = cross." <span class="pdf-ref">📄 pp. 141–148</span></li>
+  <li>Trace BFS on a tiny 5-node graph on scratch paper — write queue state after each step. <span class="pdf-ref">📄 pp. 110–128</span></li>
+  <li>Recall the G² construction: "add edge (u,w) if u and w share a neighbor v in G; includes original edges." <span class="pdf-ref">📄 pp. 108–110</span></li>
+  <li>Recall in-degree vs out-degree complexity: "out = O(V) (list length); in = O(V+E) (scan all lists)." <span class="pdf-ref">📄 p. 227</span></li>
+</ol>
+
+</div>
+
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This deep-dive covers <strong>only Topic 4 — Graph Representations, BFS &amp; DFS</strong> as listed in the CS 570 final exam appendix.
+  Companion guides cover: Mathematical Proof Techniques (Topic 6), Asymptotic Analysis (Topic 2), Recurrences &amp; Master Theorem (Topic 3),
+  Shortest Paths / Dijkstra / Bellman-Ford / Floyd-Warshall (Topic 5), Algorithm Design Patterns (Topic 7),
+  Divide &amp; Conquer (Topic 8), Dynamic Programming &amp; DAGs (Topic 9), and NP-Completeness (Topic 1 — already available as a deep-dive).
+  Read this deep-dive first, then use the condensed <span class="mono">study_guide_topic4_graph_bfs_dfs.html</span> for final exam review.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs570-dd-topic4';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 Final Exam · Topic 6 (Beginner Deep-Dive): Mathematical Proof Techniques Unpacked</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE — DARK MODE (default)
+     Topic 6 deep-dive: Periwinkle / Indigo accent (Math Proofs)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1a1d2b;
+    --surface: #1e2235;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f42;
+
+    --accent: #5c6bc0;
+    --accent-soft: #1a1f3c;
+    --accent-text: #9fa8da;
+
+    --topic-accent: #7986cb;   /* Periwinkle — Topic 6 deep-dive (Math Proof Techniques) */
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+    --code-bg: #0a0c14;
+    --code-text: #c5cae9;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f4f5fb;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eceef8;
+    --surface: #e2e5f5;
+    --text: #1a1d2e;
+    --text-dim: #3a3f6a;
+    --text-faint: #7880a8;
+    --border: #ced3ec;
+
+    --accent: #3949ab;
+    --accent-soft: #e8eaf6;
+    --accent-text: #283593;
+
+    --topic-accent: #283593;   /* Deep indigo for light mode */
+
+    --red: #c62828;
+    --orange: #e65100;
+    --yellow: #f57f17;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+    --code-bg: #eceef8;
+    --code-text: #1a237e;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eceef8; border-color: var(--accent); }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(40,53,147,0.05), rgba(92,107,192,0.04)); }
+  [data-theme="light"] .callout { background: rgba(92,107,192,0.06); }
+  [data-theme="light"] .callout.quote { background: rgba(40,53,147,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(198,40,40,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(40,53,147,0.05), rgba(92,107,192,0.05)); }
+  [data-theme="light"] .step { background: #eceef8; }
+  [data-theme="light"] .misconception { background: #eceef8; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eceef8; }
+
+  /* ================================================================
+     THEME TOGGLE
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+  [data-theme="light"] .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono {
+    font-family: 'Consolas', 'Courier New', 'Menlo', monospace;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 { font-size: 2.1em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.55em; color: var(--topic-accent); margin: 36px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.2em; color: #fff; margin: 26px 0 10px 0; }
+  h4 { color: var(--text-dim); margin: 18px 0 8px 0; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.82em; }
+
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     SIDEBAR NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-accent);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    .top-bar .crumb { font-size: 0.76em; }
+    nav.sidebar {
+      top: 44px;
+      width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main { max-width: 1100px; padding: 40px 48px 80px 48px; }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.9em; margin-top: 6px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(121,134,203,0.08), rgba(92,107,192,0.06));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title { font-size: 1.12em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     PDF REFERENCE BADGE
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  .asgn-ref {
+    display: inline-block;
+    background: var(--purple-soft);
+    color: var(--purple-text);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    vertical-align: baseline;
+  }
+
+  /* ================================================================
+     EXAM SIGNAL BADGES
+     ================================================================ */
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .exam-star { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & TOPIC CONTAINERS
+     ================================================================ */
+  section.topic {
+    border-left: 3px solid var(--topic-accent);
+    padding-left: 22px;
+    margin-bottom: 40px;
+  }
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+  }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  table.trace-table {
+    border-collapse: collapse;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82rem;
+    width: 100%;
+    margin: 12px 0;
+  }
+  table.trace-table th { background: var(--accent-soft); color: var(--blue-text); padding: 8px 10px; border: 1px solid var(--border); }
+  table.trace-table td { border: 1px solid var(--border); padding: 7px 10px; vertical-align: top; }
+  table.trace-table tr.highlight { background: var(--bg-elev2); }
+
+  /* ================================================================
+     ASCII DIAGRAM
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f5;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  pre.pseudocode {
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 16px 20px;
+    border-radius: 6px;
+    border-left: 3px solid var(--topic-accent);
+    overflow-x: auto;
+    white-space: pre;
+    margin: 14px 0;
+  }
+
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Proof blocks */
+  .proof-block {
+    background: var(--bg-elev);
+    border-left: 4px solid var(--gold);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .proof-block .proof-step { margin: 8px 0; padding-left: 16px; }
+  .proof-block .proof-label { color: var(--gold); font-weight: bold; font-size: 0.9em; }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head { color: var(--topic-accent); font-weight: 600; font-size: 0.95em; }
+  .step .step-detail { margin-top: 6px; font-size: 0.93em; color: var(--text-dim); }
+  .step .step-detail strong.lbl { color: var(--text); display: inline-block; min-width: 130px; }
+
+  /* Myth/reality */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+
+  /* Complexity box */
+  .complexity-box {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: monospace;
+    display: inline-block;
+    margin: 4px 0;
+  }
+
+  /* ================================================================
+     QUESTION BLOCKS
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  ol.mcq-options { margin: 4px 0 6px 0; padding-left: 26px; }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-warmup { background: #1a2a3a; color: #90caf9; border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; border: 1px solid #2a4060; }
+
+  /* ================================================================
+     CHEAT SHEET
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.04), rgba(121,134,203,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 { color: var(--gold); font-size: 0.82em; margin-top: 14px; }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--topic-accent);
+    background: rgba(121,134,203,0.06);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--gold);
+    background: rgba(255,215,0,0.05);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,82,82,0.05);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--gold); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  .challenge-banner {
+    background: rgba(255,215,0,0.07);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 0.82em;
+    color: var(--gold);
+    font-family: 'Consolas', monospace;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  /* ================================================================
+     PRINT
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    a { color: #000; text-decoration: underline; }
+    pre.diagram, pre.pseudocode { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ─────────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="nav-title">🔵 Topic 6 ⓓ</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#warmup">🧗 Warm-up Glossary</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 What &amp; Why (Plain English)</a>
+  <a href="#section-1-1" class="sub">→ 1.1 Why proofs matter</a>
+  <a href="#section-1-2" class="sub">→ 1.2 Three techniques overview</a>
+  <a href="#section-1-3" class="sub">→ 1.3 The staircase analogy</a>
+  <a href="#section-1-4" class="sub">→ 1.4 Technical definitions</a>
+  <a href="#section-1-5" class="sub">→ 1.5 Key Terms Table</a>
+  <a href="#section-2">§2 How — Worked Examples</a>
+  <a href="#section-2a" class="sub">→ 2a · Induction (traced step-by-step)</a>
+  <a href="#section-2b" class="sub">→ 2b · Construction (concrete build)</a>
+  <a href="#section-2c" class="sub">→ 2c · Contradiction (negation path)</a>
+  <a href="#section-2d" class="sub">→ 2d · Counterexample (FALSE claims)</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#warmup-checks">🧗 Warm-up Checks</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ (4 questions)</a>
+  <a href="#section-4-proof" class="sub">→ Proof (3 questions)</a>
+  <a href="#section-4-trace" class="sub">→ Trace / Analysis (3 questions)</a>
+  <a href="#section-4-pseudo" class="sub">→ Pseudocode / Design (3 questions)</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<!-- ── TOP BAR ─────────────────────────────────────────────── -->
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 570 · Final Exam · <strong>Topic 6 (Deep-Dive) · Mathematical Proof Techniques Unpacked</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ── DOCUMENT HEADER ──────────────────────────────────────── -->
+<div class="doc-header">
+  <h1>Topic 6 (Beginner Deep-Dive)</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">
+    Mathematical Proof Techniques Unpacked — Induction · Construction · Contradiction · Counterexample, with every proof step narrated and every worked example traced on real numbers
+  </h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final (Quiz 2) — April 30, 2026 · Class hours · Closed-book, one cheat sheet<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lec1_27_all-combined-densed-ocr.pdf</span> (Lectures 1–27, Spring 2026)<br>
+    <strong>Companion to:</strong> <span class="mono">study_guide_topic6_proof_techniques.html</span> (the condensed exam-prep version — read this deep-dive FIRST)<br>
+    <strong>Audience:</strong> Designed for a student who can follow the assignment solutions but is not yet confident writing proofs independently. We define every mathematical term before using it, narrate every step of every proof, and provide templates you can fill in on exam day.
+  </div>
+</div>
+
+<!-- ── USAGE BANNER ──────────────────────────────────────────── -->
+<div class="banner">
+  <strong class="label">How to use this deep-dive</strong><br>
+  <strong>Step 1.</strong> Read the <a href="#warmup">🧗 Warm-up Glossary</a> — confirm you know what "for all n," "even number," "binary tree," and "inductive hypothesis" mean before §1 begins.<br>
+  <strong>Step 2.</strong> Read §1 (What &amp; Why) and §2 (How) carefully. For §2, grab a pencil and trace each proof on paper — write the steps yourself before reading the explanation. The muscle memory matters.<br>
+  <strong>Step 3.</strong> Take the <a href="#warmup-checks">§3.5 Warm-up Understanding Checks</a> — five low-stakes questions to confirm you absorbed §1–2.<br>
+  <strong>Step 4.</strong> Tackle §3 (Exam Intelligence), §4 (Practice Questions), and §5 (Cheat Sheet) as final exam prep.
+</div>
+
+<!-- ============================================================
+     §0  WARM-UP GLOSSARY
+     ============================================================ -->
+<h2 id="warmup">🧗 Warm-up Glossary — Vocabulary You Need Before §1</h2>
+<p style="color: var(--text-dim);">
+  Mathematical proofs use a small set of precisely-defined words. When a proof says "for all," "assume," "integer,"
+  or "height of a tree," it means something exact. This glossary pins down those meanings before we need them.
+  If you already know all of these, skip to <a href="#section-1">§1</a>.
+</p>
+
+<div class="section-block">
+
+<h3>What is a "mathematical proof"? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  A <strong>mathematical proof</strong> is a finite sequence of logical steps that starts from known facts (axioms, definitions, or previously proved results) and arrives at the claim you want to establish — with no gaps and no appeals to intuition. Every step must follow from previous steps by a valid rule of logic.
+</p>
+<p>
+  Why is this stricter than everyday argument? Because in mathematics, "it looks true for all the examples I tried" is NOT a proof. The claim might fail for some huge n you never checked. A proof covers ALL cases, including ones you can't directly compute. <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<h3>What is mathematical induction? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  <strong>Mathematical induction</strong> is a proof technique for statements of the form "P(n) is true for every natural number n ≥ n₀."
+  The idea: imagine an infinite row of dominoes. If you can knock over the first one, AND you can prove that knocking over any domino k automatically knocks over domino k+1, then ALL dominoes fall — even the ones a billion positions away.
+</p>
+<p>
+  Formally, you do two things: (1) <em>Base case</em> — verify P(n₀) directly. (2) <em>Inductive step</em> — assume P(k) is true (the "inductive hypothesis") and prove P(k+1) follows from it. Once both are done, P(n) is proved for all n ≥ n₀. <span class="pdf-ref">📄 p. 1</span>
+</p>
+<pre class="diagram">
+  Domino analogy:
+
+    [Dom 1] → [Dom 2] → [Dom 3] → [Dom 4] → ... → [Dom n] → ...
+       ↑
+    Base case: knock the first one over.
+    Inductive step: if domino k falls, it knocks over k+1.
+    Conclusion: ALL dominoes fall.
+</pre>
+<div class="diagram-source">SOURCE: conceptual illustration <span class="pdf-ref">📄 p. 1</span></div>
+
+<h3>What does "for all n ≥ 0" mean? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  The phrase "for all n ≥ 0" (also written ∀n ≥ 0, using the upside-down "A" symbol ∀ which stands for "for all") means:
+  the statement is claimed to be true for <em>every single</em> non-negative integer n — including n = 0, n = 1, n = 2, n = 1000000, n = 10^100, every one without exception.
+</p>
+<p>
+  This is the hardest kind of claim to prove by just testing examples, because you'd need to test infinitely many values. That's exactly why induction exists — it proves all cases at once.
+</p>
+
+<h3>What is the "inductive hypothesis"? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  The <strong>inductive hypothesis (IH)</strong> is the temporary assumption you make in the inductive step: "Assume P(k) is true." You are NOT proving P(k) here — you are <em>borrowing</em> it as a given so that you can derive P(k+1).
+</p>
+<p>
+  This feels circular to many beginners: "Am I not assuming what I'm trying to prove?" The answer is no — you're proving P(k+1) given P(k), which is a separate statement. The base case handles P(n₀), and the inductive step handles the "if P(k) then P(k+1)" chain. Together they cover every n.
+</p>
+
+<h3>What is a "contradiction"? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  A <strong>contradiction</strong> is a situation where you have derived both "X is true" and "X is false" simultaneously — which is logically impossible. In mathematics, a contradiction signals that one of your assumptions was wrong.
+</p>
+<p>
+  <strong>Example:</strong> Suppose you assume "n is odd" and later derive "n is even." That's a contradiction — a number cannot be both odd and even. So the assumption "n is odd" must have been false.
+</p>
+
+<h3>What is "proof by contradiction"? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  <strong>Proof by contradiction</strong> works as follows: you want to prove claim P. You <em>temporarily assume P is false</em> (i.e., assume ¬P, the negation of P), and then you derive a logical impossibility (a contradiction). Since the assumption ¬P led to an impossible situation, ¬P must be false — which means P must be true.
+</p>
+<p>
+  Think of it as a courtroom argument: "Suppose the defendant was NOT at the scene. But then the security footage showing them at the scene must be fake. But the footage is verified genuine. Contradiction — the defendant WAS at the scene."
+</p>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Classic Misconception</strong>
+  "Proof by contradiction disproves the claim." WRONG. Proof by contradiction PROVES the claim by assuming the opposite and deriving an absurdity. At the end, the original claim is proved TRUE — not disproved. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<h3>What is a "counterexample"? <span class="pdf-ref">📄 pp. 43–54</span></h3>
+<p>
+  A <strong>counterexample</strong> is a single specific example that disproves a universal claim. If someone says "all swans are white," one black swan is a counterexample — it proves the claim false.
+</p>
+<p>
+  In CS 570, counterexamples appear when a claim like "f(n) = O(g(n)) always implies log f(n) = O(log g(n))" turns out to be false. You don't need to show it fails for all functions — just find two specific functions where f = O(g) but log f is NOT O(log g). That one example suffices to disprove the claim. <span class="pdf-ref">📄 pp. 43–54</span>
+</p>
+
+<h3>What is a binary tree? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  A <strong>binary tree</strong> is a hierarchical data structure where each node has at most two children: a left child and a right child. The <em>root</em> is the top node (no parent). A <em>leaf</em> is a node with no children. The <em>height</em> of a tree is the number of edges on the longest path from root to any leaf.
+</p>
+<pre class="diagram">
+  Binary tree of height 2:
+
+         [Root]          Height 0 — root is the only node → 1 = 2^0 leaf if no children
+        /       \
+    [Node]     [Node]    Height 1 → up to 2 = 2^1 leaves
+    /   \      /   \
+  [L1] [L2] [L3] [L4]   Height 2 → up to 4 = 2^2 leaves
+
+  Key fact: a binary tree of height n has AT MOST 2^n leaves.
+  (Some nodes may have 0 or 1 children, so not all 2^n slots are filled.)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 1</span> (prerequisite material, Lecture 1)</div>
+
+<h3>What does "parity" mean? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  The <strong>parity</strong> of an integer is whether it is <em>odd</em> or <em>even</em>.
+  Formally: an integer n is <strong>even</strong> if there exists an integer k such that n = 2k (divisible by 2 with no remainder).
+  An integer n is <strong>odd</strong> if there exists an integer k such that n = 2k + 1.
+</p>
+<p>
+  <strong>Examples:</strong> 8 = 2×4 (even, k=4). 13 = 2×6+1 (odd, k=6). 0 = 2×0 (even, k=0). −7 = 2×(−4)+1 (odd, k=−4).
+  <strong>Key property:</strong> Every integer is either even OR odd, never both. This is what makes parity arguments work in contradiction proofs.
+</p>
+
+<h3>What is "proof by construction"? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  A <strong>proof by construction</strong> (also called a <em>direct proof by example</em>) proves an existence claim by actually building the object. If someone asks "prove there exists a positive even number greater than 100," you construct one: 102 = 2 × 51.
+</p>
+<p>
+  In CS 570, construction proofs often prove claims of the form "for any two consecutive integers a and b, a + b is odd." You prove this by constructing the explicit relationship: b = a + 1, so a + b = 2a + 1, which has the form 2k + 1 (odd). You don't guess — you build it. <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<h3>What does it mean for a claim to be TRUE vs. FALSE in asymptotic proofs? <span class="pdf-ref">📄 pp. 39–54</span></h3>
+<p>
+  When an assignment or exam asks you to determine if an asymptotic claim is TRUE or FALSE, the tasks are different:
+</p>
+<ul class="plain">
+  <li><strong>TRUE:</strong> You must <em>prove</em> it — typically by finding the constants c, n₀ or by using the limit comparison method.</li>
+  <li><strong>FALSE:</strong> You must produce a <em>counterexample</em> — two specific functions f and g that violate the claim.</li>
+</ul>
+<p>
+  Saying "it seems false" or "I can't find a proof" is NOT sufficient for showing falsity. You must exhibit the explicit counterexample. <span class="pdf-ref">📄 pp. 43–54</span>
+</p>
+
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 6 draws primarily from Assignment 0 and the Quiz 1 midterm patterns. Use these page references
+  to jump to the exact lecture slide for any concept.
+</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Proof Techniques &amp; Templates <span class="pdf-ref">📄 p. 1 (Lec 1), A0 pp. 1–11</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Proof by induction — template + binary tree example <span class="exam-star">⭐</span></td><td>p. 1 / A0 p.7</td><td><span class="asgn-ref">📋 A0 Q2.1</span> / Midterm [a]</td></tr>
+    <tr><td>Proof by construction — consecutive integers sum odd <span class="exam-star">⭐</span></td><td>p. 1 / A0 p.7</td><td><span class="asgn-ref">📋 A0 Q2.2</span> / Midterm [b]</td></tr>
+    <tr><td>Proof by contradiction — n² even → n even <span class="exam-star">⭐</span></td><td>p. 1 / A0 p.7</td><td><span class="asgn-ref">📋 A0 Q2.3</span> / Midterm [c]</td></tr>
+    <tr><td>Counterexample — FALSE asymptotic claim: f=Θ(g) ↛ log f=Θ(log g) <span class="exam-star">⭐</span></td><td>pp. 43–54</td><td><span class="asgn-ref">📋 A2 Q1.3</span></td></tr>
+    <tr><td>TRUE asymptotic proof: f=O(g) ∧ f=Ω(h) → g=Ω(h) <span class="exam-star">⭐</span></td><td>pp. 43–54</td><td><span class="asgn-ref">📋 A2 Q1.1</span></td></tr>
+    <tr><td>TRUE asymptotic proof: f=O(g) → f²=O(g²) <span class="exam-star">⭐</span></td><td>pp. 43–54</td><td><span class="asgn-ref">📋 A2 Q1.2</span></td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Discrete Math Foundations <span class="pdf-ref">📄 A0 pp. 1–6</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Set operations: union, intersection, minus, complement, ×product</td><td>A0 pp. 1–4</td><td><span class="asgn-ref">📋 A0 Q1</span></td></tr>
+    <tr><td>Relations: reflexive, symmetric, transitive</td><td>A0 p. 4</td><td><span class="asgn-ref">📋 A0 Q1</span></td></tr>
+    <tr><td>Truth tables: P→Q, propositional equivalence (≡ ¬P∨Q)</td><td>A0 p. 5</td><td><span class="asgn-ref">📋 A0 Q1</span></td></tr>
+    <tr><td>Graph cycles with base vertex — enumeration</td><td>A0 p. 6</td><td><span class="asgn-ref">📋 A0 Q1</span></td></tr>
+    <tr><td>Graph connectivity proof (degree ≥ n/2 → connected)</td><td>pp. 105–118</td><td><span class="asgn-ref">📋 A4 Q5</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     §1  WHAT & WHY
+     ============================================================ -->
+<h2 id="section-1">§1 — What &amp; Why, in Plain English</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 1–12 (Lecture 1) · A0 pp. 1–11 · pp. 39–54 (Lectures 5–6)</div>
+
+<div class="section-block">
+
+<h3 id="section-1-1">1.1 The fundamental problem — why do we need formal proofs at all? <span class="pdf-ref">📄 p. 1</span></h3>
+
+<p>
+  Imagine you are designing a sorting algorithm for a hospital's patient-priority queue. You test it on 10,000 patients and it works perfectly every time. Does that mean it's correct? Not in mathematics. There might be a specific combination of inputs — perhaps the 10,001st case — that causes it to fail, and patients could be harmed. <strong>Testing confirms behavior on the cases you tried. Proof confirms behavior on all cases, including ones you will never see.</strong> <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<p>
+  In CS 570, this is not just philosophy. Dr. Ghosh directly asks: "Have you formally proved correctness of algorithms?" and "Are you familiar with proofs using induction?" <span class="pdf-ref">📄 p. 1</span> The course is built on the premise that an algorithm you cannot prove correct is an algorithm you cannot trust — regardless of how many test cases pass.
+</p>
+
+<p>
+  The good news: formal proofs are not magic. They use a small toolkit of techniques. CS 570 focuses on exactly three, which appeared on the midterm and on every assignment: <strong>induction, construction, and contradiction.</strong> Master these three and you can handle any proof question the exam throws at you.
+</p>
+
+<h3 id="section-1-2">1.2 The three proof techniques — when to use each one <span class="pdf-ref">📄 p. 1</span></h3>
+
+<p>
+  Think of each proof technique as a different legal strategy. The claim you are trying to prove is like a verdict you need to establish. Each strategy has a characteristic structure:
+</p>
+
+<table class="data">
+  <thead>
+    <tr><th>Technique</th><th>Best for...</th><th>Core move</th><th>Midterm / Assignment</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Induction</strong></td>
+      <td>Claims involving "for ALL n ≥ n₀" — especially for algorithms, trees, sequences</td>
+      <td>Prove base case; assume P(k) (IH); derive P(k+1) using IH</td>
+      <td>Midterm [a] <span class="exam-star">⭐</span>, <span class="asgn-ref">📋 A0 Q2.1</span></td>
+    </tr>
+    <tr>
+      <td><strong>Construction</strong></td>
+      <td>Existence claims ("there exists X such that...") or universal claims proved by direct formula</td>
+      <td>Build the object explicitly; verify its properties directly</td>
+      <td>Midterm [b] <span class="exam-star">⭐</span>, <span class="asgn-ref">📋 A0 Q2.2</span></td>
+    </tr>
+    <tr>
+      <td><strong>Contradiction</strong></td>
+      <td>Claims where assuming the opposite immediately leads to an absurdity</td>
+      <td>Assume ¬P; derive a logical impossibility; conclude P must be true</td>
+      <td>Midterm [c] <span class="exam-star">⭐</span>, <span class="asgn-ref">📋 A0 Q2.3</span></td>
+    </tr>
+    <tr>
+      <td><strong>Counterexample</strong></td>
+      <td>Disproving a universal FALSE claim ("for all f and g...")</td>
+      <td>Exhibit one specific pair (f, g) where the claim fails</td>
+      <td><span class="asgn-ref">📋 A2 Q1.3</span>, Lectures 5–6</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong class="lbl">📌 Decision Rule for Choosing a Technique</strong>
+  Is the claim about ALL values of n? → Try <strong>induction</strong> first. Does the claim assert something EXISTS or can be COMPUTED explicitly? → Try <strong>construction</strong>. Does the opposite of the claim immediately feel absurd? → Try <strong>contradiction</strong>. Is the claim FALSE? → Find a <strong>counterexample</strong>. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<h3 id="section-1-3">1.3 The staircase analogy — a second framing for induction <span class="pdf-ref">📄 p. 1</span></h3>
+
+<p>
+  Imagine you are at the bottom of an infinite staircase. Someone claims you can reach every step. How would you prove this?
+</p>
+<p>
+  <strong>Step 1 (Base case):</strong> You prove you can climb from the ground to Step 1. This is possible — you just do it, directly and concretely.
+</p>
+<p>
+  <strong>Step 2 (Inductive step):</strong> You prove a general rule: IF you are on step k, THEN you can always reach step k+1. You don't need to physically climb all the stairs — you just need a universal rule that works from any step.
+</p>
+<p>
+  <strong>Conclusion:</strong> Once both are established, every step is reachable. Step 1 (base case). Step 2 follows from the rule applied to step 1. Step 3 follows from the rule applied to step 2. And so on, for every n. <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<pre class="diagram">
+  The staircase — induction visualized:
+
+  Step n    ────────────────────────── ← Want to reach here? ...
+    ↑  (inductive step rule works here too!)
+  Step k+1  ────────────────────────── ← Inductive step: if on k, reach k+1
+    ↑  (inductive step)
+  Step k    ────────────────────────── ← Inductive hypothesis: ASSUME we're here
+    ↑
+  Step 2    ────────────────────────── ← Rule works here
+    ↑
+  Step 1    ────────────────────────── ← Base case: proved directly
+    ↑
+  [Ground]                               ← Starting point
+</pre>
+<div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 p. 1</span></div>
+
+<p>
+  The power of induction is that the inductive step rule, once proved, works at <em>every</em> step — so combining base case + inductive step gives you all of them for free. <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<h3 id="section-1-4">1.4 Technical definitions (lecture notation) <span class="pdf-ref">📄 pp. 1–12</span></h3>
+
+<p>
+  <strong>Proof by Induction.</strong> To prove P(n) for all integers n ≥ n₀: <span class="pdf-ref">📄 p. 1</span>
+</p>
+<ul class="plain">
+  <li><strong>Base Case:</strong> Prove P(n₀) directly by computation or definition.</li>
+  <li><strong>Inductive Hypothesis (IH):</strong> Assume P(k) is true for some arbitrary integer k ≥ n₀.</li>
+  <li><strong>Inductive Step:</strong> Using the IH, prove P(k+1) is true. The proof of P(k+1) MUST explicitly use P(k).</li>
+  <li><strong>Conclusion:</strong> By induction, P(n) holds for all n ≥ n₀.</li>
+</ul>
+
+<p>
+  <strong>Proof by Construction.</strong> To prove "For all integers a and b with b = a+1, a + b is odd": <span class="pdf-ref">📄 p. 1</span>
+  Construct the explicit expression for b (here, b = a+1), then compute a + b = a + (a+1) = 2a+1. Since 2a+1 = 2(a) + 1, it has the form 2k+1 with k = a — which is the definition of an odd integer. No "for all k" quantifier needed; the construction works for any a directly.
+</p>
+
+<p>
+  <strong>Proof by Contradiction.</strong> To prove claim P: <span class="pdf-ref">📄 p. 1</span>
+</p>
+<ul class="plain">
+  <li><strong>Assume ¬P</strong> (the negation of P) is true.</li>
+  <li><strong>Derive</strong> a statement that contradicts a known fact, a definition, or an earlier step in the proof.</li>
+  <li><strong>Conclude</strong> ¬P must be false, so P must be true. ∎</li>
+</ul>
+
+<p>
+  <strong>Counterexample.</strong> To disprove a universal claim "For all f, g: C(f,g)": <span class="pdf-ref">📄 pp. 43–54</span>
+  Find specific functions f₀ and g₀ such that C(f₀, g₀) is false. One such pair suffices to disprove the claim.
+</p>
+
+<h3 id="section-1-5">1.5 Key Terms Table <span class="pdf-ref">📄 pp. 1–54</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Term</th><th>Plain-English Meaning</th><th>Example / Mental Image</th><th>📄 Page</th><th>Textbook Ref</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Axiom</strong></td>
+      <td>A fact accepted as true without proof; the starting point</td>
+      <td>"Every integer is either odd or even" — accepted without proof</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Theorem</strong></td>
+      <td>A proved mathematical statement of significance</td>
+      <td>"A binary tree of height n has at most 2ⁿ leaves"</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Lemma</strong></td>
+      <td>A smaller proved statement used as a stepping stone to a theorem</td>
+      <td>"If n is odd, then n² is odd" — used inside a larger proof</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Claim</strong></td>
+      <td>A statement to be proved (or disproved); the goal</td>
+      <td>"f=Θ(g) implies log f = Θ(log g)" — TRUE or FALSE?</td>
+      <td>pp. 43–54</td>
+      <td>[KT] Ch.2</td>
+    </tr>
+    <tr>
+      <td><strong>Base case</strong></td>
+      <td>The smallest-input verification in an induction proof</td>
+      <td>For "binary tree of height n": prove the height-0 case (1 leaf = 2⁰)</td>
+      <td>p. 1 / A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Inductive hypothesis (IH)</strong></td>
+      <td>"Assume P(k) is true" — the borrowed assumption in the inductive step</td>
+      <td>"Assume any tree of height k has ≤ 2^k leaves"</td>
+      <td>p. 1 / A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Inductive step</strong></td>
+      <td>The proof that P(k) implies P(k+1) — must USE the IH</td>
+      <td>Show a height-(k+1) tree has ≤ 2^(k+1) leaves using IH that subtrees have ≤ 2^k</td>
+      <td>p. 1 / A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Negation (¬P)</strong></td>
+      <td>The opposite of claim P</td>
+      <td>P = "n is even"; ¬P = "n is odd"</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Contradiction</strong></td>
+      <td>Two statements that cannot both be true: X AND ¬X</td>
+      <td>"n is odd" AND "n is even" simultaneously</td>
+      <td>p. 1 / A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Counterexample</strong></td>
+      <td>One specific case that disproves a "for all" claim</td>
+      <td>f=2, g=1+1/n: f=Θ(g) but log f ≠ Θ(log g)</td>
+      <td>pp. 43–54 / A2 Q1.3</td>
+      <td>[KT] Ch.2</td>
+    </tr>
+    <tr>
+      <td><strong>Universal claim (∀)</strong></td>
+      <td>"For ALL" — true for every element in the domain</td>
+      <td>"For all n ≥ 0, a binary tree of height n has ≤ 2^n leaves"</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Existence claim (∃)</strong></td>
+      <td>"There EXISTS at least one" — proved by constructing an example</td>
+      <td>"There exists an even prime number" → 2</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Even integer</strong></td>
+      <td>An integer n = 2k for some integer k</td>
+      <td>8 = 2×4 ✓; 14 = 2×7 ✓; 0 = 2×0 ✓</td>
+      <td>p. 1 / A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Odd integer</strong></td>
+      <td>An integer n = 2k+1 for some integer k</td>
+      <td>7 = 2×3+1 ✓; 13 = 2×6+1 ✓; −3 = 2×(−2)+1 ✓</td>
+      <td>p. 1 / A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Consecutive integers</strong></td>
+      <td>Two integers differing by exactly 1</td>
+      <td>(5,6), (−3,−2), (a, a+1)</td>
+      <td>A0 p.7</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>Height of a binary tree</strong></td>
+      <td>The number of edges on the longest root-to-leaf path; a single node has height 0</td>
+      <td>Tree with root only: height 0. Tree with 2 levels: height 1.</td>
+      <td>p. 1</td>
+      <td>[CLRS] Ch.12</td>
+    </tr>
+    <tr>
+      <td><strong>Leaf node</strong></td>
+      <td>A tree node with no children</td>
+      <td>In a binary tree of height 2: all nodes on the bottom level are leaves</td>
+      <td>p. 1</td>
+      <td>[CLRS] Ch.12</td>
+    </tr>
+    <tr>
+      <td><strong>Big-O upper bound</strong></td>
+      <td>f(n) = O(g(n)) means g(n) is an upper bound for f(n) (up to a constant)</td>
+      <td>3n+5 = O(n): there exist c=4, n₀=5 such that 3n+5 ≤ 4n for n≥5</td>
+      <td>pp. 39–44</td>
+      <td>[KT] Ch.2</td>
+    </tr>
+    <tr>
+      <td><strong>Big-Omega lower bound</strong></td>
+      <td>f(n) = Ω(g(n)) means g(n) is a lower bound for f(n)</td>
+      <td>n² = Ω(n): there exist c=1, n₀=1 such that n² ≥ 1·n for n≥1</td>
+      <td>pp. 39–44</td>
+      <td>[KT] Ch.2</td>
+    </tr>
+    <tr>
+      <td><strong>Big-Theta tight bound</strong></td>
+      <td>f(n) = Θ(g(n)) means g(n) is both an upper AND lower bound</td>
+      <td>n(n-1)/2 = Θ(n²): c₁=1/4, c₂=1/2, n₀=2 (from Lecture 5)</td>
+      <td>pp. 39–44</td>
+      <td>[KT] Ch.2</td>
+    </tr>
+    <tr>
+      <td><strong>Limit comparison method</strong></td>
+      <td>Evaluate lim f(n)/g(n): =0 means f=o(g); =c&gt;0 means f=Θ(g); =∞ means f=ω(g)</td>
+      <td>lim n/n² = lim 1/n = 0 → n = o(n²)</td>
+      <td>pp. 39–54</td>
+      <td>[KT] Ch.2</td>
+    </tr>
+    <tr>
+      <td><strong>Without Loss of Generality (WLOG)</strong></td>
+      <td>A shorthand saying "by symmetry, we only need to prove one case"</td>
+      <td>"WLOG assume a ≤ b" — we treat the other case identically</td>
+      <td>pp. 39–54</td>
+      <td>[KT] Appendix</td>
+    </tr>
+    <tr>
+      <td><strong>QED / ∎ / □</strong></td>
+      <td>"Quod Erat Demonstrandum" — marks the end of a proof</td>
+      <td>Latin for "which was to be demonstrated" — put this at the end of every proof</td>
+      <td>p. 1</td>
+      <td>[KT] Appendix</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Point of Confusion — Know This Before §2</strong>
+  Many students conflate "the base case proves the claim" with "I've proved it." The base case alone proves ONLY P(n₀) — one value. The inductive step is what covers all the remaining infinitely many values. If you skip the inductive step, your "proof by induction" proves nothing about n ≠ n₀. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     §2  HOW — WORKED EXAMPLES
+     ============================================================ -->
+<h2 id="section-2">§2 — How: Every Proof Traced from Scratch</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: p. 1 (Lec 1) · A0 pp. 7–11 · pp. 39–54 (Lecs 5–6)</div>
+
+<p style="color: var(--text-dim);">
+  Each sub-section follows the same recipe: <strong>(1) Intuition</strong> — what are we doing and why?
+  <strong>(2) Mechanism</strong> — the formal structure of the proof type.
+  <strong>(3) Worked Example</strong> — the exact example from the assignments and midterm, traced step by step on real numbers.
+  Work through each proof in writing before reading the explanation — the physical act of writing the steps helps them stick.
+</p>
+
+<!-- ─── 2a: INDUCTION ──────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span>
+  <span class="title">Proof by Induction — "Binary tree of height n has at most 2ⁿ leaves"</span>
+  <span class="pages">Lecture PDF: p. 1 (Lec 1) · Assignment 0 Q2.1 <span class="asgn-ref">📋 A0 Q2.1</span> · Midterm [a] <span class="exam-star">⭐</span></span>
+</div>
+
+<h3>Intuition: Why is induction the right tool here? <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  We want to prove something about ALL binary trees, regardless of height — height 0, height 1, height 50, height 10^6. We can't draw all of them. But we notice that a tree of height k+1 is made of a root plus two subtrees, each of height at most k. If we already know the bound holds for height-k trees (that's the IH), we can compute the bound for height-(k+1) trees directly. Induction lets us leverage the smaller case to prove the larger one.
+</p>
+
+<h3>Mechanism: The 5-step induction template <span class="pdf-ref">📄 p. 1</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">INDUCTION TEMPLATE (fill in the blanks for any induction proof)</div>
+  <div class="proof-step"><strong>1. State P(n):</strong> "For all integers n ≥ [n₀], [claim]."</div>
+  <div class="proof-step"><strong>2. Base Case:</strong> "When n = [n₀], [verify the claim holds by direct calculation]."</div>
+  <div class="proof-step"><strong>3. Inductive Hypothesis (IH):</strong> "Assume P(k) is true for some arbitrary k ≥ [n₀]. That is, assume [restate claim with n=k]."</div>
+  <div class="proof-step"><strong>4. Inductive Step:</strong> "We must show P(k+1). That is, we must show [restate claim with n=k+1]. [Use the IH explicitly here.]"</div>
+  <div class="proof-step"><strong>5. Conclusion:</strong> "By the principle of mathematical induction, P(n) holds for all integers n ≥ [n₀]. ∎"</div>
+</div>
+
+<h3>Worked Example — traced step by step <span class="pdf-ref">📄 p. 1</span> <span class="asgn-ref">📋 A0 Q2.1</span></h3>
+
+<p><strong>Claim:</strong> A binary tree of height n has at most 2ⁿ leaves.</p>
+
+<h4>Step 1 — State P(n) precisely</h4>
+<p>P(n): "Every binary tree of height n has at most 2ⁿ leaf nodes."</p>
+<p>We will prove this for all integers n ≥ 0. <span class="pdf-ref">📄 p. 1</span></p>
+
+<h4>Step 2 — Base Case (n = 0)</h4>
+<p>When n = 0, the tree has only one node (the root), and since it has no children, the root is itself a leaf. So the number of leaves is 1.</p>
+<p>Upper bound: 2⁰ = 1. Since 1 ≤ 1, the base case holds. ✓ <span class="pdf-ref">📄 p. 1</span></p>
+
+<pre class="diagram">
+  Height-0 tree:
+
+       [Root / Leaf]
+
+  Number of leaves = 1 = 2⁰ ✓
+</pre>
+<div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 p. 1</span></div>
+
+<h4>Step 3 — Inductive Hypothesis</h4>
+<p>"Assume P(k) is true for some arbitrary integer k ≥ 0. That is, assume that <em>every binary tree of height k has at most 2^k leaves</em>." <span class="pdf-ref">📄 p. 1</span></p>
+<p>
+  Notice: we are NOT saying "fix one specific tree." We are assuming the claim holds for <em>every</em> tree of height k — this generality is what makes the inductive step work.
+</p>
+
+<h4>Step 4 — Inductive Step (prove P(k+1) using IH)</h4>
+<p><strong>Goal:</strong> Show that any binary tree T of height k+1 has at most 2^(k+1) leaves. <span class="pdf-ref">📄 p. 1</span></p>
+
+<div class="step">
+  <div class="step-head">Sub-step 4a: Decompose T into its parts.</div>
+  <div class="step-detail">Any binary tree T of height k+1 has a root with at most two subtrees: left subtree T_L and right subtree T_R. Since T has height k+1, each subtree has height at most k. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Sub-step 4b: Apply the IH to each subtree.</div>
+  <div class="step-detail">T_L has height ≤ k, so by the IH: T_L has at most 2^k leaves.<br>T_R has height ≤ k, so by the IH: T_R has at most 2^k leaves. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Sub-step 4c: Count total leaves in T.</div>
+  <div class="step-detail">The leaves of T are exactly the leaves of T_L plus the leaves of T_R (the root is NOT a leaf because it has children). Total leaves ≤ 2^k + 2^k = 2 × 2^k = 2^(k+1). <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+<div class="step">
+  <div class="step-head">Sub-step 4d: Conclude P(k+1).</div>
+  <div class="step-detail">We have shown: any binary tree of height k+1 has at most 2^(k+1) leaves. This is exactly P(k+1). ✓ <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<h4>Step 5 — Conclusion</h4>
+<p>By the principle of mathematical induction, P(n) holds for all integers n ≥ 0: every binary tree of height n has at most 2ⁿ leaves. ∎ <span class="pdf-ref">📄 p. 1</span></p>
+
+<h3>Verify on small cases — "sanity check" <span class="pdf-ref">📄 p. 1</span></h3>
+<pre class="diagram">
+  Height 0: 1 node, 1 leaf.   2⁰ = 1.  ✓  (leaf count ≤ 1)
+  Height 1: root + ≤ 2 leaves.          2¹ = 2.  ✓  (leaf count ≤ 2)
+  Height 2: at most 4 leaves.            2² = 4.  ✓  (leaf count ≤ 4)
+
+  Fully branched tree of height 2:
+
+          [R]                  Height 0 (root)
+         /   \
+       [A]   [B]              Height 1 (internal)
+      / \   / \
+    [1][2][3][4]              Height 2 — all 4 are leaves = 2² ✓
+
+  One-sided tree of height 2:
+
+          [R]
+         /
+       [A]
+         \
+          [2]                 Only 1 leaf — still ≤ 2² = 4 ✓
+</pre>
+<div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 p. 1</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ The Most Common Induction Mistake</strong>
+  Forgetting to EXPLICITLY USE the inductive hypothesis in the inductive step. The grader checks this. Writing "by induction" without saying "by the IH, T_L has at most 2^k leaves" loses partial credit. Always name the IH explicitly and show how it applies. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<!-- ─── 2b: CONSTRUCTION ──────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span>
+  <span class="title">Proof by Construction — "Sum of two consecutive integers is always odd"</span>
+  <span class="pages">Lecture PDF: p. 1 (Lec 1) · Assignment 0 Q2.2 <span class="asgn-ref">📋 A0 Q2.2</span> · Midterm [b] <span class="exam-star">⭐</span></span>
+</div>
+
+<h3>Intuition: Building the answer directly <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  Some claims can be proved by simply constructing an explicit algebraic expression. If the claim says "for any two consecutive integers a and b, their sum a + b is odd," we don't need induction or contradiction — we just express b in terms of a and compute a + b, then show the result is odd.
+</p>
+<p>
+  Construction proofs are often the shortest and most elegant. The key is to start from the DEFINITION of the objects involved (what does "consecutive" mean? what does "odd" mean?) and compute directly. <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<h3>Mechanism: The construction template <span class="pdf-ref">📄 p. 1</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">CONSTRUCTION TEMPLATE</div>
+  <div class="proof-step"><strong>1. State the claim:</strong> "For all [objects with property X], [conclusion C] holds."</div>
+  <div class="proof-step"><strong>2. Express the objects explicitly:</strong> "Let [objects]. By definition of X, we can write [explicit formula for the objects]."</div>
+  <div class="proof-step"><strong>3. Compute directly:</strong> "Calculate [the thing in C] using the explicit formula. [Show the algebraic steps.]"</div>
+  <div class="proof-step"><strong>4. Verify C:</strong> "The result has the form [required form], which by definition means [C]. ✓"</div>
+  <div class="proof-step"><strong>5. Conclude:</strong> "Since a and b were arbitrary [objects with X], C holds for all such pairs. ∎"</div>
+</div>
+
+<h3>Worked Example — traced step by step <span class="pdf-ref">📄 p. 1</span> <span class="asgn-ref">📋 A0 Q2.2</span></h3>
+
+<p><strong>Claim:</strong> For any two consecutive integers a and b, the sum a + b is an odd integer.</p>
+
+<div class="step">
+  <div class="step-head">Step 1: What does "consecutive integers" mean?</div>
+  <div class="step-detail">Two integers are consecutive if they differ by exactly 1. So if a is the smaller one, then b = a + 1. We may write b in terms of a: <strong>b = a + 1</strong>. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 2: Compute the sum a + b.</div>
+  <div class="step-detail">Substitute b = a + 1:<br>
+  a + b = a + (a + 1) = 2a + 1.<br>
+  The sum is 2a + 1, where a is any integer. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 3: Is 2a + 1 odd?</div>
+  <div class="step-detail">By definition, an integer n is odd if n = 2k + 1 for some integer k. Here, 2a + 1 = 2k + 1 with k = a. Since a is an integer, k = a is also an integer. So yes, 2a + 1 is odd. ✓ <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 4: Conclusion.</div>
+  <div class="step-detail">For any two consecutive integers a and b (with b = a + 1), we have a + b = 2a + 1, which is an odd integer by definition. Since a was an arbitrary integer, this holds for ALL pairs of consecutive integers. ∎ <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<h3>Verify on concrete values <span class="pdf-ref">📄 p. 1</span></h3>
+
+<pre class="diagram">
+  Let's check a few specific cases:
+
+  a = 3,  b = 4:   3 + 4 = 7 = 2(3) + 1  ✓  (odd)
+  a = 7,  b = 8:   7 + 8 = 15 = 2(7) + 1  ✓  (odd)
+  a = 0,  b = 1:   0 + 1 = 1 = 2(0) + 1  ✓  (odd)
+  a = -5, b = -4: -5 + (-4) = -9 = 2(-5) + 1  ✓  (odd)
+  a = 100, b=101:  100 + 101 = 201 = 2(100)+1  ✓  (odd)
+
+  All cases satisfy 2a + 1 — always odd! ✓
+</pre>
+<div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 p. 1</span></div>
+
+<div class="callout">
+  <strong class="lbl">📌 Why Construction Is Often Shorter Than Induction</strong>
+  Notice there was no base case, no inductive hypothesis, and no inductive step — just direct algebra. When the claim is about "for all a" but involves only arithmetic on a (not recursive structure), construction is the cleaner tool. Induction is needed when the structure is <em>recursive</em> (like trees or sequences defined in terms of their smaller instances). <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<!-- ─── 2c: CONTRADICTION ─────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span>
+  <span class="title">Proof by Contradiction — "If n² is even, then n is even"</span>
+  <span class="pages">Lecture PDF: p. 1 (Lec 1) · Assignment 0 Q2.3 <span class="asgn-ref">📋 A0 Q2.3</span> · Midterm [c] <span class="exam-star">⭐</span></span>
+</div>
+
+<h3>Intuition: Sometimes the back door is easier <span class="pdf-ref">📄 p. 1</span></h3>
+<p>
+  Sometimes, proving a claim directly is hard because you don't have much to work with. But the NEGATION of the claim gives you an extra assumption — and that extra assumption, combined with what you already know, quickly creates a contradiction. In those situations, proof by contradiction is the smart choice.
+</p>
+<p>
+  For the claim "n² even → n even," the direct approach says: "Given n² is even, I must show n is even." But we don't know how to work backwards from n² to n easily. The contradiction approach says: "Assume n is ODD (the opposite of what I want to prove). Now I have both 'n is odd' AND 'n² is even' to work with. Let me compute n² using the odd formula and see if a contradiction appears." <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<h3>Mechanism: The contradiction template <span class="pdf-ref">📄 p. 1</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">CONTRADICTION TEMPLATE</div>
+  <div class="proof-step"><strong>1. State the claim P.</strong></div>
+  <div class="proof-step"><strong>2. Negate:</strong> "Assume for contradiction that ¬P is true." Write out what ¬P means concretely.</div>
+  <div class="proof-step"><strong>3. Derive:</strong> Using the assumption ¬P (and other known facts), compute or reason until you reach an impossible statement.</div>
+  <div class="proof-step"><strong>4. Name the contradiction:</strong> "This contradicts [specific fact or assumption]."</div>
+  <div class="proof-step"><strong>5. Conclude:</strong> "Therefore our assumption that ¬P was wrong. Hence P must be true. ∎"</div>
+</div>
+
+<h3>Worked Example — traced step by step <span class="pdf-ref">📄 p. 1</span> <span class="asgn-ref">📋 A0 Q2.3</span></h3>
+
+<p><strong>Claim (P):</strong> If n² is even, then n is even. [Equivalently: n² is even implies n is even.]</p>
+
+<div class="step">
+  <div class="step-head">Step 1: State the claim clearly.</div>
+  <div class="step-detail">P: "For any integer n, if n² is even, then n is even." We want to prove this. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 2: Negate P.</div>
+  <div class="step-detail">¬P: "There exists an integer n such that n² is even BUT n is ODD."<br>
+  We assume ¬P and try to reach a contradiction. So: <strong>assume n is odd</strong>. (We keep the given: n² is even.) <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 3: Use the definition of "odd."</div>
+  <div class="step-detail">Since n is odd, by definition there exists an integer k such that n = 2k + 1. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 4: Compute n².</div>
+  <div class="step-detail">n² = (2k + 1)² = 4k² + 4k + 1 = 2(2k² + 2k) + 1.<br>
+  Let m = 2k² + 2k (which is an integer). Then n² = 2m + 1. <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 5: Identify the contradiction.</div>
+  <div class="step-detail">n² = 2m + 1 has the form 2(integer) + 1, which by definition means n² is <strong>ODD</strong>.<br>
+  But we assumed n² is EVEN (given in the claim's hypothesis).<br>
+  An integer cannot be both odd and even. <strong>This is a contradiction.</strong> ✗ <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 6: Conclusion.</div>
+  <div class="step-detail">Our assumption that n is odd led to the contradiction "n² is both even and odd." Therefore n cannot be odd — n must be even. ∎ <span class="pdf-ref">📄 p. 1</span></div>
+</div>
+
+<h3>Verify on concrete values with k = 3 <span class="pdf-ref">📄 p. 1</span></h3>
+
+<pre class="diagram">
+  Let k = 3 in the assumption: n = 2(3)+1 = 7.
+
+  If n is odd (n = 7), compute n²:
+    n² = 7² = 49
+
+  Check parity of 49: 49 = 2(24) + 1 → ODD.
+
+  But the claim's hypothesis says n² is EVEN.
+  49 is ODD, not even. → CONTRADICTION ✗
+
+  This specific case confirms that an odd n gives an odd n²,
+  contradicting the assumption that n² is even.
+  Therefore n cannot be odd — n must be even. ✓
+</pre>
+<div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 p. 1</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ The Critical Algebra Step</strong>
+  The key move is: (2k+1)² = 4k² + 4k + 1. Many students expand this incorrectly as 4k² + 1 (forgetting the cross-term 2·2k·1 = 4k). Always FOIL carefully: (2k+1)² = (2k)(2k) + 2(2k)(1) + (1)(1) = 4k² + 4k + 1. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<div class="callout">
+  <strong class="lbl">📌 Contrapositive Connection</strong>
+  This proof is equivalent to the <em>contrapositive</em> argument: "if n is odd, then n² is odd." The contrapositive of "P → Q" is "¬Q → ¬P," and both are logically equivalent. In fact, the derivation we did in steps 3–5 IS a direct proof of the contrapositive. The contradiction framing is just one way to present it — the substance is identical. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<!-- ─── 2d: COUNTEREXAMPLE ─────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span>
+  <span class="title">Counterexample — Disproving a FALSE Asymptotic Claim</span>
+  <span class="pages">Lecture PDF: pp. 43–54 (Lecs 5–6) · Assignment 2 Q1.3 <span class="asgn-ref">📋 A2 Q1.3</span></span>
+</div>
+
+<h3>Intuition: One black swan is enough <span class="pdf-ref">📄 pp. 43–54</span></h3>
+<p>
+  When a claim says "for ALL functions f and g, [property] holds," you can disprove it by showing a single pair where the property fails. You don't need to analyze all pairs — just one specific example suffices.
+</p>
+<p>
+  The art of counterexamples is finding the simplest, smallest, most obvious pair. For asymptotic claims, the trick is often to use <em>constant functions</em> or <em>functions that approach different limits</em>. <span class="pdf-ref">📄 pp. 43–54</span>
+</p>
+
+<h3>Mechanism: The counterexample template <span class="pdf-ref">📄 pp. 43–54</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">COUNTEREXAMPLE TEMPLATE</div>
+  <div class="proof-step"><strong>1. State the claim to disprove.</strong></div>
+  <div class="proof-step"><strong>2. Exhibit specific objects:</strong> "Let f(n) = [specific function] and g(n) = [specific function]."</div>
+  <div class="proof-step"><strong>3. Verify the hypothesis holds:</strong> "We check that f(n) = O(g(n)) [or whatever the if-part requires]. [Show this.] ✓"</div>
+  <div class="proof-step"><strong>4. Show the conclusion fails:</strong> "We show that [log f(n) ≠ Θ(log g(n))] for these specific functions. [Show this.] ✗"</div>
+  <div class="proof-step"><strong>5. Conclude:</strong> "Since f and g satisfy the hypothesis but not the conclusion, the claim is FALSE. ∎"</div>
+</div>
+
+<h3>Worked Example: Claim — "f = Θ(g) implies log f = Θ(log g)" — FALSE <span class="pdf-ref">📄 pp. 43–54</span> <span class="asgn-ref">📋 A2 Q1.3</span></h3>
+
+<p><strong>Claim to disprove:</strong> "For all positive functions f and g, if f(n) = Θ(g(n)), then log f(n) = Θ(log g(n))."</p>
+
+<div class="step">
+  <div class="step-head">Step 1: Choose the counterexample functions.</div>
+  <div class="step-detail">Let <strong>f(n) = 2</strong> (constant function, always equals 2) and <strong>g(n) = 1 + 1/n</strong> (converges to 1 from above). <span class="pdf-ref">📄 pp. 43–54</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 2: Verify that f(n) = Θ(g(n)).</div>
+  <div class="step-detail">We need constants c₁, c₂ and n₀ such that c₁·g(n) ≤ f(n) ≤ c₂·g(n) for all n ≥ n₀.<br>
+  g(n) = 1 + 1/n. For n ≥ 1: g(n) ranges in (1, 2].<br>
+  f(n) = 2 always.<br>
+  Choose c₁ = 1 and c₂ = 2 and n₀ = 1:<br>
+  Lower: 1·(1 + 1/n) = 1 + 1/n ≤ 2 = f(n) ✓ (since 1 + 1/n ≤ 2 for all n ≥ 1).<br>
+  Upper: 2·(1 + 1/n) = 2 + 2/n ≥ 2 = f(n) ✓ (since 2 + 2/n ≥ 2 always).<br>
+  So f(n) = Θ(g(n)). The <em>if-part</em> of the claim is satisfied. ✓ <span class="pdf-ref">📄 pp. 39–44</span></div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 3: Compute log f(n) and log g(n).</div>
+  <div class="step-detail">
+    log f(n) = log 2 = 1 (constant, since f(n) = 2 for all n).<br>
+    log g(n) = log(1 + 1/n). As n → ∞: log(1 + 1/n) → log(1) = 0. <span class="pdf-ref">📄 pp. 43–54</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 4: Show log f(n) ≠ Θ(log g(n)) using the limit test.</div>
+  <div class="step-detail">
+    Examine the ratio: (log f(n)) / (log g(n)) = 1 / log(1 + 1/n).<br>
+    As n → ∞: log(1 + 1/n) ≈ 1/n → 0 (for any logarithm base). So the ratio 1 / (1/n) = n → ∞.<br>
+    Since lim (log f(n)) / (log g(n)) = ∞, we have log f = ω(log g) — log f grows MUCH FASTER than log g (in the asymptotic sense of ratios).<br>
+    In particular, there is NO constant c such that log f(n) ≤ c · log g(n) for all large n, because log g(n) → 0 while log f(n) = 1 remains fixed.<br>
+    Therefore log f(n) ≠ O(log g(n)), which means log f(n) ≠ Θ(log g(n)). ✗ <span class="pdf-ref">📄 pp. 43–54</span>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head">Step 5: Conclude.</div>
+  <div class="step-detail">With f(n) = 2 and g(n) = 1 + 1/n: f = Θ(g) holds, but log f ≠ Θ(log g). The claim is <strong>FALSE</strong>. ∎ <span class="pdf-ref">📄 pp. 43–54</span></div>
+</div>
+
+<h3>Verifying two TRUE claims from Exercises 2–3 <span class="pdf-ref">📄 pp. 43–54</span> <span class="asgn-ref">📋 A2 Q1.1</span> <span class="asgn-ref">📋 A2 Q1.2</span></h3>
+
+<p>Not all asymptotic claims are false. Let's quickly trace the proofs for the two TRUE claims from the lecture exercises and Assignment 2:</p>
+
+<div class="proof-block">
+  <div class="proof-label">TRUE Claim 1 (A2 Q1.1): If f(n) = O(g(n)) and f(n) = Ω(h(n)), then g(n) = Ω(h(n)).</div>
+  <div class="proof-step"><strong>Given:</strong> f = O(g): ∃ c₁, n₁ such that f(n) ≤ c₁·g(n) for n ≥ n₁. <span class="pdf-ref">📄 pp. 39–44</span></div>
+  <div class="proof-step">f = Ω(h): ∃ c₂, n₂ such that f(n) ≥ c₂·h(n) for n ≥ n₂. <span class="pdf-ref">📄 pp. 39–44</span></div>
+  <div class="proof-step"><strong>Chain the inequalities:</strong> For n ≥ max(n₁, n₂):<br>
+  c₂·h(n) ≤ f(n) ≤ c₁·g(n).<br>
+  So h(n) ≤ (c₁/c₂)·g(n). <span class="pdf-ref">📄 pp. 43–54</span></div>
+  <div class="proof-step"><strong>Conclude:</strong> There exists constant c = c₁/c₂ &gt; 0 such that h(n) ≤ c·g(n) for all n ≥ max(n₁,n₂). Wait — we need the other direction for Ω: g(n) ≥ (1/c)·h(n). Yes: g(n) ≥ (c₂/c₁)·h(n). So g = Ω(h). ✓ <span class="pdf-ref">📄 pp. 43–54</span></div>
+</div>
+
+<div class="proof-block">
+  <div class="proof-label">TRUE Claim 2 (A2 Q1.2): If f(n) = O(g(n)), then f(n)² = O(g(n)²).</div>
+  <div class="proof-step"><strong>Given:</strong> f = O(g): ∃ c₀, n₀ such that f(n) ≤ c₀·g(n) for n ≥ n₀. <span class="pdf-ref">📄 pp. 39–44</span></div>
+  <div class="proof-step"><strong>Since both f and g are positive:</strong> we can square both sides (squaring preserves inequality for positive values):<br>
+  f(n)² ≤ (c₀·g(n))² = c₀²·g(n)². <span class="pdf-ref">📄 pp. 43–54</span></div>
+  <div class="proof-step"><strong>Conclude:</strong> Let c' = c₀² &gt; 0. Then f(n)² ≤ c'·g(n)² for all n ≥ n₀. So f² = O(g²). ✓ <span class="pdf-ref">📄 pp. 43–54</span></div>
+</div>
+
+<h3>§2 Synthesis — When to use which proof technique <span class="pdf-ref">📄 pp. 1–54</span></h3>
+
+<pre class="diagram">
+  PROOF TECHNIQUE DECISION FLOWCHART:
+
+  Is the claim FALSE?
+    ─── YES ──→ Find a COUNTEREXAMPLE (one specific case where it fails)
+    │
+    NO ↓
+
+  Does the claim involve "for all n ≥ n₀" with recursive / tree / sequence structure?
+    ─── YES ──→ Use INDUCTION (base case + IH + inductive step)
+    │
+    NO ↓
+
+  Can you express what the claim says using explicit algebra on the variables?
+    ─── YES ──→ Use CONSTRUCTION (substitute definitions, compute, verify)
+    │
+    NO ↓
+
+  Does assuming the OPPOSITE of the claim immediately give you useful extra info
+  that leads to an impossible situation?
+    ─── YES ──→ Use CONTRADICTION (assume ¬P, derive absurdity, conclude P)
+    │
+    NO ↓
+
+  Try harder — sometimes you need to combine techniques or use a lemma first.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 1</span> / <span class="pdf-ref">📄 pp. 43–54</span></div>
+
+<table class="data">
+  <thead>
+    <tr><th>Technique</th><th>Signal Words in the Claim</th><th>Core Structure</th><th>Assignment Source</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Induction</strong></td>
+      <td>"for all n ≥ n₀," trees, arrays, recursive algorithms</td>
+      <td>Base → IH → Inductive Step → QED</td>
+      <td><span class="asgn-ref">📋 A0 Q2.1</span> <span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+    <tr>
+      <td><strong>Construction</strong></td>
+      <td>"for all a, b (some property)...," sum, product, existence</td>
+      <td>Define objects → compute → verify definition → QED</td>
+      <td><span class="asgn-ref">📋 A0 Q2.2</span> <span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+    <tr>
+      <td><strong>Contradiction</strong></td>
+      <td>"if X then Y" where Y being false seems to help; implication claims</td>
+      <td>Assume ¬Y → derive ¬X or absurdity → QED</td>
+      <td><span class="asgn-ref">📋 A0 Q2.3</span> <span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+    <tr>
+      <td><strong>Counterexample</strong></td>
+      <td>"for ALL f,g,..." (universal claim that is actually FALSE)</td>
+      <td>Exhibit f₀, g₀ → verify hypothesis holds → show conclusion fails</td>
+      <td><span class="asgn-ref">📋 A2 Q1.3</span> <span class="pdf-ref">📄 pp. 43–54</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     §3  EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 PRIMARY SOURCE: Assignment 0 (A0), Assignment 2 (A2), Quiz 1 midterm patterns [a][b][c], Lectures 5–6</div>
+
+<div class="section-block">
+
+<h3>Exam Patterns — What the Questions Will Look Like <span class="pdf-ref">📄 pp. 1–54</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>#</th><th>Question Stem Pattern</th><th>Required Answer Elements</th><th>Most Common Error</th><th>Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>"Prove by induction: a binary tree of height n has at most 2ⁿ leaves."</td>
+      <td>State P(n); base case n=0 with explicit count; state IH; inductive step using IH on subtrees; conclusion</td>
+      <td>Forgetting to state the IH explicitly before using it; or not applying IH to BOTH subtrees</td>
+      <td><span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>"Prove that the sum of any two consecutive integers is odd."</td>
+      <td>Let b = a+1; compute a+b = 2a+1; identify 2a+1 as odd by definition (2k+1 form); conclude</td>
+      <td>Trying to use induction when a direct construction is simpler and expected</td>
+      <td><span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>"Prove by contradiction: if n² is even, then n is even."</td>
+      <td>Assume n is odd; write n = 2k+1; expand n² = 4k²+4k+1 = 2(2k²+2k)+1 = odd; state contradiction with n² even; conclude</td>
+      <td>Wrong algebra: computing (2k+1)² = 4k²+1 (missing the cross-term 4k)</td>
+      <td><span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>"For each claim, state TRUE and prove, or FALSE and give a counterexample."</td>
+      <td>For TRUE: find c, n₀ or use limit method; show all steps. For FALSE: exhibit f₀, g₀; verify hypothesis; show conclusion fails</td>
+      <td>For FALSE: saying "I couldn't find a proof" instead of exhibiting a concrete counterexample</td>
+      <td><span class="pdf-ref">📄 pp. 43–54</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>"Is f(n) = O(g(n))? Prove or disprove." (with specific functions given)</td>
+      <td>Find c and n₀ satisfying the formal O definition; verify the inequality holds for ALL n ≥ n₀; OR give the limit comparison</td>
+      <td>Finding c and n₀ but not verifying the inequality algebraically; or using L'Hôpital without showing the limit</td>
+      <td><span class="pdf-ref">📄 pp. 39–44</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>"True or False: f = O(g) and f = Ω(h) implies g = Ω(h)."</td>
+      <td>TRUE; chain the inequalities: c₂·h ≤ f ≤ c₁·g → h ≤ (c₁/c₂)·g; state witness constants explicitly</td>
+      <td>Reversing the inequality direction; or stating the conclusion without showing the chain</td>
+      <td><span class="pdf-ref">📄 pp. 43–54</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>"True or False: f = O(g) implies f² = O(g²)."</td>
+      <td>TRUE; square both sides of f ≤ c·g (valid since both positive); show f² ≤ c²·g²; identify c' = c²</td>
+      <td>Squaring without confirming positivity; or not identifying the new constant c' = c²</td>
+      <td><span class="pdf-ref">📄 pp. 43–54</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>"True or False: f = Θ(g) implies log f = Θ(log g)."</td>
+      <td>FALSE; counterexample f(n)=2, g(n)=1+1/n: verify f=Θ(g), then show log g → 0 while log f = 1 (fixed), so ratio → ∞</td>
+      <td>Not verifying f=Θ(g) for the counterexample; or choosing functions where log f and log g are both constants</td>
+      <td><span class="pdf-ref">📄 pp. 43–54</span></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>"Prove: if every vertex in graph G has degree ≥ n/2, then G is connected." (A4 Q5)</td>
+      <td>Proof by contradiction; assume disconnected; smallest component has k &lt; n/2 vertices; any vertex in it has degree ≤ k−1 &lt; n/2; contradicts degree ≥ n/2; conclude connected</td>
+      <td>Not specifying that the component size k &lt; n/2 before applying the degree bound; missing the case where k = n/2</td>
+      <td><span class="pdf-ref">📄 pp. 105–118</span></td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>"What proof technique would you use for [specific claim]? Justify."</td>
+      <td>Identify the claim structure (universal? recursive? existence?); name the technique; explain WHY it fits; sketch the structure</td>
+      <td>Choosing induction for a claim that has no recursive structure; or choosing construction when the structure is recursive</td>
+      <td><span class="pdf-ref">📄 p. 1</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Assignment Replay: A0 &amp; A2 Worked Solutions <span class="asgn-ref">📋 A0</span> <span class="asgn-ref">📋 A2</span></h3>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A0 Q2.1</span> <strong>Prove by induction: a binary tree of height n has at most 2ⁿ leaf nodes.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Statement P(n):</strong> Every binary tree of height n has at most 2^n leaves. Domain: all integers n ≥ 0. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Base case (n=0):</strong> A tree of height 0 is just the root (a single leaf). Leaf count = 1 = 2⁰. ✓ <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>IH:</strong> Assume any binary tree of height k has at most 2^k leaves. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Inductive step:</strong> Take any tree T of height k+1. T has a root plus two subtrees T_L, T_R, each of height ≤ k. By IH: |leaves(T_L)| ≤ 2^k and |leaves(T_R)| ≤ 2^k. Total leaves = |leaves(T_L)| + |leaves(T_R)| ≤ 2^k + 2^k = 2^(k+1). ✓ <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Grading criterion (100%):</strong> All 5 parts present (P(n) statement, base case with explicit value, IH explicitly stated, inductive step using IH, conclusion). Missing any part = partial credit. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Exam variant:</strong> "A binary tree of height n has at least 1 leaf." — Also provable by induction; base case n=0: 1 leaf ≥ 1 ✓; IH: assume height-k tree has ≥ 1 leaf; IS: height-(k+1) tree has ≥ 1 subtree which has ≥ 1 leaf by IH. <span class="pdf-ref">📄 p. 1</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A0 Q2.2</span> <strong>Prove by construction: the sum of any two consecutive integers is odd.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Construction:</strong> Let a be any integer. Its consecutive pair is b = a+1. Then a + b = a + (a+1) = 2a+1. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Verification:</strong> 2a+1 = 2k+1 with k = a (an integer). By definition, 2k+1 is odd. So a+b is odd. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Why NOT induction:</strong> The claim is about pairs of integers, not about "all n ≥ n₀" with recursive structure. The construction is direct and complete in 2 lines. Induction would be circular overkill. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Grading criterion (100%):</strong> Explicit substitution b = a+1; algebraic computation 2a+1; identification as odd via 2k+1 form; any valid integer a; conclusion stated. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Exam variant:</strong> "Prove the product of two consecutive integers is even." — Let b = a+1; a·b = a(a+1). One of a, a+1 must be even (consecutive integers have opposite parity); so a(a+1) = 2m for some m. ✓ <span class="pdf-ref">📄 p. 1</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A0 Q2.3</span> <strong>Prove by contradiction: if n² is even, then n is even.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Negation:</strong> Assume n is ODD (this is the negation of the conclusion "n is even"). <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Write n = 2k+1:</strong> By definition of odd integers. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Compute n²:</strong> (2k+1)² = 4k²+4k+1 = 2(2k²+2k)+1. This is odd. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Contradiction:</strong> We have n² is both even (given) and odd (derived). Impossible. So n cannot be odd — n must be even. ∎ <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Critical algebra detail:</strong> (2k+1)² = 4k²+4k+1, NOT 4k²+1. The missing term 4k is the most common algebraic error. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Grading criterion (100%):</strong> Explicit negation stated; n=2k+1 written; full algebra expansion; parity conclusion for n² (odd); specific contradiction named ("n² is both even and odd"); final conclusion. <span class="pdf-ref">📄 p. 1</span></li>
+        <li><strong>Exam variant:</strong> "Prove by contradiction: if n² is odd, then n is odd." — Assume n is even: n=2k; n²=4k²=2(2k²)=even. But n² is odd. Contradiction. ✓ <span class="pdf-ref">📄 p. 1</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A2 Q1.3</span> <strong>TRUE or FALSE: f(n) = Θ(g(n)) implies log f(n) = Θ(log g(n)). If FALSE, give a counterexample.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Answer: FALSE.</strong> <span class="pdf-ref">📄 pp. 43–54</span></li>
+        <li><strong>Counterexample:</strong> f(n) = 2 (constant 2), g(n) = 1 + 1/n. <span class="pdf-ref">📄 pp. 43–54</span></li>
+        <li><strong>Verify f=Θ(g):</strong> g(n) ∈ (1,2] for n≥1. So 1·g(n) ≤ 2 = f(n) ≤ 2·g(n). Pick c₁=1, c₂=2, n₀=1. ✓ <span class="pdf-ref">📄 pp. 39–44</span></li>
+        <li><strong>Show log f ≠ Θ(log g):</strong> log f(n) = log 2 = constant ≈ 1. log g(n) = log(1+1/n) → 0 as n→∞. Ratio → ∞, so log f = ω(log g) — NOT Θ. ✗ <span class="pdf-ref">📄 pp. 43–54</span></li>
+        <li><strong>Key insight:</strong> The Θ relationship is "crushed" by the logarithm when one function approaches a different positive constant than the other. Θ is preserved by log only when both functions grow to infinity at the same rate. <span class="pdf-ref">📄 pp. 43–54</span></li>
+        <li><strong>Grading criterion (100%):</strong> Explicit f₀ and g₀ exhibited; f=Θ(g) verified with constants; log f and log g computed; ratio shown to diverge; claim concluded FALSE. <span class="pdf-ref">📄 pp. 43–54</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3>Misconception Cards <span class="pdf-ref">📄 pp. 1–54</span></h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "In a proof by contradiction, I disprove the claim."</p>
+  <p><span class="reality">✅ Reality:</span> You PROVE the claim. You temporarily assume the claim is false, derive an absurdity, and conclude the claim is TRUE. The contradiction shows the negation is impossible — leaving only the original claim standing. <span class="pdf-ref">📄 p. 1</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "The base case proves the whole claim."</p>
+  <p><span class="reality">✅ Reality:</span> The base case only proves P(n₀) — one single value. The inductive step is what extends the proof to infinitely many n. Without the inductive step, you've proved nothing beyond the base case. <span class="pdf-ref">📄 p. 1</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "I can use any value of k in the inductive step — I'll just pick k=5."</p>
+  <p><span class="reality">✅ Reality:</span> The inductive step must work for an ARBITRARY k ≥ n₀ — you cannot fix a specific value. Picking k=5 would only prove P(6), not all P(k+1). The step must work for every possible k. <span class="pdf-ref">📄 p. 1</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "To show a claim is FALSE, I just say 'I couldn't find a proof.'"</p>
+  <p><span class="reality">✅ Reality:</span> Inability to find a proof does NOT mean the claim is false — you might just be missing the right technique. To show a claim is FALSE, you must produce a specific counterexample that visibly violates it. <span class="pdf-ref">📄 pp. 43–54</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "(2k+1)² = 4k² + 1."</p>
+  <p><span class="reality">✅ Reality:</span> (2k+1)² = 4k² + 4k + 1. The cross term 2·(2k)·1 = 4k is essential and is always forgotten under exam pressure. Write FOIL explicitly: (2k+1)(2k+1) = 4k² + 2k + 2k + 1 = 4k² + 4k + 1. <span class="pdf-ref">📄 p. 1</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "For asymptotic proofs, the limit method is optional — I can just 'say' it's O(n²)."</p>
+  <p><span class="reality">✅ Reality:</span> On graded assignments and the final exam, you must SHOW the work: either exhibit explicit c and n₀ satisfying the formal definition, or compute the limit explicitly. Stating the conclusion without proof receives no credit. <span class="pdf-ref">📄 pp. 39–54</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Proof by induction can prove any statement about natural numbers."</p>
+  <p><span class="reality">✅ Reality:</span> Induction proves statements that have the property "if n works, so does n+1." Some number-theoretic statements (like Goldbach's conjecture) have not been proved by any method, including induction. Induction is powerful but not omnipotent. <span class="pdf-ref">📄 p. 1</span></p>
+</div>
+
+<h3>Memory Aids &amp; Mnemonics <span class="pdf-ref">📄 pp. 1–54</span></h3>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 1: Induction steps — "B-I-IS-C" (Base, IH, Inductive Step, Conclude)</strong>
+  Write these four words at the top of every induction proof before you write a single formula:
+  <strong>B</strong>ase case → <strong>I</strong>nductive Hypothesis → <strong>I</strong>nductive <strong>S</strong>tep → <strong>C</strong>onclusion.
+  If any of the four is missing, the proof is incomplete. Check by covering each with your finger. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 2: Contradiction structure — "ANDC" (Assume Negation, Derive, Contradict)</strong>
+  <strong>A</strong>ssume ¬P. <strong>N</strong>ame what ¬P says explicitly (write n = 2k+1 etc.). <strong>D</strong>erive consequences using definitions. <strong>C</strong>ontradict a known fact. Then conclude P. "ANDC" in contradiction proofs = full credit. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 3: Counterexample recipe — "EHF" (Exhibit, Hypothesis, Fail)</strong>
+  To disprove a claim: <strong>E</strong>xhibit specific f₀, g₀. <strong>H</strong>ypothesis: show f₀=Θ(g₀) (the if-part holds). <strong>F</strong>ail: show log f₀ ≠ Θ(log g₀) (the conclusion fails). Without all three, the counterexample is incomplete. <span class="pdf-ref">📄 pp. 43–54</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 4: Even/Odd algebra — "2k is even, 2k+1 is odd"</strong>
+  Any expression of the form 2·(integer) is even. Any expression of the form 2·(integer)+1 is odd.
+  When you need to show something is odd: manipulate it into the form 2m+1. When you need even: into 2m.
+  This pattern appears in EVERY parity proof — internalize it. <span class="pdf-ref">📄 p. 1</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 5: Asymptotic formal proof — "c, n₀, and the inequality"</strong>
+  Every Big-O proof needs THREE things: a <strong>c</strong>onstant c &gt; 0, a threshold <strong>n₀</strong>, and the <strong>inequality</strong> f(n) ≤ c·g(n) verified for ALL n ≥ n₀. Missing any one of the three = incomplete proof = partial credit. <span class="pdf-ref">📄 pp. 39–44</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     §3.5  WARM-UP UNDERSTANDING CHECKS
+     ============================================================ -->
+<h2 id="warmup-checks">🧗 §3.5 — Warm-up Understanding Checks</h2>
+<p style="color: var(--text-dim);">Five conceptual questions to confirm you absorbed §1–2 before attempting the exam-style practice in §4. These are lower-stakes and conceptual, not exam-style.</p>
+
+<!-- WC-1 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">CONCEPTUAL</span>
+    <span class="pdf-ref">📄 p. 1</span>
+  </div>
+  <p class="question-stem">WC-1. A classmate says: "I tested my sorting algorithm on 10,000 random arrays and it was always correct. That's basically a proof." Pick apart what they got right and what they got wrong.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What they got right:</strong> Extensive testing builds confidence and is essential for engineering. Finding bugs through testing is valuable. 10,000 successful tests is much stronger evidence than 10. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>What they got wrong:</strong> Testing is NOT a proof. It only covers the specific cases tested. The algorithm might fail on the 10,001st case — perhaps a specific edge case (all-duplicate input, single-element array, reverse-sorted input of length 2^20). A mathematical proof covers all possible inputs, including ones never tested. <span class="pdf-ref">📄 p. 1</span></p>
+      <p>This is why CS 570 requires both testing (via Python in-class sessions) AND formal proof (via assignments and exams). Testing catches bugs; proof guarantees correctness. <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-2 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PROOF LABELING</span>
+    <span class="pdf-ref">📄 p. 1</span>
+  </div>
+  <p class="question-stem">WC-2. Below is an induction proof skeleton with the structural labels removed. Identify which part is the base case, which is the IH, and which is the inductive step.</p>
+  <pre class="diagram">
+  Claim: For all integers n ≥ 1, 1 + 2 + 3 + ... + n = n(n+1)/2.
+
+  (A) When n = 1: LHS = 1. RHS = 1(1+1)/2 = 1. LHS = RHS. ✓
+
+  (B) Assume that for some integer k ≥ 1:
+      1 + 2 + ... + k = k(k+1)/2.
+
+  (C) We want to show: 1 + 2 + ... + k + (k+1) = (k+1)(k+2)/2.
+      LHS = (1+2+...+k) + (k+1)
+           = k(k+1)/2 + (k+1)     [using part B]
+           = (k+1)(k/2 + 1)
+           = (k+1)(k+2)/2         ✓
+  </pre>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>(A) is the BASE CASE:</strong> It verifies the claim for the smallest value n = 1, directly by computation. No inductive hypothesis is used here. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>(B) is the INDUCTIVE HYPOTHESIS (IH):</strong> It states the assumption "assume P(k) is true" — i.e., the claim holds for some arbitrary k. Note the word "Assume" — this is being borrowed, not proved. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>(C) is the INDUCTIVE STEP:</strong> It proves P(k+1) — the claim for k+1. Crucially, it uses part (B) (the IH) on the third line: "using part B" is the explicit citation of the inductive hypothesis. This is the required connection. <span class="pdf-ref">📄 p. 1</span></p>
+      <p>After (C) is established, the conclusion would follow: "By induction, the claim holds for all n ≥ 1. ∎" <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-3 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PROOF STRUCTURE MATCHING</span>
+    <span class="pdf-ref">📄 p. 1</span>
+  </div>
+  <p class="question-stem">WC-3. For each claim below, state which proof technique (induction, construction, contradiction, or counterexample) you would use and why. You do NOT need to write the proof — just identify and justify.</p>
+  <p>(a) "For all integers n ≥ 1, n³ + 2n is divisible by 3."<br>
+  (b) "There exist integers a, b such that a² + b² = 25."<br>
+  (c) "For all positive functions f(n), f(n) = O(f(n)²)." [Hint: is this always true?]<br>
+  (d) "If a graph G has no edges, then every vertex in G is an isolated vertex."</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>(a) Induction.</strong> The claim says "for all n ≥ 1" and the expression n³ + 2n has a recursive structure when expanded by incrementing n. A direct proof by induction: base case n=1 (1+2=3, divisible by 3 ✓), then assume k³+2k divisible by 3 and show (k+1)³+2(k+1) = k³+3k²+3k+1+2k+2 = (k³+2k)+3(k²+k+1) — the first part is divisible by 3 by IH and the second is clearly divisible by 3. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>(b) Construction.</strong> "There exist" signals an existence claim — prove it by constructing the pair. a = 3, b = 4: 9 + 16 = 25 ✓. Done in one line. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>(c) Counterexample — this claim is FALSE.</strong> Take f(n) = 1/n. Then f(n)² = 1/n². For f = O(f²): we'd need 1/n ≤ c·(1/n²) → n² ≤ c·n → n ≤ c for all n, which fails for n &gt; c. So f(n) is NOT O(f(n)²). The claim is false! <span class="pdf-ref">📄 pp. 43–54</span></p>
+      <p><strong>(d) Construction (direct proof).</strong> "No edges" gives us the explicit condition. For any vertex v in G: since G has no edges, v has no neighbors (degree 0). A vertex with no neighbors is by definition "isolated." Proved directly from the definition. <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-4 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">NOTATION INTERPRETATION</span>
+    <span class="pdf-ref">📄 pp. 39–44</span>
+  </div>
+  <p class="question-stem">WC-4. The formal definition of Big-O states: f(n) = O(g(n)) if there exist constants c &gt; 0 and n₀ ≥ 0 such that f(n) ≤ c·g(n) for all n ≥ n₀. Using this definition, prove: 5n + 20 = O(n). State the explicit values of c and n₀ that work.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Goal:</strong> Find c and n₀ such that 5n + 20 ≤ c·n for all n ≥ n₀. <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Choose c = 6 and n₀ = 20.</strong></p>
+      <p><strong>Verify:</strong> For n ≥ 20: 5n + 20 ≤ 5n + n = 6n (since 20 ≤ n when n ≥ 20). So 5n + 20 ≤ 6·n = c·g(n) where g(n) = n. ✓ <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Conclusion:</strong> With c = 6 and n₀ = 20, f(n) ≤ c·g(n) for all n ≥ n₀. Therefore 5n + 20 = O(n). ∎ <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Note:</strong> Other choices work too (e.g., c = 25, n₀ = 1 since 5n+20 ≤ 25n for n ≥ 1). Any valid c and n₀ pair earns full credit — there is no unique answer. <span class="pdf-ref">📄 pp. 39–44</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-5 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">MISCONCEPTION PUNCTURE</span>
+    <span class="pdf-ref">📄 p. 1</span>
+  </div>
+  <p class="question-stem">WC-5. A classmate writes the following "proof by induction" for the claim "For all n ≥ 1, n² ≥ n": "Base case (n=1): 1² = 1 ≥ 1. ✓ Inductive step: Assume k² ≥ k. Then (k+1)² = k² + 2k + 1 ≥ k + 2k + 1 = 3k + 1 ≥ k + 1. So (k+1)² ≥ k+1. ✓ Conclusion: By induction, n² ≥ n for all n ≥ 1." What is right and what (if anything) is wrong with this proof?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What is right:</strong> The base case is correct (1 ≥ 1 ✓). The conclusion follows if the inductive step is valid. The chain (k+1)² = k²+2k+1 ≥ k+2k+1 correctly applies the IH (k² ≥ k). <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>What needs checking:</strong> The step 3k+1 ≥ k+1 requires 2k ≥ 0, which is true for all k ≥ 1 (since k ≥ 1 ≥ 0). So the step is valid for k ≥ 1. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>Verdict: The proof is correct</strong>, though a more careful version would explicitly note why 3k+1 ≥ k+1 (i.e., 2k ≥ 0 for k ≥ 1). The IH is explicitly used ("≥ k + 2k + 1 by IH") — that's good. The proof is complete and valid. <span class="pdf-ref">📄 p. 1</span></p>
+      <p><strong>One improvement:</strong> Explicitly state the IH step: "by the inductive hypothesis (k² ≥ k), we have..." — naming the IH makes it clear to the grader that you used it intentionally. <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     §4  PRACTICE QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Practice Questions</h2>
+<div class="pages-coverage">📘 13 exam-style questions: 4 MCQ + 3 PROOF + 3 TRACE + 3 PSEUDOCODE</div>
+
+<h3 id="section-4-mcq">MCQ — Multiple Choice (4 Questions)</h3>
+
+<!-- Q1 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 p. 1</span>
+  </div>
+  <p class="question-stem">Q1. Which proof technique is most directly applicable to proving the claim: "For all integers n ≥ 0, a binary tree of height n has at most 2ⁿ leaves"?</p>
+  <ol class="mcq-options" type="A">
+    <li>Proof by contradiction</li>
+    <li>Proof by construction</li>
+    <li>Proof by induction</li>
+    <li>Counterexample</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: C — Proof by induction</strong></p>
+      <p>The claim is a "for all n ≥ 0" statement about a recursive structure (trees of height n are built from trees of height n−1). Induction is ideal: base case n=0 (1 leaf = 2⁰), IH (assume height-k tree has ≤ 2^k leaves), inductive step (height-k+1 tree has two subtrees of height ≤ k, each with ≤ 2^k leaves, total ≤ 2^(k+1) = 2^(k+1)). <span class="pdf-ref">📄 p. 1</span></p>
+      <p>Why A is wrong: No obvious negation leads quickly to an absurdity here — the structure is too complex for contradiction to be the natural choice.</p>
+      <p>Why B is wrong: Construction proves existence claims. This is a universal ("for all") claim about tree structure, not an existence claim.</p>
+      <p>Why D is wrong: The claim is TRUE, so a counterexample does not apply (you use counterexamples to DISPROVE false claims).</p>
+      <p><em>Exam Tip:</em> "For all n ≥ n₀" + recursive structure → induction. Almost always. <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 p. 1</span>
+  </div>
+  <p class="question-stem">Q2. In a proof by contradiction of the claim "If n² is even, then n is even," what is the correct first move?</p>
+  <ol class="mcq-options" type="A">
+    <li>Assume n² is odd and derive that n is odd</li>
+    <li>Assume n is odd (keeping the hypothesis that n² is even) and derive a contradiction</li>
+    <li>Show that n² being even follows from n being even</li>
+    <li>Assume n is even and show that n² must also be even</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>The claim is "n² even → n even." The CONCLUSION is "n even." In proof by contradiction, we assume the NEGATION OF THE CONCLUSION: "n is odd" (while keeping the hypothesis "n² is even"). Then we derive that n² would be odd, contradicting the hypothesis. <span class="pdf-ref">📄 p. 1</span></p>
+      <p>Why A is wrong: "Assume n² is odd" negates the HYPOTHESIS, not the conclusion — that's a different proof technique (contrapositive). While the contrapositive approach also works, it's not proof by contradiction as typically presented in CS 570.</p>
+      <p>Why C is wrong: That proves the CONVERSE (n even → n² even), which is a different claim.</p>
+      <p>Why D is wrong: Assuming the conclusion directly (n is even) and deriving the hypothesis is backwards — that's not contradiction.</p>
+      <p><em>Exam Tip:</em> In "if P then Q" contradiction proofs: keep P as given, assume ¬Q, derive contradiction. <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 MCQ INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 43–54</span>
+  </div>
+  <p class="question-stem">Q3. Which of the following is a valid counterexample to the claim: "For all functions f, g with f(n) = O(g(n)), we have g(n) = O(f(n))"?</p>
+  <ol class="mcq-options" type="A">
+    <li>f(n) = n, g(n) = n² (since n = O(n²) but n² ≠ O(n))</li>
+    <li>f(n) = n², g(n) = n (since n² ≠ O(n), violating the hypothesis)</li>
+    <li>f(n) = n, g(n) = 2n (since n = O(2n) and 2n = O(n), so no counterexample)</li>
+    <li>f(n) = n log n, g(n) = n log n (since they're equal, so trivially O of each other)</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: A</strong></p>
+      <p>f(n) = n, g(n) = n². Verify hypothesis: n = O(n²)? Yes — n ≤ 1·n² for all n ≥ 1. ✓ Verify conclusion fails: g(n) = O(f(n)) requires n² = O(n), which would need n² ≤ c·n → n ≤ c for all large n. False for any fixed c. So g ≠ O(f). The claim is FALSE and A is a valid counterexample. <span class="pdf-ref">📄 pp. 43–54</span></p>
+      <p>Why B is wrong: B uses f(n) = n², g(n) = n. Here n² ≠ O(n), so the HYPOTHESIS is violated. A counterexample must satisfy the hypothesis — it can't violate it.</p>
+      <p>Why C is wrong: n = O(2n) AND 2n = O(n) — both O-relationships hold, so this is NOT a counterexample to the claim (the claim would be true for these f, g).</p>
+      <p>Why D is wrong: Same as C — equal functions are trivially O of each other in both directions.</p>
+      <p><em>Exam Tip:</em> A counterexample must satisfy the IF-part (hypothesis) AND fail the THEN-part (conclusion). Check both. <span class="pdf-ref">📄 pp. 43–54</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 MCQ ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 39–54</span>
+  </div>
+  <p class="question-stem">Q4. Which of the following correctly describes the relationship between f(n) = n(n-1)/2 and g(n) = n²? (This is the exact tight-bound example from Lecture 5.)</p>
+  <ol class="mcq-options" type="A">
+    <li>f = O(g) but f ≠ Ω(g), so f = o(g)</li>
+    <li>f = Θ(g), with witnesses c₁ = 1/4, c₂ = 1/2, n₀ = 2</li>
+    <li>f = Ω(g) but f ≠ O(g), so f = ω(g)</li>
+    <li>f and g are incomparable under Big-O</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — f = Θ(g)</strong></p>
+      <p>f(n) = n(n-1)/2 = n²/2 − n/2. From Lecture 5 (the "tight bounds" slide): <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Upper bound:</strong> n(n-1)/2 = n²/2 − n/2 ≤ n²/2 ≤ (1/2)·n² for n ≥ 0. So c₂ = 1/2 works.</p>
+      <p><strong>Lower bound:</strong> For n ≥ 2: n(n-1)/2 = n²/2 − n/2 ≥ n²/2 − n²/4 = n²/4 (since n ≤ n²/2 for n ≥ 2). So c₁ = 1/4 works.</p>
+      <p>Choosing n₀ = 2, c₁ = 1/4, c₂ = 1/2: the Theta definition is satisfied. f = Θ(g). ✓ <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p>Why A is wrong: f ≠ o(g) because the ratio f(n)/g(n) → 1/2 (not 0).</p>
+      <p>Why C is wrong: f = O(g) holds, so f ≠ ω(g).</p>
+      <p>Why D is wrong: asymptotic comparability always holds for eventually-positive functions via the limit ratio test.</p>
+      <p><em>Exam Tip:</em> n(n-1)/2 = Θ(n²) — this appears verbatim in the lectures and is a model tight-bound proof. Memorize c₁=1/4, c₂=1/2, n₀=2. <span class="pdf-ref">📄 pp. 39–44</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-proof">Proof Questions (3 Questions)</h3>
+
+<!-- Q5 PROOF BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 p. 1</span>
+    <span class="asgn-ref">📋 A0 Q2.2</span>
+  </div>
+  <p class="question-stem">Q5. Prove the following claim by construction: For any integer a, the product a(a+1) is even.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove by construction (direct proof).</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Proof by Construction: a(a+1) is even for any integer a</div>
+        <div class="proof-step"><strong>Step 1 [Setup].</strong> Let a be any integer. Its consecutive successor is a+1. We wish to show a(a+1) = 2m for some integer m. <span class="pdf-ref">📄 p. 1</span></div>
+        <div class="proof-step"><strong>Step 2 [Case 1: a is even].</strong> If a is even, then a = 2k for some integer k. So a(a+1) = 2k·(a+1) = 2·[k(a+1)]. Since k(a+1) is an integer, a(a+1) = 2m where m = k(a+1). ✓ <span class="pdf-ref">📄 p. 1</span></div>
+        <div class="proof-step"><strong>Step 3 [Case 2: a is odd].</strong> If a is odd, then a+1 is even (consecutive integers alternate parity), so a+1 = 2j for some integer j. Then a(a+1) = a·2j = 2·(a·j). Since a·j is an integer, a(a+1) = 2m where m = a·j. ✓ <span class="pdf-ref">📄 p. 1</span></div>
+        <div class="proof-step"><strong>Step 4 [Conclusion].</strong> In both cases a(a+1) = 2m for some integer m — the definition of an even integer. Therefore, for any integer a, a(a+1) is even. ∎ <span class="pdf-ref">📄 p. 1</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Two cases handled: a even and a odd (parity cases are exhaustive). <span class="pdf-ref">📄 p. 1</span></li>
+        <li>☐ Each case exhibits explicit m such that a(a+1) = 2m. <span class="pdf-ref">📄 p. 1</span></li>
+        <li>☐ m is verified to be an integer (not just a real number). <span class="pdf-ref">📄 p. 1</span></li>
+        <li>☐ Conclusion: "for any integer a" — universality stated. <span class="pdf-ref">📄 p. 1</span></li>
+      </ul>
+      <p><em>Alternative approach (one line):</em> Among any two consecutive integers a and a+1, exactly one is even. So their product contains a factor of 2. Therefore a(a+1) is even. This is equally valid. <span class="pdf-ref">📄 p. 1</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 PROOF INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 39–44</span>
+    <span class="asgn-ref">📋 A2 Q1.2</span>
+  </div>
+  <p class="question-stem">Q6. Prove formally: if f(n) = O(g(n)), then f(n)² = O(g(n)²). Use the formal definition of Big-O (find explicit c' and n₀' in terms of the witnesses for f = O(g)).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove by direct algebra from the Big-O definition.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Proof: f = O(g) → f² = O(g²)</div>
+        <div class="proof-step"><strong>Step 1 [Unpack hypothesis].</strong> Since f(n) = O(g(n)), there exist constants c &gt; 0 and n₀ ≥ 0 such that: f(n) ≤ c·g(n) for all n ≥ n₀. <span class="pdf-ref">📄 pp. 39–44</span></div>
+        <div class="proof-step"><strong>Step 2 [Assume positivity].</strong> We assume f and g are asymptotically positive (standard convention for Big-O): f(n) ≥ 0 and g(n) &gt; 0 for all sufficiently large n. <span class="pdf-ref">📄 pp. 39–44</span></div>
+        <div class="proof-step"><strong>Step 3 [Square both sides].</strong> Since f(n) ≤ c·g(n) and both sides are non-negative for n ≥ n₀, we may square both sides (squaring is monotone on non-negatives):<br>
+        f(n)² ≤ (c·g(n))² = c²·g(n)². <span class="pdf-ref">📄 pp. 39–44</span></div>
+        <div class="proof-step"><strong>Step 4 [Identify witnesses for f² = O(g²)].</strong> Let c' = c² and n₀' = n₀. Then: f(n)² ≤ c'·g(n)² for all n ≥ n₀'. <span class="pdf-ref">📄 pp. 39–44</span></div>
+        <div class="proof-step"><strong>Step 5 [Conclusion].</strong> By definition of Big-O with witnesses c' = c² and n₀' = n₀: f(n)² = O(g(n)²). ∎ <span class="pdf-ref">📄 pp. 39–44</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Unpacked hypothesis: stated c, n₀ from f = O(g). <span class="pdf-ref">📄 pp. 39–44</span></li>
+        <li>☐ Noted why squaring is valid (non-negativity). <span class="pdf-ref">📄 pp. 39–44</span></li>
+        <li>☐ Identified c' = c² explicitly. <span class="pdf-ref">📄 pp. 39–44</span></li>
+        <li>☐ Cited the formal definition of O to conclude. <span class="pdf-ref">📄 pp. 39–44</span></li>
+        <li>☐ n₀' stated (can be n₀ unchanged). <span class="pdf-ref">📄 pp. 39–44</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 PROOF ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 105–118</span>
+    <span class="asgn-ref">📋 A4 Q5</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 6 (Proof: Contradiction) + Topic 4 (Graph Algorithms)</div>
+  <p class="question-stem">Q7. Prove by contradiction: if every vertex v in a graph G = (V, E) with |V| = n has degree deg(v) ≥ n/2, then G is connected. (This is Assignment 4 Q5 — a graded question.)</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove by contradiction.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Proof by Contradiction: deg(v) ≥ n/2 for all v → G is connected</div>
+        <div class="proof-step"><strong>Step 1 [Assume ¬P].</strong> For contradiction, assume G is NOT connected. <span class="pdf-ref">📄 pp. 105–118</span></div>
+        <div class="proof-step"><strong>Step 2 [Identify a component].</strong> Since G is disconnected, it has at least two connected components. Let C be any connected component, and let k = |C| (number of vertices in C). Since there are at least two components and n vertices total: k &lt; n, so k ≤ n − 1. <span class="pdf-ref">📄 pp. 105–118</span></div>
+        <div class="proof-step"><strong>Step 3 [Bound the size of C].</strong> Since C is a connected component, no vertex in C has an edge to any vertex outside C. Pick any vertex v ∈ C. All neighbors of v must also be in C (otherwise there would be an edge to outside C, making C larger). So deg(v) ≤ |C| − 1 = k − 1. <span class="pdf-ref">📄 pp. 105–118</span></div>
+        <div class="proof-step"><strong>Step 4 [Bound k using the smaller component].</strong> Choose C to be the smaller of the two components (if there are exactly two). Then k ≤ n/2 (since C has at most half the vertices when there are two components). So deg(v) ≤ k − 1 ≤ n/2 − 1 &lt; n/2. <span class="pdf-ref">📄 pp. 105–118</span></div>
+        <div class="proof-step"><strong>Step 5 [Contradiction].</strong> We derived deg(v) &lt; n/2 for vertex v ∈ C. But the hypothesis says every vertex has degree ≥ n/2. This is a contradiction: deg(v) &lt; n/2 and deg(v) ≥ n/2 cannot both hold. ✗ <span class="pdf-ref">📄 pp. 105–118</span></div>
+        <div class="proof-step"><strong>Step 6 [Conclusion].</strong> Our assumption (G is disconnected) led to a contradiction. Therefore G must be connected. ∎ <span class="pdf-ref">📄 pp. 105–118</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Explicit assumption "G is not connected." <span class="pdf-ref">📄 pp. 105–118</span></li>
+        <li>☐ Identified smallest component C with k &lt; n vertices. <span class="pdf-ref">📄 pp. 105–118</span></li>
+        <li>☐ Argued no edges cross component boundary → deg(v) ≤ k−1. <span class="pdf-ref">📄 pp. 105–118</span></li>
+        <li>☐ Established k ≤ n/2 for the smaller component. <span class="pdf-ref">📄 pp. 105–118</span></li>
+        <li>☐ Named the contradiction (deg &lt; n/2 vs deg ≥ n/2). <span class="pdf-ref">📄 pp. 105–118</span></li>
+        <li>☐ Concluded G is connected. <span class="pdf-ref">📄 pp. 105–118</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-trace">Algorithm Trace / Analysis (3 Questions)</h3>
+
+<!-- Q8 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 p. 1</span>
+    <span class="asgn-ref">📋 A0 Q2.1</span>
+  </div>
+  <p class="question-stem">Q8. For the induction proof of "every binary tree of height n has at most 2ⁿ leaves," complete the following table for n = 0, 1, 2, 3. For each row: (a) draw the corresponding maximally-branching tree structure, (b) count the leaves, and (c) verify the bound 2ⁿ.</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <table class="trace-table">
+        <thead>
+          <tr><th>Height n</th><th>Maximum leaves</th><th>2ⁿ bound</th><th>Verify ≤</th><th>Tree sketch</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>1 (just root = leaf)</td><td>2⁰ = 1</td><td>1 ≤ 1 ✓</td><td>[R]</td></tr>
+          <tr class="highlight"><td>1</td><td>2 (root + 2 children)</td><td>2¹ = 2</td><td>2 ≤ 2 ✓</td><td>[R]─[L],[R]─[R]</td></tr>
+          <tr><td>2</td><td>4 (root + 2 nodes + 4 leaves)</td><td>2² = 4</td><td>4 ≤ 4 ✓</td><td>Full binary tree, 4 bottom leaves</td></tr>
+          <tr class="highlight"><td>3</td><td>8 (full tree: 2³ leaves)</td><td>2³ = 8</td><td>8 ≤ 8 ✓</td><td>Full binary tree, 8 bottom leaves</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Key observation:</strong> The maximum is achieved by the <em>complete</em> (fully-branched) binary tree where every non-leaf has exactly 2 children. For a tree of height 3 with some single-child nodes, the leaf count would be less than 8 — the bound is tight only for the complete tree. <span class="pdf-ref">📄 p. 1</span></p>
+      <pre class="diagram">
+  Height 2 — complete tree:          Height 2 — partial tree (still ≤ 4):
+
+         [R]                                   [R]
+        /   \                                 /
+       [A]  [B]                            [A]
+      / \  / \                             / \
+    [1][2][3][4]                         [1] [2]
+    4 leaves = 2² ✓                      2 leaves ≤ 4 = 2² ✓
+      </pre>
+      <div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 p. 1</span></div>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 39–54</span>
+    <span class="asgn-ref">📋 A2 Q1.1</span>
+  </div>
+  <p class="question-stem">Q9. A student claims: "f(n) = 5n log n + 20n = O(n log n) and Ω(n log n), so f(n) = Θ(n log n)." Trace through the formal verification: (a) find explicit c₁, c₂, n₀ for the O bound; (b) find explicit c₁', n₀' for the Ω bound; (c) state the Θ conclusion with all witnesses.</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>(a) Upper bound O(n log n):</strong> <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Step</th><th>Inequality</th><th>Justification</th></tr></thead>
+        <tbody>
+          <tr><td>Given</td><td>f(n) = 5n log n + 20n</td><td>Definition</td></tr>
+          <tr><td>Bound 20n</td><td>20n ≤ 20n log n for n ≥ 2</td><td>log n ≥ 1 for n ≥ 2</td></tr>
+          <tr class="highlight"><td>Combine</td><td>5n log n + 20n ≤ 5n log n + 20n log n = 25n log n</td><td>Using the bound above</td></tr>
+          <tr><td>Conclude</td><td>f(n) ≤ 25·(n log n)</td><td>c₂ = 25, n₀ = 2 → f = O(n log n) ✓</td></tr>
+        </tbody>
+      </table>
+      <p><strong>(b) Lower bound Ω(n log n):</strong> <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Step</th><th>Inequality</th><th>Justification</th></tr></thead>
+        <tbody>
+          <tr><td>Given</td><td>f(n) = 5n log n + 20n</td><td>Definition</td></tr>
+          <tr class="highlight"><td>Drop 20n</td><td>5n log n + 20n ≥ 5n log n</td><td>20n ≥ 0 always</td></tr>
+          <tr><td>Conclude</td><td>f(n) ≥ 5·(n log n)</td><td>c₁ = 5, n₀' = 1 → f = Ω(n log n) ✓</td></tr>
+        </tbody>
+      </table>
+      <p><strong>(c) Theta conclusion:</strong> Since f(n) = O(n log n) with c₂ = 25, n₀ = 2 AND f(n) = Ω(n log n) with c₁ = 5, n₀' = 1: choose n₀'' = max(2, 1) = 2. Then for all n ≥ 2: <span class="complexity-box">5·n log n ≤ f(n) ≤ 25·n log n</span>. Therefore <strong>f(n) = Θ(n log n)</strong>. ∎ <span class="pdf-ref">📄 pp. 39–44</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 TRACE ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 39–54</span>
+    <span class="asgn-ref">📋 A2 Q1.3</span>
+  </div>
+  <p class="question-stem">Q10. A student claims: "f(n) = n², g(n) = n² + n, so f = Θ(g) and therefore log f = Θ(log g) — by the rule from Lecture 5–6." Is the student's conclusion correct? Either verify the conclusion by finding witnesses for log f = Θ(log g), OR disprove it by showing a flaw in the reasoning.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>Step 1: Verify f = Θ(g).</strong> <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p>f(n) = n², g(n) = n²+n. For n ≥ 1: n² ≤ n²+n ≤ n²+n² = 2n². So c₁=1, c₂=2, n₀=1: f = Θ(g). ✓</p>
+      <p><strong>Step 2: Compute log f and log g.</strong> <span class="pdf-ref">📄 pp. 43–54</span></p>
+      <p>log f(n) = log(n²) = 2 log n. log g(n) = log(n²+n) = log(n(n+1)) = log n + log(n+1).</p>
+      <p><strong>Step 3: Check if log f = Θ(log g).</strong> Examine the ratio: (log f(n))/(log g(n)) = 2 log n / (log n + log(n+1)).</p>
+      <p>As n → ∞: log(n+1)/log(n) → 1 (both diverge at the same rate). So log n + log(n+1) ≈ 2 log n. Ratio → 2 log n / (2 log n) = 1. <span class="pdf-ref">📄 pp. 43–54</span></p>
+      <p>Since lim (log f)/(log g) = 1 ∈ (0, ∞): log f = Θ(log g). ✓</p>
+      <p><strong>Conclusion:</strong> The student's conclusion IS correct for this specific pair. The counterexample to the general rule (from A2 Q1.3) used functions where one approached a positive constant — here both log f and log g diverge to infinity at the same rate. The key distinction: the general claim "f=Θ(g) → log f=Θ(log g)" is FALSE (as shown by the f=2 counterexample), but it happens to hold for THIS specific pair. The student cannot invoke the "rule" — they got lucky with this pair. <span class="pdf-ref">📄 pp. 43–54</span></p>
+      <p><strong>Grading note:</strong> Full credit requires both the verification that log f = Θ(log g) for THIS pair AND the clarification that the general rule is not valid (so the student's reasoning is flawed even though the specific conclusion is true). <span class="pdf-ref">📄 pp. 43–54</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-pseudo">Pseudocode / Design (3 Questions)</h3>
+
+<!-- Q11 PSEUDO BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 39–44</span>
+  </div>
+  <p class="question-stem">Q11. Write pseudocode for an algorithm that, given two positive functions f and g (as arrays of values for n = 1 to N), computes the ratio f(n)/g(n) for each n and determines whether the ratio is converging to a constant (suggesting f = Θ(g)), to 0 (f = o(g)), or to infinity (g = o(f)). Analyze its time and space complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <pre class="pseudocode">
+function classifyAsymptoticRelation(f_values, g_values, N):
+    # f_values[i] = f(i), g_values[i] = g(i), for i = 1 to N
+    # Determine the asymptotic relationship by looking at the limit ratio
+
+    ratios = array of size N
+
+    # Step 1: Compute f(n)/g(n) for each n
+    for i = 1 to N:
+        if g_values[i] == 0:
+            ratios[i] = infinity   # avoid division by zero
+        else:
+            ratios[i] = f_values[i] / g_values[i]
+
+    # Step 2: Look at the last few values as a proxy for the limit
+    WINDOW = min(10, N)   # use last 10 values
+    sum_last = 0
+    for i = (N - WINDOW + 1) to N:
+        sum_last = sum_last + ratios[i]
+    avg_last = sum_last / WINDOW
+
+    # Step 3: Classify based on average ratio
+    EPSILON = 0.01   # tolerance for "converging to constant"
+    if avg_last &lt; EPSILON:
+        return "f = o(g): ratio → 0, g grows faster"
+    elif avg_last &gt; 1 / EPSILON:   # very large
+        return "g = o(f): ratio → ∞, f grows faster"
+    else:
+        return "f = Θ(g): ratio → constant ≈ " + avg_last
+</pre>
+      <div class="diagram-source">SOURCE: conceptual implementation, <span class="pdf-ref">📄 pp. 39–44</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>For each n from 1 to N, compute the ratio f(n)/g(n). This is the empirical analog of the limit test.</li>
+        <li>Examine the last WINDOW = 10 ratios as an approximation of the limit behavior.</li>
+        <li>If the average ratio is nearly 0 → f is growing slower than g (f = o(g)). If very large → f is growing faster (g = o(f)). If a moderate constant → f = Θ(g).</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Step 1 (compute ratios): O(N). Step 2 (scan last WINDOW values): O(WINDOW) = O(1) since WINDOW is bounded by 10. Total: <span class="complexity-box">O(N)</span>. <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Space:</strong> ratios array of size N: O(N). Other variables: O(1). Total: <span class="complexity-box">O(N)</span>. <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Caveat:</strong> This is an empirical heuristic — it can give wrong answers for pathological functions. A formal proof still requires the analytic limit or the c, n₀ witnesses. <span class="pdf-ref">📄 pp. 39–44</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 PSEUDO INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 39–54</span>
+    <span class="asgn-ref">📋 A4 Q7</span>
+  </div>
+  <p class="question-stem">Q12. The "tight bound proof" for n(n-1)/2 = Θ(n²) requires finding constants c₁, c₂, n₀. Write pseudocode for an algorithm that, given a function f(n) = a·n² + b·n + c (provided as coefficients a, b, c), automatically finds valid c₁, c₂, and n₀ for the claim f(n) = Θ(n²). Explain your approach and analyze complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <pre class="pseudocode">
+function findThetaWitnesses(a, b, c):
+    # Given f(n) = a*n^2 + b*n + c, find c1, c2, n0 such that:
+    # c1 * n^2 &lt;= f(n) &lt;= c2 * n^2 for all n &gt;= n0
+    # Assumes a &gt; 0 (leading coefficient positive, f = Θ(n^2))
+
+    # Step 1: Upper bound c2
+    # For large n: |b*n| &lt;= |b|*n^2 and |c| &lt;= |c|*n^2 for n &gt;= 1
+    # So f(n) &lt;= a*n^2 + |b|*n^2 + |c|*n^2 = (a + |b| + |c|) * n^2
+    c2 = a + abs(b) + abs(c)
+    # This holds for n &gt;= 1 since n &lt;= n^2 and 1 &lt;= n^2
+
+    # Step 2: Lower bound c1
+    # f(n) = a*n^2 + b*n + c &gt;= a*n^2 - |b|*n - |c|
+    # We want a*n^2 - |b|*n - |c| &gt;= c1 * n^2
+    # i.e., a - |b|/n - |c|/n^2 &gt;= c1
+    # For n &gt;= max(2|b|/a, 2*sqrt(|c|/a)): each term is at most a/4
+    # So c1 = a/2 works for sufficiently large n0
+
+    c1 = a / 2.0
+
+    # Step 3: Find n0 = smallest n where both bounds hold
+    n0 = 1
+    while n0 &lt;= 10000:   # search up to 10000
+        fn = a * n0 * n0 + b * n0 + c
+        g = n0 * n0       # g(n) = n^2
+        if fn &gt;= c1 * g and fn &lt;= c2 * g:
+            # Check if bounds hold for next 100 values (confidence check)
+            valid = True
+            for n = n0 + 1 to n0 + 100:
+                fn_check = a*n*n + b*n + c
+                gn_check = n*n
+                if fn_check &lt; c1 * gn_check or fn_check &gt; c2 * gn_check:
+                    valid = False
+                    break
+            if valid:
+                return (c1, c2, n0)
+        n0 = n0 + 1
+
+    return "Could not find witnesses (function may not be Theta(n^2))"
+</pre>
+      <div class="diagram-source">SOURCE: conceptual implementation, <span class="pdf-ref">📄 pp. 39–44</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Upper bound c₂: every lower-degree term (b·n and c) is dominated by n² for large n. We use c₂ = a + |b| + |c| as a safe overestimate.</li>
+        <li>Lower bound c₁: use half the leading coefficient. For large enough n, the lower-order terms become negligible and f(n) ≈ a·n².</li>
+        <li>Search for n₀: scan increasing n until both bounds hold stably for 100 consecutive values.</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Steps 1–2 are O(1). Step 3 scans up to 10,000 values, and for each candidate n₀, runs 100 verification steps: O(10,000 × 100) = O(1,000,000) = <span class="complexity-box">O(1)</span> (constant, since the bound is fixed regardless of input). <span class="pdf-ref">📄 pp. 39–44</span></p>
+      <p><strong>Space:</strong> O(1) — only a fixed number of scalar variables. <span class="pdf-ref">📄 pp. 39–44</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 PSEUDO ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 1–54</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 6 (Proof by Induction) + Topic 7 (Algorithm Design: Divide and Conquer)</div>
+  <p class="question-stem">Q13. Consider the recursive algorithm for computing the sum of an array: Sum(A, n) returns A[0] if n=1, else returns A[n-1] + Sum(A, n-1). (a) Write this pseudocode cleanly. (b) Prove by induction that Sum(A, n) correctly computes A[0]+A[1]+...+A[n-1] for all n ≥ 1. (c) State and solve its recurrence relation T(n) for time complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>(a) Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function Sum(A, n):
+    # Returns sum of A[0] + A[1] + ... + A[n-1]
+    # Base case: single element
+    if n == 1:
+        return A[0]
+    # Recursive case: last element + sum of first n-1 elements
+    else:
+        return A[n-1] + Sum(A, n-1)
+</pre>
+      <div class="diagram-source">SOURCE: conceptual, <span class="pdf-ref">📄 pp. 55–62</span></div>
+      <p><strong>(b) Correctness Proof by Induction:</strong> <span class="pdf-ref">📄 p. 1</span></p>
+      <div class="proof-block">
+        <div class="proof-label">Claim P(n): Sum(A, n) = A[0] + A[1] + ... + A[n-1] for all n ≥ 1.</div>
+        <div class="proof-step"><strong>Base Case (n=1):</strong> Sum(A, 1) returns A[0]. The sum A[0] is exactly A[0]+...+A[0] (one term). P(1) holds. ✓ <span class="pdf-ref">📄 p. 1</span></div>
+        <div class="proof-step"><strong>Inductive Hypothesis:</strong> Assume P(k): Sum(A, k) = A[0]+A[1]+...+A[k-1] for some k ≥ 1. <span class="pdf-ref">📄 p. 1</span></div>
+        <div class="proof-step"><strong>Inductive Step (n = k+1):</strong>
+          Sum(A, k+1) = A[k] + Sum(A, k) [by the algorithm's recursive case]<br>
+          = A[k] + (A[0]+A[1]+...+A[k-1]) [by the IH applied to Sum(A,k)]<br>
+          = A[0]+A[1]+...+A[k-1]+A[k]<br>
+          = A[0]+...+A[(k+1)-1]. ✓ This is P(k+1). <span class="pdf-ref">📄 p. 1</span>
+        </div>
+        <div class="proof-step"><strong>Conclusion:</strong> By induction, Sum(A, n) correctly computes the sum for all n ≥ 1. ∎ <span class="pdf-ref">📄 p. 1</span></div>
+      </div>
+      <p><strong>(c) Recurrence and Time Complexity:</strong> <span class="pdf-ref">📄 pp. 79–90</span></p>
+      <p>The recurrence: T(1) = 1 (base case does O(1) work). T(n) = T(n-1) + 1 (recursive call on n-1 plus O(1) addition).</p>
+      <p>Solve by unrolling: T(n) = T(n-1)+1 = T(n-2)+2 = ... = T(1)+(n-1) = 1+(n-1) = n.</p>
+      <p>Therefore: <span class="complexity-box">T(n) = O(n)</span> time, O(n) stack space due to n-deep recursion. <span class="pdf-ref">📄 pp. 79–90</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     §5  CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Cheat Sheet</h2>
+<div class="pages-coverage">📘 SOURCE: p. 1 (Lec 1), A0 pp. 1–11, pp. 39–54 (Lecs 5–6)</div>
+
+<div class="cheat-sheet">
+
+<h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+<p class="oneliner">
+  Mathematical proof techniques — induction, construction, contradiction, and counterexample — are the tools that guarantee an algorithm is correct for ALL inputs, not just the ones you tested;
+  mastering these four techniques (with their exact structural templates) covers every proof question on the CS 570 final.
+  <span class="pdf-ref">📄 pp. 1–54</span>
+</p>
+
+<h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+<ol>
+  <li><strong>Induction template (5 parts): B-I-IS-C</strong> — State P(n); Base Case; Inductive Hypothesis; Inductive Step (USE the IH explicitly); Conclusion. All 5 are graded. <span class="pdf-ref">📄 p. 1</span></li>
+  <li><strong>Contradiction recipe: ANDC</strong> — Assume ¬P; Name what it says (write n=2k+1 etc.); Derive consequences; Contradict a known fact. Classic example: (2k+1)² = 4k²+4k+1 = ODD. <span class="pdf-ref">📄 p. 1</span></li>
+  <li><strong>Asymptotic proofs need c, n₀, and the inequality</strong> — For O: f(n) ≤ c·g(n) for all n ≥ n₀. For Ω: f(n) ≥ c·g(n). For Θ: both. State all three. <span class="pdf-ref">📄 pp. 39–44</span></li>
+</ol>
+
+<h4>KEY FORMULAS / STRUCTURES:</h4>
+<table class="data">
+  <thead><tr><th>Technique</th><th>Template / Formula</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Induction — binary tree</strong></td><td>Height n → ≤ 2ⁿ leaves. Base: n=0 → 1 leaf = 2⁰ ✓. IH: height k → ≤ 2^k. IS: two subtrees each ≤ 2^k → total ≤ 2^(k+1).</td><td><span class="pdf-ref">📄 p. 1</span></td></tr>
+    <tr><td><strong>Construction — consecutive sum</strong></td><td>b = a+1 → a+b = 2a+1 = odd (form 2k+1 with k=a).</td><td><span class="pdf-ref">📄 p. 1</span></td></tr>
+    <tr><td><strong>Contradiction — n² even → n even</strong></td><td>Assume n odd → n=2k+1 → n²=4k²+4k+1 (odd) → contradicts n² even. ✗</td><td><span class="pdf-ref">📄 p. 1</span></td></tr>
+    <tr><td><strong>Counterexample — log f ≠ Θ(log g)</strong></td><td>f(n)=2, g(n)=1+1/n: f=Θ(g) ✓ but log f=1 (const) while log g→0 → NOT Θ. ✗</td><td><span class="pdf-ref">📄 pp. 43–54</span></td></tr>
+    <tr><td><strong>Tight bound — n(n-1)/2 = Θ(n²)</strong></td><td>c₁=1/4, c₂=1/2, n₀=2. Upper: n²/2−n/2 ≤ n²/2. Lower: ≥ n²/4 for n≥2.</td><td><span class="pdf-ref">📄 pp. 39–44</span></td></tr>
+    <tr><td><strong>TRUE: f=O(g) ∧ f=Ω(h) → g=Ω(h)</strong></td><td>Chain: c₂·h ≤ f ≤ c₁·g → g ≥ (c₂/c₁)·h. Identify c_new = c₂/c₁.</td><td><span class="pdf-ref">📄 pp. 43–54</span></td></tr>
+    <tr><td><strong>TRUE: f=O(g) → f²=O(g²)</strong></td><td>f≤c·g → f²≤c²·g². New constant c'=c², n₀ unchanged.</td><td><span class="pdf-ref">📄 pp. 43–54</span></td></tr>
+    <tr><td><strong>Graph connectivity</strong></td><td>deg(v)≥n/2 ∀v → G connected. Proof: contradiction via smallest component of size k&lt;n/2 → deg≤k-1&lt;n/2. ✗</td><td><span class="pdf-ref">📄 pp. 105–118</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE CANONICAL ALGORITHM (Proof-by-Induction Structure):</h4>
+<pre class="pseudocode">
+INDUCTION PROOF SKELETON:
+  Claim: P(n) holds for all n ≥ n₀.
+
+  [Step 1 — State P(n)]
+  P(n): "[Exact claim with n in it]."
+
+  [Step 2 — Base Case]
+  When n = n₀: [Compute directly]. P(n₀) holds. ✓
+
+  [Step 3 — Inductive Hypothesis]
+  Assume P(k) is true for some arbitrary k ≥ n₀.
+  That is: "[Restate claim with k]."
+
+  [Step 4 — Inductive Step]
+  We want to show P(k+1): "[Restate claim with k+1]."
+    [Use IH]: By the inductive hypothesis, [quote what IH gives you].
+    [Derive]: Therefore [conclusion for k+1].
+  P(k+1) holds. ✓
+
+  [Step 5 — Conclusion]
+  By mathematical induction, P(n) holds for all n ≥ n₀. ∎
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 1</span></div>
+
+<h4>ASSIGNMENTS THAT TEST THIS TOPIC (QUICK REFERENCE):</h4>
+<table class="data">
+  <thead><tr><th>Assignment</th><th>Question</th><th>What It Tests</th><th>Graded?</th></tr></thead>
+  <tbody>
+    <tr><td><span class="asgn-ref">📋 A0</span></td><td>Q2.1</td><td>Proof by induction — binary tree leaves ≤ 2^n</td><td>No (A0)</td></tr>
+    <tr><td><span class="asgn-ref">📋 A0</span></td><td>Q2.2</td><td>Proof by construction — consecutive integer sum is odd</td><td>No (A0)</td></tr>
+    <tr><td><span class="asgn-ref">📋 A0</span></td><td>Q2.3</td><td>Proof by contradiction — n² even → n even</td><td>No (A0)</td></tr>
+    <tr><td><span class="asgn-ref">📋 A2</span></td><td>Q1.1</td><td>TRUE asymptotic proof — transitivity chain with O and Ω</td><td>No (A2)</td></tr>
+    <tr><td><span class="asgn-ref">📋 A2</span></td><td>Q1.2</td><td>TRUE asymptotic proof — squaring O relationship</td><td>No (A2)</td></tr>
+    <tr><td><span class="asgn-ref">📋 A2</span></td><td>Q1.3</td><td>FALSE claim — counterexample for log f ≠ Θ(log g)</td><td>No (A2)</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q5</td><td>Proof by contradiction — graph connectivity (degree ≥ n/2)</td><td>YES ⭐</td></tr>
+  </tbody>
+</table>
+
+<h4>THE #1 MISTAKE ON EXAM QUESTIONS ABOUT THIS TOPIC:</h4>
+<p>
+  In induction proofs: forgetting to <em>explicitly cite the inductive hypothesis</em> in the inductive step. Writing "by induction" or "by assumption" is too vague. You must write: "By the inductive hypothesis, [quote exactly what the IH says for k]." The grader needs to see the IH activated and applied — not implied. <span class="pdf-ref">📄 p. 1</span>
+</p>
+<p>
+  In contradiction proofs: stopping at "n² is odd" without connecting it back to the stated hypothesis ("n² is even"). Always name the contradiction explicitly: "This contradicts our assumption that n² is even." <span class="pdf-ref">📄 p. 1</span>
+</p>
+
+<h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+<p class="remember">
+  For induction: Base → IH (assume P(k)) → use IH to prove P(k+1) → done.<br>
+  For contradiction: Assume ¬P → derive absurdity → P is true.<br>
+  For counterexample: Verify the IF-part holds, then show the THEN-part fails. One pair suffices.
+  <span class="pdf-ref">📄 p. 1</span> / <span class="pdf-ref">📄 pp. 43–54</span>
+</p>
+
+<h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS IN THE LECTURE PDF:</h4>
+<table class="data">
+  <thead><tr><th>If you want to review...</th><th>Go to PDF page(s)...</th><th>Also in...</th></tr></thead>
+  <tbody>
+    <tr><td>Proof prerequisites mentioned by instructor</td><td>p. 1 (Lecture 1 slides)</td><td>[KT] Appendix A</td></tr>
+    <tr><td>Binary tree induction proof (A0 Q2.1)</td><td>A0 p. 7 / all_assignment_merged_ocr.pdf</td><td>[CLRS] §12.1</td></tr>
+    <tr><td>Consecutive integers construction (A0 Q2.2)</td><td>A0 p. 7</td><td>[KT] Appendix A</td></tr>
+    <tr><td>n² even → n even contradiction (A0 Q2.3)</td><td>A0 p. 7 / Midterm</td><td>[KT] Appendix A</td></tr>
+    <tr><td>Big-O formal definition</td><td>pp. 39–41</td><td>[KT] Ch.2 §2.1</td></tr>
+    <tr><td>Tight bound n(n-1)/2 = Θ(n²)</td><td>p. 39</td><td>[KT] Ch.2 §2.1</td></tr>
+    <tr><td>Exercises 1–3 (asymptotic T/F claims)</td><td>pp. 39–54</td><td>[KT] Ch.2</td></tr>
+    <tr><td>TRUE claim: f=O(g) ∧ f=Ω(h) → g=Ω(h)</td><td>pp. 43–54 / A2 Q1.1</td><td>[KT] Ch.2</td></tr>
+    <tr><td>TRUE claim: f=O(g) → f²=O(g²)</td><td>pp. 43–54 / A2 Q1.2</td><td>[KT] Ch.2</td></tr>
+    <tr><td>FALSE claim: counterexample f=2, g=1+1/n</td><td>pp. 43–54 / A2 Q1.3</td><td>[KT] Ch.2</td></tr>
+    <tr><td>Graph connectivity proof (degree ≥ n/2)</td><td>pp. 105–118 / A4 Q5</td><td>[KT] Ch.3</td></tr>
+    <tr><td>Limit comparison method for asymptotic order</td><td>pp. 39–54</td><td>[KT] Ch.2 §2.2</td></tr>
+    <tr><td>Selection sort recurrence t(n) = n + t(n-1)</td><td>pp. 79–90</td><td>[KT] Ch.2</td></tr>
+  </tbody>
+</table>
+
+<h4>15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM):</h4>
+<ol>
+  <li>Write the 5-part induction template from memory: P(n), Base, IH, IS (with "by IH"), Conclusion. Check you named the IH explicitly. <span class="pdf-ref">📄 p. 1</span></li>
+  <li>Re-derive the binary tree proof from memory in 3 minutes. Key move: "two subtrees of height ≤ k → each ≤ 2^k leaves → total ≤ 2^(k+1)." <span class="pdf-ref">📄 p. 1</span></li>
+  <li>Re-derive the contradiction proof for n²=even→n=even: assume n odd, write n=2k+1, compute (2k+1)²=4k²+4k+1=ODD, state contradiction. <span class="pdf-ref">📄 p. 1</span></li>
+  <li>Write the counterexample f=2, g=1+1/n from memory. Verify f=Θ(g): c₁=1, c₂=2, n₀=1. Verify log failure: log g→0 while log f=1. <span class="pdf-ref">📄 pp. 43–54</span></li>
+  <li>Recite the formal O definition: "∃c&gt;0, n₀≥0: f(n) ≤ c·g(n) ∀n≥n₀." Name c, n₀ explicitly for any O proof. <span class="pdf-ref">📄 pp. 39–44</span></li>
+  <li>State the tight bound: n(n-1)/2 = Θ(n²) with witnesses c₁=1/4, c₂=1/2, n₀=2. Know WHY each choice works. <span class="pdf-ref">📄 pp. 39–44</span></li>
+  <li>State the graph connectivity proof skeleton: assume disconnected → smallest component k&lt;n/2 → deg≤k-1&lt;n/2 → contradiction. <span class="pdf-ref">📄 pp. 105–118</span></li>
+  <li>Name the four mnemonics: "B-I-IS-C (induction), ANDC (contradiction), EHF (counterexample), c-n₀-inequality (Big-O)." <span class="pdf-ref">📄 pp. 1–54</span></li>
+</ol>
+
+</div>
+
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This deep-dive covers <strong>only Topic 6 — Mathematical Proof Techniques</strong> as listed in the CS 570 final exam appendix.
+  Companion guides cover the other topics: NP-Completeness (Topic 1), Asymptotic Analysis (Topic 2),
+  Recurrences &amp; Master Theorem (Topic 3), Graph Algorithms BFS/DFS (Topic 4), Shortest Paths (Topic 5),
+  Algorithm Design Patterns (Topic 7), Divide &amp; Conquer (Topic 8), and Dynamic Programming &amp; DAGs (Topic 9).
+  Read this deep-dive first, then use the condensed
+  <span class="mono">study_guide_topic6_proof_techniques.html</span> guide for final exam review.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs570-dd-topic6';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>

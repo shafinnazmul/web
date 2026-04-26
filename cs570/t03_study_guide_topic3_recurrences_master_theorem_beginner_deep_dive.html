@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 Final Exam · Topic 3 (Beginner Deep-Dive): Recurrences &amp; the Master Theorem Unpacked</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE — DARK MODE (default)
+     Topic 3 deep-dive: Leaf-green / Forest accent
+     ================================================================ */
+  :root {
+    --bg: #0d1109;
+    --bg-elev: #131a0e;
+    --bg-elev2: #182012;
+    --surface: #1d2816;
+    --text: #e4ead8;
+    --text-dim: #a0ad88;
+    --text-faint: #6a7a55;
+    --border: #2a3820;
+
+    --accent: #2979ff;
+    --accent-soft: #0d2a1a;
+    --accent-text: #69c97a;
+
+    --topic-accent: #43a047;
+    --topic-accent-soft: rgba(67,160,71,0.12);
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b3a1e;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d1f3a;
+    --blue-text: #90caf9;
+    --purple-soft: #2a1040;
+    --purple-text: #ce93d8;
+    --code-bg: #080e06;
+    --code-text: #a8d8a8;
+  }
+
+  /* ================================================================
+     LIGHT MODE
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f4f8f0;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eaf1e4;
+    --surface: #ddecd5;
+    --text: #1a2212;
+    --text-dim: #3a5228;
+    --text-faint: #7a9a68;
+    --border: #c5d8b8;
+
+    --accent: #2e7d32;
+    --accent-soft: #e8f5e9;
+    --accent-text: #1b5e20;
+
+    --topic-accent: #2e7d32;
+    --topic-accent-soft: rgba(46,125,50,0.08);
+
+    --red: #c62828;
+    --orange: #e65100;
+    --yellow: #f57f17;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+    --code-bg: #eef4e8;
+    --code-text: #1b5e20;
+  }
+
+  [data-theme="light"] strong { color: #0d1a08; }
+  [data-theme="light"] h1 { color: #0d1a08; }
+  [data-theme="light"] h3 { color: #0d1a08; }
+  [data-theme="light"] .question-stem { color: #0d1a08; }
+  [data-theme="light"] pre.diagram { color: #1a2212; background: #eaf1e4; border-color: var(--topic-accent); }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(46,125,50,0.06), rgba(41,121,255,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(46,125,50,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(198,40,40,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(46,125,50,0.06), rgba(41,121,255,0.04)); }
+  [data-theme="light"] .step { background: #eaf1e4; }
+  [data-theme="light"] .misconception { background: #eaf1e4; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eaf1e4; }
+
+  /* ================================================================
+     THEME TOGGLE
+     ================================================================ */
+  .top-bar {
+    position: fixed; top: 0; left: 240px; right: 0; height: 44px;
+    background: var(--bg-elev); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 0 28px; gap: 10px; z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em; color: var(--text-faint); font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px; margin-right: auto; user-select: none;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label { font-size: 0.75em; color: var(--text-faint); font-family: 'Consolas', monospace; letter-spacing: 0.5px; user-select: none; flex-shrink: 0; }
+  .theme-pill {
+    display: flex; align-items: center; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px; padding: 3px; gap: 2px; cursor: pointer; flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 22px; border-radius: 16px; font-size: 12px;
+    transition: background 0.2s, color 0.2s; color: var(--text-faint); user-select: none;
+  }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px; line-height: 1.7; padding-left: 240px; padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  code, pre, .mono { font-family: 'Consolas', 'Courier New', 'Menlo', monospace; }
+  h1, h2, h3, h4 { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 600; letter-spacing: 0.2px; }
+  h1 { font-size: 2.1em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.55em; color: var(--topic-accent); margin: 36px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.2em; color: #fff; margin: 26px 0 10px 0; }
+  h4 { color: var(--text-dim); margin: 18px 0 8px 0; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.82em; }
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     SIDEBAR
+     ================================================================ */
+  nav.sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+    background: var(--bg-elev); border-right: 1px solid var(--border);
+    padding: 22px 18px; overflow-y: auto; font-size: 0.88em; z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title { font-weight: 700; color: var(--topic-accent); text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.74em; margin-bottom: 14px; }
+  nav.sidebar a {
+    display: block; padding: 6px 10px; margin: 2px 0; border-radius: 4px;
+    color: var(--text-dim); border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover { background: var(--bg-elev2); color: var(--text); border-left-color: var(--topic-accent); text-decoration: none; }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; }
+    nav.sidebar { top: 44px; width: 100%; height: 52px; bottom: auto; display: flex; overflow-x: auto; overflow-y: hidden; padding: 8px 12px; gap: 6px; align-items: center; }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  main { max-width: 1100px; padding: 40px 48px 80px 48px; }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER
+     ================================================================ */
+  .doc-header { border-left: 4px solid var(--topic-accent); padding: 4px 0 4px 22px; margin-bottom: 32px; }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.9em; margin-top: 6px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(67,160,71,0.08), rgba(41,121,255,0.06));
+    border: 1px solid var(--border); border-left: 3px solid var(--topic-accent);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0; font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label { color: var(--topic-accent); text-transform: uppercase; letter-spacing: 1px; font-size: 0.78em; }
+
+  .subtopic-banner {
+    background: var(--bg-elev); border-top: 3px solid var(--topic-accent);
+    border-radius: 4px; padding: 14px 22px; margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block; background: var(--topic-accent); color: #fff; font-weight: 700;
+    font-family: 'Consolas', monospace; padding: 2px 10px; border-radius: 4px;
+    margin-right: 10px; font-size: 0.88em; letter-spacing: 1px;
+  }
+  .subtopic-banner .title { font-size: 1.12em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages { display: block; margin-top: 4px; font-family: 'Consolas', monospace; font-size: 0.82em; color: var(--text-faint); }
+
+  /* ================================================================
+     BADGES
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block; background: var(--accent-soft); color: var(--accent-text);
+    border: 1px solid var(--topic-accent); border-radius: 4px; padding: 1px 7px;
+    font-size: 0.78em; font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap; margin: 0 3px; cursor: default; vertical-align: baseline;
+  }
+  .asgn-ref {
+    display: inline-block; background: var(--purple-soft); color: var(--purple-text);
+    border-radius: 4px; padding: 1px 7px; font-size: 0.78em; font-family: 'Consolas', monospace;
+    white-space: nowrap; margin: 0 3px; vertical-align: baseline;
+  }
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .exam-star { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS
+     ================================================================ */
+  section.topic { border-left: 3px solid var(--topic-accent); padding-left: 22px; margin-bottom: 40px; }
+  div.section-block {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px 26px; margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .pages-coverage {
+    display: inline-block; background: var(--bg-elev2); border: 1px dashed var(--topic-accent);
+    color: var(--accent-text); padding: 6px 14px; border-radius: 6px;
+    font-family: 'Consolas', monospace; font-size: 0.82em; margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index { width: 100%; border-collapse: collapse; margin: 12px 0 18px 0; font-size: 0.92em; }
+  table.page-index th { background: var(--accent-soft); color: var(--accent-text); text-align: left; padding: 10px 14px; border: 1px solid var(--border); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.8px; }
+  table.page-index td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child { font-family: 'Consolas', monospace; color: var(--accent-text); white-space: nowrap; }
+
+  table.data { width: 100%; border-collapse: collapse; margin: 12px 0 18px 0; font-size: 0.92em; }
+  table.data th { background: var(--accent-soft); color: var(--accent-text); text-align: left; padding: 10px 12px; border: 1px solid var(--border); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.6px; }
+  table.data td { padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  table.trace-table { border-collapse: collapse; font-family: 'Consolas', monospace; font-size: 0.82rem; width: 100%; margin: 12px 0; }
+  table.trace-table th { background: var(--accent-soft); color: var(--accent-text); padding: 8px 10px; border: 1px solid var(--border); }
+  table.trace-table td { border: 1px solid var(--border); padding: 7px 10px; vertical-align: top; }
+  table.trace-table tr.highlight { background: var(--bg-elev2); }
+
+  /* ================================================================
+     CODE BLOCKS
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2); border: 1px solid var(--topic-accent);
+    border-radius: 6px; padding: 16px 20px; overflow-x: auto;
+    font-size: 0.86em; line-height: 1.5; color: #c8ddb8; margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  pre.pseudocode {
+    background: var(--code-bg); color: var(--code-text);
+    font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem;
+    line-height: 1.6; padding: 16px 20px; border-radius: 6px;
+    border-left: 3px solid var(--topic-accent); overflow-x: auto; white-space: pre; margin: 14px 0;
+  }
+  .diagram-source { font-size: 0.85em; color: var(--text-faint); margin: -6px 0 16px 0; font-style: italic; }
+
+  /* ================================================================
+     PROOF / STEP BLOCKS
+     ================================================================ */
+  .proof-block {
+    background: var(--bg-elev); border-left: 4px solid var(--gold);
+    padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .proof-block .proof-step { margin: 8px 0; padding-left: 16px; }
+  .proof-block .proof-label { color: var(--gold); font-weight: bold; font-size: 0.9em; }
+
+  .step {
+    background: var(--bg-elev2); border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px; margin: 10px 0; border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head { color: var(--topic-accent); font-weight: 600; font-size: 0.95em; }
+  .step .step-detail { margin-top: 6px; font-size: 0.93em; color: var(--text-dim); }
+
+  .misconception {
+    background: var(--bg-elev2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 16px; margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+
+  .complexity-box {
+    background: var(--accent-soft); color: var(--accent-text);
+    border: 1px solid var(--topic-accent); border-radius: 6px;
+    padding: 10px 14px; font-family: monospace; display: inline-block; margin: 4px 0;
+  }
+
+  /* ================================================================
+     QUESTION BLOCKS
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px 20px; margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .q-format { background: var(--surface); color: var(--text-dim); padding: 2px 9px; border-radius: 4px; font-size: 0.78em; font-family: 'Consolas', monospace; font-weight: 600; letter-spacing: 0.8px; }
+  .question-stem { font-weight: 500; font-size: 1.02em; margin: 6px 0 10px 0; color: #fff; }
+  ol.mcq-options { margin: 4px 0 6px 0; padding-left: 26px; }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block { margin-top: 10px; border-left: 3px solid var(--green); padding-left: 14px; }
+  details.answer-block summary { cursor: pointer; color: var(--green); font-weight: bold; padding: 4px 0; list-style: none; user-select: none; }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-warmup { background: #1a2a1a; color: #a5d6a7; border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; border: 1px solid #2a4a2a; }
+
+  /* ================================================================
+     CHEAT SHEET
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(67,160,71,0.05));
+    border: 1px solid var(--gold); border-radius: 8px; padding: 22px 26px; margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 { color: var(--gold); font-size: 0.82em; margin-top: 14px; }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* ================================================================
+     CALLOUTS
+     ================================================================ */
+  .callout {
+    border-left: 3px solid var(--orange); background: rgba(255,152,0,0.05);
+    padding: 10px 16px; margin: 14px 0; border-radius: 0 6px 6px 0; font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote { border-left-color: var(--topic-accent); background: rgba(67,160,71,0.06); }
+  .callout.warning { border-left-color: var(--red); background: rgba(255,82,82,0.05); }
+  .callout strong.lbl { display: block; color: var(--orange); text-transform: uppercase; letter-spacing: 1px; font-size: 0.74em; margin-bottom: 4px; }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  .challenge-banner { background: rgba(255,215,0,0.07); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 12px; font-size: 0.82em; color: var(--gold); font-family: 'Consolas', monospace; display: inline-block; margin-bottom: 8px; }
+
+  /* MT case boxes */
+  .mt-case {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 20px; margin: 14px 0;
+  }
+  .mt-case.case1 { border-left: 4px solid #ef5350; }
+  .mt-case.case2 { border-left: 4px solid var(--topic-accent); }
+  .mt-case.case3 { border-left: 4px solid #29b6f6; }
+  .mt-case.nonapply { border-left: 4px solid var(--gold); }
+  .mt-case .case-label { font-family: 'Consolas', monospace; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .mt-case.case1 .case-label { color: #ef5350; }
+  .mt-case.case2 .case-label { color: var(--topic-accent); }
+  .mt-case.case3 .case-label { color: #29b6f6; }
+  .mt-case.nonapply .case-label { color: var(--gold); }
+  .mt-formula { font-family: 'Consolas', monospace; font-size: 1.0em; color: var(--text); background: var(--bg-elev2); padding: 8px 14px; border-radius: 4px; display: block; margin: 8px 0; }
+
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    h1, h2, h3, h4 { color: #000; }
+    h2 { border-bottom-color: #000; }
+    pre.diagram, pre.pseudocode { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-title">🌲 Topic 3 ⓓ</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#warmup">🧗 Warm-up Glossary</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 What &amp; Why (Plain English)</a>
+  <a href="#section-1-1" class="sub">→ 1.1 The pizza-chef analogy</a>
+  <a href="#section-1-2" class="sub">→ 1.2 Three MT cases as rules</a>
+  <a href="#section-1-3" class="sub">→ 1.3 Recursion tree as staircase</a>
+  <a href="#section-1-4" class="sub">→ 1.4 Technical definition</a>
+  <a href="#section-1-5" class="sub">→ 1.5 Key Terms Table</a>
+  <a href="#section-2">§2 How — Worked Examples</a>
+  <a href="#section-2a" class="sub">→ 2a · Case 1 (leaves dominate)</a>
+  <a href="#section-2b" class="sub">→ 2b · Case 2 (balanced levels)</a>
+  <a href="#section-2c" class="sub">→ 2c · Case 3 (root dominates)</a>
+  <a href="#section-2d" class="sub">→ 2d · Non-applicable case</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#warmup-checks">🧗 Warm-up Checks</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ (4 questions)</a>
+  <a href="#section-4-proof" class="sub">→ Proof (3 questions)</a>
+  <a href="#section-4-trace" class="sub">→ Trace / Analysis (3 questions)</a>
+  <a href="#section-4-pseudo" class="sub">→ Pseudocode / Design (3 questions)</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 570 · Final Exam · <strong>Topic 3 (Deep-Dive) · Recurrences &amp; the Master Theorem Unpacked</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ============================================================
+     DOC HEADER
+     ============================================================ -->
+<div class="doc-header">
+  <h1>Topic 3 (Beginner Deep-Dive)</h1>
+  <h3 style="color: var(--topic-accent); margin-top: 4px; font-weight: 500;">Recurrences &amp; the Master Theorem Unpacked — Every case traced on real examples, every formula explained before use, Strassen comparison worked in full</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final (Quiz 2) — April 30, 2026 · Class hours · Closed-book, one cheat sheet<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lec1_27_all-combined-densed-ocr.pdf</span> (Lectures 1–27, Spring 2026)<br>
+    <strong>Companion to:</strong> <span class="mono">study_guide_topic3_recurrences_master_theorem.html</span> (condensed exam-prep version — read this deep-dive FIRST)<br>
+    <strong>Audience:</strong> Designed for a student who can follow the A6 solutions but is not yet confident deriving Master Theorem applications independently. We unpack every notation, walk through all three cases from scratch, and trace the non-applicable gap step by step.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">How to use this deep-dive</strong><br>
+  <strong>Step 1.</strong> Read <a href="#warmup">🧗 Warm-up Glossary</a> to confirm you're comfortable with recurrences, logs, and O/Θ notation before §1.<br>
+  <strong>Step 2.</strong> Read §1 (What &amp; Why) and §2 (How) carefully — trace every recursion tree and Master Theorem case on paper with the concrete examples we provide.<br>
+  <strong>Step 3.</strong> Take the <a href="#warmup-checks">§3.5 Warm-up Understanding Checks</a> to confirm you absorbed §1–2 before attempting graded exam-style questions.<br>
+  <strong>Step 4.</strong> Tackle §3 (Exam Intelligence), §4 (Practice Questions), and §5 (Cheat Sheet) as final review — these mirror the A6 graded format exactly.
+</div>
+
+<!-- ============================================================
+     WARM-UP GLOSSARY
+     ============================================================ -->
+<h2 id="warmup">🧗 Warm-up Glossary — Vocabulary You Need Before §1</h2>
+<p style="color: var(--text-dim);">The Master Theorem uses dense mathematical notation. None of the underlying ideas are difficult — they just need careful introduction. If you are fluent in all of these already, skip straight to <a href="#section-1">§1</a>.</p>
+
+<div class="section-block">
+
+<h3>What is a recurrence relation? <span class="pdf-ref">📄 p. 79</span></h3>
+<p>A <strong>recurrence relation</strong> is a formula that defines the running time of an algorithm in terms of itself on a smaller input. Instead of calculating total work directly, we express T(n) — the time to solve a problem of size n — as a sum of: the time to solve smaller sub-problems, plus the extra work done outside those recursive calls.</p>
+<p><strong>Concrete example:</strong> Merge sort splits an array of n elements into two halves and merges them. Each half takes T(n/2) time. The merge step takes O(n) extra time. So: T(n) = 2·T(n/2) + n. This one equation fully describes merge sort's growth. <span class="pdf-ref">📄 p. 79</span></p>
+<pre class="diagram">
+  T(n) = 2·T(n/2) + n
+
+        ↑                ↑
+  Two recursive calls  Extra work done
+  each on half-size    by merge step
+  input (n/2)          outside recursion
+</pre>
+
+<h3>What does T(n) mean? <span class="pdf-ref">📄 p. 79</span></h3>
+<p><strong>T(n)</strong> is a function that maps input size n to the running time of the algorithm. "T" stands for "Time." When we say T(n) = 2T(n/2) + n, we mean: the time to sort n items equals the time to sort n/2 items (done twice) plus n extra operations for the merge. <span class="pdf-ref">📄 p. 79</span></p>
+<p><strong>Base case:</strong> At some smallest input (like n = 1 element), T(1) = Θ(1) — the algorithm just returns immediately. Without a base case, the recurrence would recurse forever.</p>
+
+<h3>What does "divide and conquer" mean structurally? <span class="pdf-ref">📄 p. 79</span></h3>
+<p><strong>Divide and conquer</strong> algorithms have a 3-part structure: <em>Divide</em> the problem into a smaller sub-problems, each of size n/b. <em>Conquer</em> by solving each sub-problem recursively (taking T(n/b) time each). <em>Combine</em> the results in f(n) extra time.</p>
+<pre class="diagram">
+  Standard D&C recurrence form: T(n) = a·T(n/b) + f(n)
+
+  a = number of sub-problems created at each level
+  b = factor by which input size shrinks (each sub-problem is 1/b the size)
+  f(n) = non-recursive work done at this level (divide + combine)
+
+  Merge sort:   a=2, b=2, f(n)=n   →  T(n) = 2T(n/2) + n
+  Binary search: a=1, b=2, f(n)=1  →  T(n) = T(n/2) + 1
+  Karatsuba:    a=3, b=2, f(n)=n   →  T(n) = 3T(n/2) + O(n)
+  Strassen:     a=7, b=2, f(n)=n²  →  T(n) = 7T(n/2) + O(n²)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 79–90, 227–238</span></div>
+
+<h3>What is log base b — log<sub>b</sub>? <span class="pdf-ref">📄 p. 39</span></h3>
+<p><strong>log<sub>b</sub>(x)</strong> asks: "to what power must I raise b to get x?" In other words, log<sub>b</sub>(x) = y means b<sup>y</sup> = x. The course uses log₂ (log base 2) most frequently, often written just as "log." <span class="pdf-ref">📄 p. 39</span></p>
+<pre class="diagram">
+  Examples (essential to memorize):
+
+  log₂(1)  = 0        because  2⁰ = 1
+  log₂(2)  = 1        because  2¹ = 2
+  log₂(4)  = 2        because  2² = 4
+  log₂(8)  = 3        because  2³ = 8
+  log₂(16) = 4        because  2⁴ = 16
+  log₂(32) = 5        because  2⁵ = 32
+  log₂(n)  = ?   →   keep halving n until you reach 1; count steps
+
+  log₄(2)  = 0.5      because  4^0.5 = √4 = 2
+  log₄(16) = 2        because  4² = 16
+  log₄(64) = 3        because  4³ = 64
+</pre>
+
+<h3>What is log<sub>b</sub>(a)? Why does it matter for the Master Theorem? <span class="pdf-ref">📄 p. 227</span></h3>
+<p><strong>log<sub>b</sub>(a)</strong> is the critical exponent in the Master Theorem. It measures the "effective growth rate due to sub-problems." When we recurse a times into sub-problems of size n/b, the total number of leaves in the recursion tree is a<sup>log<sub>b</sub>(n)</sup> = n<sup>log<sub>b</sub>(a)</sup>. The comparison between f(n) and n<sup>log<sub>b</sub>(a)</sup> determines which of the three Master Theorem cases applies. <span class="pdf-ref">📄 p. 227</span></p>
+<p><strong>Quick computation trick:</strong> log<sub>b</sub>(a) = log(a) / log(b) (using any logarithm base for both). For example, log₄(48) = log₂(48)/log₂(4) = log₂(48)/2 ≈ 5.58/2 ≈ 2.79.</p>
+
+<h3>What is a recursion tree? <span class="pdf-ref">📄 pp. 227–228</span></h3>
+<p>A <strong>recursion tree</strong> is a visual way to understand a recurrence by unrolling it level by level. The root of the tree represents the top-level call T(n). It has a children (one per sub-problem), each representing T(n/b). Those children each have a children representing T(n/b²), and so on until we reach leaves of size T(1). <span class="pdf-ref">📄 pp. 227–228</span></p>
+<pre class="diagram">
+  Recursion tree for T(n) = 2T(n/2) + n:
+
+  Level 0:              T(n)                   Work: n
+                       /    \
+  Level 1:         T(n/2)  T(n/2)              Work: n/2 + n/2 = n
+                   /  \    /  \
+  Level 2:   T(n/4).. T(n/4)..               Work: 4·(n/4) = n
+              ...
+  Level log n:  1  1  1  1 ... 1              Work: n·1 = n (n leaves)
+
+  Total levels: log n + 1
+  Work per level: n
+  Total: n · (log n + 1) = O(n log n)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 79–90, 227–228</span></div>
+
+<h3>What is the "critical exponent" n<sup>log<sub>b</sub>(a)</sup>? <span class="pdf-ref">📄 p. 227</span></h3>
+<p>The <strong>critical exponent</strong> n<sup>log<sub>b</sub>(a)</sup> represents the total work done at the leaf level of the recursion tree. At depth log<sub>b</sub>(n), there are exactly a<sup>log<sub>b</sub>(n)</sup> = n<sup>log<sub>b</sub>(a)</sup> leaves (each doing Θ(1) work). This is the cost of the sub-problem decomposition. The Master Theorem compares f(n) (work per level at the root) to n<sup>log<sub>b</sub>(a)</sup> (work at the leaves) to determine which dominates. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h3>What is "polynomially larger/smaller"? <span class="pdf-ref">📄 p. 227</span></h3>
+<p>We say f(n) is <strong>polynomially larger</strong> than g(n) if f(n) ≥ c·n<sup>ε</sup>·g(n) for some positive constants c and ε. In simpler terms: f(n)/g(n) grows at least as fast as some power n<sup>ε</sup>. A logarithm factor (like log n) is NOT a polynomial factor — this is crucial for the non-applicable case. <span class="pdf-ref">📄 p. 227</span></p>
+<p><strong>Example:</strong> n² is polynomially larger than n¹ (ratio = n = n¹). But n² log n is NOT polynomially larger than n² (ratio = log n, which grows slower than any n<sup>ε</sup> for ε &gt; 0).</p>
+
+<h3>What is Θ (theta) notation? <span class="pdf-ref">📄 p. 39</span></h3>
+<p><strong>Θ(f(n))</strong> means "grows at exactly the same rate as f(n)" — both an upper bound (O) and lower bound (Ω) simultaneously. When the Master Theorem gives T(n) = Θ(n log n), it means there exist constants c₁, c₂, n₀ such that c₁·n log n ≤ T(n) ≤ c₂·n log n for all n ≥ n₀. <span class="pdf-ref">📄 p. 39</span></p>
+
+<h3>What is the substitution method? <span class="pdf-ref">📄 p. 79</span></h3>
+<p>The <strong>substitution method</strong> is a way to solve recurrences by: (1) guessing the answer, (2) substituting the guess back into the recurrence, and (3) using induction to verify the constants work out. For example, guess T(n) = O(n log n) for T(n) = 2T(n/2) + n, then substitute T(n/2) ≤ c(n/2)log(n/2) and verify T(n) ≤ cn log n. <span class="pdf-ref">📄 p. 79</span></p>
+
+<h3>What is the Akra-Bazzi theorem? <span class="pdf-ref">📄 p. 228</span></h3>
+<p>The <strong>Akra-Bazzi theorem</strong> is a generalization of the Master Theorem that handles more complex recurrences where the sub-problem sizes aren't exactly n/b, or where there are multiple terms with different splitting factors. It uses an integral formula: T(n) = Θ(n<sup>p</sup>(1 + ∫₁ⁿ g(u)/u<sup>p+1</sup> du)), where p satisfies Σa<sub>i</sub>b<sub>i</sub><sup>p</sup> = 1. You won't need to apply this formula from scratch, but knowing it exists for irregular recurrences is useful. <span class="pdf-ref">📄 p. 228</span></p>
+
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">Topic 3 spans Lecture 23 and parts of Lectures 10–11. All three graded A6 Q1–Q3 questions test this topic directly.</p>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Master Theorem Cases <span class="pdf-ref">📄 pp. 227–238</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Case 1: a &gt; b<sup>c</sup> → T(n) = Θ(n<sup>log<sub>b</sub>a</sup>) <span class="exam-star">⭐</span></td><td>p. 227</td><td><span class="asgn-ref">📋 A6 Q1</span></td></tr>
+    <tr><td>Case 2: a = b<sup>c</sup> → T(n) = Θ(n<sup>c</sup>·log n) <span class="exam-star">⭐</span></td><td>p. 227</td><td><span class="asgn-ref">📋 A6 Q2</span></td></tr>
+    <tr><td>Case 3: a &lt; b<sup>c</sup> → T(n) = Θ(f(n))</td><td>p. 227</td><td>Lec 23</td></tr>
+    <tr><td>Non-applicable: f(n) = n²logn with n<sup>log₂4</sup> = n² <span class="exam-star">⭐</span></td><td>p. 227</td><td><span class="asgn-ref">📋 A6 Q3</span></td></tr>
+    <tr><td>Strassen benchmark: Θ(n<sup>log₂7</sup>) ≈ Θ(n<sup>2.807</sup>) <span class="exam-star">⭐</span></td><td>pp. 227, 239–248</td><td><span class="asgn-ref">📋 A6 Q1</span></td></tr>
+    <tr><td>Extended MT for n<sup>c</sup>·log<sup>k</sup>n terms</td><td>p. 227</td><td><span class="asgn-ref">📋 A6 Q3</span> note</td></tr>
+    <tr><td>Karatsuba: T(n) = 3T(n/2) + O(n) → O(n<sup>1.585</sup>)</td><td>pp. 227–238</td><td>Lec 23</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-accent); margin-top: 22px;">Supporting Recurrences from Prior Lectures <span class="pdf-ref">📄 pp. 79–104</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Recursion tree for T(n) = aT(n/b) + n<sup>c</sup></td><td>pp. 227–228</td><td>Lec 23</td></tr>
+    <tr><td>Merge sort recurrence: T(n) = 2T(n/2) + n → O(n log n)</td><td>pp. 79–90</td><td>Lec 10</td></tr>
+    <tr><td>Selection sort: T(n) = n + T(n-1) → O(n²)</td><td>p. 79</td><td>Lec 10</td></tr>
+    <tr><td>Binary search: T(n) = T(n/2) + 1 → O(log n)</td><td>pp. 55–62</td><td>Lec 7</td></tr>
+    <tr><td>Akra-Bazzi theorem (generalized recurrences)</td><td>p. 228</td><td>Lec 23</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: WHAT & WHY
+     ============================================================ -->
+<h2 id="section-1">§1 — What &amp; Why, in Plain English</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 79–104 (Lectures 10–11), pp. 227–238 (Lecture 23)</div>
+
+<div class="section-block">
+
+<h3 id="section-1-1">1.1 The fundamental problem — why not just count every operation? <span class="pdf-ref">📄 p. 79</span></h3>
+
+<p>Imagine you are a head chef who splits a large pizza-dough ball among multiple junior chefs, each of whom does the same split with their piece, recursively, until each piece is small enough to stretch by hand. How long does it take total? You could count every hand-stretch — but that's tedious. Instead, you ask: <em>how many times do I split, how much work happens at each split level, and which level does the most work?</em> That is exactly what the Master Theorem answers for recursive algorithms. <span class="pdf-ref">📄 p. 79</span></p>
+
+<p>Without a framework like the Master Theorem, analyzing a recursive algorithm means unrolling the recurrence by hand for many levels — messy, error-prone, and slow. The Master Theorem is a one-step lookup table: given a = sub-problems, b = size-reduction factor, and f(n) = non-recursive work, it directly tells you T(n). This is why it appears on the graded Assignment 6 and is a near-certain exam question. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h3 id="section-1-2">1.2 The three cases — which level of the tree dominates? <span class="pdf-ref">📄 p. 227</span></h3>
+
+<p>The Master Theorem applies to recurrences of the form <strong>T(n) = a·T(n/b) + f(n)</strong>. Think of the recursion tree as a pyramid. There are multiple levels of work: the root (top) does f(n) work, then the next level does work, and so on down to the leaves. The total runtime depends on <em>which level(s) do the most work</em>:</p>
+
+<div class="mt-case case1">
+  <div class="case-label">Case 1: Leaves Dominate (Root is small, bottom is big)</div>
+  <span class="mt-formula">Condition: f(n) = O(n<sup>log<sub>b</sub>a - ε</sup>) for some ε &gt; 0 — f(n) is polynomially SMALLER than n<sup>log<sub>b</sub>a</sup></span>
+  <span class="mt-formula">Result: T(n) = Θ(n<sup>log<sub>b</sub>a</sup>)</span>
+  <p><em>Plain English:</em> The work at each level grows as we go deeper. The leaves of the recursion tree accumulate by far the most work. The answer is determined by counting all the leaves. <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="mt-case case2">
+  <div class="case-label">Case 2: Every Level Does Equal Work</div>
+  <span class="mt-formula">Condition: f(n) = Θ(n<sup>log<sub>b</sub>a</sup>) — f(n) and n<sup>log<sub>b</sub>a</sup> grow at exactly the same rate</span>
+  <span class="mt-formula">Result: T(n) = Θ(n<sup>log<sub>b</sub>a</sup> · log n) = Θ(f(n) · log n)</span>
+  <p><em>Plain English:</em> Every level of the tree contributes the same total work. Since there are log n levels, we multiply f(n) by log n. <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="mt-case case3">
+  <div class="case-label">Case 3: Root Dominates (Root is big, bottom is small)</div>
+  <span class="mt-formula">Condition: f(n) = Ω(n<sup>log<sub>b</sub>a + ε</sup>) for some ε &gt; 0 — f(n) is polynomially LARGER than n<sup>log<sub>b</sub>a</sup></span>
+  <span class="mt-formula">AND: a·f(n/b) ≤ c·f(n) for some c &lt; 1 (regularity condition)</span>
+  <span class="mt-formula">Result: T(n) = Θ(f(n))</span>
+  <p><em>Plain English:</em> The work at each level shrinks as we go deeper. The root level does by far the most work, and the total cost is just f(n). <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="mt-case nonapply">
+  <div class="case-label">Non-applicable: Gap in the Middle</div>
+  <span class="mt-formula">f(n) = n<sup>log<sub>b</sub>a</sup> · log<sup>k</sup>n for k &gt; 0 (log factor bridges the polynomial gap)</span>
+  <span class="mt-formula">None of the three cases applies in standard form!</span>
+  <p><em>Plain English:</em> f(n) is between Case 2 and Case 3 — it's bigger than n<sup>log<sub>b</sub>a</sup> but only by a logarithm factor, which is NOT a polynomial factor. The Master Theorem in its basic form cannot handle this. <span class="pdf-ref">📄 p. 227</span></p>
+  <p><em>Extended MT result:</em> For T(n) = aT(n/b) + n<sup>log<sub>b</sub>a</sup>·log<sup>k</sup>n → T(n) = Θ(n<sup>log<sub>b</sub>a</sup>·log<sup>k+1</sup>n). <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<h3 id="section-1-3">1.3 The recursion tree — a staircase of work <span class="pdf-ref">📄 pp. 227–228</span></h3>
+
+<p>Imagine a staircase. Each step is a level of the recursion tree. At the top step, the algorithm does f(n) work. At the next step down, it does a calls of f(n/b) work each — a total of a·f(n/b). At the step below that: a²·f(n/b²). And so on until the bottom step, where n<sup>log<sub>b</sub>a</sup> leaves each do Θ(1) work. <span class="pdf-ref">📄 pp. 227–228</span></p>
+
+<pre class="diagram">
+  Recursion tree for T(n) = a·T(n/b) + n^c:
+
+  Level 0 (root):    [   n^c   ]               Work = n^c
+                      /   ...   \
+  Level 1:         [n^c/b^c] × a               Work = a × (n/b)^c = a/b^c × n^c
+                   /         \
+  Level 2:         × a²                        Work = (a/b^c)² × n^c
+  ...
+  Level j:         × a^j                       Work = (a/b^c)^j × n^c
+  ...
+  Level log_b(n)   [1] × n^(log_b a)           Work = n^(log_b a) (the leaves)
+
+  Total levels: log_b(n)
+  Geometric series ratio per level: r = a / b^c
+
+  If r < 1:  root dominates (geometric series → root = O(f(n)))   → Case 3
+  If r = 1:  each level equal (log_b(n) levels × f(n) each)       → Case 2
+  If r > 1:  leaves dominate (series grows → leaves = O(n^log_b a)) → Case 1
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 227–228</span></div>
+
+<p>The ratio r = a/b<sup>c</sup> tells you whether work grows or shrinks as we descend the tree. <strong>r = a/b<sup>c</sup> &gt; 1 ↔ a &gt; b<sup>c</sup> ↔ Case 1.</strong> <strong>r = 1 ↔ a = b<sup>c</sup> ↔ Case 2.</strong> <strong>r &lt; 1 ↔ a &lt; b<sup>c</sup> ↔ Case 3.</strong> <span class="pdf-ref">📄 p. 227</span></p>
+
+<h3 id="section-1-4">1.4 Technical definition — the standard Master Theorem form <span class="pdf-ref">📄 p. 227</span></h3>
+
+<p>Let a ≥ 1 and b &gt; 1 be constants, let f(n) be a function, and let T(n) be defined on non-negative integers by the recurrence T(n) = a·T(n/b) + f(n), with T(1) = Θ(1). Let n<sup>∗</sup> = n<sup>log<sub>b</sub>a</sup> be the critical polynomial.</p>
+
+<ul class="plain">
+  <li><strong>Case 1:</strong> If f(n) = O(n<sup>∗ − ε</sup>) for some constant ε &gt; 0, then T(n) = Θ(n<sup>∗</sup>). <span class="pdf-ref">📄 p. 227</span></li>
+  <li><strong>Case 2:</strong> If f(n) = Θ(n<sup>∗</sup>), then T(n) = Θ(n<sup>∗</sup> log n). <span class="pdf-ref">📄 p. 227</span></li>
+  <li><strong>Case 3:</strong> If f(n) = Ω(n<sup>∗ + ε</sup>) for some constant ε &gt; 0, AND a·f(n/b) ≤ c·f(n) for some c &lt; 1 and sufficiently large n, then T(n) = Θ(f(n)). <span class="pdf-ref">📄 p. 227</span></li>
+</ul>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Point of Confusion — Know This Before §2</strong>
+  The three cases are NOT about comparing a to b<sup>c</sup> directly (though that's a useful shortcut). They are about comparing f(n) to n<sup>log<sub>b</sub>a</sup> ASYMPTOTICALLY with a polynomial gap. A logarithm factor does NOT constitute a polynomial gap — this is why n² log n is NOT polynomially larger than n², making T(n) = 4T(n/2) + n²log n non-applicable. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<h3 id="section-1-5">1.5 Key Terms Table <span class="pdf-ref">📄 pp. 79–104, 227–238</span></h3>
+
+<table class="data">
+  <thead><tr><th>Term</th><th>Plain-English Meaning</th><th>Example / Mental Image</th><th>📄 Page</th><th>Textbook Ref</th></tr></thead>
+  <tbody>
+    <tr><td><strong>T(n)</strong></td><td>Time to solve problem of size n</td><td>T(100) = time to sort 100 elements</td><td>p. 79</td><td>[KT] §5.1, [CLRS] §4</td></tr>
+    <tr><td><strong>Recurrence relation</strong></td><td>Equation defining T(n) using T on smaller inputs</td><td>T(n) = 2T(n/2) + n is merge sort's recurrence</td><td>p. 79</td><td>[KT] §5.1</td></tr>
+    <tr><td><strong>Base case</strong></td><td>Smallest input where recursion stops</td><td>T(1) = 1 — sorting 1 element takes 0 extra steps</td><td>p. 79</td><td>[KT] §5.1</td></tr>
+    <tr><td><strong>a</strong></td><td>Number of recursive calls at each level</td><td>Merge sort splits into a=2 halves</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>b</strong></td><td>Factor by which size shrinks at each call</td><td>Merge sort divides by b=2</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>f(n)</strong></td><td>Non-recursive (combine) work at each level</td><td>Merge step costs f(n)=n; matrix mult costs f(n)=n²</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>n<sup>log<sub>b</sub>a</sup></strong></td><td>Critical polynomial — total work at leaves</td><td>Merge sort: n<sup>log₂2</sup>=n leaves; Strassen: n<sup>log₂7</sup>≈n<sup>2.807</sup></td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Recursion tree</strong></td><td>Visual unrolling of the recurrence level by level</td><td>Pyramid of work; see diagram in §1.3</td><td>pp. 227–228</td><td>[CLRS] §4.4</td></tr>
+    <tr><td><strong>Case 1 (leaves dominate)</strong></td><td>f(n) polynomially smaller than n<sup>log<sub>b</sub>a</sup></td><td>Leaves pile up more work than root; T(n) = Θ(n<sup>log<sub>b</sub>a</sup>)</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Case 2 (balanced)</strong></td><td>f(n) and n<sup>log<sub>b</sub>a</sup> grow at the same rate</td><td>Every level does same total work; multiply by log n</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Case 3 (root dominates)</strong></td><td>f(n) polynomially larger than n<sup>log<sub>b</sub>a</sup></td><td>Root does most work; T(n) = Θ(f(n))</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Polynomial gap (ε)</strong></td><td>f(n)/n<sup>log<sub>b</sub>a</sup> ≥ n<sup>ε</sup> or ≤ n<sup>-ε</sup></td><td>n² vs n: ratio = n = n¹ ← polynomial gap ✓</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Non-applicable case</strong></td><td>f(n) has only a log factor gap from n<sup>log<sub>b</sub>a</sup></td><td>n²logn vs n²: ratio = logn — NOT a polynomial gap ✗</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Regularity condition</strong></td><td>a·f(n/b) ≤ c·f(n) for c &lt; 1; required for Case 3</td><td>Total child work is a constant fraction of parent work</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td><strong>Substitution method</strong></td><td>Guess + verify via induction</td><td>Guess T(n) = O(n log n); verify using IH T(n/2) ≤ cn/2 log(n/2)</td><td>p. 79</td><td>[CLRS] §4.3</td></tr>
+    <tr><td><strong>Strassen's algorithm</strong></td><td>Matrix multiplication using 7 recursive n/2 calls</td><td>T(n) = 7T(n/2) + O(n²) → Θ(n<sup>log₂7</sup>) ≈ Θ(n<sup>2.807</sup>)</td><td>pp. 239–248</td><td>[KT] §5.5</td></tr>
+    <tr><td><strong>Karatsuba's algorithm</strong></td><td>Integer multiplication using 3 recursive calls</td><td>T(n) = 3T(n/2) + O(n) → Θ(n<sup>log₂3</sup>) ≈ Θ(n<sup>1.585</sup>)</td><td>pp. 227–238</td><td>[KT] §5.5</td></tr>
+    <tr><td><strong>Akra-Bazzi theorem</strong></td><td>Generalized MT for irregular recurrences</td><td>Handles non-uniform sub-problem sizes via integral formula</td><td>p. 228</td><td>—</td></tr>
+    <tr><td><strong>Merge sort</strong></td><td>T(n)=2T(n/2)+n → Θ(n log n), Case 2 of MT</td><td>a=2, b=2, n<sup>log₂2</sup>=n, f(n)=n: equal → Case 2</td><td>pp. 79–90</td><td>[KT] §5.1</td></tr>
+    <tr><td><strong>Binary search</strong></td><td>T(n)=T(n/2)+1 → Θ(log n), Case 3 of MT</td><td>a=1, b=2, n<sup>log₂1</sup>=n⁰=1, f(n)=1: equal → Case 2</td><td>pp. 55–62</td><td>[KT] §5.1</td></tr>
+    <tr><td><strong>log₄(48)</strong></td><td>The answer to A6 Q1: exponent for a=48,b=4 in Case 1</td><td>log₄(48) = log₂(48)/2 ≈ 5.585/2 ≈ 2.792 &lt; log₂7 ≈ 2.807</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ The Hardest Part for Beginners</strong>
+  Students frequently confuse "Case 1 requires a &gt; b<sup>c</sup>" as a DEFINITION. It is a sufficient condition but the true condition involves comparing f(n) to n<sup>log<sub>b</sub>a</sup> polynomially. When f(n) is given as n<sup>c</sup> (a pure power), the shortcut works. When f(n) has log factors, you MUST use the polynomial comparison and cannot use the shortcut. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     SECTION 2: HOW — WORKED EXAMPLES
+     ============================================================ -->
+<h2 id="section-2">§2 — How: Worked Examples from Scratch</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 79–104 (Lec 10–11), pp. 227–238 (Lec 23) · A6 Q1–Q3</div>
+
+<p style="color: var(--text-dim);">Each sub-section follows the three-step recipe: <strong>(1) Intuition</strong> — what is happening and why? <strong>(2) Mechanism</strong> — the formal Master Theorem procedure. <strong>(3) Worked Example</strong> — every arithmetic step carried out with real numbers from the graded assignments.</p>
+
+<!-- ─── 2a ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span>
+  <span class="title">Case 1: Leaves Dominate — The Strassen Comparison (A6 Q1)</span>
+  <span class="pages">Lecture PDF: pp. 227–238 · Assignment 6 Q1 <span class="asgn-ref">📋 A6 Q1</span></span>
+</div>
+
+<h3>Intuition: More chefs at the bottom than the top <span class="pdf-ref">📄 p. 227</span></h3>
+<p>In Case 1, every time you split the problem, you create MORE total work than you had before. Imagine a=48 chefs, each taking on a quarter of the pizza (b=4). At the next level you have 48²=2304 chefs, each working on a 16th of the pizza. The number of chefs grows exponentially faster than the pizza shrinks — so the bottom level (the leaves, with thousands of tiny tasks) dominates the total work. The root-level work (just one call) is a tiny fraction of the total. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h3>Mechanism: How to apply Case 1 <span class="pdf-ref">📄 p. 227</span></h3>
+
+<div class="step">
+  <div class="step-head">Step 1: Identify a, b, and f(n).</div>
+  <div class="step-detail">Read T(n) = a·T(n/b) + f(n). Write down a, b, and what f(n) is.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 2: Compute the critical polynomial n<sup>log<sub>b</sub>a</sup>.</div>
+  <div class="step-detail">Calculate log<sub>b</sub>(a). If a = b<sup>c</sup>, then log<sub>b</sub>(a) = c exactly. Otherwise, compute log(a)/log(b).</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 3: Compare f(n) to n<sup>log<sub>b</sub>a</sup>.</div>
+  <div class="step-detail">For Case 1: check if f(n) = O(n<sup>log<sub>b</sub>a - ε</sup>) for some ε &gt; 0. In practice: if f(n) = n<sup>c</sup> and c &lt; log<sub>b</sub>(a), then Case 1 applies.</div>
+</div>
+<div class="step">
+  <div class="step-head">Step 4: State the answer.</div>
+  <div class="step-detail">T(n) = Θ(n<sup>log<sub>b</sub>a</sup>). The answer is the critical polynomial.</div>
+</div>
+
+<h3>Worked Example — A6 Q1: The Strassen Comparison <span class="pdf-ref">📄 pp. 227, 239–248</span> <span class="asgn-ref">📋 A6 Q1</span></h3>
+
+<p><strong>Problem:</strong> Consider T(n) = a·T(n/4) + Θ(n²). Find the largest integer value of a such that this algorithm beats Strassen's Θ(n<sup>log₂7</sup>) ≈ Θ(n<sup>2.807</sup>). <span class="asgn-ref">📋 A6 Q1</span></p>
+
+<pre class="diagram">
+  SETUP:  T(n) = a·T(n/4) + Θ(n²)
+  b = 4,  c = 2,  f(n) = n²
+
+  We need to find: for which values of a is T(n) FASTER than Strassen?
+
+  STEP 1: Compute critical polynomial  n^(log₄ a)
+  STEP 2: We need  n^(log₄ a) < n^(log₂ 7) for the complexity to beat Strassen
+  STEP 3: This requires  log₄(a) < log₂(7)
+  STEP 4: Solve for a:   a < 4^(log₂ 7)
+
+  Computing 4^(log₂ 7):
+    4 = 2²,  so  4^(log₂ 7) = (2²)^(log₂ 7) = 2^(2·log₂ 7) = (2^(log₂ 7))² = 7² = 49
+
+  So we need a < 49.
+  Largest INTEGER a is  a = 48.  ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 227, 239–248</span></div>
+
+<p>Now let's verify that a = 48 indeed falls under Case 1 of the Master Theorem:</p>
+
+<pre class="diagram">
+  a = 48,  b = 4,  f(n) = n²  (so c = 2)
+
+  STEP 1: n^(log₄ 48)
+    log₄(48) = log₂(48) / log₂(4) = log₂(48) / 2
+    log₂(48): 2^5 = 32, 2^6 = 64, so log₂(48) ≈ 5.585
+    log₄(48) ≈ 5.585 / 2 ≈ 2.792
+
+  STEP 2: Compare f(n) = n² to critical exponent n^2.792
+    f(n) = n² is polynomially SMALLER than n^2.792
+    (ratio: n^2.792 / n² = n^0.792 → ∞ — yes, polynomial gap)
+    So f(n) = O(n^(2.792 - ε)) for any ε ∈ (0, 0.792) — e.g., ε = 0.4 ✓
+
+  STEP 3: CASE 1 APPLIES.
+    T(n) = Θ(n^(log₄ 48)) ≈ Θ(n^2.792)
+
+  STEP 4: Compare to Strassen Θ(n^log₂ 7) ≈ Θ(n^2.807)
+    2.792 < 2.807  →  n^2.792 grows SLOWER than n^2.807  ✓
+    Our algorithm with a=48 beats Strassen!
+
+  STEP 5: Check a = 49 (would fail):
+    log₄(49) = log₂(49)/2 = log₂(7²)/2 = 2·log₂(7)/2 = log₂(7) ≈ 2.807
+    T(n) = Θ(n^(log₂ 7)) — exactly equal to Strassen, does NOT beat it.
+
+  CONCLUSION: Largest a is 48. ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 227, 239–248</span></div>
+
+<h3>Recursion tree visualization for Case 1 <span class="pdf-ref">📄 pp. 227–228</span></h3>
+
+<pre class="diagram">
+  T(n) = 48·T(n/4) + n²   (simplified with a=48, b=4)
+
+  Level 0:   [n²]                          Work: n²           (×1 node)
+              × 48 children
+  Level 1:   [n²/16] × 48                 Work: 48 × (n/4)² = 3n²
+              × 48 children each
+  Level 2:   [n²/256] × 48²               Work: 48² × (n/16)² = 9n²
+  ...
+  Level j:   work grows by factor (48/16) = 3 per level  ←  leaves dominate!
+  ...
+  Level log₄n = leaves: 48^(log₄ n) = n^(log₄ 48) ≈ n^2.792 leaves
+
+  Each level's work: n²·(3^j), growing geometrically → leaves dominate.
+  Total ≈ last level = Θ(n^2.792)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 227–228</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ A6 Q1 Trap: How Did We Get 49?</strong>
+  The key insight is that 4^(log₂7) = 7² = 49 — this uses the identity (b^k)^x = b^(kx). Students who try to compute 4^2.807 directly on a calculator get confused. The clean algebraic path: 4 = 2², so 4^(log₂7) = (2²)^(log₂7) = 2^(2log₂7) = (2^(log₂7))² = 7² = 49. <span class="pdf-ref">📄 pp. 227, 239–248</span>
+</div>
+
+<!-- ─── 2b ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span>
+  <span class="title">Case 2: Every Level Contributes Equally (A6 Q2)</span>
+  <span class="pages">Lecture PDF: p. 227 · Assignment 6 Q2 <span class="asgn-ref">📋 A6 Q2</span></span>
+</div>
+
+<h3>Intuition: A perfectly balanced staircase <span class="pdf-ref">📄 p. 227</span></h3>
+<p>Case 2 is the "Goldilocks" case — not too many leaves, not too few. The work per level is exactly the same at every step of the staircase. Since there are log<sub>b</sub>(n) levels in total, the answer is just: (work per level) × (number of levels) = f(n) × log n. <span class="pdf-ref">📄 p. 227</span></p>
+
+<p>This is exactly what happens in merge sort: each level of the recursion tree does exactly n operations total (n/2 from the left merge, n/2 from the right), and there are log₂(n) levels, so the total is n log n. <span class="pdf-ref">📄 pp. 79–90</span></p>
+
+<h3>Worked Example — A6 Q2: T(n) = 2T(n/4) + √n <span class="pdf-ref">📄 p. 227</span> <span class="asgn-ref">📋 A6 Q2</span></h3>
+
+<pre class="diagram">
+  GIVEN:  T(n) = 2·T(n/4) + √n
+  READ:   a = 2,  b = 4,  f(n) = √n = n^(1/2)
+
+  ────────────────────────────────────────────────────────────────
+  STEP 1: Compute  n^(log_b a) = n^(log₄ 2)
+
+    log₄(2) = ?   Ask: "4 to what power gives 2?"
+    4^(1/2) = √4 = 2  ✓  So log₄(2) = 1/2
+
+    Critical polynomial: n^(1/2) = √n
+
+  ────────────────────────────────────────────────────────────────
+  STEP 2: Compare f(n) = √n to critical polynomial √n
+
+    f(n) = √n = n^(1/2)
+    n^(log₄ 2) = n^(1/2) = √n
+
+    They are EQUAL: f(n) = Θ(n^(log₄ 2)) = Θ(√n)
+
+  ────────────────────────────────────────────────────────────────
+  STEP 3: CASE 2 APPLIES.
+
+    T(n) = Θ(n^(log₄ 2) · log n) = Θ(√n · log n)
+
+  ────────────────────────────────────────────────────────────────
+  COMMON MISTAKE: Writing Θ(√n) — forgetting the log n factor!
+  Case 2 always introduces a log n multiplicative factor.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<h3>Recursion tree verification for Case 2 <span class="pdf-ref">📄 pp. 227–228</span></h3>
+
+<pre class="diagram">
+  T(n) = 2·T(n/4) + √n:
+
+  Level 0:   √n   (1 node)
+  Level 1:   2 × √(n/4) = 2 × √n/2 = √n   (2 nodes, each doing √(n/4))
+  Level 2:   4 × √(n/16) = 4 × √n/4 = √n  (4 nodes, each doing √(n/16))
+  Level j:   2^j × √(n/4^j) = 2^j × √n / 2^j = √n
+
+  ✓ Every level does exactly √n total work!
+
+  Number of levels until n/4^j = 1:  4^j = n  →  j = log₄ n = (log₂ n)/2
+
+  Total work = √n × (log₄ n + 1) = Θ(√n · log n) ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 227–228</span></div>
+
+<h3>Canonical Case 2 — Merge Sort <span class="pdf-ref">📄 pp. 79–90</span></h3>
+
+<pre class="diagram">
+  T(n) = 2·T(n/2) + n:
+
+  a = 2,  b = 2,  f(n) = n
+
+  STEP 1: n^(log₂ 2) = n^1 = n
+  STEP 2: f(n) = n = Θ(n^1) — EQUAL to critical polynomial
+  STEP 3: Case 2 applies → T(n) = Θ(n · log n) ✓
+
+  Check via tree: each level does n total work; log₂ n levels → n log n ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 79–90</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Case 2 Gotcha: The Log Factor Is Mandatory</strong>
+  Almost every student at least once writes "T(n) = Θ(√n)" for T(n) = 2T(n/4) + √n. This loses half the points for this question. Case 2 ALWAYS produces T(n) = Θ(f(n) · log n). The log factor comes from multiplying equal per-level work by the number of levels. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<!-- ─── 2c ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span>
+  <span class="title">Case 3: Root Dominates — T(n) = T(n/2) + n</span>
+  <span class="pages">Lecture PDF: p. 227 (Lecture 23)</span>
+</div>
+
+<h3>Intuition: One big chef at the top <span class="pdf-ref">📄 p. 227</span></h3>
+<p>In Case 3, there is only one recursive call (or very few), and the non-recursive work f(n) is large — much larger than the total work done by all sub-problems combined. Like a single head chef who does most of the cooking while the sous-chef handles a tiny fraction, the root level completely dominates. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h3>Worked Example — T(n) = T(n/2) + n <span class="pdf-ref">📄 p. 227</span></h3>
+
+<pre class="diagram">
+  GIVEN:  T(n) = T(n/2) + n
+  READ:   a = 1,  b = 2,  f(n) = n
+
+  ────────────────────────────────────────────────────────────────
+  STEP 1: Compute n^(log_b a) = n^(log₂ 1) = n^0 = 1
+
+    log₂(1) = 0  because  2^0 = 1
+
+    Critical polynomial: n^0 = 1
+
+  ────────────────────────────────────────────────────────────────
+  STEP 2: Compare f(n) = n to critical polynomial 1
+
+    f(n) = n = Ω(1 · n^ε) for ε = 1 — yes, n is polynomially LARGER than 1
+
+  ────────────────────────────────────────────────────────────────
+  STEP 3: Check regularity condition:
+    a·f(n/b) = 1·(n/2) = n/2 ≤ (1/2)·n = c·f(n) with c = 1/2 < 1 ✓
+
+  ────────────────────────────────────────────────────────────────
+  STEP 4: CASE 3 APPLIES.
+    T(n) = Θ(f(n)) = Θ(n)
+
+  ────────────────────────────────────────────────────────────────
+  Tree check:
+    Level 0: n        (1 node does n work)
+    Level 1: n/2      (1 node does n/2 work)
+    Level 2: n/4
+    Level j: n/2^j
+    Total: n + n/2 + n/4 + ... = 2n = Θ(n) ✓   (geometric series, sum ≤ 2n)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<h3>Another Case 3 example — Binary Search <span class="pdf-ref">📄 pp. 55–62</span></h3>
+
+<pre class="diagram">
+  T(n) = T(n/2) + 1:
+
+  a = 1,  b = 2,  f(n) = 1
+
+  STEP 1: n^(log₂ 1) = n^0 = 1
+  STEP 2: f(n) = 1 = Θ(1) = Θ(n^0) — EQUAL to critical polynomial!
+  STEP 3: This is actually CASE 2 (equal), not Case 3!
+    T(n) = Θ(n^0 · log n) = Θ(log n) ✓
+
+  Note: Binary search → Case 2, giving Θ(log n). Even though a=1 makes the
+  sub-problem count tiny, the combine work f(n)=1 matches the leaf work 1.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 55–62</span></div>
+
+<div class="callout">
+  <strong class="lbl">📌 Case 3 Regularity Condition — When to Check It</strong>
+  For most well-behaved functions (polynomials, exponentials), the regularity condition a·f(n/b) ≤ c·f(n) is automatically satisfied. You only need to verify it explicitly for exotic f(n) functions. For exam purposes, if f(n) = n<sup>c</sup> and c &gt; log<sub>b</sub>(a), regularity holds automatically. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<!-- ─── 2d ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span>
+  <span class="title">Non-applicable Case: The Log Factor Gap (A6 Q3)</span>
+  <span class="pages">Lecture PDF: p. 227 · Assignment 6 Q3 <span class="asgn-ref">📋 A6 Q3</span></span>
+</div>
+
+<h3>Intuition: A gap too small for the Master Theorem to see <span class="pdf-ref">📄 p. 227</span></h3>
+<p>The Master Theorem needs a clear "polynomial gap" between f(n) and n<sup>log<sub>b</sub>a</sup>. A log factor is NOT a polynomial — it grows much slower than any n<sup>ε</sup>. So when f(n) = n²logn and n<sup>log<sub>b</sub>a</sup> = n², the ratio is log n: too big for Case 1 (f &gt; n<sup>log<sub>b</sub>a</sup>), too different for Case 2 (not Θ(n²)), but not a polynomial bigger for Case 3. The Master Theorem cannot classify this situation. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h3>Worked Example — A6 Q3: T(n) = 4T(n/2) + n²logn <span class="pdf-ref">📄 p. 227</span> <span class="asgn-ref">📋 A6 Q3</span></h3>
+
+<pre class="diagram">
+  GIVEN:  T(n) = 4·T(n/2) + n²·log n
+  READ:   a = 4,  b = 2,  f(n) = n²·log n
+
+  ────────────────────────────────────────────────────────────────
+  STEP 1: Compute critical polynomial n^(log₂ 4)
+
+    log₂(4) = 2  because  2² = 4
+
+    Critical polynomial: n^2 = n²
+
+  ────────────────────────────────────────────────────────────────
+  STEP 2: Compare f(n) = n²·log n to critical polynomial n²
+
+    Ratio: f(n) / n² = n²·log n / n² = log n
+
+    Is this ratio at least n^ε for some ε > 0?  NO!
+    lim (log n) / n^ε = 0 for any ε > 0  (log grows slower than any polynomial)
+
+    So f(n) = n²·log n is NOT polynomially larger than n².  → Case 3 fails.
+
+  ────────────────────────────────────────────────────────────────
+  STEP 3: Check Case 2 — is f(n) = Θ(n²)?
+
+    f(n) = n²·log n,  critical = n²
+    n²·log n / n² = log n → ∞   →  n²·log n ≠ Θ(n²)     → Case 2 fails.
+
+  ────────────────────────────────────────────────────────────────
+  STEP 4: Check Case 1 — is f(n) = O(n^(2-ε)) for some ε > 0?
+
+    n²·log n ≥ n²  for all n ≥ 1.
+    So n²·log n is NOT O(n^(2-ε)) for any ε > 0.           → Case 1 fails.
+
+  ────────────────────────────────────────────────────────────────
+  CONCLUSION: ALL THREE CASES FAIL.
+  Standard Master Theorem is NOT APPLICABLE.
+
+  Extended MT for this form: T(n) = Θ(n^(log_b a) · log^(k+1) n)
+  Here: log_b a = 2, k = 1 (since f(n) = n^2 · log^1 n)
+  So: T(n) = Θ(n² · log² n)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<h3>Why the three cases fail — explained line by line <span class="pdf-ref">📄 p. 227</span></h3>
+
+<table class="data">
+  <thead><tr><th>Case</th><th>Condition Required</th><th>What We Have</th><th>Does It Hold?</th><th>Why Not?</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Case 1</strong></td>
+      <td>f(n) = O(n<sup>2-ε</sup>) for some ε &gt; 0</td>
+      <td>f(n) = n²logn</td>
+      <td>❌ No</td>
+      <td>n²logn grows FASTER than n² (by a log factor) — it's not smaller</td>
+    </tr>
+    <tr>
+      <td><strong>Case 2</strong></td>
+      <td>f(n) = Θ(n²)</td>
+      <td>f(n) = n²logn</td>
+      <td>❌ No</td>
+      <td>n²logn / n² = logn → ∞; they don't grow at the same rate</td>
+    </tr>
+    <tr>
+      <td><strong>Case 3</strong></td>
+      <td>f(n) = Ω(n<sup>2+ε</sup>) for some ε &gt; 0</td>
+      <td>f(n) = n²logn</td>
+      <td>❌ No</td>
+      <td>n²logn / n<sup>2+ε</sup> = logn / n<sup>ε</sup> → 0; not polynomially bigger</td>
+    </tr>
+    <tr>
+      <td><strong>Extended MT</strong></td>
+      <td>f(n) = n<sup>log<sub>b</sub>a</sup>·log<sup>k</sup>n for k ≥ 0</td>
+      <td>f(n) = n²·log¹n (k=1)</td>
+      <td>✅ Yes</td>
+      <td>This matches the extended form with log_b(a) = 2, k = 1 → Θ(n²log²n)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Exam Trap: "Non-applicable" Requires Ruling Out ALL Three Cases</strong>
+  On the exam, if you just write "Master Theorem doesn't apply" without showing WHY each of the three cases fails, you will lose points. The grader expects you to: (1) compute n<sup>log<sub>b</sub>a</sup>, (2) show Case 1 fails with a specific inequality, (3) show Case 2 fails by showing the ratio is not Θ(1), (4) show Case 3 fails by showing the polynomial gap doesn't exist. Four lines, one for each case. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<h3>§2 Synthesis: The Master Theorem Decision Flowchart <span class="pdf-ref">📄 p. 227</span></h3>
+
+<pre class="diagram">
+  MASTER THEOREM DECISION FLOWCHART
+  ═══════════════════════════════════════════════════════════════════
+
+  Given T(n) = a·T(n/b) + f(n):
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  Step 0: Compute  n* = n^(log_b a)                             │
+  └────────────────────────────┬────────────────────────────────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │  Compare f(n) to n*  │
+                    └─────────────────────┘
+                    /           |           \
+     f(n) = O(n*⁻ᵉ)     f(n) = Θ(n*)     f(n) = Ω(n*⁺ᵉ)
+     (polynomial          (same rate)       (polynomial
+      smaller)                               larger)
+          │                   │                    │
+          ▼                   ▼                    ▼
+      CASE 1              CASE 2              Check regularity:
+   T=Θ(n*)           T=Θ(n*·log n)        a·f(n/b) ≤ c·f(n)?
+                                              │           │
+                                             Yes          No
+                                              │           │
+                                              ▼           ▼
+                                          CASE 3       Unusual f(n)
+                                       T=Θ(f(n))      — verify carefully
+
+  SPECIAL WARNING: If f(n) = n*·log^k(n) for k>0 → NON-APPLICABLE.
+  Use extended MT: T(n) = Θ(n*·log^(k+1) n)
+
+  ═══════════════════════════════════════════════════════════════════
+  QUICK CHEATSHEET (when f(n) = n^c exactly):
+    a > b^c  ↔  Case 1:  T = Θ(n^(log_b a))
+    a = b^c  ↔  Case 2:  T = Θ(n^c · log n)
+    a < b^c  ↔  Case 3:  T = Θ(n^c) = Θ(f(n))
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<table class="data">
+  <thead><tr><th>Recurrence</th><th>a</th><th>b</th><th>f(n)</th><th>n<sup>log<sub>b</sub>a</sup></th><th>Case</th><th>T(n)</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr><td>T = 48T(n/4)+n²</td><td>48</td><td>4</td><td>n²</td><td>n<sup>log₄48</sup>≈n<sup>2.79</sup></td><td>1</td><td>Θ(n<sup>log₄48</sup>)</td><td><span class="asgn-ref">📋 A6 Q1</span></td></tr>
+    <tr><td>T = 2T(n/4)+√n</td><td>2</td><td>4</td><td>n<sup>1/2</sup></td><td>n<sup>1/2</sup></td><td>2</td><td>Θ(√n·logn)</td><td><span class="asgn-ref">📋 A6 Q2</span></td></tr>
+    <tr><td>T = 4T(n/2)+n²logn</td><td>4</td><td>2</td><td>n²logn</td><td>n²</td><td>❌ N/A</td><td>Θ(n²log²n) [ext.]</td><td><span class="asgn-ref">📋 A6 Q3</span></td></tr>
+    <tr><td>T = 2T(n/2)+n</td><td>2</td><td>2</td><td>n</td><td>n</td><td>2</td><td>Θ(n logn)</td><td>Merge sort <span class="pdf-ref">📄 p. 79</span></td></tr>
+    <tr><td>T = T(n/2)+1</td><td>1</td><td>2</td><td>1</td><td>1</td><td>2</td><td>Θ(logn)</td><td>Binary search <span class="pdf-ref">📄 p. 55</span></td></tr>
+    <tr><td>T = T(n/2)+n</td><td>1</td><td>2</td><td>n</td><td>1</td><td>3</td><td>Θ(n)</td><td>Simple recursion <span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>T = 3T(n/2)+n</td><td>3</td><td>2</td><td>n</td><td>n<sup>1.585</sup></td><td>1</td><td>Θ(n<sup>1.585</sup>)</td><td>Karatsuba <span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>T = 7T(n/2)+n²</td><td>7</td><td>2</td><td>n²</td><td>n<sup>2.807</sup></td><td>1</td><td>Θ(n<sup>2.807</sup>)</td><td>Strassen <span class="pdf-ref">📄 p. 239</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 PRIMARY SOURCE: Graded Assignment 6 Q1–Q3, Lecture 23, pp. 227–238</div>
+
+<div class="section-block">
+
+<h3>Exam Patterns — What the Questions Will Look Like <span class="pdf-ref">📄 pp. 227–238</span></h3>
+
+<table class="data">
+  <thead><tr><th>#</th><th>Question Stem Pattern</th><th>Required Answer Elements</th><th>Most Common Error</th><th>Page</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>"Apply the Master Theorem to T(n) = aT(n/b) + f(n)"</td><td>State a, b, f(n); compute n<sup>log<sub>b</sub>a</sup>; compare to f(n); identify case; state Θ result</td><td>Skipping the computation of n<sup>log<sub>b</sub>a</sup>; jumping to answer without showing the comparison</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>2</td><td>"Explain why the Master Theorem does NOT apply to [recurrence]"</td><td>Show each of the three cases fails by exhibiting the specific inequality that breaks; mention polynomial gap requirement</td><td>Saying "log n factor" without explaining WHY log n is not a polynomial factor</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>3</td><td>"Find the largest a such that T(n)=aT(n/b)+n^c beats Strassen"</td><td>Set up inequality log<sub>b</sub>(a) &lt; log₂(7); solve for a using a &lt; b<sup>log₂7</sup>; compute algebraically</td><td>Computing log₄(48) numerically instead of recognizing the elegant algebraic identity 4<sup>log₂7</sup> = 49</td><td><span class="pdf-ref">📄 pp. 227, 239–248</span></td></tr>
+    <tr><td>4</td><td>"Derive the time complexity of merge sort using the Master Theorem"</td><td>Write T(n)=2T(n/2)+n; identify a=2,b=2,f(n)=n; show n<sup>log₂2</sup>=n = f(n); apply Case 2; state Θ(n log n)</td><td>Forgetting to verify the match is exact (Θ, not just O or Ω) before applying Case 2</td><td><span class="pdf-ref">📄 pp. 79–90</span></td></tr>
+    <tr><td>5</td><td>"Which case of the Master Theorem applies? [multiple choice]"</td><td>Compute n<sup>log<sub>b</sub>a</sup>; compare to f(n); name the case; optionally state the answer</td><td>Confusing which direction of inequality triggers which case (Case 1 is f SMALLER, Case 3 is f LARGER)</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>6</td><td>"Verify your Master Theorem result using the recursion tree"</td><td>Draw tree with levels; compute work per level; identify whether it grows/shrinks/stays constant; sum</td><td>Drawing only 2 levels and extrapolating incorrectly; forgetting to account for number of leaves</td><td><span class="pdf-ref">📄 pp. 227–228</span></td></tr>
+    <tr><td>7</td><td>"T(n) = 2T(n/4) + √n. What is T(n)?"</td><td>Show log₄(2) = 1/2; show √n = Θ(n<sup>1/2</sup>) = Θ(critical polynomial); Case 2; answer Θ(√n·log n)</td><td>Writing Θ(√n) — the most common A6 Q2 error. Missing the log n factor.</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td>8</td><td>"Describe when the Akra-Bazzi theorem is needed vs the Master Theorem"</td><td>State MT requires uniform splitting (n/b for all calls); Akra-Bazzi handles different sub-problem sizes, non-uniform splits</td><td>Thinking MT handles all recurrences; not knowing Akra-Bazzi exists</td><td><span class="pdf-ref">📄 p. 228</span></td></tr>
+  </tbody>
+</table>
+
+<h3>Assignment Replay: A6 Q1–Q3 Worked Solutions <span class="asgn-ref">📋 A6</span></h3>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q1</span> <strong>T(n) = aT(n/4) + Θ(n²). Find largest a beating Strassen's Θ(n<sup>log₂7</sup>).</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Core computation:</strong> Need log₄(a) &lt; log₂(7) for our algorithm to grow slower than Strassen. So a &lt; 4<sup>log₂7</sup> = (2²)<sup>log₂7</sup> = 2<sup>2log₂7</sup> = (2<sup>log₂7</sup>)² = 7² = 49. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Largest integer:</strong> a = 48. Then T(n) = Θ(n<sup>log₄48</sup>) ≈ Θ(n<sup>2.792</sup>) &lt; Θ(n<sup>2.807</sup>). <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Verify a=48 uses Case 1:</strong> b=4, b²=16, a=48 &gt; 16 = b<sup>c</sup> where c=2. So f(n)=n² is polynomially smaller than n<sup>log₄48</sup> ≈ n<sup>2.792</sup>. Case 1 applies. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Verify a=49 ties:</strong> log₄(49) = log₄(7²) = 2·log₄(7) = 2·log₂(7)/log₂(4) = 2·log₂(7)/2 = log₂(7). So a=49 gives T(n) = Θ(n<sup>log₂7</sup>) — exactly equal to Strassen, not better. <span class="pdf-ref">📄 pp. 227, 239</span></li>
+        <li><strong>Grading criterion (100%):</strong> Show the inequality setup, the algebraic computation of 4<sup>log₂7</sup>=49, state a=48, verify it uses Case 1. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Exam variant:</strong> "Find the smallest a such that T(n)=aT(n/4)+n² is SLOWER than Strassen." Answer: a ≥ 49. <span class="pdf-ref">📄 p. 227</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q2</span> <strong>Apply the Master Theorem to T(n) = 2T(n/4) + √n.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Identify parameters:</strong> a=2, b=4, f(n)=√n=n<sup>1/2</sup>. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Compute critical polynomial:</strong> log₄(2) = 1/2 (since 4<sup>1/2</sup>=2). So n<sup>log₄2</sup> = n<sup>1/2</sup> = √n. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Compare:</strong> f(n) = √n = Θ(n<sup>1/2</sup>) = Θ(critical polynomial). Equal! Case 2 applies. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Answer:</strong> T(n) = Θ(n<sup>1/2</sup>·log n) = Θ(√n·log n). <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Biggest error:</strong> Writing Θ(√n) — forgetting the log n factor. Case 2 always adds log n. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Grading criterion (100%):</strong> Show all 4 steps; explicitly state why Case 2 applies (Θ match); write the log n factor in the answer. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Recursion tree verification:</strong> Level j has 2^j nodes each doing √(n/4^j) = √n / 2^j work. Total per level = 2^j · √n/2^j = √n. Constant per level. log₄(n) levels. Total = Θ(√n log n). ✓ <span class="pdf-ref">📄 pp. 227–228</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background: var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A6 Q3</span> <strong>Explain why the Master Theorem does NOT apply to T(n) = 4T(n/2) + n²logn.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Setup:</strong> a=4, b=2, f(n)=n²logn. Critical polynomial: n<sup>log₂4</sup> = n². <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Case 1 fails:</strong> Need f(n) = O(n<sup>2-ε</sup>). But n²logn ≥ n², so f is NOT smaller than n². ✗ <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Case 2 fails:</strong> Need f(n) = Θ(n²). But n²logn/n² = logn → ∞, so they don't grow at the same rate. ✗ <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Case 3 fails:</strong> Need f(n) = Ω(n<sup>2+ε</sup>). But n²logn/n<sup>2+ε</sup> = logn/n<sup>ε</sup> → 0, so f is NOT polynomially larger. ✗ <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Extended MT:</strong> f(n) = n<sup>2</sup>·log<sup>1</sup>n matches the extended form with k=1. T(n) = Θ(n²·log²n). <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Key conceptual point:</strong> logn grows slower than any n<sup>ε</sup> for ε&gt;0. This sub-polynomial growth is the reason the standard MT cannot classify the gap. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Grading criterion (100%):</strong> Rule out all three cases with explicit inequalities; state the polynomial gap requirement; optionally apply extended MT for full credit. <span class="pdf-ref">📄 p. 227</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3>Misconception Cards <span class="pdf-ref">📄 pp. 227–238</span></h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Case 1 applies when a &gt; b<sup>c</sup> regardless of what f(n) is."</p>
+  <p><span class="reality">✅ Reality:</span> The shortcut a &gt; b<sup>c</sup> works ONLY when f(n) is a simple polynomial n<sup>c</sup>. The real condition is f(n) = O(n<sup>log<sub>b</sub>a - ε</sup>). When f(n) has log factors, you must use the proper comparison. <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Case 2 applies whenever f(n) and n<sup>log<sub>b</sub>a</sup> have the same leading exponent."</p>
+  <p><span class="reality">✅ Reality:</span> Case 2 requires f(n) = Θ(n<sup>log<sub>b</sub>a</sup>) — an EXACT asymptotic match including all non-polynomial factors. f(n) = n²logn is NOT Θ(n²) because n²logn/n² = logn → ∞ (not bounded by a constant). <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "For T(n) = 2T(n/4) + √n, the answer is Θ(√n)."</p>
+  <p><span class="reality">✅ Reality:</span> The answer is Θ(√n · log n). Case 2 always introduces a multiplicative log n factor. This is the most common single-point loss on the exam. <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "The Master Theorem applies to ALL recurrences of the form T(n) = aT(n/b) + f(n)."</p>
+  <p><span class="reality">✅ Reality:</span> The MT has a gap: when f(n) = n<sup>log<sub>b</sub>a</sup>·poly-log(n) (log factors separate f from the critical polynomial), none of the three cases applies. The extended MT or Akra-Bazzi must be used. <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Binary search uses Case 3 of the Master Theorem."</p>
+  <p><span class="reality">✅ Reality:</span> Binary search T(n)=T(n/2)+1 uses Case 2 (equal). n<sup>log₂1</sup>=1=f(n)=1. Equal → Case 2 → Θ(1·logn) = Θ(logn). This is a common confusion because a=1 feels like "nothing recurses." <span class="pdf-ref">📄 pp. 55–62</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "log₄(48) is just 48/4 = 12."</p>
+  <p><span class="reality">✅ Reality:</span> log₄(48) asks "4 to what power gives 48?" NOT "48 divided by 4." log₄(48) = log₂(48)/log₂(4) ≈ 5.585/2 ≈ 2.79. Division and logarithm are completely different operations. <span class="pdf-ref">📄 p. 227</span></p>
+</div>
+
+<h3>Memory Aids &amp; Mnemonics <span class="pdf-ref">📄 pp. 227–238</span></h3>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 1: "BIG BOTTOM, BIG MIDDLE, BIG TOP"</strong>
+  Case 1 = BIG BOTTOM (leaves dominate) = answer is n<sup>log<sub>b</sub>a</sup> (the leaf count)<br>
+  Case 2 = BIG MIDDLE (everyone equal) = answer is n<sup>log<sub>b</sub>a</sup>·log n (multiply by levels)<br>
+  Case 3 = BIG TOP (root dominates) = answer is f(n) (the root work)<br>
+  The dominant level's work = the answer. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 2: "A vs B-to-the-C"</strong>
+  When f(n) = n<sup>c</sup> exactly: compare a to b<sup>c</sup>.<br>
+  a &gt; b<sup>c</sup> → Case 1 (subproblems overwhelm combine work)<br>
+  a = b<sup>c</sup> → Case 2 (balance)<br>
+  a &lt; b<sup>c</sup> → Case 3 (combine work overwhelms subproblems)<br>
+  Shortcut: "a vs b-to-the-c" — three comparisons, three cases. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 3: "CASE 2 + 1 LOG"</strong>
+  The only tricky case to remember is Case 2. The formula is ALWAYS (critical polynomial) × log n. Write "+1 LOG" next to your Case 2 formula on the cheat sheet. Never forget the log n factor. <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 4: "Log-Not-Poly Gap = Non-Applicable"</strong>
+  If f(n)/n<sup>log<sub>b</sub>a</sup> = some power of log n (like log n, log²n, log³n), the standard MT cannot apply. Log is "not a polynomial gap." Use extended MT: just increment the log exponent by 1. n²logn → Θ(n²log²n). n²log²n → Θ(n²log³n). <span class="pdf-ref">📄 p. 227</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 5: "7 squared is 49" (Strassen magic number)</strong>
+  For the A6 Q1 class of problem: 4<sup>log₂7</sup> = 7² = 49. Memorize this identity. The key algebraic move: 4 = 2², so 4<sup>log₂7</sup> = (2²)<sup>log₂7</sup> = 2<sup>2log₂7</sup> = (2<sup>log₂7</sup>)² = 7² = 49. Largest a that beats Strassen (with b=4) is 48. <span class="pdf-ref">📄 pp. 227, 239</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     WARM-UP UNDERSTANDING CHECKS
+     ============================================================ -->
+<h2 id="warmup-checks">🧗 Warm-up Understanding Checks</h2>
+<p style="color: var(--text-dim);">Five conceptual checks to confirm you absorbed §1–2 before tackling exam-style practice. These are NOT exam-level; they are diagnostic.</p>
+
+<!-- WC-1 -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-warmup">WARM-UP</span><span class="q-format">CONCEPTUAL</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">WC-1. A classmate says: "Case 1 of the Master Theorem applies whenever a &gt; b." Explain what they got right and what they got wrong, and give a counterexample where a &gt; b but Case 1 does NOT give the simplest formula.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What they got right:</strong> Having more sub-problems (a &gt; b) is a hint that leaves might dominate. In many standard recurrences, a &gt; b does correspond to Case 1. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>What they got wrong:</strong> The correct condition for Case 1 is a &gt; b<sup>c</sup> (where c is the exponent of f(n) = n<sup>c</sup>), NOT a &gt; b. The split factor b is irrelevant unless compared to b<sup>c</sup>. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>Counterexample:</strong> T(n) = 3T(n/2) + n². Here a=3, b=2, so a &gt; b. But b<sup>c</sup> = 2² = 4 &gt; 3 = a. So a &lt; b<sup>c</sup> → Case 3 applies → T(n) = Θ(n²), NOT the leaf-dominated formula. The classmate's rule would incorrectly say Case 1. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-2 -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-warmup">WARM-UP</span><span class="q-format">CASE IDENTIFICATION</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">WC-2. For each recurrence below, identify a, b, f(n), compute n<sup>log<sub>b</sub>a</sup>, and name which case of the Master Theorem applies (or "non-applicable"). Do NOT compute the final Θ answer yet.
+  (a) T(n) = 9T(n/3) + n   (b) T(n) = T(n/3) + n²   (c) T(n) = 3T(n/3) + n   (d) T(n) = 9T(n/3) + n²logn</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>(a) T(n) = 9T(n/3) + n:</strong> a=9, b=3, f(n)=n. n<sup>log₃9</sup> = n² (since 3²=9). f(n)=n vs n²: f is polynomially SMALLER → <strong>Case 1</strong>. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>(b) T(n) = T(n/3) + n²:</strong> a=1, b=3, f(n)=n². n<sup>log₃1</sup> = n⁰ = 1. f(n)=n² vs 1: f is polynomially LARGER → <strong>Case 3</strong>. Regularity: 1·(n/3)² = n²/9 ≤ (1/9)·n² ✓. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>(c) T(n) = 3T(n/3) + n:</strong> a=3, b=3, f(n)=n. n<sup>log₃3</sup> = n¹ = n. f(n)=n vs n: EQUAL → <strong>Case 2</strong>. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>(d) T(n) = 9T(n/3) + n²logn:</strong> a=9, b=3, f(n)=n²logn. n<sup>log₃9</sup>=n². Ratio f/n²=logn. Not polynomially larger (Case 3 fails), not equal (Case 2 fails), not smaller (Case 1 fails) → <strong>Non-applicable</strong>. Extended MT gives Θ(n²log²n). <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-3 -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-warmup">WARM-UP</span><span class="q-format">RECURSION TREE</span><span class="pdf-ref">📄 pp. 227–228</span></div>
+  <p class="question-stem">WC-3. Draw the first 3 levels of the recursion tree for T(n) = 4T(n/2) + n. At each level, count the number of nodes and the work done per node. Compute the total work at each level. Which case do you expect, and why?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <pre class="diagram">
+  T(n) = 4T(n/2) + n
+
+  Level 0: 1 node, n work per node       Total: n
+  Level 1: 4 nodes, n/2 work each        Total: 4·(n/2) = 2n
+  Level 2: 16 nodes, n/4 work each       Total: 16·(n/4) = 4n
+  Level j: 4^j nodes, n/2^j work each    Total: 4^j·(n/2^j) = (4/2)^j·n = 2^j·n
+
+  Work DOUBLES at each level → leaves dominate → Case 1 expected!</pre>
+      <p>Formal check: a=4, b=2, f(n)=n, n<sup>log₂4</sup>=n². f(n)=n is polynomially smaller than n² (ratio = n → ∞). Case 1 applies → T(n) = Θ(n²). <span class="pdf-ref">📄 pp. 227–228</span></p>
+      <p>Tree verification: Total = n·(2⁰ + 2¹ + 2² + ... + 2<sup>log n</sup>) ≈ n·2n = Θ(n²). ✓ <span class="pdf-ref">📄 p. 228</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-4 -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-warmup">WARM-UP</span><span class="q-format">NOTATION</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">WC-4. Compute the following without a calculator: (a) log₄(64), (b) log₈(4), (c) log₄(2), (d) 4<sup>log₂3</sup>. Show all steps.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>(a) log₄(64):</strong> Ask "4 to what power = 64?" 4¹=4, 4²=16, 4³=64 ✓. Answer: <strong>3</strong>. <span class="pdf-ref">📄 p. 39</span></p>
+      <p><strong>(b) log₈(4):</strong> 4 = 2², 8 = 2³. log₈(4) = log₈(2²) = 2·log₈(2). log₈(2) = 1/3 (since 8<sup>1/3</sup>=2). So log₈(4) = 2/3. Check: 8<sup>2/3</sup> = (8<sup>1/3</sup>)² = 2² = 4 ✓. Answer: <strong>2/3</strong>. <span class="pdf-ref">📄 p. 39</span></p>
+      <p><strong>(c) log₄(2):</strong> 4 = 2². log₄(2) = log₄(4<sup>1/2</sup>) = 1/2. Check: 4<sup>1/2</sup>=√4=2 ✓. Answer: <strong>1/2</strong>. <span class="pdf-ref">📄 p. 39</span></p>
+      <p><strong>(d) 4<sup>log₂3</sup>:</strong> 4 = 2². So 4<sup>log₂3</sup> = (2²)<sup>log₂3</sup> = 2<sup>2·log₂3</sup> = (2<sup>log₂3</sup>)² = 3² = <strong>9</strong>. This is the same identity used in A6 Q1 (where we computed 4<sup>log₂7</sup> = 49). <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-5 -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-warmup">WARM-UP</span><span class="q-format">MISCONCEPTION PUNCTURE</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">WC-5. Your classmate says: "The Master Theorem works for T(n) = 4T(n/2) + n²logn. It falls under Case 3 because n²logn is bigger than n² (the critical polynomial)." Explain exactly what they got wrong and why logn is the key culprit.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What they got right:</strong> n²logn IS bigger than n² (for large n), so it's in the right "direction" for Case 3. Their intuition about direction is correct. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>What they got wrong:</strong> Case 3 requires f(n) = Ω(n<sup>log<sub>b</sub>a + ε</sup>) for some ε &gt; 0 — a <em>polynomial</em> factor of growth, not just a log factor. The ratio n²logn / n<sup>2+ε</sup> = logn / n<sup>ε</sup> → 0 as n → ∞ for any fixed ε &gt; 0. So n²logn is NOT polynomially larger than n². <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>Why logn is the culprit:</strong> Logarithms grow infinitely slowly — slower than any positive power of n. For any ε &gt; 0, no matter how tiny, n<sup>ε</sup> eventually dominates logn. So logn × n² is "between" n² and n<sup>2+ε</sup> for every ε, falling in a gap that the standard MT cannot classify. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>Correct approach:</strong> Standard MT is non-applicable. Extended MT gives T(n) = Θ(n²log²n). <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 4: PRACTICE QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Practice Questions</h2>
+<div class="pages-coverage">📘 13 exam-style questions: 4 MCQ + 3 PROOF + 3 TRACE + 3 PSEUDOCODE</div>
+
+<h3 id="section-4-mcq">MCQ — Multiple Choice (4 Questions)</h3>
+
+<!-- Q1 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">Q1. What is the time complexity of T(n) = 3T(n/3) + n²?</p>
+  <ol class="mcq-options" type="A">
+    <li>Θ(n log n)</li>
+    <li>Θ(n²)</li>
+    <li>Θ(n² log n)</li>
+    <li>Θ(n<sup>log₃3</sup>) = Θ(n)</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — Θ(n²)</strong></p>
+      <p>a=3, b=3, f(n)=n². Critical polynomial: n<sup>log₃3</sup> = n¹ = n. Compare f(n)=n² to n: n²/n = n → ∞, so f(n) is polynomially LARGER than n. Case 3 applies (regularity: 3·(n/3)² = n²/3 ≤ (1/3)·n² ✓). T(n) = Θ(f(n)) = Θ(n²). <span class="pdf-ref">📄 p. 227</span></p>
+      <p>Why A is wrong: Θ(n log n) would suggest Case 2 with n<sup>log<sub>b</sub>a</sup>=n — but f(n)=n²≠n.</p>
+      <p>Why C is wrong: Case 3 gives Θ(f(n)), not Θ(f(n)·log n). The log n factor appears only in Case 2.</p>
+      <p>Why D is wrong: That is the leaf polynomial n, which only appears as the answer when Case 1 applies. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><em>Exam Tip:</em> When the combine work n² dominates the sub-problem structure (a &lt; b<sup>c</sup>: 3 &lt; 9), Case 3 gives Θ(f(n)) with no extra log. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">Q2. For T(n) = 2T(n/4) + √n, what is the correct answer and which case applies?</p>
+  <ol class="mcq-options" type="A">
+    <li>Case 1 — Θ(√n)</li>
+    <li>Case 2 — Θ(√n · log n)</li>
+    <li>Case 3 — Θ(√n)</li>
+    <li>Non-applicable</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — Case 2 — Θ(√n · log n)</strong></p>
+      <p>a=2, b=4, f(n)=√n=n<sup>1/2</sup>. Critical: n<sup>log₄2</sup>=n<sup>1/2</sup>=√n. Since f(n)=√n=Θ(√n)=Θ(critical polynomial), Case 2 applies. T(n) = Θ(√n · log n). <span class="pdf-ref">📄 p. 227</span></p>
+      <p>Why A and C are wrong: Both give Θ(√n) without the log n factor — the most common mistake. Case 2 ALWAYS adds log n.</p>
+      <p>Why D is wrong: This is non-applicable only when f(n) differs from the critical polynomial by a log factor. Here they match exactly. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><em>Exam Tip:</em> Memorize: Case 2 answer = (critical polynomial) × log n. The most common exam error is forgetting this log n. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 MCQ INT -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">Q3. Consider T(n) = aT(n/4) + Θ(n²). For which value of a does T(n) achieve exactly Θ(n²log n)?</p>
+  <ol class="mcq-options" type="A">
+    <li>a = 4</li>
+    <li>a = 16</li>
+    <li>a = 48</li>
+    <li>a = 49</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — a = 16</strong></p>
+      <p>For T(n)=Θ(n²logn), we need Case 2 to apply: f(n)=Θ(n<sup>log<sub>b</sub>a</sup>). Here b=4 and f(n)=n², so we need n<sup>log₄a</sup>=n², meaning log₄(a)=2, meaning a=4²=16. Then f(n)=n²=Θ(n<sup>log₄16</sup>)=Θ(n²) → Case 2 → T(n)=Θ(n²logn). <span class="pdf-ref">📄 p. 227</span></p>
+      <p>Why A is wrong: a=4 → log₄(4)=1 → n<sup>1</sup>=n ≠ n². f(n)=n² is bigger → Case 3 → Θ(n²).</p>
+      <p>Why C is wrong: a=48 → log₄(48)≈2.79 → Case 1 → Θ(n<sup>2.79</sup>). This beats Strassen (A6 Q1).</p>
+      <p>Why D is wrong: a=49 → log₄(49)=log₂7 → Case 1 → Θ(n<sup>log₂7</sup>) = same as Strassen. <span class="pdf-ref">📄 pp. 227, 239</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 MCQ ADV -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">MCQ</span><span class="pdf-ref">📄 p. 227</span></div>
+  <p class="question-stem">Q4. Which of the following recurrences is NOT solvable by the standard (three-case) Master Theorem?</p>
+  <ol class="mcq-options" type="A">
+    <li>T(n) = 4T(n/2) + n²</li>
+    <li>T(n) = 4T(n/2) + n² log n</li>
+    <li>T(n) = 4T(n/2) + n³</li>
+    <li>T(n) = 4T(n/2) + n</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — T(n) = 4T(n/2) + n²logn</strong></p>
+      <p>For all options: a=4, b=2, critical polynomial = n<sup>log₂4</sup> = n². <span class="pdf-ref">📄 p. 227</span></p>
+      <p>A: f(n)=n²=Θ(n²). Case 2 applies → Θ(n²logn). ✓ Solvable.</p>
+      <p>B: f(n)=n²logn. Ratio to n² is logn: not polynomial gap in either direction. → Non-applicable. ❌</p>
+      <p>C: f(n)=n³. n³/n²=n → polynomial gap → Case 3. T(n)=Θ(n³). ✓ Solvable.</p>
+      <p>D: f(n)=n. n/n²=1/n→0 → polynomial gap → Case 1. T(n)=Θ(n²). ✓ Solvable. <span class="pdf-ref">📄 p. 227</span></p>
+      <p><em>Exam Tip:</em> Anytime f(n) = n<sup>log<sub>b</sub>a</sup> × (any power of logn &gt; 0), the standard MT fails. Extended MT gives answer with one extra log. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-proof">Proof Questions (3 Questions)</h3>
+
+<!-- Q5 PROOF BEG -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">PROOF</span><span class="pdf-ref">📄 pp. 79–90</span></div>
+  <p class="question-stem">Q5. Prove by the substitution method that T(n) = 2T(n/2) + n = O(n log n). Explicitly state the inductive hypothesis, show the algebra works, and specify the values of c and n₀ you used.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <div class="proof-block">
+        <div class="proof-label">Substitution Method Proof: T(n) = 2T(n/2) + n = O(n log n)</div>
+        <div class="proof-step"><strong>Step 1 [Guess].</strong> We guess T(n) ≤ c · n · log₂(n) for some constant c &gt; 0 and all n ≥ n₀. <span class="pdf-ref">📄 p. 79</span></div>
+        <div class="proof-step"><strong>Step 2 [Inductive Hypothesis].</strong> Assume T(n/2) ≤ c · (n/2) · log₂(n/2). <span class="pdf-ref">📄 p. 79</span></div>
+        <div class="proof-step"><strong>Step 3 [Substitute into recurrence].</strong><br>
+          T(n) = 2T(n/2) + n<br>
+          ≤ 2 · [c · (n/2) · log₂(n/2)] + n<br>
+          = c · n · log₂(n/2) + n<br>
+          = c · n · [log₂(n) - log₂(2)] + n<br>
+          = c · n · [log₂(n) - 1] + n<br>
+          = c · n · log₂(n) - c · n + n<br>
+          = c · n · log₂(n) - (c - 1) · n <span class="pdf-ref">📄 p. 79</span></div>
+        <div class="proof-step"><strong>Step 4 [Verify bound holds].</strong><br>
+          We need: c · n · log₂(n) - (c-1)·n ≤ c · n · log₂(n)<br>
+          This simplifies to: -(c-1)·n ≤ 0, i.e., (c-1)·n ≥ 0.<br>
+          This holds whenever c ≥ 1. <span class="pdf-ref">📄 p. 79</span></div>
+        <div class="proof-step"><strong>Step 5 [Choose constants].</strong> Choose c = 1, n₀ = 2 (need n ≥ 2 so that log₂(n) ≥ 1 and the IH makes sense).<br>
+          For the base case: T(2) = 2T(1) + 2 = 2·1 + 2 = 4 ≤ 1·2·log₂(2) = 2·1 = 2? NO! 4 &gt; 2.<br>
+          Adjust: choose c = 2. Then T(2) = 4 ≤ 2·2·1 = 4. ✓</div>
+        <div class="proof-step"><strong>Step 6 [Conclusion].</strong> With c = 2, the bound T(n) ≤ 2n log₂(n) holds for all n ≥ 2. Therefore T(n) = O(n log n). ∎ <span class="pdf-ref">📄 pp. 79–90</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Explicitly stated the guess: T(n) ≤ c·n·log n. <span class="pdf-ref">📄 p. 79</span></li>
+        <li>☐ Stated IH: T(n/2) ≤ c·(n/2)·log(n/2). <span class="pdf-ref">📄 p. 79</span></li>
+        <li>☐ Used IH in the substitution: 2·T(n/2) ≤ 2·c·(n/2)·log(n/2). <span class="pdf-ref">📄 p. 79</span></li>
+        <li>☐ Applied log identity: log(n/2) = log n - 1. <span class="pdf-ref">📄 p. 79</span></li>
+        <li>☐ Showed the extra -cn + n term is ≤ 0 for c ≥ 1. <span class="pdf-ref">📄 p. 79</span></li>
+        <li>☐ Stated explicit c and n₀ values; verified base case. <span class="pdf-ref">📄 p. 79</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 PROOF INT -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">PROOF</span><span class="pdf-ref">📄 p. 227</span><span class="asgn-ref">📋 A6 Q3</span></div>
+  <p class="question-stem">Q6. Prove that the Master Theorem does NOT apply to T(n) = 4T(n/2) + n²logn. You must explicitly verify that each of the three cases fails, citing the specific inequality that breaks for each case.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <div class="proof-block">
+        <div class="proof-label">Proof: Standard Master Theorem is non-applicable for T(n) = 4T(n/2) + n²logn</div>
+        <div class="proof-step"><strong>Setup.</strong> a=4, b=2, f(n)=n²logn. Critical polynomial: n<sup>log₂4</sup> = n². <span class="pdf-ref">📄 p. 227</span></div>
+        <br>
+        <div class="proof-step"><strong>Case 1 fails.</strong> Case 1 requires f(n) = O(n<sup>2-ε</sup>) for some ε &gt; 0.<br>
+          But f(n) = n²logn ≥ n² for all n ≥ 1 (since logn ≥ 0 for n ≥ 1).<br>
+          So f(n) = Ω(n²) which means f(n) ≠ O(n<sup>2-ε</sup>) for any ε &gt; 0 — in fact, f grows faster than n<sup>2-ε</sup>. Case 1 does NOT apply. ✗ <span class="pdf-ref">📄 p. 227</span></div>
+        <br>
+        <div class="proof-step"><strong>Case 2 fails.</strong> Case 2 requires f(n) = Θ(n²).<br>
+          Compute lim f(n)/n² = lim n²logn/n² = lim logn = ∞.<br>
+          Since the limit is ∞ (not a positive finite constant), f(n) ≠ Θ(n²). Case 2 does NOT apply. ✗ <span class="pdf-ref">📄 p. 227</span></div>
+        <br>
+        <div class="proof-step"><strong>Case 3 fails.</strong> Case 3 requires f(n) = Ω(n<sup>2+ε</sup>) for some ε &gt; 0.<br>
+          Compute lim f(n)/n<sup>2+ε</sup> = lim n²logn/n<sup>2+ε</sup> = lim logn/n<sup>ε</sup> = 0 (L'Hôpital or standard limit).<br>
+          Since the limit is 0, f(n) = o(n<sup>2+ε</sup>) ≠ Ω(n<sup>2+ε</sup>). Case 3 does NOT apply. ✗ <span class="pdf-ref">📄 p. 227</span></div>
+        <br>
+        <div class="proof-step"><strong>Conclusion.</strong> None of the three cases of the standard Master Theorem applies, because the ratio f(n)/n<sup>log₂4</sup> = logn is neither O(1) (Case 2) nor Ω(n<sup>ε</sup>) (Case 3) nor O(n<sup>-ε</sup>) (Case 1). The logn factor creates a "gap" that the standard MT cannot classify. ∎ <span class="pdf-ref">📄 p. 227</span></div>
+        <br>
+        <div class="proof-step"><strong>[Optional: Extended MT answer].</strong> Using the extended Master Theorem for f(n) = n<sup>log<sub>b</sub>a</sup>·log<sup>k</sup>n with k=1: T(n) = Θ(n²·log²n). <span class="pdf-ref">📄 p. 227</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Computed n<sup>log₂4</sup> = n². <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Case 1 failure: showed f(n) ≥ n² → not O(n<sup>2-ε</sup>). <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Case 2 failure: showed lim f/n² = ∞ → not Θ(n²). <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Case 3 failure: showed lim f/n<sup>2+ε</sup> = 0 → not Ω(n<sup>2+ε</sup>). <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Stated conclusion: polynomial gap does not exist. <span class="pdf-ref">📄 p. 227</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 PROOF ADV -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">PROOF</span><span class="pdf-ref">📄 pp. 227, 239–248</span><span class="asgn-ref">📋 A6 Q1</span></div>
+  <p class="question-stem">Q7. Prove that the largest integer a for which T(n) = aT(n/4) + Θ(n²) is asymptotically faster than Strassen's Θ(n<sup>log₂7</sup>) is a = 48. Your proof must: (a) set up the inequality on log₄(a), (b) solve it algebraically using the identity 4<sup>log₂7</sup> = 49, and (c) verify that a=48 uses Case 1 of the Master Theorem.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Full Proof)</summary>
+    <div class="answer-content">
+      <div class="proof-block">
+        <div class="proof-label">Proof: Largest a beating Strassen for T(n) = aT(n/4) + Θ(n²)</div>
+        <div class="proof-step"><strong>Part (a): Setting up the inequality.</strong><br>
+          For T(n) = aT(n/4) + Θ(n²): b=4, f(n)=Θ(n²).<br>
+          Critical polynomial: n<sup>log₄a</sup>.<br>
+          Case 1 applies (for large enough a where a &gt; b² = 16, making f smaller than critical):<br>
+          T(n) = Θ(n<sup>log₄a</sup>).<br>
+          For our algorithm to beat Strassen's Θ(n<sup>log₂7</sup>):<br>
+          n<sup>log₄a</sup> = o(n<sup>log₂7</sup>), which requires log₄(a) &lt; log₂(7). <span class="pdf-ref">📄 p. 227</span></div>
+        <div class="proof-step"><strong>Part (b): Solving algebraically.</strong><br>
+          log₄(a) &lt; log₂(7)<br>
+          ↔ a &lt; 4<sup>log₂7</sup>.<br>
+          Compute 4<sup>log₂7</sup>: Since 4 = 2², we have<br>
+          4<sup>log₂7</sup> = (2²)<sup>log₂7</sup> = 2<sup>2·log₂7</sup> = (2<sup>log₂7</sup>)² = 7² = 49.<br>
+          So the condition is a &lt; 49.<br>
+          Since a must be a positive integer, the largest valid a is <strong>a = 48</strong>. <span class="pdf-ref">📄 pp. 227, 239</span></div>
+        <div class="proof-step"><strong>Part (c): Verify a=48 uses Case 1.</strong><br>
+          a=48, b=4, b²=16. Check a vs b<sup>c</sup>: 48 &gt; 16 = 4² = b<sup>c</sup>. So a &gt; b<sup>c</sup>.<br>
+          This means f(n) = n² is polynomially smaller than n<sup>log₄48</sup> (since log₄48 ≈ 2.79 &gt; 2).<br>
+          Specifically, f(n) = n² = O(n<sup>log₄48 - ε</sup>) for ε = log₄48 - 2 ≈ 0.79 &gt; 0. <br>
+          Case 1 applies. T(n) = Θ(n<sup>log₄48</sup>). ∎ <span class="pdf-ref">📄 p. 227</span></div>
+        <div class="proof-step"><strong>Final check: a=48 beats Strassen?</strong><br>
+          log₄(48) ≈ 2.792 &lt; log₂(7) ≈ 2.807.<br>
+          So Θ(n<sup>2.792</sup>) is asymptotically faster than Θ(n<sup>2.807</sup>). ✓ <span class="pdf-ref">📄 pp. 227, 239</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Set up inequality: log₄(a) &lt; log₂(7) ↔ a &lt; 4<sup>log₂7</sup>. <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Used identity 4 = 2² to get 4<sup>log₂7</sup> = 7² = 49. <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Concluded a &lt; 49, so largest integer is 48. <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Verified a=48 uses Case 1 (48 &gt; 4² = 16 = b<sup>c</sup>). <span class="pdf-ref">📄 p. 227</span></li>
+        <li>☐ Verified log₄(48) &lt; log₂(7) numerically or algebraically. <span class="pdf-ref">📄 p. 227</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-trace">Algorithm Trace / Analysis (3 Questions)</h3>
+
+<!-- Q8 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">TRACE</span><span class="pdf-ref">📄 pp. 227–228</span></div>
+  <p class="question-stem">Q8. Draw the complete recursion tree for T(n) = 3T(n/3) + n with n=27. For each level, show: number of nodes, work per node, and total work at that level. Sum all levels to verify T(27) = Θ(n log n).</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>Parameters:</strong> a=3, b=3, f(n)=n, n=27. <span class="pdf-ref">📄 pp. 227–228</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Level j</th><th>Nodes</th><th>Sub-prob size</th><th>Work per node</th><th>Total level work</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td>0 (root)</td><td>1 = 3⁰</td><td>27</td><td>27</td><td>27</td></tr>
+          <tr><td>1</td><td>3 = 3¹</td><td>9</td><td>9</td><td>27</td></tr>
+          <tr class="highlight"><td>2</td><td>9 = 3²</td><td>3</td><td>3</td><td>27</td></tr>
+          <tr><td>3 (leaves)</td><td>27 = 3³</td><td>1</td><td>T(1)=1</td><td>27</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Total work:</strong> 27 + 27 + 27 + 27 = 4 × 27 = 108 = 27 × (log₃27 + 1) = 27 × (3 + 1) = 108. ✓</p>
+      <p><strong>In terms of n=27:</strong> Total = n × (log₃n + 1) = n log₃n + n = Θ(n log n). ✓ <span class="pdf-ref">📄 pp. 227–228</span></p>
+      <p><strong>MT verification:</strong> n<sup>log₃3</sup> = n¹ = n = f(n) → Case 2 → Θ(n log n). The recursion tree confirms equal work per level, so multiply by number of levels log₃n. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">TRACE</span><span class="pdf-ref">📄 pp. 227, 239–248</span><span class="asgn-ref">📋 A6 Q1</span></div>
+  <p class="question-stem">Q9. Apply the Master Theorem to each of the following recurrences. For each: state a, b, f(n), compute n<sup>log<sub>b</sub>a</sup>, identify the case, and state the Θ answer.
+  (a) T(n) = 8T(n/2) + n²  (b) T(n) = 8T(n/2) + n³  (c) T(n) = 8T(n/2) + n³logn  (d) T(n) = 16T(n/4) + n²</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <table class="trace-table">
+        <thead><tr><th>Recurrence</th><th>a</th><th>b</th><th>f(n)</th><th>n<sup>log<sub>b</sub>a</sup></th><th>Comparison</th><th>Case</th><th>T(n)</th></tr></thead>
+        <tbody>
+          <tr><td>8T(n/2)+n²</td><td>8</td><td>2</td><td>n²</td><td>n<sup>3</sup></td><td>n²=O(n<sup>3-1</sup>), ε=1</td><td>Case 1</td><td>Θ(n³)</td></tr>
+          <tr class="highlight"><td>8T(n/2)+n³</td><td>8</td><td>2</td><td>n³</td><td>n<sup>3</sup></td><td>n³=Θ(n³), equal</td><td>Case 2</td><td>Θ(n³logn)</td></tr>
+          <tr><td>8T(n/2)+n³logn</td><td>8</td><td>2</td><td>n³logn</td><td>n<sup>3</sup></td><td>logn gap→</td><td>❌ N/A</td><td>Θ(n³log²n) [ext.]</td></tr>
+          <tr class="highlight"><td>16T(n/4)+n²</td><td>16</td><td>4</td><td>n²</td><td>n<sup>log₄16</sup>=n²</td><td>n²=Θ(n²), equal</td><td>Case 2</td><td>Θ(n²logn)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Key computations:</strong> <span class="pdf-ref">📄 p. 227</span></p>
+      <p>(a) log₂(8) = 3. n<sup>3</sup> vs n²: n²/n³=1/n→0 → f is polynomially smaller → Case 1. Regularity not needed for Case 1. T(n)=Θ(n³).</p>
+      <p>(b) log₂(8) = 3. n<sup>3</sup> vs n³: equal → Case 2. T(n)=Θ(n³logn). Note the mandatory log n factor!</p>
+      <p>(c) f(n)=n³logn, critical=n³. Ratio=logn: not a polynomial gap → non-applicable. Extended MT: k=1 → T(n)=Θ(n³log²n).</p>
+      <p>(d) log₄(16): 4²=16 → log₄(16)=2. n<sup>2</sup>. f(n)=n²=Θ(n²) → Case 2. T(n)=Θ(n²logn). <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 TRACE ADV -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">TRACE</span><span class="pdf-ref">📄 pp. 227–228</span></div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 3 (Master Theorem) + Topic 8 (Divide &amp; Conquer: Strassen)</div>
+  <p class="question-stem">Q10. Consider a matrix multiplication algorithm with recurrence T(n) = kT(n/2) + Θ(n²). (a) For k=4, k=7, and k=8: apply the Master Theorem and state T(n) for each. (b) Explain why Strassen (k=7) is faster than the naive algorithm (k=8). (c) For what range of k values does T(n) = Θ(n²logn)?</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>Setup:</strong> b=2, f(n)=n², critical polynomial = n<sup>log₂k</sup>. <span class="pdf-ref">📄 pp. 227, 239–248</span></p>
+      <table class="trace-table">
+        <thead><tr><th>k</th><th>n<sup>log₂k</sup></th><th>Comparison to n²</th><th>Case</th><th>T(n)</th></tr></thead>
+        <tbody>
+          <tr><td>4</td><td>n<sup>2</sup></td><td>n²=Θ(n²) — equal</td><td>Case 2</td><td>Θ(n²logn)</td></tr>
+          <tr class="highlight"><td>7</td><td>n<sup>log₂7</sup>≈n<sup>2.807</sup></td><td>n² = O(n<sup>2.807-ε</sup>)</td><td>Case 1</td><td>Θ(n<sup>log₂7</sup>)</td></tr>
+          <tr><td>8</td><td>n<sup>3</sup></td><td>n² = O(n<sup>3-1</sup>)</td><td>Case 1</td><td>Θ(n³)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>(b) Why Strassen (k=7) beats naive (k=8):</strong> Both are in Case 1 (leaves dominate), so T(n) = Θ(n<sup>log₂k</sup>). Strassen has log₂(7) ≈ 2.807, naive has log₂(8) = 3. Since 2.807 &lt; 3, n<sup>2.807</sup> grows slower than n³. The key insight: one fewer recursive call at each level dramatically reduces the leaf count at depth log₂n. <span class="pdf-ref">📄 pp. 239–248</span></p>
+      <p><strong>(c) Range where T(n) = Θ(n²logn):</strong> This happens exactly when Case 2 applies, i.e., n<sup>log₂k</sup> = Θ(n²), i.e., log₂(k) = 2, i.e., k = 4. So ONLY k=4 gives this answer (exactly). For k between 4 and 8 (exclusive), e.g., k=5 or k=6, we'd get Case 1 with log₂5 ≈ 2.32 or log₂6 ≈ 2.58, giving T(n) = Θ(n<sup>log₂k</sup>) between n² and n<sup>log₂7</sup>. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-pseudo">Pseudocode / Design (3 Questions)</h3>
+
+<!-- Q11 PSEUDO BEG -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-beg">BEG</span><span class="q-format">PSEUDOCODE</span><span class="pdf-ref">📄 pp. 79–90</span></div>
+  <p class="question-stem">Q11. Write pseudocode for merge sort on an array A[0..n-1]. Then (a) identify the values of a, b, and f(n), (b) apply the Master Theorem, and (c) verify your answer matches the known O(n log n) bound.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <pre class="pseudocode">
+function MergeSort(A, left, right):
+    # Sort A[left..right-1] in place
+    # Base case: 0 or 1 elements — already sorted
+    if right - left <= 1:
+        return
+
+    # Divide: find midpoint
+    mid = (left + right) // 2
+
+    # Conquer: recursively sort each half     ← contributes 2·T(n/2)
+    MergeSort(A, left, mid)
+    MergeSort(A, mid, right)
+
+    # Combine: merge the two sorted halves   ← contributes O(n) work
+    Merge(A, left, mid, right)
+
+function Merge(A, left, mid, right):
+    # Standard two-pointer merge into temp array; O(n) total operations
+    L = A[left..mid-1];  R = A[mid..right-1]
+    i = 0; j = 0; k = left
+    while i < len(L) and j < len(R):
+        if L[i] <= R[j]:  A[k] = L[i]; i += 1
+        else:              A[k] = R[j]; j += 1
+        k += 1
+    copy remaining L or R into A[k..]
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 79–90</span></div>
+      <p><strong>(a) Master Theorem parameters:</strong></p>
+      <p>a = 2 (two recursive calls: left half and right half)<br>
+         b = 2 (each call works on n/2 elements)<br>
+         f(n) = Θ(n) (the Merge step is linear in the range size) <span class="pdf-ref">📄 p. 79</span></p>
+      <p><strong>(b) Apply Master Theorem:</strong></p>
+      <p>n<sup>log₂2</sup> = n¹ = n. Compare f(n)=n to critical n: they are EQUAL → <strong>Case 2</strong>. T(n) = Θ(n · log n). <span class="pdf-ref">📄 p. 227</span></p>
+      <p><strong>(c) Verification:</strong></p>
+      <p>📝 <strong>Time Complexity:</strong> T(n) = <span class="complexity-box">Θ(n log n)</span> — matches the well-known merge sort complexity. <span class="pdf-ref">📄 pp. 79–90</span></p>
+      <p>📝 <strong>Space Complexity:</strong> <span class="complexity-box">Θ(n)</span> — the Merge step needs O(n) temporary arrays. <span class="pdf-ref">📄 p. 79</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 PSEUDO INT -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-int">INT</span><span class="q-format">PSEUDOCODE</span><span class="pdf-ref">📄 pp. 227–238</span><span class="asgn-ref">📋 A6 Q1</span></div>
+  <p class="question-stem">Q12. Describe (in pseudocode and plain English) an algorithm that applies the Master Theorem to a given recurrence T(n) = aT(n/b) + n^c. The algorithm should identify which of the three cases applies (or "non-applicable"), and output the Θ answer. Analyze its time complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <pre class="pseudocode">
+function ApplyMasterTheorem(a, b, c):
+    # Given: T(n) = a*T(n/b) + n^c
+    # Computes: the Θ answer using Master Theorem
+
+    # Step 1: Compute the critical exponent
+    log_b_a = log(a) / log(b)          # log_b(a) using change of base
+
+    # Step 2: Compare c (exponent of f) to log_b_a (exponent of critical)
+    epsilon = 0.001                     # practical threshold for "polynomial gap"
+
+    if c < log_b_a - epsilon:           # Case 1: f is polynomially smaller
+        print("Case 1 applies")
+        print("T(n) = Theta(n^" + log_b_a + ")")
+
+    elif abs(c - log_b_a) <= epsilon:   # Case 2: f and critical match
+        print("Case 2 applies")
+        print("T(n) = Theta(n^" + c + " * log n)")
+
+    else:                               # Case 3: f is polynomially larger
+        # Check regularity: a * f(n/b) <= d * f(n) for d < 1
+        # For f(n) = n^c: regularity holds iff a * (1/b)^c < 1, i.e., a < b^c
+        regularity_ratio = a / (b ** c)
+        if regularity_ratio < 1:        # a < b^c ensures regularity
+            print("Case 3 applies")
+            print("T(n) = Theta(n^" + c + ")")
+        else:
+            print("WARNING: verify regularity condition manually")
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Compute log<sub>b</sub>(a) using the change-of-base formula: log(a)/log(b). <span class="pdf-ref">📄 p. 39</span></li>
+        <li>Compare c (the exponent of f(n) = n<sup>c</sup>) to log<sub>b</sub>(a). If c is clearly smaller, Case 1. If equal, Case 2. If clearly larger (and regularity holds), Case 3.</li>
+        <li>For Case 3, verify regularity: for f(n)=n<sup>c</sup>, regularity holds iff a &lt; b<sup>c</sup> (equivalently log<sub>b</sub>(a) &lt; c — same as the Case 3 condition). So for polynomial f, the regularity condition is automatic. <span class="pdf-ref">📄 p. 227</span></li>
+        <li><strong>Note:</strong> This only handles f(n) = n<sup>c</sup> exactly. For f(n) = n<sup>c</sup>·log n, the algorithm correctly detects neither case cleanly (c = log<sub>b</sub>(a) but f has log factor). In practice, the epsilon threshold prevents false Case 2 detection for f(n)=n<sup>c</sup>logn only if log is explicitly detected separately.</li>
+      </ol>
+      <p>📝 <strong>Complexity:</strong> Time = <span class="complexity-box">O(1)</span> — a fixed number of arithmetic operations regardless of a, b, c. Space = <span class="complexity-box">O(1)</span>. <span class="pdf-ref">📄 p. 227</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 PSEUDO ADV -->
+<div class="question-block">
+  <div class="question-meta"><span class="badge-adv">ADV</span><span class="q-format">PSEUDOCODE</span><span class="pdf-ref">📄 pp. 227–238</span></div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 3 (Recurrences) + Topic 2 (Asymptotic Analysis: Growth Rates)</div>
+  <p class="question-stem">Q13. You are given a choice between three divide-and-conquer algorithms for computing the product of two n-bit integers:
+  Algorithm A: T(n) = 4T(n/2) + O(n)
+  Algorithm B: T(n) = 3T(n/2) + O(n)  (Karatsuba)
+  Algorithm C: T(n) = 2T(n/2) + O(n²)
+  (a) Apply the Master Theorem to each. (b) Order them from fastest to slowest. (c) Prove that Algorithm B is faster than Algorithm A using the definition of asymptotic ordering. (d) For input sizes n=1000 and n=1,000,000, estimate the practical advantage of B over A.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p><strong>(a) Master Theorem for each:</strong> <span class="pdf-ref">📄 p. 227</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Algorithm</th><th>a</th><th>b</th><th>f(n)</th><th>n<sup>log<sub>b</sub>a</sup></th><th>Case</th><th>T(n)</th></tr></thead>
+        <tbody>
+          <tr><td>A: 4T(n/2)+n</td><td>4</td><td>2</td><td>n</td><td>n²</td><td>Case 1</td><td>Θ(n²)</td></tr>
+          <tr class="highlight"><td>B: 3T(n/2)+n (Karatsuba)</td><td>3</td><td>2</td><td>n</td><td>n<sup>log₂3</sup>≈n<sup>1.585</sup></td><td>Case 1</td><td>Θ(n<sup>log₂3</sup>)</td></tr>
+          <tr><td>C: 2T(n/2)+n²</td><td>2</td><td>2</td><td>n²</td><td>n</td><td>Case 3</td><td>Θ(n²)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>(b) Order fastest to slowest:</strong></p>
+      <p>log₂(3) ≈ 1.585. So rankings: n<sup>1.585</sup> &lt; n² = n². Algorithm B (Karatsuba) &gt; Algorithms A and C (tied at n²). Ordering: <strong>B fastest, then A and C equally slow</strong>. <span class="pdf-ref">📄 pp. 227–238</span></p>
+      <p><strong>(c) Proof that B is faster than A:</strong></p>
+      <p>T_A(n) = Θ(n²) and T_B(n) = Θ(n<sup>log₂3</sup>). We need to show n<sup>log₂3</sup> = o(n²) (B is asymptotically faster). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p>Compute lim T_B(n)/T_A(n) = lim n<sup>log₂3</sup>/n² = lim n<sup>log₂3 - 2</sup> = lim n<sup>-(2-log₂3)</sup>.</p>
+      <p>Since log₂3 ≈ 1.585 &lt; 2, we have 2 - log₂3 ≈ 0.415 &gt; 0. So n<sup>-(0.415)</sup> → 0 as n → ∞.</p>
+      <p>Therefore T_B(n) = o(T_A(n)) — Algorithm B is strictly faster. ✓ <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p><strong>(d) Practical advantage at n=1000 and n=1,000,000:</strong></p>
+      <pre class="diagram">
+  At n = 1,000:
+    A: Θ(n²) ≈ 10⁶ operations
+    B: Θ(n^1.585) ≈ 1000^1.585 = 10^(3×1.585) = 10^4.755 ≈ 57,000 operations
+    Ratio: A/B ≈ 10⁶/57000 ≈ 17.5× advantage for B
+
+  At n = 1,000,000:
+    A: Θ(n²) ≈ 10¹²
+    B: Θ(n^1.585) ≈ (10⁶)^1.585 = 10^(6×1.585) = 10^9.51 ≈ 3.2×10⁹
+    Ratio: A/B ≈ 10¹² / 3.2×10⁹ ≈ 312× advantage for B
+
+  Conclusion: The advantage grows with input size. At n=10⁶, Karatsuba
+  is over 300× faster — this explains why it's used in cryptographic
+  libraries for large-integer arithmetic.
+      </pre>
+      <p>📝 <strong>Complexity Analysis:</strong></p>
+      <p>Algorithm A: T = <span class="complexity-box">Θ(n²)</span> | Algorithm B: T = <span class="complexity-box">Θ(n<sup>1.585</sup>)</span> | Algorithm C: T = <span class="complexity-box">Θ(n²)</span> <span class="pdf-ref">📄 pp. 227–238</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Cheat Sheet</h2>
+<div class="pages-coverage">📘 SOURCE: Lecture 23, pp. 227–238 · Lectures 10–11, pp. 79–104 · A6 Q1–Q3</div>
+
+<div class="cheat-sheet">
+
+<h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+<p class="oneliner">The Master Theorem is a formula that solves recurrences T(n) = aT(n/b) + f(n) by comparing f(n) to the critical polynomial n<sup>log<sub>b</sub>a</sup> to determine which level of the recursion tree dominates the total work. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+<ol>
+  <li><strong>Compute n<sup>log<sub>b</sub>a</sup> first.</strong> Always start here. Then compare f(n) to it polynomially. Never try to apply cases without this computation. <span class="pdf-ref">📄 p. 227</span></li>
+  <li><strong>Case 2 adds log n. Always.</strong> If f(n) = Θ(critical), then T(n) = Θ(critical · log n). The log factor is mandatory. Writing Θ(√n) for T=2T(n/4)+√n costs points. <span class="pdf-ref">📄 p. 227</span></li>
+  <li><strong>Log-gap → non-applicable. Explain all three failures.</strong> If f(n)/n<sup>log<sub>b</sub>a</sup> = logn (or any log power), show each case fails in turn. Then optionally apply extended MT: increment the log exponent by 1. <span class="pdf-ref">📄 p. 227</span></li>
+</ol>
+
+<h4>KEY FORMULAS / STRUCTURES:</h4>
+<table class="data">
+  <thead><tr><th>Case</th><th>Condition (shortcut for f=n<sup>c</sup>)</th><th>Full condition</th><th>T(n) =</th><th>Page</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Case 1</strong></td><td>a &gt; b<sup>c</sup></td><td>f(n) = O(n<sup>log<sub>b</sub>a - ε</sup>)</td><td>Θ(n<sup>log<sub>b</sub>a</sup>)</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td><strong>Case 2</strong></td><td>a = b<sup>c</sup></td><td>f(n) = Θ(n<sup>log<sub>b</sub>a</sup>)</td><td>Θ(n<sup>log<sub>b</sub>a</sup> · log n)</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td><strong>Case 3</strong></td><td>a &lt; b<sup>c</sup></td><td>f(n) = Ω(n<sup>log<sub>b</sub>a + ε</sup>) + regularity</td><td>Θ(f(n))</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+    <tr><td><strong>Non-applicable</strong></td><td>a = b<sup>c</sup> but f has log factor</td><td>f(n) = n<sup>log<sub>b</sub>a</sup>·log<sup>k</sup>n</td><td>Θ(n<sup>log<sub>b</sub>a</sup>·log<sup>k+1</sup>n) [ext.]</td><td><span class="pdf-ref">📄 p. 227</span></td></tr>
+  </tbody>
+</table>
+
+<h4>CANONICAL KNOWN RECURRENCES:</h4>
+<table class="data">
+  <thead><tr><th>Algorithm</th><th>Recurrence</th><th>Case</th><th>T(n)</th></tr></thead>
+  <tbody>
+    <tr><td>Binary search</td><td>T(n)=T(n/2)+1</td><td>Case 2</td><td>Θ(log n)</td></tr>
+    <tr><td>Merge sort</td><td>T(n)=2T(n/2)+n</td><td>Case 2</td><td>Θ(n log n)</td></tr>
+    <tr><td>Karatsuba</td><td>T(n)=3T(n/2)+n</td><td>Case 1</td><td>Θ(n<sup>1.585</sup>)</td></tr>
+    <tr><td>Strassen</td><td>T(n)=7T(n/2)+n²</td><td>Case 1</td><td>Θ(n<sup>2.807</sup>)</td></tr>
+    <tr><td>Naive matrix mult</td><td>T(n)=8T(n/2)+n²</td><td>Case 1</td><td>Θ(n³)</td></tr>
+    <tr><td>A6 Q1 (a=48)</td><td>T(n)=48T(n/4)+n²</td><td>Case 1</td><td>Θ(n<sup>log₄48</sup>)≈Θ(n<sup>2.79</sup>)</td></tr>
+    <tr><td>A6 Q2</td><td>T(n)=2T(n/4)+√n</td><td>Case 2</td><td>Θ(√n·log n)</td></tr>
+    <tr><td>A6 Q3</td><td>T(n)=4T(n/2)+n²logn</td><td>Non-applicable</td><td>Θ(n²log²n) [ext.]</td></tr>
+  </tbody>
+</table>
+
+<h4>THE CANONICAL ALGORITHM (Master Theorem Application):</h4>
+<pre class="pseudocode">
+To solve T(n) = a·T(n/b) + f(n):
+
+1. Compute  n* = n^(log_b(a))  using: log_b(a) = log(a)/log(b)
+2. Compare f(n) to n*:
+   a > b^c (f=n^c smaller):  Case 1 → T(n) = Theta(n*)
+   a = b^c (f=n^c equal):    Case 2 → T(n) = Theta(n* · log n)
+   a < b^c (f=n^c larger):   Case 3 → T(n) = Theta(f(n))
+   f = n* · log^k n:          NON-APPLICABLE → extended MT: Theta(n* · log^(k+1) n)
+
+Key identity for Strassen problems: 4^(log_2(7)) = 7^2 = 49
+Largest a beating Strassen with b=4: a = 48
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 227</span></div>
+
+<h4>ASSIGNMENTS THAT TEST THIS TOPIC:</h4>
+<table class="data">
+  <thead><tr><th>Assignment</th><th>Question</th><th>What It Tests</th><th>Graded?</th></tr></thead>
+  <tbody>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q1</td><td>Case 1 + Strassen comparison + algebraic identity 4<sup>log₂7</sup>=49; largest a=48</td><td>✅ YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q2</td><td>Case 2 applied to T=2T(n/4)+√n; must include log n factor in answer</td><td>✅ YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A6</span></td><td>Q3</td><td>Non-applicable case with n²logn; must rule out all three cases explicitly</td><td>✅ YES</td></tr>
+  </tbody>
+</table>
+
+<h4>THE #1 MISTAKE ON EXAM QUESTIONS ABOUT THIS TOPIC:</h4>
+<p>Writing Θ(n<sup>c</sup>) instead of Θ(n<sup>c</sup>·log n) for Case 2 problems. When you correctly identify Case 2 (f(n) = Θ(n<sup>log<sub>b</sub>a</sup>)), the answer ALWAYS has an additional log n factor. This applies to merge sort (Θ(n log n), NOT Θ(n)) and to A6 Q2 (Θ(√n · log n), NOT Θ(√n)). The log n factor represents the number of equally-weighted levels in the recursion tree. <span class="pdf-ref">📄 p. 227</span></p>
+
+<h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+<p class="remember">
+  Compute n<sup>log<sub>b</sub>a</sup>. Compare f(n) to it polynomially. f smaller → Case 1 (leaves win). f equal → Case 2 (add log n). f larger → Case 3 (root wins). f = critical × log<sup>k</sup>n → Non-applicable (use extended MT, add one more log). <span class="pdf-ref">📄 p. 227</span>
+</p>
+
+<h4>QUICK-NAVIGATION GUIDE — WHERE TO FIND THIS IN THE LECTURE PDF:</h4>
+<table class="data">
+  <thead><tr><th>If you want to review...</th><th>Go to PDF page(s)...</th><th>Also in...</th></tr></thead>
+  <tbody>
+    <tr><td>Merge sort recurrence + analysis</td><td>pp. 79–90</td><td>[KT] §5.1</td></tr>
+    <tr><td>Quicksort recurrence + analysis</td><td>pp. 95–104</td><td>[KT] §5.1</td></tr>
+    <tr><td>Binary search recurrence</td><td>pp. 55–62</td><td>[KT] §5.1</td></tr>
+    <tr><td>Master Theorem — all three cases</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td>Recursion tree method</td><td>pp. 227–228</td><td>[CLRS] §4.4</td></tr>
+    <tr><td>Case 1 example (Karatsuba)</td><td>pp. 227–238</td><td>[KT] §5.5</td></tr>
+    <tr><td>Case 2 example (merge sort via MT)</td><td>p. 227</td><td>[CLRS] §4.5</td></tr>
+    <tr><td>Non-applicable case</td><td>p. 227</td><td>[CLRS] §4.5 (gap note)</td></tr>
+    <tr><td>Strassen matrix multiplication</td><td>pp. 239–248</td><td>[KT] §5.5, [CLRS] §4.2</td></tr>
+    <tr><td>Strassen comparison (A6 Q1 type)</td><td>pp. 227, 239–248</td><td>[CLRS] §4.2, §4.5</td></tr>
+    <tr><td>Akra-Bazzi theorem</td><td>p. 228</td><td>Akra-Bazzi 1998 (original paper)</td></tr>
+    <tr><td>Substitution method proof</td><td>p. 79</td><td>[CLRS] §4.3</td></tr>
+    <tr><td>A6 Q1 solution (largest a=48)</td><td>all_assignment_merged_ocr.pdf</td><td>§3 of this guide</td></tr>
+    <tr><td>A6 Q2 solution (Case 2, √n·log n)</td><td>all_assignment_merged_ocr.pdf</td><td>§3 of this guide</td></tr>
+    <tr><td>A6 Q3 solution (non-applicable)</td><td>all_assignment_merged_ocr.pdf</td><td>§3 of this guide</td></tr>
+  </tbody>
+</table>
+
+<h4>15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM):</h4>
+<ol>
+  <li>Write from memory: "Critical polynomial = n<sup>log<sub>b</sub>a</sup>" and the three case conditions. Verify on T(n) = 2T(n/2) + n. <span class="pdf-ref">📄 p. 227</span></li>
+  <li>Practice: compute log₄(2), log₄(16), log₄(48) without a calculator. <span class="pdf-ref">📄 p. 39</span></li>
+  <li>Write the Strassen identity: 4<sup>log₂7</sup> = 7² = 49. Then state the largest a = 48 and why. <span class="pdf-ref">📄 pp. 227, 239</span></li>
+  <li>Apply Case 2 to T = 2T(n/4) + √n from memory. Verify you wrote Θ(√n·log n), not Θ(√n). <span class="pdf-ref">📄 p. 227</span></li>
+  <li>Write the non-applicable statement: "n²logn fails Case 1 (not smaller than n²), Case 2 (not Θ(n²)), Case 3 (logn/n<sup>ε</sup>→0)." <span class="pdf-ref">📄 p. 227</span></li>
+  <li>Draw the recursion tree for T(n) = 2T(n/2) + n up to level 3. Verify equal work per level. <span class="pdf-ref">📄 pp. 227–228</span></li>
+  <li>State the 5 canonical algorithms and their complexities (binary search, merge sort, Karatsuba, Strassen, naive matrix mult). <span class="pdf-ref">📄 pp. 55, 79, 227, 239</span></li>
+  <li>Re-read the grading checklist from Q5–Q7 above and confirm you can hit every bullet point. <span class="pdf-ref">📄 pp. 79, 227</span></li>
+</ol>
+
+</div>
+
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This deep-dive covers <strong>only Topic 3 — Recurrences &amp; the Master Theorem</strong>. Companion guides cover the other 8 topics: NP-Completeness (Topic 1), Asymptotic Analysis (Topic 2), Graph Algorithms BFS/DFS (Topic 4), Shortest Paths (Topic 5), Mathematical Proof Techniques (Topic 6), Algorithm Design Patterns (Topic 7), Divide &amp; Conquer (Topic 8), and Dynamic Programming &amp; DAGs (Topic 9). Read this deep-dive first, then use the condensed <span class="mono">study_guide_topic3_recurrences_master_theorem.html</span> guide for final exam review.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs570-dd-topic3';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active', isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>

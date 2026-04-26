@@ -1,0 +1,2978 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 Final Exam · Topic 9 (Beginner Deep-Dive): Dynamic Programming &amp; DAG Algorithms Unpacked</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE — DARK MODE (default)
+     Topic 9 deep-dive: Steel-blue / Navy accent
+     ================================================================ */
+  :root {
+    --bg: #0d1117;
+    --bg-elev: #161b22;
+    --bg-elev2: #1c2128;
+    --surface: #21262d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-faint: #6e7681;
+    --border: #30363d;
+
+    --accent: #58a6ff;
+    --accent-soft: #0d2340;
+    --accent-text: #79c0ff;
+
+    --topic-accent: #1565c0;   /* Steel-blue — Topic 9 deep-dive (DP & DAGs) */
+    --topic-light: #42a5f5;    /* lighter for text contrast in dark mode */
+
+    --red: #ff7b72;
+    --orange: #ffa657;
+    --yellow: #f0e040;
+    --gold: #e3b341;
+    --green: #3fb950;
+    --green-soft: #0d3320;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d2340;
+    --blue-text: #79c0ff;
+    --purple-soft: #2d1558;
+    --purple-text: #d2a8ff;
+    --code-bg: #0d1117;
+    --code-text: #7ee787;
+    --teal: #39d0d8;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #f6f8fa;
+    --bg-elev: #ffffff;
+    --bg-elev2: #eef1f5;
+    --surface: #e4e9f0;
+    --text: #1f2328;
+    --text-dim: #57606a;
+    --text-faint: #8c959f;
+    --border: #d0d7de;
+
+    --accent: #0969da;
+    --accent-soft: #ddf4ff;
+    --accent-text: #0550ae;
+
+    --topic-accent: #0d47a1;
+    --topic-light: #1565c0;
+
+    --red: #cf222e;
+    --orange: #bc4c00;
+    --yellow: #9a6700;
+    --gold: #9a6700;
+    --green: #1a7f37;
+    --green-soft: #dafbe1;
+    --green-text: #1a7f37;
+    --blue-soft: #ddf4ff;
+    --blue-text: #0550ae;
+    --purple-soft: #fbefff;
+    --purple-text: #8250df;
+    --code-bg: #eef1f5;
+    --code-text: #116329;
+    --teal: #0e7490;
+  }
+
+  [data-theme="light"] strong { color: #1f2328; }
+  [data-theme="light"] h1 { color: #1f2328; }
+  [data-theme="light"] h3 { color: #1f2328; }
+  [data-theme="light"] .question-stem { color: #1f2328; }
+  [data-theme="light"] pre.diagram { color: #1f2328; background: #eef1f5; border-color: var(--accent); }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(13,71,161,0.05), rgba(9,105,218,0.04)); }
+  [data-theme="light"] .callout { background: rgba(188,76,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(13,71,161,0.06); }
+  [data-theme="light"] .callout.warning { background: rgba(207,34,46,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(13,71,161,0.05), rgba(9,105,218,0.05)); }
+  [data-theme="light"] .step { background: #eef1f5; }
+  [data-theme="light"] .misconception { background: #eef1f5; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #1a7f37; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #eef1f5; }
+  [data-theme="light"] .subtopic-banner { background: #ffffff; }
+  [data-theme="light"] .section-block { background: #ffffff; }
+  [data-theme="light"] .dp-cell { background: #ddf4ff; border-color: #0969da; color: #0550ae; }
+  [data-theme="light"] .dp-cell.filled { background: #e6f4ea; border-color: #1a7f37; color: #1a7f37; }
+  [data-theme="light"] .dp-cell.highlight { background: #fff3cd; border-color: #9a6700; color: #9a6700; }
+
+  /* ================================================================
+     THEME TOGGLE
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease, left 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-light); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-light); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono { font-family: 'Consolas', 'Courier New', 'Menlo', monospace; }
+
+  h1, h2, h3, h4 {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  h1 { font-size: 2.1em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.55em; color: var(--topic-light); margin: 36px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.2em; color: #fff; margin: 26px 0 10px 0; }
+  h4 { color: var(--text-dim); margin: 18px 0 8px 0; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.82em; }
+
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     SIDEBAR NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 14px;
+    overflow-y: auto;
+    font-size: 0.84em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-light);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 5px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+    line-height: 1.4;
+  }
+  nav.sidebar a:hover {
+    background: var(--bg-elev2);
+    color: var(--text);
+    border-left-color: var(--topic-light);
+    text-decoration: none;
+  }
+  nav.sidebar a.sub { padding-left: 20px; font-size: 0.91em; }
+  nav.sidebar a.sub2 { padding-left: 32px; font-size: 0.86em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; }
+    nav.sidebar {
+      top: 44px; width: 100%; height: 52px; bottom: auto;
+      display: flex; overflow-x: auto; overflow-y: hidden;
+      padding: 8px 12px; gap: 6px; align-items: center;
+    }
+    nav.sidebar .nav-title { display: none; }
+    nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  /* ================================================================
+     CONTAINER
+     ================================================================ */
+  main { max-width: 1100px; padding: 40px 48px 80px 48px; }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-light);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.9em; margin-top: 8px; line-height: 1.7; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(21,101,192,0.08), rgba(88,166,255,0.06));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-light);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label {
+    color: var(--topic-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.78em;
+  }
+
+  /* ================================================================
+     SECTION BLOCKS
+     ================================================================ */
+  .section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     SUB-TOPIC BANNER
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-light);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title { font-size: 1.12em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages {
+    display: block;
+    margin-top: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    color: var(--text-faint);
+  }
+
+  /* ================================================================
+     BADGES & REFS
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+
+  .asgn-ref {
+    display: inline-block;
+    background: var(--purple-soft);
+    color: var(--purple-text);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    vertical-align: baseline;
+  }
+
+  .signal-explicit { color: var(--red); font-weight: bold; }
+  .signal-strong   { color: var(--orange); font-weight: bold; }
+  .exam-star       { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.page-index th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  table.page-index td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child {
+    font-family: 'Consolas', monospace;
+    color: var(--accent-text);
+    white-space: nowrap;
+  }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+    font-size: 0.92em;
+  }
+  table.data th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  table.data td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  table.trace-table {
+    border-collapse: collapse;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82rem;
+    width: 100%;
+    margin: 12px 0;
+  }
+  table.trace-table th {
+    background: var(--accent-soft);
+    color: var(--blue-text);
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  table.trace-table td {
+    border: 1px solid var(--border);
+    padding: 7px 10px;
+    vertical-align: top;
+    text-align: center;
+  }
+  table.trace-table tr.highlight { background: var(--bg-elev2); }
+  table.trace-table td.active-cell {
+    background: rgba(21,101,192,0.25);
+    color: var(--topic-light);
+    font-weight: 700;
+  }
+  table.trace-table td.done-cell {
+    background: rgba(63,185,80,0.15);
+    color: var(--green);
+  }
+
+  /* DP Table visualization */
+  .dp-table-wrap { overflow-x: auto; margin: 14px 0; }
+  .dp-grid {
+    display: inline-grid;
+    gap: 3px;
+    padding: 12px;
+    background: var(--bg-elev2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .dp-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 40px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.85em;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    transition: background 0.2s, color 0.2s;
+  }
+  .dp-cell.filled { background: rgba(63,185,80,0.15); border-color: var(--green); color: var(--green-text); }
+  .dp-cell.highlight { background: rgba(227,179,65,0.2); border-color: var(--gold); color: var(--gold); }
+  .dp-cell.header { background: var(--surface); border-color: var(--border); color: var(--text-dim); font-weight: 700; }
+  .dp-cell.base { background: rgba(88,166,255,0.15); border-color: var(--accent); color: var(--accent-text); }
+
+  /* ================================================================
+     ASCII DIAGRAM
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.5;
+    color: #dce3f0;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+
+  pre.pseudocode {
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 16px 20px;
+    border-radius: 6px;
+    border-left: 3px solid var(--topic-light);
+    overflow-x: auto;
+    white-space: pre;
+    margin: 14px 0;
+  }
+
+  .diagram-source {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    margin: -6px 0 16px 0;
+    font-style: italic;
+  }
+
+  /* Proof blocks */
+  .proof-block {
+    background: var(--bg-elev);
+    border-left: 4px solid var(--gold);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .proof-block .proof-step { margin: 8px 0; padding-left: 16px; }
+  .proof-block .proof-label { color: var(--gold); font-weight: bold; font-size: 0.9em; }
+
+  /* Step blocks */
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-light);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head { color: var(--topic-light); font-weight: 600; font-size: 0.95em; }
+  .step .step-detail { margin-top: 6px; font-size: 0.93em; color: var(--text-dim); }
+
+  /* Myth / reality */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+
+  /* Complexity box */
+  .complexity-box {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: monospace;
+    display: inline-block;
+    margin: 4px 2px;
+    font-size: 0.95em;
+  }
+
+  /* ================================================================
+     QUESTION BLOCKS
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-format {
+    background: var(--surface);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  .question-stem {
+    font-weight: 500;
+    font-size: 1.02em;
+    margin: 6px 0 10px 0;
+    color: #fff;
+  }
+  [data-theme="light"] .question-stem { color: #1f2328; }
+  ol.mcq-options { margin: 4px 0 6px 0; padding-left: 26px; }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block {
+    margin-top: 10px;
+    border-left: 3px solid var(--green);
+    padding-left: 14px;
+  }
+  details.answer-block summary {
+    cursor: pointer;
+    color: var(--green);
+    font-weight: bold;
+    padding: 4px 0;
+    list-style: none;
+    user-select: none;
+  }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #56d364; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-warmup { background: #0e2a1a; color: #a5d6a7; border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; border: 1px solid #1f4e30; }
+
+  /* ================================================================
+     CHEAT SHEET
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(21,101,192,0.06), rgba(88,166,255,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .cheat-sheet h4 { color: var(--gold); font-size: 0.82em; margin-top: 14px; }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,166,87,0.06);
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95em;
+    transition: background 0.22s ease;
+  }
+  .callout.quote {
+    border-left-color: var(--topic-light);
+    background: rgba(21,101,192,0.07);
+  }
+  .callout.warning {
+    border-left-color: var(--red);
+    background: rgba(255,123,114,0.06);
+  }
+  .callout strong.lbl {
+    display: block;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.74em;
+    margin-bottom: 4px;
+  }
+  .callout.quote strong.lbl { color: var(--topic-light); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  ul.plain { padding-left: 22px; }
+  ul.plain li { margin: 4px 0; }
+
+  .challenge-banner {
+    background: rgba(227,179,65,0.08);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 0.82em;
+    color: var(--gold);
+    font-family: 'Consolas', monospace;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  /* Graph node visualization helpers */
+  .node-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--topic-accent);
+    color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8em;
+    font-weight: 700;
+    margin: 0 2px;
+  }
+
+  /* Separator lines */
+  .sep { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ================================================================
+     PRINT STYLES
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar { display: none; }
+    .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    h1, h2, h3, h4 { color: #000; }
+    pre.diagram, pre.pseudocode { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR NAV -->
+<nav class="sidebar">
+  <div class="nav-title">🔵 Topic 9 ⓓ</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#warmup">🧗 Warm-up Glossary</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 What &amp; Why (Plain English)</a>
+  <a href="#section-1-1" class="sub">→ 1.1 Real-World Problem</a>
+  <a href="#section-1-2" class="sub">→ 1.2 DAG Taxonomy</a>
+  <a href="#section-1-3" class="sub">→ 1.3 DP as Smart Recursion</a>
+  <a href="#section-1-4" class="sub">→ 1.4 Technical Definitions</a>
+  <a href="#section-1-5" class="sub">→ 1.5 Key Terms Table</a>
+  <a href="#section-2">§2 How — Worked Examples</a>
+  <a href="#section-2a" class="sub">→ 2a · Topological Sort (traced)</a>
+  <a href="#section-2b" class="sub">→ 2b · Longest Path in DAG</a>
+  <a href="#section-2c" class="sub">→ 2c · Floyd-Warshall as DP</a>
+  <a href="#section-2d" class="sub">→ 2d · Bellman-Ford as DP</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#warmup-checks">🧗 Warm-up Checks</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#section-4-mcq" class="sub">→ MCQ (4 questions)</a>
+  <a href="#section-4-proof" class="sub">→ Proof (3 questions)</a>
+  <a href="#section-4-trace" class="sub">→ Trace / Analysis (3 questions)</a>
+  <a href="#section-4-pseudo" class="sub">→ Pseudocode / Design (3 questions)</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="top-bar" role="toolbar" aria-label="Document toolbar">
+  <span class="crumb">CS 570 · Final Exam · <strong>Topic 9 (Deep-Dive) · Dynamic Programming &amp; DAG Algorithms Unpacked</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" aria-label="Toggle colour theme" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- DOCUMENT HEADER -->
+<div class="doc-header">
+  <h1>Topic 9 (Beginner Deep-Dive)</h1>
+  <h3 style="color: var(--topic-light); margin-top: 4px; font-weight: 500;">Dynamic Programming &amp; DAG Algorithms Unpacked — Topological Sort · Longest Path · Floyd-Warshall · Bellman-Ford · DP Foundations, with every step traced on concrete examples</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final (Quiz 2) — April 30, 2026 · Class hours · Closed-book, one cheat sheet<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lec1_27_all-combined-densed-ocr.pdf</span> (Lectures 1–27, Spring 2026)<br>
+    <strong>Companion to:</strong> <span class="mono">study_guide_topic9_dp_dag.html</span> (read this deep-dive FIRST, then use the condensed guide for review)<br>
+    <strong>Audience:</strong> Designed for a student who can follow assignment solutions but is not yet confident deriving DAG algorithms or DP recurrences independently. Every term is unpacked. Every algorithm is traced step-by-step with real numbers.
+  </div>
+</div>
+
+<!-- USAGE BANNER -->
+<div class="banner">
+  <strong class="label">How to use this deep-dive — 4-step reading strategy</strong><br>
+  <strong>Step 1.</strong> Read the <a href="#warmup">🧗 Warm-up Glossary</a> — 10 prerequisite concepts the topic assumes you know (recursion, graphs, shortest paths, subproblems).<br>
+  <strong>Step 2.</strong> Read §1 (What &amp; Why) and §2 (How) carefully — trace every topological sort, every DP table fill, every Bellman-Ford iteration on paper alongside the guide.<br>
+  <strong>Step 3.</strong> Take the <a href="#warmup-checks">§3.5 Warm-up Understanding Checks</a> to confirm you absorbed §1–2 before attempting exam-style questions.<br>
+  <strong>Step 4.</strong> Tackle §3 (Exam Intelligence), §4 (Practice Questions), and §5 (Cheat Sheet) as your final exam-prep drill.
+</div>
+
+<!-- ============================================================
+     WARM-UP GLOSSARY
+     ============================================================ -->
+<h2 id="warmup">🧗 Warm-up Glossary — Vocabulary You Need Before §1</h2>
+<p style="color: var(--text-dim);">
+  Dynamic programming and DAG algorithms build on several foundational ideas that lectures often use without re-introducing.
+  If every term below is already crystal-clear, skip to <a href="#section-1">§1</a>. Otherwise, read each entry carefully — these are the prerequisites.
+</p>
+
+<div class="section-block">
+
+<h3>What is a directed graph? <span class="pdf-ref">📄 p. 105</span></h3>
+<p>
+  A <strong>directed graph</strong> (also called a <em>digraph</em>) G = (V, E) has vertices (circles) connected by
+  <em>directed</em> edges (arrows). An arrow from A to B means "you can travel A → B" but NOT automatically B → A.
+  This is different from an undirected graph where edges have no direction.
+</p>
+<pre class="diagram">
+  Directed graph example:
+
+     A ──▶ B ──▶ C
+     │           │
+     ▼           ▼
+     D ──────▶  E
+
+  Edge (A,B) exists — travel from A to B is allowed.
+  Edge (B,A) does NOT exist — you cannot go backward.
+  This directionality is what makes DAGs useful for modeling dependencies.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 105</span></div>
+
+<h3>What is a cycle in a graph? <span class="pdf-ref">📄 p. 141</span></h3>
+<p>
+  A <strong>cycle</strong> is a path that starts and ends at the same vertex.
+  In a directed graph: a directed cycle means you can follow arrows and return to where you started.
+</p>
+<pre class="diagram">
+  Cycle:      A ──▶ B ──▶ C ──▶ A    (you can go round and round forever)
+
+  No cycle:   A ──▶ B ──▶ C          (no arrow leads back to A or B)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 141</span></div>
+
+<h3>What is a DAG? <span class="pdf-ref">📄 pp. 141–156</span></h3>
+<p>
+  A <strong>DAG</strong> (Directed Acyclic Graph) is a directed graph with <em>no directed cycles</em>.
+  The key idea: you can always move "forward" in a DAG — you can never loop back to where you were.
+  This makes DAGs perfect for representing <em>dependencies</em> (if A must happen before B, draw an arrow A → B).
+</p>
+<p>
+  <strong>Concrete example:</strong> University course prerequisites. Algebra must come before Calculus. Calculus before Differential Equations. You can never take Algebra "after" Differential Equations — there's no cycle. <span class="pdf-ref">📄 p. 141</span>
+</p>
+
+<h3>What is "indegree" and "outdegree"? <span class="pdf-ref">📄 pp. 141–156</span></h3>
+<p>
+  The <strong>indegree</strong> of a vertex is the number of arrows pointing INTO it (incoming edges).
+  The <strong>outdegree</strong> is the number of arrows pointing OUT OF it.
+</p>
+<pre class="diagram">
+  In the graph:  A ──▶ B ──▶ C
+                        │
+                        ▼
+                        D
+
+  Indegree of A = 0 (no arrows come into A)
+  Indegree of B = 1 (only A points to B)
+  Indegree of C = 1 (only B points to C)
+  Indegree of D = 1 (only B points to D)
+  Outdegree of B = 2 (B points to C and D)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–156</span></div>
+<p>
+  A vertex with <strong>indegree 0</strong> has no dependencies — it can be done first.
+  This is the key to topological sorting. <span class="pdf-ref">📄 pp. 141–156</span>
+</p>
+
+<h3>What is recursion? <span class="pdf-ref">📄 p. 63</span></h3>
+<p>
+  <strong>Recursion</strong> is when a function calls itself with a smaller input.
+  The function gets simpler and simpler until it hits a <em>base case</em> — the simplest possible input where the answer is known directly (no further recursion needed).
+</p>
+<p>
+  <strong>Example:</strong> factorial(4) = 4 × factorial(3) = 4 × 3 × factorial(2) = 4 × 3 × 2 × factorial(1) = 4 × 3 × 2 × 1 = 24. The base case is factorial(1) = 1. <span class="pdf-ref">📄 p. 63</span>
+</p>
+
+<h3>What are "overlapping subproblems"? <span class="pdf-ref">📄 pp. 207–226</span></h3>
+<p>
+  When solving a problem recursively, you sometimes compute the <em>same smaller sub-problem multiple times</em>.
+  This redundancy is wasteful. For example, when computing Fibonacci(5): Fibonacci(3) gets computed twice — once for Fibonacci(5) and once for Fibonacci(4).
+</p>
+<pre class="diagram">
+  fib(5)
+  ├─ fib(4)
+  │   ├─ fib(3)          ← computed here
+  │   │   ├─ fib(2)
+  │   │   └─ fib(1)
+  │   └─ fib(2)
+  └─ fib(3)              ← computed AGAIN — redundant!
+      ├─ fib(2)
+      └─ fib(1)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 207–226</span></div>
+
+<h3>What is memoization? <span class="pdf-ref">📄 pp. 207–226</span></h3>
+<p>
+  <strong>Memoization</strong> (note: memo, not memori-z-ation) is the technique of storing the result of a
+  sub-problem the first time you compute it, so you never re-compute it. It turns exponential recursion into
+  polynomial-time computation.
+</p>
+<p>
+  <strong>Analogy:</strong> Imagine you solve a crossword clue ("Capital of France") and write "Paris" in the margin.
+  Next time you see the same clue, you look at your margin note instead of thinking again.
+  Memoization is your "margin note" system for recursive functions.
+</p>
+
+<h3>What is "optimal substructure"? <span class="pdf-ref">📄 pp. 207–226</span></h3>
+<p>
+  A problem has <strong>optimal substructure</strong> if: the optimal solution to the whole problem contains optimal solutions to its sub-problems.
+</p>
+<p>
+  <strong>Example:</strong> The shortest path from city A to city C via city B is the shortest path A→B plus the shortest path B→C. You can't have a "shortcut" that ignores the optimal sub-paths. <span class="pdf-ref">📄 pp. 207–226</span>
+</p>
+
+<h3>What is "path relaxation" in shortest path algorithms? <span class="pdf-ref">📄 pp. 207–216</span></h3>
+<p>
+  <strong>Relaxation</strong> is the operation: "If I can reach vertex k through vertex j and the total distance would be less than what I currently know, update my estimate."
+</p>
+<pre class="diagram">
+  Current estimate:  dist[C] = 10
+  We discover:       dist[A] = 3,  weight(A → C) = 4
+  Relaxation:        3 + 4 = 7 &lt; 10, so dist[C] = 7  ← UPDATE!
+
+  This is the "relax(A, C)" operation. <span class="pdf-ref">📄 pp. 207–210</span>
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 207–210</span></div>
+
+<h3>What is a weight matrix W[i][j]? <span class="pdf-ref">📄 pp. 217–226</span></h3>
+<p>
+  A <strong>weight matrix</strong> W is a 2D array (n × n for n vertices) where W[i][j] is the weight of the edge from vertex i to vertex j.
+  If no edge exists: W[i][j] = ∞ (or a very large number). If i = j: W[i][j] = 0 (no cost to stay at the same vertex).
+</p>
+<pre class="diagram">
+  Graph:  1 ──3──▶ 2
+          │         │
+          5         2
+          ▼         ▼
+          3 ──1──▶ 4
+
+  Weight matrix W:
+       1    2    3    4
+  1  [ 0    3    5    ∞ ]
+  2  [ ∞    0    ∞    2 ]
+  3  [ ∞    ∞    0    1 ]
+  4  [ ∞    ∞    ∞    0 ]
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<h3>What does "bottom-up" vs "top-down" mean in DP? <span class="pdf-ref">📄 pp. 207–226</span></h3>
+<p>
+  <strong>Top-down DP:</strong> Start with the big problem, recurse down to smaller problems, and use memoization to avoid recomputation. You solve sub-problems on-demand.
+</p>
+<p>
+  <strong>Bottom-up DP:</strong> Start with the smallest base cases and iteratively build up to the big problem. You fill in a table from left-to-right (or bottom-to-top), ensuring sub-problem answers are available before they're needed.
+</p>
+<p>
+  Both produce the same answer. Bottom-up is often faster in practice because it avoids function-call overhead. <span class="pdf-ref">📄 pp. 207–226</span>
+</p>
+
+</div>
+
+<!-- ============================================================
+     TOPIC PAGE INDEX
+     ============================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color: var(--text-faint); font-size: 0.86em;">
+  Topic 9 spans Lectures 15–16 (DAGs, topological sort, longest path) and Lectures 21–22 (Bellman-Ford, Floyd-Warshall interpreted as DP).
+  Use this index to jump to the exact PDF location for any concept.
+</p>
+
+<h4 style="color: var(--topic-light); margin-top: 22px;">DAG Foundations &amp; Topological Sort <span class="pdf-ref">📄 pp. 141–168</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>DAG definition: directed, no cycles</td><td>pp. 141–156</td><td>Lec 15</td></tr>
+    <tr><td>Topological sort: indegree-0 queue, O(n²)</td><td>pp. 141–156</td><td>Lec 15</td></tr>
+    <tr><td>Topological sort O(n+m) version: queue + decrement</td><td>pp. 141–156</td><td>Lec 15</td></tr>
+    <tr><td>Longest path in DAG: 1 + max(LP to incoming neighbors) <span class="exam-star">⭐</span></td><td>pp. 157–168</td><td>Lec 16</td></tr>
+    <tr><td>Combined topo sort + longest path</td><td>pp. 157–168</td><td>Lec 16</td></tr>
+    <tr><td>Tasks with dependencies (course prerequisites model)</td><td>pp. 141–156</td><td>Lec 15</td></tr>
+    <tr><td>DFS-based topological sort (post-order numbering)</td><td>pp. 141–156</td><td>Lec 15</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color: var(--topic-light); margin-top: 22px;">DP in Shortest Paths <span class="pdf-ref">📄 pp. 207–226</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Bellman-Ford: iterative relaxation DP, O(nm) <span class="exam-star">⭐</span></td><td>pp. 207–216</td><td>Lec 21</td></tr>
+    <tr><td>Negative edge weights and negative cycles</td><td>pp. 207–216</td><td>Lec 21</td></tr>
+    <tr><td>Why shortest paths have ≤ n−1 edges</td><td>pp. 207–216</td><td>Lec 21</td></tr>
+    <tr><td>Floyd-Warshall: W^k[i][j] recurrence — O(n³) <span class="exam-star">⭐</span></td><td>pp. 217–226</td><td>Lec 22</td></tr>
+    <tr><td>Floyd-Warshall space: O(n²) rolling two-matrix update</td><td>pp. 217–226</td><td>Lec 22</td></tr>
+    <tr><td>Warshall transitive closure (path matrix P[i][j])</td><td>pp. 217–226</td><td>Lec 22</td></tr>
+    <tr><td>DP framing of Floyd-Warshall: vertex set expansion</td><td>pp. 217–226</td><td>Lec 22</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 1: WHAT & WHY
+     ============================================================ -->
+<h2 id="section-1">§1 — What &amp; Why, in Plain English</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 141–168, 207–226 (Lectures 15–16, 21–22)</div>
+
+<div class="section-block">
+
+<h3 id="section-1-1">1.1 The fundamental problem — how do we handle dependencies efficiently? <span class="pdf-ref">📄 pp. 141–156</span></h3>
+
+<p>
+  Imagine you're planning a trip abroad. You need to: get a passport, buy a ticket, apply for a visa (requires ticket), get travel insurance (requires passport), buy foreign exchange (requires visa). You can't buy a ticket before getting a passport (some airlines require it). You can't get a visa without a ticket. These are <em>dependencies</em>.
+</p>
+<p>
+  The question is: <strong>what order do you do tasks in?</strong> And a harder question: <strong>what is the minimum number of days</strong> if some tasks take one day each, but independent tasks can be done in parallel?
+</p>
+<p>
+  This is exactly what <strong>Directed Acyclic Graphs (DAGs)</strong> model, and <strong>topological sorting</strong> + <strong>longest path</strong> answer. <span class="pdf-ref">📄 pp. 141–156</span>
+</p>
+
+<pre class="diagram">
+  Trip planning as a DAG:
+
+         [passport] ────▶ [ticket] ────▶ [visa] ────▶ [forex]
+               │                │
+               └──▶ [insurance]  └──▶ [insurance]
+
+  Arrow A → B means: "A must come before B"
+  No cycles (you can't need a visa to get a passport to get a visa)
+
+  Topological sort gives one valid ordering:
+    passport, insurance, ticket, visa, forex
+
+  Longest path (in terms of tasks) tells you: how many STEPS minimum?
+    passport(1) → ticket(2) → visa(3) → forex(4)  = 4 steps minimum
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–156</span></div>
+
+<p>
+  Now for a completely different-looking problem: we want the <strong>shortest path between every pair of cities</strong> in a country's road network.
+  Bellman-Ford and Floyd-Warshall use <strong>dynamic programming</strong> — the same "build up from sub-problems" idea —
+  to solve this efficiently. <span class="pdf-ref">📄 pp. 207–226</span>
+</p>
+
+<h3 id="section-1-2">1.2 The core ideas — DAGs and DP as a system <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<p>
+  Topic 9 has four interlocking ideas, all using the same underlying philosophy: <em>solve smaller problems first, then combine them</em>.
+</p>
+
+<table class="data">
+  <thead>
+    <tr><th>Algorithm</th><th>The "sub-problem" idea</th><th>Order of solving</th><th>Final goal</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Topological Sort</strong></td>
+      <td>Find a vertex with no prerequisites (indegree 0), then remove it and repeat</td>
+      <td>Process vertices in dependency order</td>
+      <td>Valid ordering of all tasks <span class="pdf-ref">📄 pp. 141–156</span></td>
+    </tr>
+    <tr>
+      <td><strong>Longest Path in DAG</strong></td>
+      <td>Longest path to vertex v = 1 + max(longest path to any predecessor of v)</td>
+      <td>Process in topological order — predecessors always computed first</td>
+      <td>Minimum number of sequential steps <span class="pdf-ref">📄 pp. 157–168</span></td>
+    </tr>
+    <tr>
+      <td><strong>Bellman-Ford</strong></td>
+      <td>"After k edges, what is the shortest distance to each vertex?"</td>
+      <td>Iterate n−1 times; each iteration = one more edge allowed</td>
+      <td>Single-source shortest paths (allows negative weights) <span class="pdf-ref">📄 pp. 207–216</span></td>
+    </tr>
+    <tr>
+      <td><strong>Floyd-Warshall</strong></td>
+      <td>"Using only vertices {1…k} as intermediates, what is the shortest path from i to j?"</td>
+      <td>Expand k from 0 to n; each step allows one more intermediate vertex</td>
+      <td>All-pairs shortest paths <span class="pdf-ref">📄 pp. 217–226</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="section-1-3">1.3 Dynamic programming — the "smart recursion" metaphor <span class="pdf-ref">📄 pp. 207–226</span></h3>
+
+<p>
+  Imagine you're a delivery driver who must find the fastest route between every pair of cities in a country.
+  The naive approach: for each pair (A, B), search exhaustively — but there are n² pairs and exponentially many paths.
+  The smart approach: build up systematically.
+</p>
+<p>
+  <strong>The DP insight for Floyd-Warshall:</strong> Start by allowing only city 1 as an intermediate stop. Then expand to allow city 1 or 2. Then city 1, 2, or 3. At each step, the new answer is either:
+  (a) the old answer (city k isn't useful on this path), or
+  (b) go through city k (combine path i→k with path k→j, both already computed).
+</p>
+
+<pre class="diagram">
+  Floyd-Warshall's expanding "allowed intermediate" idea:
+
+  Step k=0:  Only direct edges.  W⁰[i][j] = direct edge weight (or ∞)
+  Step k=1:  Can pass through city 1.  W¹[i][j] = min(W⁰[i][j], W⁰[i][1] + W⁰[1][j])
+  Step k=2:  Can pass through cities 1 or 2.  W²[i][j] = min(W¹[i][j], W¹[i][2] + W¹[2][j])
+  ...
+  Step k=n:  All cities allowed as intermediates. Final answer!
+
+  "Each step, we ask: does going THROUGH city k improve any path i→j?"
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<p>
+  <strong>The DP insight for Bellman-Ford:</strong> Shortest paths have at most n−1 edges (no loops in a shortest path).
+  So iterate: after iteration k, we know the shortest path using at most k edges.
+  After n−1 iterations, we have all shortest paths. <span class="pdf-ref">📄 pp. 207–210</span>
+</p>
+
+<div class="callout quote">
+  <strong class="lbl">📌 Unifying Principle</strong>
+  Every algorithm in Topic 9 follows the same DP recipe:
+  <strong>(1)</strong> Define what a "sub-problem" is (smaller graph, fewer edges allowed, fewer vertices allowed).
+  <strong>(2)</strong> Write a recurrence: "the answer to this sub-problem in terms of slightly smaller sub-problems."
+  <strong>(3)</strong> Solve in the RIGHT ORDER — so that when you compute a sub-problem, all the sub-problems it depends on are already done.
+  <span class="pdf-ref">📄 pp. 141–226</span>
+</div>
+
+<h3 id="section-1-4">1.4 Technical definitions (using lecture notation) <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<p><strong>DAG:</strong> A directed graph G = (V, E) with no directed cycles. <span class="pdf-ref">📄 pp. 141–156</span></p>
+
+<p><strong>Topological ordering:</strong> An enumeration of the vertices of a DAG as {i₁, i₂, ..., iₙ} such that for any edge (j, k) ∈ E, j appears before k in the enumeration. Equivalently: all dependencies come before their dependents. <span class="pdf-ref">📄 pp. 141–156</span></p>
+
+<p><strong>Longest path to vertex v (LPT[v]):</strong> If indegree(v) = 0, then LPT[v] = 0. Otherwise, LPT[v] = 1 + max{ LPT[j] : (j,v) ∈ E }. Compute in topological order so all predecessors j are computed before v. <span class="pdf-ref">📄 pp. 157–168</span></p>
+
+<p><strong>Bellman-Ford update rule:</strong> For each edge (j,k): Distance[k] = min(Distance[k], Distance[j] + weight(j,k)). Repeat for all edges n−1 times. Initialize Distance[source] = 0, Distance[others] = ∞. <span class="pdf-ref">📄 pp. 207–216</span></p>
+
+<p><strong>Floyd-Warshall recurrence:</strong> W⁰[i][j] = direct edge weight (∞ if no edge). For k = 1 to n: W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]). Final answer in W^n. <span class="pdf-ref">📄 pp. 217–226</span></p>
+
+<h3 id="section-1-5">1.5 Key Terms Table (20+ rows) <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Term</th><th>Plain-English Meaning</th><th>Example / Mental Image</th><th>📄 Page</th><th>Textbook Ref</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DAG</strong></td>
+      <td>Directed graph with no cycles — always moves "forward"</td>
+      <td>Course prerequisites: Algebra → Calculus → DiffEq</td>
+      <td>pp. 141–156</td>
+      <td>[KT] §3.6, [CLRS] §22.4</td>
+    </tr>
+    <tr>
+      <td><strong>Topological sort</strong></td>
+      <td>Order vertices so all dependencies come first</td>
+      <td>Get passport before buying ticket</td>
+      <td>pp. 141–156</td>
+      <td>[KT] §3.6, [CLRS] §22.4</td>
+    </tr>
+    <tr>
+      <td><strong>Indegree</strong></td>
+      <td>Number of incoming arrows to a vertex</td>
+      <td>Indegree 0 = no prerequisites = start here</td>
+      <td>pp. 141–156</td>
+      <td>[KT] §3.6</td>
+    </tr>
+    <tr>
+      <td><strong>Outdegree</strong></td>
+      <td>Number of outgoing arrows from a vertex</td>
+      <td>Outdegree 0 = nothing depends on this further</td>
+      <td>pp. 141–156</td>
+      <td>[KT] §3.6</td>
+    </tr>
+    <tr>
+      <td><strong>Longest path to v (LPT[v])</strong></td>
+      <td>The maximum number of steps to reach v along any path</td>
+      <td>Min semesters to reach "Differential Equations" in a course sequence</td>
+      <td>pp. 157–168</td>
+      <td>[KT] §6.2</td>
+    </tr>
+    <tr>
+      <td><strong>Dynamic programming (DP)</strong></td>
+      <td>Solve a big problem by solving and storing answers to smaller sub-problems</td>
+      <td>Margin notes: write down "Paris = capital of France" so you never rethink it</td>
+      <td>pp. 207–226</td>
+      <td>[KT] Ch.6, [CLRS] Ch.15</td>
+    </tr>
+    <tr>
+      <td><strong>Overlapping subproblems</strong></td>
+      <td>The same smaller problem appears many times in the recursion</td>
+      <td>fib(3) computed twice in fib(5) recursion tree</td>
+      <td>pp. 207–226</td>
+      <td>[KT] Ch.6</td>
+    </tr>
+    <tr>
+      <td><strong>Optimal substructure</strong></td>
+      <td>Best solution to big problem uses best solutions to sub-problems</td>
+      <td>Shortest path A→C via B = shortest A→B + shortest B→C</td>
+      <td>pp. 207–226</td>
+      <td>[CLRS] Ch.15</td>
+    </tr>
+    <tr>
+      <td><strong>Memoization</strong></td>
+      <td>Cache sub-problem answers to avoid recomputation</td>
+      <td>Write the answer in the margin; look it up next time</td>
+      <td>pp. 207–226</td>
+      <td>[CLRS] §15.3</td>
+    </tr>
+    <tr>
+      <td><strong>Bottom-up DP</strong></td>
+      <td>Fill a table from smallest sub-problems up to the big problem</td>
+      <td>Build a house: foundation first, then walls, then roof</td>
+      <td>pp. 207–226</td>
+      <td>[CLRS] §15.3</td>
+    </tr>
+    <tr>
+      <td><strong>Relaxation (update(j,k))</strong></td>
+      <td>If going through j improves the known distance to k, update it</td>
+      <td>Find a shortcut route and update your GPS estimate</td>
+      <td>pp. 207–210</td>
+      <td>[KT] §6.8, [CLRS] §24.1</td>
+    </tr>
+    <tr>
+      <td><strong>Bellman-Ford</strong></td>
+      <td>Single-source shortest paths; handles negative weights; O(nm)</td>
+      <td>Iterate "relax all edges" exactly n−1 times</td>
+      <td>pp. 207–216</td>
+      <td>[KT] §6.8, [CLRS] §24.1</td>
+    </tr>
+    <tr>
+      <td><strong>Negative cycle</strong></td>
+      <td>A directed cycle where total edge weight is negative</td>
+      <td>A loop that makes total cost decrease every time you go around</td>
+      <td>pp. 207–210</td>
+      <td>[CLRS] §24.1</td>
+    </tr>
+    <tr>
+      <td><strong>Floyd-Warshall</strong></td>
+      <td>All-pairs shortest paths using DP over intermediate vertex set; O(n³)</td>
+      <td>"Can I improve i→j if I'm allowed to go through city k?"</td>
+      <td>pp. 217–226</td>
+      <td>[KT] §6.10, [CLRS] §25.2</td>
+    </tr>
+    <tr>
+      <td><strong>W^k[i][j]</strong></td>
+      <td>Shortest path from i to j using only vertices {1,…,k} as intermediates</td>
+      <td>k=0: direct edges only; k=n: all vertices allowed</td>
+      <td>pp. 217–226</td>
+      <td>[CLRS] §25.2</td>
+    </tr>
+    <tr>
+      <td><strong>Transitive closure</strong></td>
+      <td>P[i][j] = 1 if there is ANY path from i to j (regardless of cost)</td>
+      <td>Warshall's algorithm: A can reach B (TRUE/FALSE)</td>
+      <td>pp. 217–226</td>
+      <td>[CLRS] §25.4</td>
+    </tr>
+    <tr>
+      <td><strong>Rolling array (space optimization)</strong></td>
+      <td>Use only two arrays (current k and previous k) instead of full 3D table</td>
+      <td>Only keep "yesterday's" and "today's" distance estimates</td>
+      <td>pp. 217–226</td>
+      <td>[CLRS] §25.2</td>
+    </tr>
+    <tr>
+      <td><strong>Subproblem order constraint</strong></td>
+      <td>You must solve sub-problems before the problems that need them</td>
+      <td>Topological order ensures predecessors are computed first</td>
+      <td>pp. 141–226</td>
+      <td>[KT] Ch.6</td>
+    </tr>
+    <tr>
+      <td><strong>Complexity: O(n+m) topo sort</strong></td>
+      <td>Linear-time topological sort using a queue</td>
+      <td>Process each vertex and edge exactly once</td>
+      <td>pp. 141–156</td>
+      <td>[KT] §3.6, [CLRS] §22.4</td>
+    </tr>
+    <tr>
+      <td><strong>Complexity: O(nm) Bellman-Ford</strong></td>
+      <td>Outer loop n−1 times; inner loop m edges</td>
+      <td>n=5 vertices, m=8 edges → at most 32 relaxation operations</td>
+      <td>pp. 207–216</td>
+      <td>[KT] §6.8, [CLRS] §24.1</td>
+    </tr>
+    <tr>
+      <td><strong>Complexity: O(n³) Floyd-Warshall</strong></td>
+      <td>Three nested loops: k from 1 to n, i from 1 to n, j from 1 to n</td>
+      <td>n=100 cities → 1,000,000 operations — fast!</td>
+      <td>pp. 217–226</td>
+      <td>[KT] §6.10, [CLRS] §25.2</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Point of Confusion — Know This Before §2</strong>
+  Longest path in a DAG (Topic 9) is NOT the same as shortest path. And it is NOT computationally hard in a DAG —
+  it can be computed in O(n+m) using topological sort. But <em>longest path in a general graph</em> (with cycles allowed) IS
+  NP-hard (the Hamiltonian path problem). The key distinction: DAG = tractable; general graph = intractable.
+  <span class="pdf-ref">📄 pp. 157–168</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     SECTION 2: HOW — WORKED EXAMPLES
+     ============================================================ -->
+<h2 id="section-2">§2 — How: Worked Examples from Scratch</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 141–168, 207–226 (Lectures 15–16, 21–22)</div>
+
+<p style="color: var(--text-dim);">
+  Each sub-section follows the same three-step recipe: <strong>(1) Intuition</strong> — what are we trying to do?
+  <strong>(2) Mechanism</strong> — the actual algorithm structure with pseudocode.
+  <strong>(3) Worked Example</strong> — a concrete trace with real numbers on a small graph. Trace along with pencil and paper.
+</p>
+
+<!-- ─── 2a ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2a">
+  <span class="letter">2a</span>
+  <span class="title">Topological Sort — Ordering Tasks with Dependencies</span>
+  <span class="pages">Lecture PDF: pp. 141–156 (Lectures 15) · Lec 16 Python session</span>
+</div>
+
+<h3>Intuition: Find who has no prerequisites, do them first <span class="pdf-ref">📄 pp. 141–156</span></h3>
+<p>
+  Think about making breakfast: you can't eat toast before you toast the bread; you can't toast bread before you put it in the toaster; you can't put it in the toaster before you plug in the toaster. But you CAN make coffee in parallel with all of this, because coffee has no dependency on toast.
+</p>
+<p>
+  Topological sort finds a valid ordering where all dependencies come before their dependents. The algorithm is elegant: repeatedly find a vertex with no remaining prerequisites (indegree 0), output it, then remove it (decrementing the indegrees of its successors). <span class="pdf-ref">📄 pp. 141–156</span>
+</p>
+
+<h3>Mechanism: Two versions of topological sort <span class="pdf-ref">📄 pp. 141–156</span></h3>
+
+<pre class="pseudocode">
+# VERSION 1: O(n²) — simple, uses adjacency matrix
+function TopologicalSort_Simple(G):
+    compute indegree[i] for all i        # scan adjacency matrix, O(n²)
+    for each step from 1 to n:
+        choose j with indegree[j] == 0   # find next vertex, O(n)
+        output j
+        indegree[j] = -1                 # mark as done
+        for each neighbor k of j:
+            indegree[k] -= 1             # update successors, O(n)
+    # Total: O(n²)
+
+# VERSION 2: O(n+m) — efficient, uses queue + adjacency list
+function TopologicalSort_Fast(G):
+    compute indegree[v] for all v        # scan adjacency lists, O(n+m)
+    Queue = all vertices with indegree 0 # initialize queue
+    result = []
+    while Queue is not empty:
+        v = remove_front(Queue)          # dequeue a ready vertex
+        result.append(v)                 # output it
+        for each neighbor w of v:        # update successors
+            indegree[w] -= 1
+            if indegree[w] == 0:
+                Queue.add(w)             # w is now ready
+    return result                        # total: O(n+m)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–156</span></div>
+
+<h3>Worked Example: 6-task project DAG <span class="pdf-ref">📄 pp. 141–156</span></h3>
+
+<pre class="diagram">
+  Our working DAG — tasks for a trip:
+
+      [A:Passport] ──▶ [B:Ticket] ──▶ [D:Visa] ──▶ [E:Forex]
+             │
+             └──▶ [C:Insurance] ──▶ [D:Visa]
+                                          ▲
+                                          │
+                                    [F:Photos]
+
+  Edges: (A,B), (A,C), (B,D), (C,D), (D,E), (F,D)
+
+  Initial indegrees:
+    A: 0  (no prerequisites)
+    B: 1  (needs A)
+    C: 1  (needs A)
+    D: 3  (needs B, C, F)
+    E: 1  (needs D)
+    F: 0  (no prerequisites)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–156</span></div>
+
+<p>Now let's trace the O(n+m) algorithm step by step:</p>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Step</th><th>Queue (ready tasks)</th><th>Task Selected</th><th>Indegree Updates</th><th>Output So Far</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Init</td>
+      <td>{A, F}</td>
+      <td>—</td>
+      <td>A=0, B=1, C=1, D=3, E=1, F=0</td>
+      <td>[]</td>
+    </tr>
+    <tr class="highlight">
+      <td>1</td>
+      <td class="active-cell">{A, F} → remove A</td>
+      <td><strong>A</strong></td>
+      <td>B: 1→0 (add to queue), C: 1→0 (add to queue)</td>
+      <td>[A]</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td class="active-cell">{F, B, C} → remove F</td>
+      <td><strong>F</strong></td>
+      <td>D: 3→2</td>
+      <td>[A, F]</td>
+    </tr>
+    <tr class="highlight">
+      <td>3</td>
+      <td class="active-cell">{B, C} → remove B</td>
+      <td><strong>B</strong></td>
+      <td>D: 2→1</td>
+      <td>[A, F, B]</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td class="active-cell">{C} → remove C</td>
+      <td><strong>C</strong></td>
+      <td>D: 1→0 (add to queue!)</td>
+      <td>[A, F, B, C]</td>
+    </tr>
+    <tr class="highlight">
+      <td>5</td>
+      <td class="active-cell">{D} → remove D</td>
+      <td><strong>D</strong></td>
+      <td>E: 1→0 (add to queue)</td>
+      <td>[A, F, B, C, D]</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td class="active-cell">{E} → remove E</td>
+      <td><strong>E</strong></td>
+      <td>(no successors)</td>
+      <td class="done-cell">[A, F, B, C, D, E] ✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>Final topological order: A, F, B, C, D, E</strong><br>
+  This is ONE valid ordering — other valid orderings also exist (e.g., F, A, B, C, D, E). Any order where
+  every dependency comes before its dependent is valid. <span class="pdf-ref">📄 pp. 141–156</span>
+</p>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Key Point: Topological Sort is NOT Unique</strong>
+  Multiple valid topological orderings can exist for the same DAG. In our example, A and F can be swapped.
+  Any ordering where all edges (u,v) have u appearing before v is valid.
+  The exam may ask you to verify an ordering is valid or find ONE valid ordering — both are fine.
+  <span class="pdf-ref">📄 pp. 141–156</span>
+</div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ What if the DAG has a cycle?</strong>
+  If the graph has a cycle, topological sort will fail — the queue will become empty before all vertices are output.
+  This is the detection method! If |output| &lt; |V|, a cycle exists. <span class="pdf-ref">📄 pp. 141–156</span>
+</div>
+
+<!-- ─── 2b ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2b">
+  <span class="letter">2b</span>
+  <span class="title">Longest Path in a DAG — Minimum Semesters to Graduate</span>
+  <span class="pages">Lecture PDF: pp. 157–168 (Lecture 16)</span>
+</div>
+
+<h3>Intuition: Group courses into semesters — how many minimum? <span class="pdf-ref">📄 pp. 157–168</span></h3>
+<p>
+  Imagine you're planning which semester to take each course. CS101 must come before CS201, which must come before CS301.
+  This is a chain of length 3 — you need at least 3 semesters. The <strong>longest chain of dependencies</strong>
+  determines the <strong>minimum number of sequential steps</strong>.
+</p>
+<p>
+  The longest path in the DAG IS the answer to "minimum time to completion assuming parallel tasks."
+  Every vertex on the longest path is a bottleneck — it cannot be parallelized. <span class="pdf-ref">📄 pp. 157–168</span>
+</p>
+
+<h3>Mechanism: DP in topological order <span class="pdf-ref">📄 pp. 157–168</span></h3>
+
+<p>The recurrence is beautifully simple:</p>
+
+<pre class="pseudocode">
+function LongestPath(G):
+    # Assumes G is a DAG; compute topological order first
+    topo_order = TopologicalSort_Fast(G)
+
+    # Initialize: all vertices start with LPT = 0
+    for each vertex v:
+        LPT[v] = 0
+
+    # Process vertices in topological order (left to right)
+    for each vertex v in topo_order:
+        # LPT[v] is already set from when predecessors were processed
+        for each successor w of v:              # for each outgoing edge (v,w)
+            if LPT[v] + 1 > LPT[w]:
+                LPT[w] = LPT[v] + 1            # relax: can we reach w in more steps via v?
+
+    # The answer is the maximum LPT across all vertices
+    return max(LPT[v] for all v)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 157–168</span></div>
+
+<p>
+  <strong>Why must we process in topological order?</strong> Because when we compute LPT[v], we need LPT[j] for ALL
+  predecessors j of v to already be correct. Topological order guarantees that ALL edges (j,v) have j appearing before v —
+  so all predecessors are processed before v. <span class="pdf-ref">📄 pp. 157–168</span>
+</p>
+
+<h3>Worked Example: Course prerequisite DAG <span class="pdf-ref">📄 pp. 157–168</span></h3>
+
+<pre class="diagram">
+  Course prerequisite DAG (vertices = courses):
+
+  [CS101] ──▶ [CS201] ──▶ [CS301] ──▶ [CS401]
+                 │
+                 └──▶ [CS250] ──▶ [CS350]
+
+  [MATH101] ──▶ [CS201]
+
+  Edges:
+    CS101 → CS201, CS201 → CS301, CS301 → CS401
+    CS201 → CS250, CS250 → CS350
+    MATH101 → CS201
+
+  Indegrees:
+    CS101:   0      MATH101:  0
+    CS201:   2      CS250:    1
+    CS301:   1      CS350:    1
+    CS401:   1
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 157–168</span></div>
+
+<p>
+  <strong>Step 1:</strong> Topological order (one valid ordering): MATH101, CS101, CS201, CS301, CS250, CS401, CS350
+</p>
+<p>
+  <strong>Step 2:</strong> Compute LPT values (longest path TO each vertex):
+</p>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Vertex Processed</th><th>LPT update rule</th><th>LPT[MATH101]</th><th>LPT[CS101]</th><th>LPT[CS201]</th><th>LPT[CS301]</th><th>LPT[CS250]</th><th>LPT[CS401]</th><th>LPT[CS350]</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Init</td><td>—</td><td class="base">0</td><td class="base">0</td><td class="base">0</td><td class="base">0</td><td class="base">0</td><td class="base">0</td><td class="base">0</td></tr>
+    <tr class="highlight">
+      <td><strong>MATH101</strong></td>
+      <td>LPT[CS201] = max(0, 0+1) = 1</td>
+      <td class="done-cell">0</td><td>0</td><td class="active-cell">1</td><td>0</td><td>0</td><td>0</td><td>0</td>
+    </tr>
+    <tr>
+      <td><strong>CS101</strong></td>
+      <td>LPT[CS201] = max(1, 0+1) = 1 (no change)</td>
+      <td class="done-cell">0</td><td class="done-cell">0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td>
+    </tr>
+    <tr class="highlight">
+      <td><strong>CS201</strong></td>
+      <td>LPT[CS301] = max(0, 1+1) = 2<br>LPT[CS250] = max(0, 1+1) = 2</td>
+      <td class="done-cell">0</td><td class="done-cell">0</td><td class="done-cell">1</td><td class="active-cell">2</td><td class="active-cell">2</td><td>0</td><td>0</td>
+    </tr>
+    <tr>
+      <td><strong>CS301</strong></td>
+      <td>LPT[CS401] = max(0, 2+1) = 3</td>
+      <td class="done-cell">0</td><td class="done-cell">0</td><td class="done-cell">1</td><td class="done-cell">2</td><td>2</td><td class="active-cell">3</td><td>0</td>
+    </tr>
+    <tr class="highlight">
+      <td><strong>CS250</strong></td>
+      <td>LPT[CS350] = max(0, 2+1) = 3</td>
+      <td class="done-cell">0</td><td class="done-cell">0</td><td class="done-cell">1</td><td class="done-cell">2</td><td class="done-cell">2</td><td>3</td><td class="active-cell">3</td>
+    </tr>
+    <tr>
+      <td><strong>CS401</strong></td>
+      <td>(no successors)</td>
+      <td class="done-cell">0</td><td class="done-cell">0</td><td class="done-cell">1</td><td class="done-cell">2</td><td class="done-cell">2</td><td class="done-cell">3</td><td>3</td>
+    </tr>
+    <tr class="highlight">
+      <td><strong>CS350</strong></td>
+      <td>(no successors)</td>
+      <td class="done-cell">0</td><td class="done-cell">0</td><td class="done-cell">1</td><td class="done-cell">2</td><td class="done-cell">2</td><td class="done-cell">3</td><td class="done-cell">3</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>Result:</strong> max(LPT) = <strong>3</strong> (achieved by CS401 and CS350).<br>
+  This means you need at least <strong>4 semesters</strong> minimum (semesters 1 through 4): <br>
+  Semester 1: CS101, MATH101 · Semester 2: CS201 · Semester 3: CS301, CS250 · Semester 4: CS401, CS350. <span class="pdf-ref">📄 pp. 157–168</span>
+</p>
+
+<div class="callout">
+  <strong class="lbl">🔗 Why does LPT start at 0?</strong>
+  LPT[v] = 0 for all source vertices (indegree 0). This represents "v is in semester/group 0 — the first round."
+  LPT[v] = k means v is in the (k+1)th group, so the total number of groups (semesters) is max(LPT) + 1.
+  <span class="pdf-ref">📄 pp. 157–168</span>
+</div>
+
+<!-- ─── 2c ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2c">
+  <span class="letter">2c</span>
+  <span class="title">Floyd-Warshall — All-Pairs Shortest Paths via DP</span>
+  <span class="pages">Lecture PDF: pp. 217–226 (Lecture 22)</span>
+</div>
+
+<h3>Intuition: Progressively allow more intermediate cities <span class="pdf-ref">📄 pp. 217–226</span></h3>
+<p>
+  Imagine you're planning road trips between 4 cities {1, 2, 3, 4}. Initially, you only know direct roads.
+  Then you realize: "If I'm allowed to stop in city 1, does that create any shortcuts?"
+  Then: "If I'm allowed to stop in city 1 OR 2, any more shortcuts?"
+  At each step k, you check: "Does going THROUGH city k improve any path from i to j?"
+</p>
+
+<pre class="diagram">
+  Floyd-Warshall's core question at each step k:
+
+  "Is  i ──▶ k ──▶ j  shorter than the current known i ──▶ j?"
+
+  If W^(k-1)[i][k] + W^(k-1)[k][j] &lt; W^(k-1)[i][j]:
+      W^k[i][j] = W^(k-1)[i][k] + W^(k-1)[k][j]    ← use city k as intermediate
+  Else:
+      W^k[i][j] = W^(k-1)[i][j]                     ← skip city k
+
+  This is the DP recurrence. Two cases. That's it!
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<h3>Mechanism: Floyd-Warshall pseudocode <span class="pdf-ref">📄 pp. 217–226</span></h3>
+
+<pre class="pseudocode">
+function FloydWarshall(W, n):
+    # W is the n×n weight matrix: W[i][j] = edge weight (∞ if no edge), W[i][i] = 0
+    # We work in-place using a rolling update (only need previous W^(k-1))
+
+    D = copy(W)          # D[i][j] will hold the current shortest path estimate
+
+    for k = 1 to n:                          # try each vertex as an intermediate
+        for i = 1 to n:                      # from each source
+            for j = 1 to n:                  # to each destination
+                if D[i][k] + D[k][j] &lt; D[i][j]:
+                    D[i][j] = D[i][k] + D[k][j]   # found a shorter path via k
+
+    return D             # D[i][j] = shortest path from i to j
+
+# Complexity: O(n³) — three nested loops of size n
+# Space: O(n²) — just the n×n matrix D (rolling update, no extra k-dimension)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<h3>Worked Example: 4-city road network <span class="pdf-ref">📄 pp. 217–226</span></h3>
+
+<pre class="diagram">
+  Road network with 4 cities and directed roads:
+
+       ──3──▶
+  1            2
+  │   ▲    │
+  5   │8   2
+  ▼   │    ▼
+  3 ──1──▶ 4
+
+  Edges: (1,2,3)  (1,3,5)  (2,4,2)  (3,2,8) wait...
+  Actually: let's use:
+    (1→2): weight 3
+    (1→3): weight 5
+    (2→4): weight 2
+    (3→4): weight 1
+    (4→1): weight 8   (creates a cycle, but Floyd-Warshall still works!)
+
+  Initial weight matrix W⁰ (= W^0):
+
+       To: 1    2    3    4
+  From 1 [ 0    3    5    ∞ ]
+       2 [ ∞    0    ∞    2 ]
+       3 [ ∞    ∞    0    1 ]
+       4 [ 8    ∞    ∞    0 ]
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<p><strong>Iteration k=1</strong> (allow city 1 as intermediate — can we improve paths by going through 1?)</p>
+<p>For each pair (i,j), check: D[i][1] + D[1][j] vs D[i][j]</p>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Pair (i,j)</th><th>Current D[i][j]</th><th>D[i][1] + D[1][j]</th><th>New D[i][j]</th><th>Changed?</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>(2,2)</td><td>0</td><td>∞+3=∞</td><td>0</td><td>No</td></tr>
+    <tr><td>(2,3)</td><td>∞</td><td>∞+5=∞</td><td>∞</td><td>No</td></tr>
+    <tr class="highlight"><td><strong>(4,2)</strong></td><td>∞</td><td>8+3=11</td><td><strong>11</strong></td><td class="active-cell">YES!</td></tr>
+    <tr class="highlight"><td><strong>(4,3)</strong></td><td>∞</td><td>8+5=13</td><td><strong>13</strong></td><td class="active-cell">YES!</td></tr>
+    <tr><td>(4,4)</td><td>0</td><td>8+∞=∞</td><td>0</td><td>No</td></tr>
+    <tr><td>all others</td><td>various</td><td>∞ terms</td><td>unchanged</td><td>No</td></tr>
+  </tbody>
+</table>
+
+<p><strong>After k=1:</strong> We found that 4→1→2 has weight 11, and 4→1→3 has weight 13. Both use city 1 as an intermediate.</p>
+
+<p><strong>Matrix W¹ after k=1:</strong></p>
+<pre class="diagram">
+       To: 1    2    3    4
+  From 1 [ 0    3    5    ∞ ]
+       2 [ ∞    0    ∞    2 ]
+       3 [ ∞    ∞    0    1 ]
+       4 [ 8   11   13    0 ]   ← rows 4 updated!
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<p><strong>Iteration k=2</strong> (allow city 2 as intermediate — can paths improve by going through 2?)</p>
+<p>Key updates: look for i→2→j improvements. D[i][2] + D[2][j]</p>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Pair (i,j)</th><th>Current D[i][j]</th><th>D[i][2] + D[2][j]</th><th>New D[i][j]</th><th>Changed?</th></tr>
+  </thead>
+  <tbody>
+    <tr class="highlight"><td><strong>(1,4)</strong></td><td>∞</td><td>3+2=5</td><td><strong>5</strong></td><td class="active-cell">YES!</td></tr>
+    <tr class="highlight"><td><strong>(4,4)</strong></td><td>0</td><td>11+2=13</td><td>0</td><td>No (0 &lt; 13)</td></tr>
+    <tr><td>(3,4)</td><td>1</td><td>∞+2=∞</td><td>1</td><td>No</td></tr>
+  </tbody>
+</table>
+
+<p><strong>After k=2:</strong> We found that 1→2→4 has weight 5. This is the only significant new path.</p>
+
+<p><strong>Iteration k=3</strong> (allow city 3 as intermediate): D[i][3] + D[3][j]</p>
+<table class="trace-table">
+  <thead>
+    <tr><th>Key pairs</th><th>Current</th><th>Via 3: D[i][3]+D[3][j]</th><th>New</th></tr>
+  </thead>
+  <tbody>
+    <tr class="highlight"><td><strong>(1,4)</strong></td><td>5</td><td>5+1=6</td><td>5 (no change: 5&lt;6)</td></tr>
+    <tr class="highlight"><td><strong>(2,4)</strong></td><td>2</td><td>∞+1=∞</td><td>2</td></tr>
+    <tr><td>(4,4)</td><td>0</td><td>13+1=14</td><td>0</td></tr>
+  </tbody>
+</table>
+<p>No improvements in k=3 (city 3 only connects to city 4, which we already know directly from most paths).</p>
+
+<p><strong>Iteration k=4</strong> (allow city 4 as intermediate): D[i][4] + D[4][j]</p>
+<table class="trace-table">
+  <thead>
+    <tr><th>Key pairs</th><th>Current</th><th>Via 4: D[i][4]+D[4][j]</th><th>New</th></tr>
+  </thead>
+  <tbody>
+    <tr class="highlight"><td><strong>(1,1)</strong></td><td>0</td><td>5+8=13</td><td>0 (no change)</td></tr>
+    <tr class="highlight"><td><strong>(2,1)</strong></td><td>∞</td><td>2+8=10</td><td><strong>10</strong> YES!</td></tr>
+    <tr class="highlight"><td><strong>(3,1)</strong></td><td>∞</td><td>1+8=9</td><td><strong>9</strong> YES!</td></tr>
+    <tr class="highlight"><td><strong>(2,2)</strong></td><td>0</td><td>2+11=13</td><td>0 (no change)</td></tr>
+    <tr class="highlight"><td><strong>(3,2)</strong></td><td>∞</td><td>1+11=12</td><td><strong>12</strong> YES!</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Final Matrix W⁴ (all-pairs shortest paths):</strong></p>
+
+<pre class="diagram">
+       To: 1    2    3    4
+  From 1 [ 0    3    5    5 ]   ← 1→4 = 5 (via 2)
+       2 [ 10   0    ∞    2 ]   ← 2→1 = 10 (via 4→1), 2→3 = ∞ (no path!)
+       3 [ 9   12    0    1 ]   ← 3→1 = 9 (via 4), 3→2 = 12 (via 4→1→2)
+       4 [ 8   11   13    0 ]   ← 4→2 = 11 (via 1→2), 4→3 = 13 (via 1→3)
+
+  Note: W[2][3] = ∞ because there is truly no path from 2 to 3 in this graph.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Space Optimization — "Rolling Array"</strong>
+  A naive 3D array W[i][j][k] would use O(n³) space — wasteful.
+  The key insight: when computing W^k, you only need W^(k-1).
+  So you can use ONE 2D matrix and update it in place (or two matrices, swapping each iteration).
+  The lecture notes this explicitly: "We need two 'slices' at a time." Result: O(n²) space. <span class="pdf-ref">📄 pp. 217–226</span>
+</div>
+
+<!-- ─── 2d ─────────────────────────────────────────────────── -->
+<div class="subtopic-banner" id="section-2d">
+  <span class="letter">2d</span>
+  <span class="title">Bellman-Ford as DP — Single-Source Shortest Paths with Negative Weights</span>
+  <span class="pages">Lecture PDF: pp. 207–216 (Lecture 21)</span>
+</div>
+
+<h3>Intuition: Build shortest paths edge by edge <span class="pdf-ref">📄 pp. 207–216</span></h3>
+<p>
+  Dijkstra's algorithm "burns" vertices — once settled, never revisited. This works only with non-negative weights.
+  With negative edges, a "settled" vertex might have a shorter path discovered later via a negative edge.
+  Bellman-Ford takes a different approach: don't commit to any vertex being final. Instead, repeat the relaxation process.
+</p>
+<p>
+  <strong>The key observation:</strong> In a graph with n vertices, any shortest path (without negative cycles)
+  uses at most n−1 edges (visiting each vertex at most once). So iterate n−1 times, each time relaxing all edges.
+  After k iterations, we know all shortest paths of length ≤ k. <span class="pdf-ref">📄 pp. 207–210</span>
+</p>
+
+<pre class="diagram">
+  Why n−1 iterations suffice:
+
+  Any shortest path in a graph with n vertices visits at most n different vertices.
+  That means it has at most n−1 edges (edges = vertices − 1 for a simple path).
+
+  After iteration 1: we know all 1-edge shortest paths.
+  After iteration 2: we know all 2-edge shortest paths.
+  ...
+  After iteration n−1: we know all (n−1)-edge shortest paths.
+  = ALL shortest paths (since no shortest path needs more than n−1 edges).
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 207–210</span></div>
+
+<h3>Mechanism: Bellman-Ford pseudocode <span class="pdf-ref">📄 pp. 207–216</span></h3>
+
+<pre class="pseudocode">
+function BellmanFord(G, source s):
+    # Initialize distances
+    Distance[s] = 0
+    for each vertex v ≠ s:
+        Distance[v] = ∞
+
+    # Relax all edges n−1 times
+    for iteration = 1 to n−1:                    # ← outer loop: n−1 times
+        for each edge (j, k) with weight w(j,k):  # ← inner loop: m edges
+            if Distance[j] + w(j,k) &lt; Distance[k]:
+                Distance[k] = Distance[j] + w(j,k)   # relax!
+
+    # OPTIONAL: detect negative cycles
+    for each edge (j, k) with weight w(j,k):
+        if Distance[j] + w(j,k) &lt; Distance[k]:
+            print("Negative cycle detected!")   # n-th iteration still improves → cycle
+
+    return Distance
+
+# Complexity: O(n × m) = O(nm)
+# Works with: negative edge weights (but not negative cycles)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 207–216</span></div>
+
+<h3>Worked Example: 5-vertex graph with negative edge <span class="pdf-ref">📄 pp. 207–216</span></h3>
+
+<pre class="diagram">
+  5-vertex directed graph, source = vertex 1:
+
+       ──4──▶
+  1            2
+  │            │
+  6        -2  │
+  ▼            ▼
+  3 ──2──▶ 4 ──3──▶ 5
+
+  Plus edge 1→4: weight 7
+
+  Edges with weights:
+    (1,2): 4    (1,3): 6    (1,4): 7
+    (2,4): -2   (4,5): 3    (3,4): 2
+
+  Initial: Distance = [0, ∞, ∞, ∞, ∞]
+           (indices 1–5 for vertices 1–5)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 207–216</span></div>
+
+<p>We have n=5 vertices, so we run n−1=4 iterations. (Many will converge early.)</p>
+
+<table class="trace-table">
+  <thead>
+    <tr><th>Iteration</th><th>Edge relaxed</th><th>Dist[1]</th><th>Dist[2]</th><th>Dist[3]</th><th>Dist[4]</th><th>Dist[5]</th></tr>
+  </thead>
+  <tbody>
+    <tr class="highlight"><td>Init</td><td>—</td><td class="done-cell">0</td><td>∞</td><td>∞</td><td>∞</td><td>∞</td></tr>
+    <tr>
+      <td rowspan="6"><strong>Iter 1</strong></td>
+      <td>(1,2): 4 → Dist[2]=min(∞,0+4)=4</td>
+      <td class="done-cell">0</td><td class="active-cell">4</td><td>∞</td><td>∞</td><td>∞</td>
+    </tr>
+    <tr>
+      <td>(1,3): 6 → Dist[3]=min(∞,0+6)=6</td>
+      <td class="done-cell">0</td><td>4</td><td class="active-cell">6</td><td>∞</td><td>∞</td>
+    </tr>
+    <tr>
+      <td>(1,4): 7 → Dist[4]=min(∞,0+7)=7</td>
+      <td class="done-cell">0</td><td>4</td><td>6</td><td class="active-cell">7</td><td>∞</td>
+    </tr>
+    <tr>
+      <td>(2,4): -2 → Dist[4]=min(7,4+(-2))=2</td>
+      <td class="done-cell">0</td><td>4</td><td>6</td><td class="active-cell">2</td><td>∞</td>
+    </tr>
+    <tr>
+      <td>(3,4): 2 → Dist[4]=min(2,6+2)=2 (no change)</td>
+      <td class="done-cell">0</td><td>4</td><td>6</td><td>2</td><td>∞</td>
+    </tr>
+    <tr class="highlight">
+      <td>(4,5): 3 → Dist[5]=min(∞,2+3)=5</td>
+      <td class="done-cell">0</td><td class="done-cell">4</td><td class="done-cell">6</td><td class="done-cell">2</td><td class="active-cell">5</td>
+    </tr>
+    <tr>
+      <td><strong>Iter 2</strong></td>
+      <td>All edges re-relaxed — no improvements (already optimal)</td>
+      <td class="done-cell">0</td><td class="done-cell">4</td><td class="done-cell">6</td><td class="done-cell">2</td><td class="done-cell">5</td>
+    </tr>
+    <tr>
+      <td><strong>Iter 3, 4</strong></td>
+      <td>No changes — algorithm has converged</td>
+      <td class="done-cell">0</td><td class="done-cell">4</td><td class="done-cell">6</td><td class="done-cell">2</td><td class="done-cell">5</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>Final shortest distances from vertex 1:</strong> [0, 4, 6, 2, 5]<br>
+  The path 1→2→4 with weight 4+(−2)=2 is shorter than the direct 1→4 with weight 7 — and Bellman-Ford found it! <span class="pdf-ref">📄 pp. 207–216</span>
+</p>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Negative Cycles — When Shortest Path is Undefined</strong>
+  If a negative cycle is reachable from the source (a loop with total weight &lt; 0), you can traverse it indefinitely
+  to make the path cost go to −∞. Bellman-Ford detects this: run a (n-th) iteration. If any distance still improves,
+  a negative cycle exists. <span class="pdf-ref">📄 pp. 207–210</span>
+</div>
+
+<h3>§2 Synthesis: Choosing the right algorithm <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Question</th><th>Algorithm</th><th>Complexity</th><th>DP sub-problem</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>"In what order can I do these tasks?"</td>
+      <td><strong>Topological Sort</strong></td>
+      <td>O(n+m)</td>
+      <td>Indegree 0 = "no prerequisites remaining"</td>
+      <td>Only works on DAGs <span class="pdf-ref">📄 pp. 141–156</span></td>
+    </tr>
+    <tr>
+      <td>"What is the minimum number of sequential steps?"</td>
+      <td><strong>Longest Path in DAG</strong></td>
+      <td>O(n+m)</td>
+      <td>LPT[v] = 1 + max(LPT of predecessors)</td>
+      <td>Process in topological order <span class="pdf-ref">📄 pp. 157–168</span></td>
+    </tr>
+    <tr>
+      <td>"Shortest paths from one source, possible negative edges?"</td>
+      <td><strong>Bellman-Ford</strong></td>
+      <td>O(nm)</td>
+      <td>"Shortest path using ≤ k edges" for k = 1 to n−1</td>
+      <td>Fails with negative cycles <span class="pdf-ref">📄 pp. 207–216</span></td>
+    </tr>
+    <tr>
+      <td>"Shortest paths between ALL pairs?"</td>
+      <td><strong>Floyd-Warshall</strong></td>
+      <td>O(n³)</td>
+      <td>W^k[i][j] = "shortest i→j using vertices {1…k}"</td>
+      <td>Also handles negative weights <span class="pdf-ref">📄 pp. 217–226</span></td>
+    </tr>
+    <tr>
+      <td>"Shortest paths from one source, no negative edges?"</td>
+      <td><strong>Dijkstra</strong> (Topic 5)</td>
+      <td>O((n+m)log n)</td>
+      <td>Greedy, not DP</td>
+      <td>Faster than BF for non-negative weights <span class="pdf-ref">📄 pp. 169–190</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     SECTION 3: EXAM INTELLIGENCE
+     ============================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 PRIMARY SOURCE: Lectures 15–16, 21–22, pp. 141–226</div>
+
+<div class="section-block">
+
+<h3>Exam Patterns — What the Questions Will Look Like <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>#</th><th>Question Stem Pattern</th><th>Required Answer Elements</th><th>Most Common Error</th><th>Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>"Given this DAG, find a topological order"</td>
+      <td>Trace the queue: show initial indegrees, which vertex is dequeued each step, how indegrees update, final order</td>
+      <td>Picking a vertex that still has unmet prerequisites (indegree &gt; 0)</td>
+      <td><span class="pdf-ref">📄 pp. 141–156</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>"What is the minimum number of semesters / groups / rounds to complete all tasks?"</td>
+      <td>Compute topological order, then compute LPT for each vertex; answer = max(LPT) + 1</td>
+      <td>Returning max(LPT) instead of max(LPT) + 1; or not processing in topological order</td>
+      <td><span class="pdf-ref">📄 pp. 157–168</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>"Run Floyd-Warshall on this weighted graph. Show the matrix after each k."</td>
+      <td>Start from W⁰ (direct edges), show W¹, W², W³, W⁴; for each k, check the 3 cases where D[i][k]+D[k][j]&lt;D[i][j]</td>
+      <td>Forgetting that D[i][i] must remain 0; updating in wrong order; missing ∞+finite = ∞</td>
+      <td><span class="pdf-ref">📄 pp. 217–226</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>"Run Bellman-Ford on this graph with negative edges from source s."</td>
+      <td>Show Distance array after each of n−1 iterations; show which edges are relaxed; state final shortest distances</td>
+      <td>Running only until convergence (not always n−1 iterations for negative edge graphs); forgetting negative cycle check</td>
+      <td><span class="pdf-ref">📄 pp. 207–216</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>"Why can't Dijkstra be used here? What algorithm should be used instead?"</td>
+      <td>State: negative edges invalidate the greedy commitment; Bellman-Ford handles negative weights but not negative cycles; Floyd-Warshall for all-pairs</td>
+      <td>Saying "Dijkstra doesn't work because the graph has negative edges" without explaining WHY the greedy argument breaks</td>
+      <td><span class="pdf-ref">📄 pp. 179–190</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>"Write pseudocode for longest path in a DAG and analyze its complexity."</td>
+      <td>Topological sort first, then iterate in topo order computing LPT[v] = 1 + max(LPT of predecessors); complexity O(n+m)</td>
+      <td>Using BFS/DFS naively (O(n×m)); not combining with topological sort; missing the base case LPT = 0 for source nodes</td>
+      <td><span class="pdf-ref">📄 pp. 157–168</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>"Prove that Bellman-Ford correctly computes shortest paths in n−1 iterations."</td>
+      <td>Key lemma: shortest paths have ≤ n−1 edges (no repeating vertices); after k iterations, all k-edge shortest paths are correct; inductive argument</td>
+      <td>Not explaining WHY n−1 edges suffice; circular reasoning</td>
+      <td><span class="pdf-ref">📄 pp. 207–210</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>"What is the DP sub-problem in Floyd-Warshall? Write the recurrence."</td>
+      <td>W^k[i][j] = shortest path from i to j using only {1,...,k} as intermediates; recurrence: W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]); base case W⁰[i][j] = direct edge weight</td>
+      <td>Forgetting to specify the "intermediate vertex set" constraint; confusing k-th iteration with k-edge paths (that's Bellman-Ford's sub-problem)</td>
+      <td><span class="pdf-ref">📄 pp. 217–226</span></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>"What is Floyd-Warshall's space complexity and why is it O(n²) not O(n³)?"</td>
+      <td>Explain rolling array: W^k depends only on W^(k-1), so only two n×n matrices needed; the naive W[i][j][k] 3D array is not necessary</td>
+      <td>Saying O(n³) space; not explaining the rolling array argument</td>
+      <td><span class="pdf-ref">📄 pp. 217–226</span></td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>"Compare Bellman-Ford and Floyd-Warshall — when would you use each?"</td>
+      <td>BF: single source, O(nm), handles negative weights, detects negative cycles. FW: all-pairs, O(n³), handles negative weights, simpler code. FW better when you need all pairs (otherwise BF is faster per source)</td>
+      <td>Forgetting that running BF from every source gives O(n²m) total for all pairs — which is worse than FW's O(n³) when m is large</td>
+      <td><span class="pdf-ref">📄 pp. 207–226</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Misconception Cards <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Longest path in a general graph can be computed in O(n+m) using the DAG algorithm."</p>
+  <p><span class="reality">✅ Reality:</span> The O(n+m) longest path algorithm ONLY works for DAGs. For general graphs with cycles, computing the longest simple path is NP-hard (it's equivalent to the Hamiltonian Path problem). The DAG structure is essential — it guarantees topological order exists and prevents infinite loops. <span class="pdf-ref">📄 pp. 157–168</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Floyd-Warshall can only be used for directed graphs."</p>
+  <p><span class="reality">✅ Reality:</span> Floyd-Warshall works for both directed and undirected graphs. For undirected graphs, represent each undirected edge (u,v,w) as TWO directed edges: (u,v,w) and (v,u,w). The algorithm then proceeds identically. <span class="pdf-ref">📄 pp. 217–226</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Bellman-Ford runs until convergence — if it converges early, we can stop."</p>
+  <p><span class="reality">✅ Reality:</span> Early convergence IS allowed as an optimization, but the guaranteed correctness comes from running exactly n−1 iterations. For exam purposes, always show n−1 full iterations (or explicitly state "converged after k iterations, which is ≤ n−1, so the answer is correct"). <span class="pdf-ref">📄 pp. 207–216</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Topological sort uniquely determines an ordering of vertices."</p>
+  <p><span class="reality">✅ Reality:</span> A DAG may have many valid topological orderings. Any ordering where all edges (u,v) have u before v is valid. The algorithm using a queue produces ONE valid ordering, but which one depends on the implementation (choice of initial vertex when multiple have indegree 0). <span class="pdf-ref">📄 pp. 141–156</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "max(LPT) gives the minimum number of semesters."</p>
+  <p><span class="reality">✅ Reality:</span> max(LPT) + 1 gives the minimum number of semesters. LPT[v] = 0 means v is in Semester 1 (group 0). LPT[v] = k means v is in Semester k+1. So if max LPT = 3, you need semesters 0, 1, 2, 3 = 4 total semesters. Watch the off-by-one! <span class="pdf-ref">📄 pp. 157–168</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Floyd-Warshall's recurrence uses i and j from the previous k-layer, but you must update k in the same pass."</p>
+  <p><span class="reality">✅ Reality:</span> Floyd-Warshall's correctness DEPENDS on using values from W^(k-1) when computing W^k. In-place update actually still works (this is a known subtlety), but conceptually each W^k[i][j] depends on W^(k-1)[i][k] and W^(k-1)[k][j], which are NOT changed during iteration k (since W^k[i][k] = W^(k-1)[i][k] and W^k[k][j] = W^(k-1)[k][j]). <span class="pdf-ref">📄 pp. 217–226</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "The update rule for Floyd-Warshall is W[i][j] = W[i][k] × W[k][j]."</p>
+  <p><span class="reality">✅ Reality:</span> The update uses ADDITION (for weights) and MIN (to find the shortest), NOT multiplication. W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]). The multiplication version would be Warshall's transitive closure algorithm (path existence, not shortest path). <span class="pdf-ref">📄 pp. 217–226</span></p>
+</div>
+
+<h3>Memory Aids &amp; Mnemonics <span class="pdf-ref">📄 pp. 141–226</span></h3>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 1: Topological Sort — "Zero First"</strong>
+  Always pick the vertex with indegree ZERO. Remove it, decrement its successors.
+  Repeat. If you run out of zero-indegree vertices before processing all: CYCLE DETECTED.
+  <strong>Memory hook:</strong> "Zero before hero" — vertices with zero prerequisites go first, enabling all others.
+  <span class="pdf-ref">📄 pp. 141–156</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 2: Longest Path (Topo DP) — "Process left, update right"</strong>
+  In topological order, each vertex v: look LEFT (its predecessors' LPT values, already computed) to set LPT[v].
+  Then look RIGHT (update v's successors). Never go backward in topological order.
+  <strong>Formula:</strong> LPT[v] = 1 + max{LPT[u] : (u,v) ∈ E}. Source vertices get LPT = 0.
+  <span class="pdf-ref">📄 pp. 157–168</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 3: Bellman-Ford — "Relax n-1 Times"</strong>
+  n vertices → shortest paths have ≤ n−1 edges → relax ALL edges EXACTLY n−1 times.
+  <strong>Memory hook:</strong> "n-1 Laps Around the Track" — the track is all edges; you run n−1 laps.
+  If a (n-th) lap still improves anything: negative cycle exists.
+  <span class="pdf-ref">📄 pp. 207–216</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 4: Floyd-Warshall — "Through k, or Not Through k"</strong>
+  For each intermediate vertex k, ask: "Does going through k improve the path from i to j?"
+  Two-case recurrence:
+  W^k[i][j] = min(W^(k-1)[i][j],  W^(k-1)[i][k] + W^(k-1)[k][j])
+              "skip k"              "go through k"
+  Run this for k=1 to n. Final W^n is the answer. Space: just two n×n matrices (rolling).
+  <span class="pdf-ref">📄 pp. 217–226</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 5: Algorithm Selection</strong>
+  <strong>DA</strong>G + dependencies → <strong>To</strong>pological sort → <strong>Lo</strong>ngest path (DATO-LO)<br>
+  <strong>One</strong> source + <strong>neg</strong>ative weights → <strong>Bell</strong>man-Ford (ONE-NEG-BELL)<br>
+  <strong>All</strong> pairs + any weights → <strong>Floyd</strong>-Warshall (ALL-FLOYD)<br>
+  <strong>One</strong> source + <strong>pos</strong>itive weights → <strong>Di</strong>jkstra (ONE-POS-DI)
+  <span class="pdf-ref">📄 pp. 141–226</span>
+</div>
+
+</div>
+
+<!-- ============================================================
+     WARM-UP UNDERSTANDING CHECKS
+     ============================================================ -->
+<h2 id="warmup-checks">🧗 Warm-up Understanding Checks</h2>
+<p style="color: var(--text-dim);">Five conceptual checks before the graded practice questions. These are NOT exam-style — they confirm you understood §1–2.</p>
+
+<!-- WC-1 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">CONCEPTUAL</span>
+    <span class="pdf-ref">📄 pp. 141–156</span>
+  </div>
+  <p class="question-stem">WC-1. A classmate says: "Topological sort is just sorting vertices alphabetically or by number — you always output them in order 1, 2, 3, 4, ..." Is this correct? Explain what topological sort actually does.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Incorrect.</strong> Topological sort is NOT numeric/alphabetic ordering of vertices. <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p>Topological sort produces an ordering where every directed edge (u,v) has u appearing BEFORE v. The ordering respects the dependency structure of the DAG. <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p><strong>Counter-example:</strong> If vertex 3 must come before vertex 1 (edge 3→1 exists), a valid topological sort must output ...3...1... — with 3 before 1. Numeric order (1,2,3,4...) would be wrong here.</p>
+      <p><strong>What makes it "sorting" at all:</strong> The algorithm uses indegrees to determine which vertex has no remaining unfulfilled dependencies and can be output next. This might happen to produce numeric order on some specific graphs, but not in general.</p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-2 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PROOF STRUCTURE</span>
+    <span class="pdf-ref">📄 pp. 157–168</span>
+  </div>
+  <p class="question-stem">WC-2. For the Longest Path in a DAG computation, why is it ESSENTIAL to process vertices in topological order? What goes wrong if you process them in a different order?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>The core issue: dependencies.</strong> When we compute LPT[v] = 1 + max{LPT[u] : (u,v) ∈ E}, we need all LPT[u] values for predecessors u to be ALREADY CORRECT. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p><strong>What goes wrong with wrong order:</strong> Suppose we process vertex v before its predecessor u. At that moment, LPT[u] = 0 (not yet computed). We compute LPT[v] = 1 + 0 = 1. Later, we compute LPT[u] = 5. Now LPT[v] should be 6, but we already set it to 1 — and we don't go back to fix it.</p>
+      <p><strong>Why topological order guarantees correctness:</strong> In topological order, ALL predecessors u of v appear BEFORE v. So when we reach v, all LPT[u] values for predecessors are already correctly computed. We never need to backtrack. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p>See §2b for the full traced example where this plays out on the course prerequisite DAG.</p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-3 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">SMALL TRACE</span>
+    <span class="pdf-ref">📄 pp. 217–226</span>
+  </div>
+  <p class="question-stem">WC-3. In Floyd-Warshall, when we process intermediate vertex k=2 and compute W²[3][1], what exactly are we computing? Explain in plain English what W²[3][1] represents.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>W²[3][1]</strong> = the length of the shortest path from vertex 3 to vertex 1, where the ONLY allowed intermediate vertices are {1, 2}. <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p>In plain English: "What is the cheapest way to travel from city 3 to city 1, if you are only allowed to stop at cities 1 and 2 along the way (and not cities 3, 4, 5, ...)?"</p>
+      <p><strong>How it's computed:</strong> W²[3][1] = min(W¹[3][1], W¹[3][2] + W¹[2][1]). This asks: is it cheaper to go 3→1 WITHOUT using city 2 (= W¹[3][1]), or to go 3→2→1 (= W¹[3][2] + W¹[2][1])? <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p>After all n iterations (k=1 to n), W^n[i][j] = shortest path from i to j allowing ALL vertices as intermediates = the true shortest path.</p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-4 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">ALGORITHM COMPARISON</span>
+    <span class="pdf-ref">📄 pp. 207–216</span>
+  </div>
+  <p class="question-stem">WC-4. Bellman-Ford and Dijkstra both compute single-source shortest paths. Your friend says "Bellman-Ford is just a slower Dijkstra — you should always use Dijkstra." When is your friend wrong? Give a specific type of example.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Your friend is wrong when the graph has negative edge weights.</strong> <span class="pdf-ref">📄 pp. 207–216</span></p>
+      <p><strong>Why Dijkstra fails with negative edges:</strong> Dijkstra "settles" a vertex — marks it as finalized — when it has the minimum current distance. With negative edges, a later negative edge can create a shorter path to an already-settled vertex. Dijkstra doesn't go back and re-update settled vertices, so it misses these shortcuts.</p>
+      <p><strong>Concrete counter-example:</strong> Graph: 1→2 (weight 3), 1→3 (weight 5), 2→4 (weight -2). Dijkstra settles vertex 2 first. But later, using edge 2→4 (weight -2), the actual shortest 1→4 path is 1→2→4 = 1. If Dijkstra settled 4 before processing the negative edge from 2, it might miss this. Bellman-Ford handles this correctly by iterating over ALL edges multiple times. <span class="pdf-ref">📄 pp. 179–216</span></p>
+      <p><strong>When the friend IS right:</strong> If all edge weights are non-negative, Dijkstra is both correct AND faster (O((n+m)log n) vs Bellman-Ford's O(nm)). Use Dijkstra when no negative edges exist.</p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-5 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">MISCONCEPTION PUNCTURE</span>
+    <span class="pdf-ref">📄 pp. 157–168</span>
+  </div>
+  <p class="question-stem">WC-5. Your classmate says: "The minimum number of semesters to complete 7 courses where the longest dependency chain has 3 courses is 3 semesters." What did they get wrong about the off-by-one?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>The answer should be 4 semesters, not 3.</strong> Your classmate confused the longest chain length with the number of semesters. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p><strong>The off-by-one explained:</strong> If the longest chain is A → B → C (length 3 courses), the LPT values are:
+      LPT[A] = 0 (first semester), LPT[B] = 1 (second semester), LPT[C] = 2 (third semester).
+      But max(LPT) = 2 means 3 distinct "levels" (0, 1, 2), which corresponds to 3 semesters.</p>
+      <p>Wait — is the answer 3 or 4? Let's recount: A chain of 3 courses where no two can be taken simultaneously requires 3 semesters (one course per semester). The longest PATH value (LPT) of the last node = 2. Number of semesters = max(LPT) + 1 = 3. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p>So if your classmate said "3 semesters," they might actually be right! The off-by-one trips up students who say "max(LPT) = answer" (getting 2) instead of "max(LPT) + 1 = answer" (getting 3). Check the specific wording — LPT uses 0-indexing for semesters.</p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 4: PRACTICE QUESTIONS
+     ============================================================ -->
+<h2 id="section-4">§4 — Practice Questions</h2>
+<div class="pages-coverage">📘 13 exam-style questions: 4 MCQ + 3 PROOF + 3 TRACE + 3 PSEUDOCODE</div>
+
+<h3 id="section-4-mcq">MCQ — Multiple Choice (4 Questions)</h3>
+
+<!-- Q1 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 141–156</span>
+  </div>
+  <p class="question-stem">Q1. A directed graph G has a valid topological ordering if and only if:</p>
+  <ol class="mcq-options" type="A">
+    <li>G is connected</li>
+    <li>G has no directed cycles (G is a DAG)</li>
+    <li>Every vertex has the same indegree</li>
+    <li>G has at least one vertex with indegree 0</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — G has no directed cycles (G is a DAG)</strong></p>
+      <p>A topological ordering exists if and only if the directed graph is a DAG (Directed Acyclic Graph). If there is a cycle A→B→C→A, then A must come before B, B before C, and C before A — an impossibility. <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p>Why A is wrong: G need not be connected. A DAG with two disconnected components still has a valid topological ordering (interleave the two component orderings in any way). <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p>Why C is wrong: vertices can have different indegrees — the algorithm just picks the ones with indegree 0. <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p>Why D is wrong: D is actually a NECESSARY condition for any DAG, but it's weaker than B. B states both necessity and sufficiency. A DAG always has at least one vertex with indegree 0 — but D alone doesn't imply the graph is acyclic. <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p><em>Exam Tip:</em> The bidirectional equivalence "topological sort exists ⟺ graph is a DAG" is a key theorem. Know it in both directions. <span class="pdf-ref">📄 pp. 141–156</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 217–226</span>
+  </div>
+  <p class="question-stem">Q2. Floyd-Warshall computes all-pairs shortest paths in time O(n³). Why is it preferable over running Dijkstra from every vertex (n times) in some cases?</p>
+  <ol class="mcq-options" type="A">
+    <li>Floyd-Warshall handles negative edge weights; Dijkstra does not</li>
+    <li>Floyd-Warshall uses less memory than Dijkstra</li>
+    <li>Floyd-Warshall is always faster than running Dijkstra n times</li>
+    <li>Floyd-Warshall can detect negative cycles; Dijkstra cannot detect any cycles</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: A</strong></p>
+      <p>Floyd-Warshall correctly handles negative edge weights (as long as there are no negative cycles). Dijkstra requires all edge weights to be non-negative. So when the graph has negative edges, Floyd-Warshall is the correct choice for all-pairs shortest paths. <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p>Why B is wrong: Floyd-Warshall uses O(n²) space (the n×n matrix), while Dijkstra uses O(n+m) per run. For sparse graphs, Dijkstra may use less memory per run. <span class="pdf-ref">📄 pp. 169–226</span></p>
+      <p>Why C is wrong: Running Dijkstra n times with a binary heap is O(n(n+m)log n). For sparse graphs (m = O(n)), this is O(n² log n) which is better than O(n³). Floyd-Warshall is only "faster" for dense graphs. <span class="pdf-ref">📄 pp. 169–226</span></p>
+      <p>Why D is wrong: Floyd-Warshall CAN detect negative cycles (W[i][i] &lt; 0 after the algorithm), but Dijkstra CAN detect non-negative cycles (it just doesn't loop in them). The key distinction is about negative EDGES, not just cycles. <span class="pdf-ref">📄 pp. 217–226</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 MCQ INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 157–168</span>
+  </div>
+  <p class="question-stem">Q3. A DAG has vertices {A,B,C,D,E} with edges: A→C, A→D, B→D, C→E, D→E. What is the maximum value of LPT (longest path to any vertex, 0-indexed), and what is the minimum number of rounds needed to process all tasks?</p>
+  <ol class="mcq-options" type="A">
+    <li>LPT max = 2, rounds = 2</li>
+    <li>LPT max = 2, rounds = 3</li>
+    <li>LPT max = 3, rounds = 3</li>
+    <li>LPT max = 3, rounds = 4</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B — LPT max = 2, rounds = 3</strong></p>
+      <p>Let's compute LPT values: <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <ul>
+        <li>A: indegree 0 → LPT[A] = 0</li>
+        <li>B: indegree 0 → LPT[B] = 0</li>
+        <li>C: predecessors = {A} → LPT[C] = 1 + LPT[A] = 1 + 0 = 1</li>
+        <li>D: predecessors = {A, B} → LPT[D] = 1 + max(LPT[A], LPT[B]) = 1 + max(0,0) = 1</li>
+        <li>E: predecessors = {C, D} → LPT[E] = 1 + max(LPT[C], LPT[D]) = 1 + max(1,1) = 2</li>
+      </ul>
+      <p>max(LPT) = 2, so minimum rounds = max(LPT) + 1 = 3. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p>The three rounds: Round 1: {A, B}; Round 2: {C, D}; Round 3: {E}. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p>Why A is wrong: rounds = 2 would require E to be done in round 2, but E depends on C and D, which are in round 2 — impossible.</p>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 MCQ ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 207–226</span>
+  </div>
+  <p class="question-stem">Q4. What is the DP sub-problem in Bellman-Ford versus Floyd-Warshall? Which statement correctly distinguishes them?</p>
+  <ol class="mcq-options" type="A">
+    <li>Bellman-Ford: "shortest path using at most k intermediate vertices"; Floyd-Warshall: "shortest path using at most k edges"</li>
+    <li>Bellman-Ford: "shortest path using at most k edges"; Floyd-Warshall: "shortest path through intermediate vertex set {1,...,k}"</li>
+    <li>Both use the same sub-problem but Bellman-Ford is for single source while Floyd-Warshall is for all pairs</li>
+    <li>Bellman-Ford uses DP; Floyd-Warshall uses greedy choices at each k</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p><strong>Bellman-Ford sub-problem:</strong> "What is the shortest path from source s to vertex v using AT MOST k edges?" After k iterations, all k-edge shortest paths are correct. After n−1 iterations: all shortest paths. <span class="pdf-ref">📄 pp. 207–216</span></p>
+      <p><strong>Floyd-Warshall sub-problem:</strong> "What is the shortest path from vertex i to vertex j using only vertices from {1, 2, ..., k} as intermediate stops?" After k iterations over all k from 0 to n: all shortest paths using any intermediates. <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p>Why A is wrong: the descriptions are reversed — Bellman-Ford uses "at most k edges", Floyd-Warshall uses "intermediate vertex set {1,...,k}". <span class="pdf-ref">📄 pp. 207–226</span></p>
+      <p>Why C is wrong: they use fundamentally DIFFERENT sub-problem definitions, not just different source counts. <span class="pdf-ref">📄 pp. 207–226</span></p>
+      <p>Why D is wrong: BOTH algorithms are DP. Neither uses a greedy approach. <span class="pdf-ref">📄 pp. 207–226</span></p>
+      <p><em>Exam Tip:</em> Knowing the sub-problem formulation is often asked directly. Bellman-Ford = "at most k edges"; Floyd-Warshall = "intermediate vertices from {1,...,k}." <span class="pdf-ref">📄 pp. 207–226</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-proof">Proof Questions (3 Questions)</h3>
+
+<!-- Q5 PROOF BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 141–156</span>
+  </div>
+  <p class="question-stem">Q5. Prove: If a directed graph G has a directed cycle, then G has NO valid topological ordering.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Proof by contradiction.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Proof by Contradiction</div>
+        <div class="proof-step"><strong>Step 1 [Assume the opposite].</strong> Suppose G has a directed cycle AND a valid topological ordering π = (v₁, v₂, ..., vₙ). <span class="pdf-ref">📄 pp. 141–156</span></div>
+        <div class="proof-step"><strong>Step 2 [Extract the cycle].</strong> Let C = (c₁ → c₂ → ... → c_r → c₁) be a directed cycle in G. <span class="pdf-ref">📄 pp. 141–156</span></div>
+        <div class="proof-step"><strong>Step 3 [Apply topological ordering property].</strong> In a valid topological ordering π, for every edge (u,v) in E, u appears before v in π. Apply this to each edge in C: c₁ appears before c₂; c₂ before c₃; ...; c_r before c₁. <span class="pdf-ref">📄 pp. 141–156</span></div>
+        <div class="proof-step"><strong>Step 4 [Derive the contradiction].</strong> From Step 3: c₁ appears before c₂ before ... before c_r before c₁. This means c₁ appears before itself in π — a logical impossibility. No element can appear before itself in any ordering. <span class="pdf-ref">📄 pp. 141–156</span></div>
+        <div class="proof-step"><strong>Step 5 [Conclusion].</strong> Our assumption that both a cycle and a topological ordering exist leads to contradiction. Therefore, if G has a directed cycle, G has no valid topological ordering. ∎ <span class="pdf-ref">📄 pp. 141–156</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Set up contradiction: assumed cycle AND topological ordering both exist. <span class="pdf-ref">📄 p. 141</span></li>
+        <li>☐ Applied the definition of topological ordering to edges of the cycle. <span class="pdf-ref">📄 p. 141</span></li>
+        <li>☐ Chained the ordering requirements to get c₁ before c₁. <span class="pdf-ref">📄 pp. 141–156</span></li>
+        <li>☐ Identified this as a contradiction (no element before itself). <span class="pdf-ref">📄 pp. 141–156</span></li>
+        <li>☐ Concluded: cycle → no topological ordering. <span class="pdf-ref">📄 pp. 141–156</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 PROOF INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 207–216</span>
+  </div>
+  <p class="question-stem">Q6. Prove that in a graph with n vertices and no negative cycles, every shortest path (from source s to any vertex v) uses at most n−1 edges. Why does this justify running Bellman-Ford for exactly n−1 iterations?</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Proof by contradiction + constructive argument.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Part 1: Shortest paths use at most n−1 edges (proof by contradiction)</div>
+        <div class="proof-step"><strong>Step 1.</strong> Suppose for contradiction that a shortest path P from s to v uses k ≥ n edges. <span class="pdf-ref">📄 pp. 207–210</span></div>
+        <div class="proof-step"><strong>Step 2.</strong> P visits k+1 vertices (including endpoints). But the graph has only n vertices. By the pigeonhole principle, some vertex w appears at least twice on P. <span class="pdf-ref">📄 pp. 207–210</span></div>
+        <div class="proof-step"><strong>Step 3.</strong> The portion of P between the two occurrences of w forms a cycle. Since there are no negative cycles (given), this cycle has total weight ≥ 0. <span class="pdf-ref">📄 pp. 207–210</span></div>
+        <div class="proof-step"><strong>Step 4.</strong> Remove this cycle from P: the remaining path P' still goes from s to v and has weight(P') = weight(P) − weight(cycle) ≤ weight(P). <span class="pdf-ref">📄 pp. 207–210</span></div>
+        <div class="proof-step"><strong>Step 5.</strong> So P' is at most as long as P (possibly shorter), contradicting that P was a SHORTEST path. ∎ Therefore no shortest path uses ≥ n edges, so all shortest paths use at most n−1 edges. <span class="pdf-ref">📄 pp. 207–210</span></div>
+        <div class="proof-label">Part 2: Why n−1 Bellman-Ford iterations suffice</div>
+        <div class="proof-step">After iteration k of Bellman-Ford, Distance[v] equals the shortest path using AT MOST k edges (by induction on k). Since all shortest paths use at most n−1 edges (proved above), after n−1 iterations all shortest paths are correctly computed. <span class="pdf-ref">📄 pp. 207–216</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Stated the pigeonhole principle argument: k ≥ n edges → n+1 vertices visited → some vertex repeated. <span class="pdf-ref">📄 pp. 207–210</span></li>
+        <li>☐ Identified the repeated vertex forms a cycle. <span class="pdf-ref">📄 pp. 207–210</span></li>
+        <li>☐ Used "no negative cycle" to say the cycle weight ≥ 0. <span class="pdf-ref">📄 pp. 207–210</span></li>
+        <li>☐ Showed removing the cycle doesn't increase path weight. <span class="pdf-ref">📄 pp. 207–210</span></li>
+        <li>☐ Concluded: shortest paths have ≤ n−1 edges. <span class="pdf-ref">📄 pp. 207–210</span></li>
+        <li>☐ Connected to Bellman-Ford: n−1 iterations sufficient because of the ≤ n−1 edges bound. <span class="pdf-ref">📄 pp. 207–216</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 PROOF ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 217–226</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 9 (DP/DAG) + Topic 2 (Asymptotic Analysis)</div>
+  <p class="question-stem">Q7. Prove the Floyd-Warshall recurrence is correct: W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]). Then analyze its time and space complexity, explaining why the "rolling array" optimization reduces space from O(n³) to O(n²).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Full Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Part 1: Correctness of the recurrence</strong> <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <div class="proof-block">
+        <div class="proof-label">Definition: W^k[i][j] = shortest path from i to j using only {1,...,k} as intermediate vertices.</div>
+        <div class="proof-step"><strong>Base case.</strong> W⁰[i][j]: no intermediate vertices allowed. Only direct edges count. So W⁰[i][j] = direct edge weight (∞ if none), and W⁰[i][i] = 0. ✓ <span class="pdf-ref">📄 p. 217</span></div>
+        <div class="proof-step"><strong>Inductive step.</strong> Assume W^(k-1) correctly gives shortest paths using {1,...,k-1}. We derive W^k. <span class="pdf-ref">📄 pp. 217–226</span></div>
+        <div class="proof-step"><strong>Two cases for any shortest i→j path using {1,...,k}:</strong></div>
+        <div class="proof-step"><strong>Case 1: The shortest path does NOT use vertex k as an intermediate.</strong> Then it uses only {1,...,k-1} as intermediates → W^k[i][j] = W^(k-1)[i][j]. <span class="pdf-ref">📄 pp. 217–226</span></div>
+        <div class="proof-step"><strong>Case 2: The shortest path DOES use vertex k as an intermediate.</strong> Vertex k appears exactly once (otherwise we could remove a k-cycle to shorten the path, since no negative cycles assumed). So the path splits as i→...→k→...→j, where the subpaths i→k and k→j use only {1,...,k-1} as intermediates. Hence: W^k[i][j] = W^(k-1)[i][k] + W^(k-1)[k][j]. <span class="pdf-ref">📄 pp. 217–226</span></div>
+        <div class="proof-step"><strong>Combining:</strong> W^k[i][j] = min(Case 1, Case 2) = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]). ✓ ∎ <span class="pdf-ref">📄 pp. 217–226</span></div>
+      </div>
+      <p><strong>Part 2: Complexity analysis</strong> <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p><strong>Time:</strong> Three nested loops: k from 1 to n, i from 1 to n, j from 1 to n. Each iteration does O(1) work (one min and one addition). Total: <span class="complexity-box">O(n³)</span>.</p>
+      <p><strong>Space (naive):</strong> If we store W[i][j][k] for all three dimensions, we need n × n × n = n³ entries → <span class="complexity-box">O(n³)</span> space.</p>
+      <p><strong>Space (rolling array optimization):</strong> When computing W^k, we only use values from W^(k-1). Specifically, W^k[i][j] depends on W^(k-1)[i][k] and W^(k-1)[k][j]. Crucially, W^k[i][k] = W^(k-1)[i][k] (vertex k as destination, using k as intermediate, is the same as not using k since you'd have to go i→k and then stay — no improvement). This means W^(k-1)[i][k] = W^k[i][k], so we can safely update the matrix IN PLACE. Only ONE n×n matrix is needed, not n of them. Space: <span class="complexity-box">O(n²)</span>. <span class="pdf-ref">📄 pp. 217–226</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-trace">Algorithm Trace / Analysis (3 Questions)</h3>
+
+<!-- Q8 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 141–168</span>
+  </div>
+  <p class="question-stem">Q8. Given the DAG: V = {1,2,3,4,5,6}, edges: (1,3), (1,4), (2,3), (2,5), (3,6), (4,6), (5,6). (a) Find a valid topological ordering using the queue-based algorithm. (b) Compute LPT for each vertex. (c) What is the minimum number of rounds to process all tasks?</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>(a) Topological ordering trace:</strong> <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p>Initial indegrees: 1:0, 2:0, 3:2, 4:1, 5:1, 6:3. Queue = {1, 2}.</p>
+      <table class="trace-table">
+        <thead><tr><th>Step</th><th>Dequeued</th><th>Indegree Updates</th><th>Queue After</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td class="active-cell">1</td><td>3: 2→1, 4: 1→0 (add)</td><td>{2, 4}</td><td>[1]</td></tr>
+          <tr class="highlight"><td>2</td><td class="active-cell">2</td><td>3: 1→0 (add), 5: 1→0 (add)</td><td>{4, 3, 5}</td><td>[1,2]</td></tr>
+          <tr><td>3</td><td class="active-cell">4</td><td>6: 3→2</td><td>{3, 5}</td><td>[1,2,4]</td></tr>
+          <tr class="highlight"><td>4</td><td class="active-cell">3</td><td>6: 2→1</td><td>{5}</td><td>[1,2,4,3]</td></tr>
+          <tr><td>5</td><td class="active-cell">5</td><td>6: 1→0 (add)</td><td>{6}</td><td>[1,2,4,3,5]</td></tr>
+          <tr class="highlight"><td>6</td><td class="active-cell">6</td><td>(none)</td><td>{}</td><td class="done-cell">[1,2,4,3,5,6] ✓</td></tr>
+        </tbody>
+      </table>
+      <p><strong>(b) LPT computation (in topological order [1,2,4,3,5,6]):</strong> <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Vertex processed</th><th>Predecessors</th><th>LPT formula</th><th>LPT value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1</strong></td><td>none (indegree 0)</td><td>LPT[1] = 0</td><td class="base">0</td></tr>
+          <tr class="highlight"><td><strong>2</strong></td><td>none (indegree 0)</td><td>LPT[2] = 0</td><td class="base">0</td></tr>
+          <tr><td><strong>4</strong></td><td>{1}</td><td>LPT[4] = 1 + LPT[1] = 1+0 = 1</td><td class="active-cell">1</td></tr>
+          <tr class="highlight"><td><strong>3</strong></td><td>{1, 2}</td><td>LPT[3] = 1 + max(LPT[1], LPT[2]) = 1+0 = 1</td><td class="active-cell">1</td></tr>
+          <tr><td><strong>5</strong></td><td>{2}</td><td>LPT[5] = 1 + LPT[2] = 1+0 = 1</td><td class="active-cell">1</td></tr>
+          <tr class="highlight"><td><strong>6</strong></td><td>{3, 4, 5}</td><td>LPT[6] = 1 + max(LPT[3], LPT[4], LPT[5]) = 1+1 = 2</td><td class="done-cell">2</td></tr>
+        </tbody>
+      </table>
+      <p><strong>(c) Minimum rounds:</strong> max(LPT) + 1 = 2 + 1 = <strong>3 rounds</strong>. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p>Round 1: {1, 2} · Round 2: {3, 4, 5} · Round 3: {6}</p>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 207–216</span>
+  </div>
+  <p class="question-stem">Q9. Run Bellman-Ford from source vertex 1 on the following graph with 4 vertices: edges (1,2) weight 6, (1,3) weight 7, (2,3) weight -3, (2,4) weight 5, (3,4) weight -4. Show the Distance array after each of n−1 = 3 iterations.</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>Initial:</strong> Distance = [0, ∞, ∞, ∞] (indices 1,2,3,4) <span class="pdf-ref">📄 pp. 207–216</span></p>
+      <table class="trace-table">
+        <thead>
+          <tr><th>Iteration</th><th>Edge Relaxed</th><th>Condition</th><th>Dist[1]</th><th>Dist[2]</th><th>Dist[3]</th><th>Dist[4]</th></tr>
+        </thead>
+        <tbody>
+          <tr class="highlight"><td>Init</td><td>—</td><td>—</td><td class="done-cell">0</td><td>∞</td><td>∞</td><td>∞</td></tr>
+          <tr><td rowspan="5"><strong>Iter 1</strong></td>
+            <td>(1,2) w=6</td><td>0+6=6 &lt; ∞ → update</td><td class="done-cell">0</td><td class="active-cell">6</td><td>∞</td><td>∞</td></tr>
+          <tr><td>(1,3) w=7</td><td>0+7=7 &lt; ∞ → update</td><td class="done-cell">0</td><td>6</td><td class="active-cell">7</td><td>∞</td></tr>
+          <tr><td>(2,3) w=-3</td><td>6+(-3)=3 &lt; 7 → update</td><td class="done-cell">0</td><td>6</td><td class="active-cell">3</td><td>∞</td></tr>
+          <tr><td>(2,4) w=5</td><td>6+5=11 &lt; ∞ → update</td><td class="done-cell">0</td><td>6</td><td>3</td><td class="active-cell">11</td></tr>
+          <tr class="highlight"><td>(3,4) w=-4</td><td>3+(-4)=-1 &lt; 11 → update</td><td class="done-cell">0</td><td class="done-cell">6</td><td class="done-cell">3</td><td class="active-cell">-1</td></tr>
+          <tr><td rowspan="5"><strong>Iter 2</strong></td>
+            <td>(1,2) w=6</td><td>0+6=6 = 6 → no change</td><td class="done-cell">0</td><td>6</td><td>3</td><td>-1</td></tr>
+          <tr><td>(1,3) w=7</td><td>0+7=7 &gt; 3 → no change</td><td class="done-cell">0</td><td>6</td><td>3</td><td>-1</td></tr>
+          <tr><td>(2,3) w=-3</td><td>6+(-3)=3 = 3 → no change</td><td class="done-cell">0</td><td>6</td><td>3</td><td>-1</td></tr>
+          <tr><td>(2,4) w=5</td><td>6+5=11 &gt; -1 → no change</td><td class="done-cell">0</td><td>6</td><td>3</td><td>-1</td></tr>
+          <tr class="highlight"><td>(3,4) w=-4</td><td>3+(-4)=-1 = -1 → no change</td><td class="done-cell">0</td><td class="done-cell">6</td><td class="done-cell">3</td><td class="done-cell">-1</td></tr>
+          <tr class="highlight"><td><strong>Iter 3</strong></td><td>All edges</td><td>No improvements</td><td class="done-cell">0</td><td class="done-cell">6</td><td class="done-cell">3</td><td class="done-cell">-1</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Final shortest distances from vertex 1:</strong> Dist = [0, 6, 3, -1]. <span class="pdf-ref">📄 pp. 207–216</span></p>
+      <p><strong>Paths:</strong> 1→1 = 0; 1→2 = 6; 1→2→3 = 6+(−3) = 3; 1→2→3→4 = 6+(−3)+(−4) = −1.</p>
+      <p>📝 <strong>Complexity:</strong> Time = O(nm) = O(4×5) = O(20) for this example. Space = O(n) = O(4) for the Distance array. <span class="pdf-ref">📄 pp. 207–216</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 TRACE ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 217–226</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 9 (Floyd-Warshall DP) + Topic 4 (Graph Representations)</div>
+  <p class="question-stem">Q10. Run Floyd-Warshall on the 3-vertex graph: (1→2): weight 4, (2→3): weight -2, (3→1): weight 1. Show W⁰, W¹, W², W³. After the algorithm, can you detect if a negative cycle exists from the result matrix?</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>W⁰ (direct edges only):</strong> <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <table class="trace-table">
+        <thead><tr><th></th><th>To 1</th><th>To 2</th><th>To 3</th></tr></thead>
+        <tbody>
+          <tr><td><strong>From 1</strong></td><td class="base">0</td><td class="active-cell">4</td><td>∞</td></tr>
+          <tr><td><strong>From 2</strong></td><td>∞</td><td class="base">0</td><td class="active-cell">-2</td></tr>
+          <tr><td><strong>From 3</strong></td><td class="active-cell">1</td><td>∞</td><td class="base">0</td></tr>
+        </tbody>
+      </table>
+      <p><strong>k=1 (allow vertex 1 as intermediate): Check i→1→j paths</strong></p>
+      <p>D[2][1]+D[1][j]: D[2][1]=∞ → no improvements. D[3][1]+D[1][j]: D[3][1]=1, so D[3][2]=min(∞, 1+4)=5. W¹ updates: W[3][2] = 5.</p>
+      <table class="trace-table">
+        <thead><tr><th>W¹</th><th>To 1</th><th>To 2</th><th>To 3</th></tr></thead>
+        <tbody>
+          <tr><td><strong>From 1</strong></td><td class="base">0</td><td>4</td><td>∞</td></tr>
+          <tr><td><strong>From 2</strong></td><td>∞</td><td class="base">0</td><td>-2</td></tr>
+          <tr><td><strong>From 3</strong></td><td>1</td><td class="active-cell">5</td><td class="base">0</td></tr>
+        </tbody>
+      </table>
+      <p><strong>k=2 (allow vertex 2 as intermediate): Check i→2→j paths</strong></p>
+      <p>D[1][2]+D[2][j]: D[1][2]=4. D[1][3]=min(∞, 4+(-2))=2. D[3][2]+D[2][j]: D[3][2]=5. D[3][3]=min(0, 5+(-2))=0 (no change).</p>
+      <table class="trace-table">
+        <thead><tr><th>W²</th><th>To 1</th><th>To 2</th><th>To 3</th></tr></thead>
+        <tbody>
+          <tr><td><strong>From 1</strong></td><td class="base">0</td><td>4</td><td class="active-cell">2</td></tr>
+          <tr><td><strong>From 2</strong></td><td>∞</td><td class="base">0</td><td>-2</td></tr>
+          <tr><td><strong>From 3</strong></td><td>1</td><td>5</td><td class="base">0</td></tr>
+        </tbody>
+      </table>
+      <p><strong>k=3 (allow vertex 3 as intermediate): Check i→3→j paths</strong></p>
+      <p>D[1][3]+D[3][j]: D[1][3]=2. D[1][1]=min(0, 2+1)=0 (no change). D[1][2]=min(4, 2+5)=4 (no change). D[2][3]+D[3][j]: D[2][3]=-2. D[2][1]=min(∞, -2+1)=-1 YES! D[2][2]=min(0, -2+5)=0 (no change).</p>
+      <table class="trace-table">
+        <thead><tr><th>W³ (final)</th><th>To 1</th><th>To 2</th><th>To 3</th></tr></thead>
+        <tbody>
+          <tr><td><strong>From 1</strong></td><td class="base">0</td><td>4</td><td>2</td></tr>
+          <tr><td><strong>From 2</strong></td><td class="active-cell">-1</td><td class="base">0</td><td>-2</td></tr>
+          <tr><td><strong>From 3</strong></td><td>1</td><td>5</td><td class="base">0</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Negative cycle detection:</strong> Check if any W[i][i] &lt; 0. In W³: W[1][1]=0, W[2][2]=0, W[3][3]=0. No negative diagonal — no negative cycle detected. <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p>Let's verify: cycle 1→2→3→1 has total weight 4+(-2)+1 = 3 &gt; 0. Not a negative cycle — consistent!</p>
+      <p>📝 <strong>Complexity:</strong> Time = O(n³) = O(27) for this tiny example. Space = O(n²) = O(9) with rolling update. <span class="pdf-ref">📄 pp. 217–226</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="section-4-pseudo">Pseudocode / Design (3 Questions)</h3>
+
+<!-- Q11 PSEUDO BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 141–156</span>
+  </div>
+  <p class="question-stem">Q11. Write pseudocode for the O(n+m) topological sort algorithm using a queue. Provide a step-wise English explanation and analyze time and space complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function TopologicalSort(G, n):
+    # G is given as adjacency list. n = number of vertices.
+
+    # Step 1: Compute indegree of every vertex
+    indegree = array of size n, initialized to 0
+    for each vertex u in G:
+        for each neighbor v of u:       # edge (u,v)
+            indegree[v] += 1
+
+    # Step 2: Initialize queue with all zero-indegree vertices
+    Queue = empty queue
+    for each vertex v:
+        if indegree[v] == 0:
+            Queue.enqueue(v)
+
+    # Step 3: Process vertices
+    result = empty list
+    while Queue is not empty:
+        v = Queue.dequeue()             # pick a ready vertex
+        result.append(v)               # output it
+        for each neighbor w of v:      # for each edge (v,w)
+            indegree[w] -= 1           # remove v's dependency
+            if indegree[w] == 0:
+                Queue.enqueue(w)       # w is now ready
+
+    # Step 4: Check for cycles
+    if len(result) &lt; n:
+        print("CYCLE DETECTED — no topological ordering exists!")
+        return None
+
+    return result
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–156</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Count incoming edges for each vertex (indegree). O(n+m) time.</li>
+        <li>All vertices with indegree 0 (no prerequisites) go into the queue first.</li>
+        <li>Repeatedly: dequeue a vertex v (it's safe to process now), add to result, then reduce indegrees of v's neighbors. If any neighbor now has indegree 0, add it to the queue.</li>
+        <li>If we couldn't process all n vertices: a cycle prevented the algorithm from finishing.</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Step 1 (indegree computation): each edge processed once = O(m). Step 2 (init queue): each vertex checked once = O(n). Step 3 (main loop): each vertex dequeued once (O(n)) and each edge processed once (O(m)) = O(n+m). Total: <span class="complexity-box">O(n+m)</span>. <span class="pdf-ref">📄 pp. 141–156</span></p>
+      <p><strong>Space:</strong> Indegree array = O(n). Queue = O(n) (at most n vertices). Result = O(n). Total: <span class="complexity-box">O(n)</span>. <span class="pdf-ref">📄 pp. 141–156</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 PSEUDO INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 157–168</span>
+  </div>
+  <p class="question-stem">Q12. Write pseudocode for computing the Longest Path To each vertex in a DAG (the "minimum semesters" computation). Combine it with topological sort in one pass. Analyze time and space complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode (combined topological sort + LPT in one pass):</strong></p>
+      <pre class="pseudocode">
+function LongestPathToAll(G, n):
+    # Computes LPT[v] = longest path from any source to vertex v.
+    # Uses topological sort (queue-based) and updates LPT during sort.
+
+    # Step 1: Compute indegrees and initialize LPT
+    indegree = array of size n+1, initialized to 0
+    LPT = array of size n+1, initialized to 0      # base case: all start at 0
+
+    for each vertex u:
+        for each neighbor v of u:                   # edge (u,v)
+            indegree[v] += 1
+
+    # Step 2: Initialize queue with indegree-0 vertices
+    Queue = empty queue
+    for each vertex v:
+        if indegree[v] == 0:
+            Queue.enqueue(v)
+            # LPT[v] = 0 already — these are the "source" vertices
+
+    # Step 3: Process in topological order, computing LPT on the fly
+    result_order = []
+    while Queue is not empty:
+        v = Queue.dequeue()
+        result_order.append(v)
+
+        for each neighbor w of v:                   # edge (v,w)
+            # Can we reach w via v in longer steps?
+            if LPT[v] + 1 > LPT[w]:
+                LPT[w] = LPT[v] + 1               # relax!
+
+            indegree[w] -= 1
+            if indegree[w] == 0:
+                Queue.enqueue(w)                    # w is ready; LPT[w] is now final
+
+    # Step 4: Answer
+    max_LPT = max(LPT)
+    min_rounds = max_LPT + 1                       # 0-indexed, so add 1
+
+    return LPT, min_rounds, result_order
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 157–168</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Initialize LPT[v]=0 for all v. Source vertices (indegree 0) stay at 0 — they're in "semester 1."</li>
+        <li>Process vertices in topological order. When we dequeue v, LPT[v] is guaranteed final (all predecessors were processed earlier in topo order).</li>
+        <li>For each successor w of v: if going through v gives a longer path (LPT[v]+1 &gt; LPT[w]), update LPT[w]. This is the "relaxation" step — same as Bellman-Ford, but on a DAG.</li>
+        <li>When a vertex w enters the queue (indegree becomes 0), its LPT is finalized.</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> All steps are O(n+m) — each vertex and edge processed exactly once. <span class="complexity-box">O(n+m)</span>. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p><strong>Space:</strong> Indegree array O(n) + LPT array O(n) + Queue O(n) = <span class="complexity-box">O(n)</span>. <span class="pdf-ref">📄 pp. 157–168</span></p>
+      <p><strong>Key insight:</strong> When w enters the queue (all its predecessors processed), LPT[w] is final because ALL predecessors' contributions have been incorporated. This is why topological order is critical. <span class="pdf-ref">📄 pp. 157–168</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 PSEUDO ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 207–226</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 9 (Bellman-Ford + Floyd-Warshall) + Topic 2 (Asymptotic Analysis)</div>
+  <p class="question-stem">Q13. You need to compute all-pairs shortest paths on a graph with 1000 vertices and 50,000 edges (negative edges allowed, no negative cycles). (a) Write pseudocode for Floyd-Warshall. (b) Alternatively, describe running Bellman-Ford from every source. (c) Compare the time complexities and recommend which to use.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>(a) Floyd-Warshall Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function FloydWarshall(W, n):
+    # W[i][j] = edge weight (0 if i==j, ∞ if no edge)
+    D = copy(W)               # working distance matrix
+
+    for k = 1 to n:           # for each potential intermediate vertex
+        for i = 1 to n:       # for each source
+            for j = 1 to n:   # for each destination
+                via_k = D[i][k] + D[k][j]
+                if via_k &lt; D[i][j]:
+                    D[i][j] = via_k   # shorter path found through k
+
+    # Optional: detect negative cycles
+    for i = 1 to n:
+        if D[i][i] &lt; 0:
+            print("Negative cycle involving vertex i!")
+
+    return D   # D[i][j] = shortest path from i to j
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 217–226</span></div>
+      <p><strong>(b) Bellman-Ford from every source:</strong> <span class="pdf-ref">📄 pp. 207–216</span></p>
+      <pre class="pseudocode">
+function AllPairs_BellmanFord(G, n):
+    Results = n × n matrix (all ∞ initially)
+    for each source s = 1 to n:          # run BF from EVERY vertex
+        Results[s] = BellmanFord(G, s)   # returns distance array of size n
+    return Results
+
+# BellmanFord(G, s) runs in O(nm) — see Q11 above
+</pre>
+      <p><strong>(c) Time Complexity Comparison:</strong> <span class="pdf-ref">📄 pp. 207–226</span></p>
+      <table class="data">
+        <thead><tr><th>Algorithm</th><th>Time</th><th>For n=1000, m=50,000</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Floyd-Warshall</strong></td><td>O(n³)</td><td>O(1000³) = O(10⁹) operations</td></tr>
+          <tr><td><strong>n × Bellman-Ford</strong></td><td>O(n × nm) = O(n²m)</td><td>O(1000² × 50,000) = O(5×10¹⁰) operations</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Recommendation:</strong> Use Floyd-Warshall. For this graph, Floyd-Warshall does ~10⁹ operations versus ~5×10¹⁰ for repeated Bellman-Ford — 50x fewer operations. <span class="pdf-ref">📄 pp. 217–226</span></p>
+      <p><strong>When would repeated BF be better?</strong> For a very sparse graph: m = O(n). Then Floyd-Warshall = O(n³) and repeated BF = O(n × n × n) = O(n³) — the same! But for sparse graphs with non-negative edges, repeated Dijkstra = O(n(n+m)log n) = O(n² log n) beats both. <span class="pdf-ref">📄 pp. 207–226</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ============================================================
+     SECTION 5: CHEAT SHEET
+     ============================================================ -->
+<h2 id="section-5">§5 — Topic Cheat Sheet</h2>
+<div class="pages-coverage">📘 SOURCE: Lectures 15–16, 21–22, pp. 141–168, 207–226</div>
+
+<div class="cheat-sheet">
+
+<h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+<p class="oneliner">
+  Dynamic programming and DAG algorithms model dependencies (topological sort + longest path) and compute shortest paths
+  (Bellman-Ford for single-source with negative weights; Floyd-Warshall for all-pairs) by building solutions to big
+  problems from precomputed solutions to smaller sub-problems.
+  <span class="pdf-ref">📄 pp. 141–226</span>
+</p>
+
+<h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+<ol>
+  <li><strong>Topological Sort + Longest Path:</strong> Queue-based O(n+m) topo sort using indegree; LPT[v] = 1 + max(LPT of predecessors) computed in topo order; min rounds = max(LPT)+1. <span class="pdf-ref">📄 pp. 141–168</span></li>
+  <li><strong>Bellman-Ford:</strong> Relax ALL edges exactly n−1 times; handles negative weights; detects negative cycles in n-th iteration; O(nm) time. <span class="pdf-ref">📄 pp. 207–216</span></li>
+  <li><strong>Floyd-Warshall:</strong> W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]); O(n³) time; O(n²) space; handles negative weights; all-pairs. <span class="pdf-ref">📄 pp. 217–226</span></li>
+</ol>
+
+<h4>KEY FORMULAS / STRUCTURES:</h4>
+<table class="data">
+  <thead><tr><th>Formula / Rule</th><th>Plain English</th><th>Page</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Topo sort: pick indegree-0</strong></td><td>Always process vertices with no remaining prerequisites next</td><td><span class="pdf-ref">📄 pp. 141–156</span></td></tr>
+    <tr><td><strong>LPT[v] = 1 + max{LPT[u]: (u,v)∈E}</strong></td><td>Longest path to v = one more step than the longest path to any predecessor</td><td><span class="pdf-ref">📄 pp. 157–168</span></td></tr>
+    <tr><td><strong>min rounds = max(LPT) + 1</strong></td><td>LPT is 0-indexed; add 1 to get the count of rounds</td><td><span class="pdf-ref">📄 pp. 157–168</span></td></tr>
+    <tr><td><strong>update(j,k): D[k] = min(D[k], D[j]+w)</strong></td><td>Relaxation: improve distance to k if going via j is shorter</td><td><span class="pdf-ref">📄 pp. 207–210</span></td></tr>
+    <tr><td><strong>Bellman-Ford: n−1 iterations</strong></td><td>Shortest paths use ≤ n−1 edges; one iteration covers one more edge</td><td><span class="pdf-ref">📄 pp. 207–216</span></td></tr>
+    <tr><td><strong>W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j])</strong></td><td>Two cases: skip k, or go through k</td><td><span class="pdf-ref">📄 pp. 217–226</span></td></tr>
+    <tr><td><strong>FW negative cycle detection: W[i][i] &lt; 0</strong></td><td>If the shortest "path" from i to itself is negative: negative cycle exists</td><td><span class="pdf-ref">📄 pp. 217–226</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE CANONICAL ALGORITHMS (both must be memorizable):</h4>
+
+<pre class="pseudocode">
+# TOPOLOGICAL SORT + LONGEST PATH — O(n+m)
+function TopoSort_LPT(G, n):
+    compute indegree[v] for all v       # O(n+m)
+    LPT[v] = 0 for all v
+    Q = {v : indegree[v] == 0}
+    result = []
+    while Q not empty:
+        v = dequeue(Q)
+        result.append(v)
+        for each neighbor w of v:
+            LPT[w] = max(LPT[w], LPT[v] + 1)   # relax LPT
+            indegree[w] -= 1
+            if indegree[w] == 0: Q.enqueue(w)
+    return result, max(LPT) + 1         # topo order, min rounds
+
+# BELLMAN-FORD — O(nm)
+function BellmanFord(G, s, n, m):
+    D[s]=0; D[v]=∞ for v≠s
+    for i = 1 to n-1:                  # n-1 iterations
+        for each edge (j,k,w):
+            if D[j]+w &lt; D[k]: D[k]=D[j]+w   # relax
+    return D
+
+# FLOYD-WARSHALL — O(n³), O(n²) space
+function FloydWarshall(W, n):
+    D = copy(W)                         # D[i][i]=0, D[i][j]=w or ∞
+    for k=1 to n:
+        for i=1 to n:
+            for j=1 to n:
+                if D[i][k]+D[k][j] &lt; D[i][j]:
+                    D[i][j] = D[i][k]+D[k][j]
+    return D
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 141–226</span></div>
+
+<h4>ASSIGNMENTS THAT TEST THIS TOPIC:</h4>
+<table class="data">
+  <thead><tr><th>Assignment</th><th>Question</th><th>What It Tests</th><th>Graded?</th></tr></thead>
+  <tbody>
+    <tr><td>Lec 15–16</td><td>In-class DAG</td><td>Topological sort + longest path (min semesters)</td><td>In-class Python</td></tr>
+    <tr><td>Lec 21</td><td>In-class BF</td><td>Bellman-Ford on graphs with negative edges</td><td>In-class Python</td></tr>
+    <tr><td>Lec 22</td><td>In-class FW</td><td>Floyd-Warshall all-pairs shortest paths</td><td>In-class Python</td></tr>
+    <tr><td>Lec 16 Python</td><td>Merge Intervals</td><td>Related sorting + scanning pattern</td><td>Ungraded</td></tr>
+  </tbody>
+</table>
+
+<h4>THE #1 MISTAKE ON EXAM QUESTIONS ABOUT THIS TOPIC:</h4>
+<p>
+  <strong>For Floyd-Warshall:</strong> Confusing the sub-problem definition with Bellman-Ford's. Floyd-Warshall's k is the
+  <em>set of allowed intermediate vertices</em> ({1,...,k}), NOT the number of edges allowed. Writing the wrong recurrence
+  (e.g., "shortest path using exactly k edges") will get zero points even if the code looks similar. Always state
+  "using only vertices {1,...,k} as intermediates." <span class="pdf-ref">📄 pp. 217–226</span>
+</p>
+<p>
+  <strong>For Longest Path in DAG:</strong> Returning max(LPT) instead of max(LPT)+1. LPT is 0-indexed — source vertices have LPT=0, which means "first group." Always add 1 to convert from 0-indexed group number to group count. <span class="pdf-ref">📄 pp. 157–168</span>
+</p>
+
+<h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+<p class="remember">
+  All four algorithms — Topological Sort, Longest Path, Bellman-Ford, Floyd-Warshall — follow the same DP recipe:
+  define a sub-problem, write a two-case recurrence, solve in the right order (topological or k=1 to n).
+  The "right order" guarantee is what makes DP efficient. Without it, you'd need exponential recursion.
+  <span class="pdf-ref">📄 pp. 141–226</span>
+</p>
+
+<h4>QUICK-NAVIGATION GUIDE:</h4>
+<table class="data">
+  <thead><tr><th>If you want to review...</th><th>Go to PDF page(s)...</th><th>Also in...</th></tr></thead>
+  <tbody>
+    <tr><td>DAG definition and examples</td><td>pp. 141–156</td><td>[KT] §3.6, [CLRS] §22.4</td></tr>
+    <tr><td>Topological sort (simple O(n²))</td><td>pp. 141–156</td><td>[KT] §3.6</td></tr>
+    <tr><td>Topological sort O(n+m) — queue version</td><td>pp. 141–156</td><td>[CLRS] §22.4 (DFS version)</td></tr>
+    <tr><td>Longest path in DAG definition</td><td>pp. 157–168</td><td>[KT] §6.2</td></tr>
+    <tr><td>Longest path algorithm + example</td><td>pp. 157–168</td><td>[KT] §6.2</td></tr>
+    <tr><td>Combined topo sort + longest path code</td><td>pp. 157–168</td><td>[KT] §6.2</td></tr>
+    <tr><td>Why longest path in general graph is hard</td><td>pp. 157–168</td><td>[KT] §8 (NP-complete)</td></tr>
+    <tr><td>Negative edge weight problem</td><td>pp. 184–210</td><td>[KT] §6.8</td></tr>
+    <tr><td>Relaxation operation update(j,k)</td><td>pp. 207–210</td><td>[CLRS] §24.1</td></tr>
+    <tr><td>Bellman-Ford algorithm</td><td>pp. 207–216</td><td>[KT] §6.8, [CLRS] §24.1</td></tr>
+    <tr><td>Why n−1 iterations suffice (proof)</td><td>pp. 207–210</td><td>[CLRS] §24.1 Theorem 24.4</td></tr>
+    <tr><td>Floyd-Warshall recurrence</td><td>pp. 217–226</td><td>[KT] §6.10, [CLRS] §25.2</td></tr>
+    <tr><td>Floyd-Warshall space optimization</td><td>pp. 217–226</td><td>[CLRS] §25.2</td></tr>
+    <tr><td>Warshall transitive closure</td><td>pp. 217–226</td><td>[CLRS] §25.4</td></tr>
+    <tr><td>Negative cycle detection in FW</td><td>pp. 217–226</td><td>[CLRS] §25.2</td></tr>
+  </tbody>
+</table>
+
+<h4>15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM):</h4>
+<ol>
+  <li>Draw the 5-vertex trip-planning DAG from §2a and trace topological sort from scratch (verify you get a valid order). <span class="pdf-ref">📄 pp. 141–156</span></li>
+  <li>On the same DAG, compute LPT for each vertex and state the min rounds. Verify: min rounds = max(LPT) + 1. <span class="pdf-ref">📄 pp. 157–168</span></li>
+  <li>Write the Bellman-Ford recurrence from memory: "Relax all edges n−1 times." State why n−1 suffices in one sentence. <span class="pdf-ref">📄 pp. 207–210</span></li>
+  <li>Write the Floyd-Warshall recurrence from memory: W^k[i][j] = min(W^(k-1)[i][j], W^(k-1)[i][k] + W^(k-1)[k][j]). State the two cases in plain English. <span class="pdf-ref">📄 pp. 217–226</span></li>
+  <li>State all four complexities: Topo sort O(n+m), Longest path O(n+m), Bellman-Ford O(nm), Floyd-Warshall O(n³) time O(n²) space. <span class="pdf-ref">📄 pp. 141–226</span></li>
+  <li>State when each shortest path algorithm should be used (the DATO-LO / ONE-NEG-BELL / ALL-FLOYD / ONE-POS-DI mnemonic from §3). <span class="pdf-ref">📄 pp. 141–226</span></li>
+  <li>Flip to the worked Floyd-Warshall trace (§2c) and confirm you understand which cells changed and why for k=1. <span class="pdf-ref">📄 pp. 217–226</span></li>
+  <li>Run through the grading checklist for Q6 (Bellman-Ford correctness proof) — confirm you can hit all 6 bullet points. <span class="pdf-ref">📄 pp. 207–216</span></li>
+</ol>
+
+</div>
+
+<div class="banner" style="margin-top: 40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This deep-dive covers <strong>only Topic 9 — Dynamic Programming &amp; DAG Algorithms</strong> as listed in the CS 570 final exam appendix.
+  Companion deep-dive guides cover Topics 1 (NP-Completeness), 2 (Asymptotic Analysis), 3 (Master Theorem), 4 (Graph BFS/DFS), 5 (Shortest Paths / Dijkstra), 6 (Proof Techniques), 7 (Algorithm Design Patterns), and 8 (Divide &amp; Conquer).
+  Read this deep-dive FIRST, then use the condensed companion guide for rapid final-day review.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs570-dd-topic9';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active',  isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
