@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 — All Assignments A0–A6: Comprehensive Beginner Deep-Dive Answer Guide</title>
+<style>
+  :root {
+    --bg: #0f1117; --bg-elev: #161a24; --bg-elev2: #1a1d27; --surface: #1e2230;
+    --text: #e8eaf0; --text-dim: #a8aec0; --text-faint: #7a8095; --border: #2a2f3e;
+    --accent: #2979ff; --accent-soft: #1a3a5c; --accent-text: #64b5f6;
+    --topic-accent: #7c4dff;
+    --red: #ff5252; --orange: #ff9800; --yellow: #ffeb3b; --gold: #ffd700;
+    --green: #4caf50; --green-soft: #1b5e20; --green-text: #a5d6a7;
+    --blue-soft: #0d47a1; --blue-text: #90caf9;
+    --purple-soft: #4a148c; --purple-text: #ce93d8;
+    --teal: #26a69a; --teal-soft: #0d3330; --teal-text: #80cbc4;
+    --code-bg: #0a0c14; --code-text: #a8d8a8;
+  }
+  [data-theme="light"] {
+    --bg: #f4f6fb; --bg-elev: #ffffff; --bg-elev2: #eef1f8; --surface: #e4e8f2;
+    --text: #1a1d2e; --text-dim: #4a5068; --text-faint: #8890a8; --border: #d0d5e8;
+    --accent: #1a5fe0; --accent-soft: #dbeafe; --accent-text: #1a4fb0;
+    --topic-accent: #5e35b1;
+    --red: #d32f2f; --orange: #e65100; --yellow: #f9a825; --gold: #c17900;
+    --green: #2e7d32; --green-soft: #e8f5e9; --green-text: #1b5e20;
+    --blue-soft: #e3f2fd; --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5; --purple-text: #4a148c;
+    --teal: #00796b; --teal-soft: #e0f2f1; --teal-text: #004d40;
+    --code-bg: #eef1f7; --code-text: #1b5e20;
+  }
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1,h2,h3 { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #eef1f7; }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px; line-height: 1.7;
+    padding-left: 260px; padding-top: 44px;
+    transition: background 0.22s, color 0.22s;
+  }
+  code, pre, .mono { font-family: 'Consolas','Courier New',monospace; }
+  h1 { font-size: 2em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.5em; color: var(--topic-accent); margin: 32px 0 12px 0;
+       padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.15em; color: #fff; margin: 22px 0 8px 0; }
+  h4 { color: var(--text-dim); margin: 14px 0 6px 0; text-transform: uppercase;
+       letter-spacing: 1.2px; font-size: 0.82em; }
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* TOP BAR */
+  .top-bar {
+    position: fixed; top: 0; left: 260px; right: 0; height: 44px;
+    background: var(--bg-elev); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 24px; gap: 10px; z-index: 60;
+    transition: background 0.22s, border-color 0.22s;
+  }
+  .crumb { font-size: 0.8em; color: var(--text-faint); font-family: 'Consolas',monospace;
+            margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .crumb strong { color: var(--topic-accent); }
+  .theme-pill { display: flex; align-items: center; background: var(--surface);
+                 border: 1px solid var(--border); border-radius: 20px; padding: 3px;
+                 gap: 2px; cursor: pointer; }
+  .theme-opt { display: flex; align-items: center; justify-content: center;
+                width: 28px; height: 22px; border-radius: 16px; font-size: 12px;
+                transition: background 0.2s; color: var(--text-faint); }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  /* SIDEBAR */
+  nav.sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
+    background: var(--bg-elev); border-right: 1px solid var(--border);
+    padding: 18px 14px; overflow-y: auto; font-size: 0.84em; z-index: 50;
+    transition: background 0.22s, border-color 0.22s;
+  }
+  nav.sidebar .nav-brand { font-weight: 700; color: var(--topic-accent);
+                             text-transform: uppercase; letter-spacing: 1.5px;
+                             font-size: 0.7em; margin-bottom: 12px; }
+  nav.sidebar .nav-section { color: var(--text-faint); text-transform: uppercase;
+                               letter-spacing: 1px; font-size: 0.68em; font-weight: 600;
+                               margin: 12px 0 4px 0; padding-left: 8px; }
+  nav.sidebar a { display: block; padding: 5px 10px; margin: 1px 0;
+                   border-radius: 4px; color: var(--text-dim);
+                   border-left: 2px solid transparent; transition: all 0.18s; }
+  nav.sidebar a:hover { background: var(--bg-elev2); color: var(--text);
+                         border-left-color: var(--topic-accent); text-decoration: none; }
+  nav.sidebar a.sub { padding-left: 20px; font-size: 0.93em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  /* MAIN */
+  main { max-width: 1060px; padding: 36px 44px 80px 44px; }
+
+  /* DOC HEADER */
+  .doc-header { border-left: 4px solid var(--topic-accent);
+                  padding: 4px 0 4px 20px; margin-bottom: 28px; }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.88em; margin-top: 6px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  /* ASSIGNMENT CARD */
+  .asgn-card {
+    border: 1px solid var(--border); border-radius: 10px;
+    margin: 24px 0; overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .asgn-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-color: var(--topic-accent); }
+  .asgn-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; background: var(--bg-elev);
+    cursor: pointer; list-style: none; transition: background 0.18s;
+  }
+  .asgn-header:hover { background: var(--bg-elev2); }
+  .asgn-header::-webkit-details-marker { display: none; }
+  .asgn-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 44px; height: 28px; border-radius: 6px; font-family: 'Consolas',monospace;
+    font-size: 0.72em; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; padding: 0 8px;
+  }
+  .badge-a0 { background: rgba(102,187,106,0.15); color: #66bb6a; border: 1px solid rgba(102,187,106,0.35); }
+  .badge-a1 { background: rgba(41,121,255,0.15); color: #64b5f6; border: 1px solid rgba(41,121,255,0.35); }
+  .badge-a2 { background: rgba(255,152,0,0.15); color: #ffb74d; border: 1px solid rgba(255,152,0,0.35); }
+  .badge-a3 { background: rgba(38,166,154,0.15); color: #80cbc4; border: 1px solid rgba(38,166,154,0.35); }
+  .badge-a4 { background: rgba(255,82,82,0.15); color: #ff8a80; border: 1px solid rgba(255,82,82,0.35); }
+  .badge-a5 { background: rgba(171,71,188,0.15); color: #ce93d8; border: 1px solid rgba(171,71,188,0.35); }
+  .badge-a6 { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.35); }
+  .badge-graded { background: rgba(255,82,82,0.12); color: var(--red); border: 1px solid rgba(255,82,82,0.3);
+                   font-size: 0.68em; padding: 2px 7px; border-radius: 4px; }
+  .asgn-title { font-size: 1.05em; font-weight: 600; color: var(--text); flex: 1; }
+  .chevron { font-size: 0.75em; color: var(--text-faint); transition: transform 0.25s; }
+  details[open] > .asgn-header .chevron { transform: rotate(90deg); }
+  .asgn-body { padding: 0 20px 20px; background: var(--bg-elev2);
+                border-top: 1px solid var(--border); }
+
+  /* QUESTION BLOCK */
+  .q-block {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 8px; margin: 16px 0; padding: 16px 20px;
+    transition: background 0.22s;
+  }
+  .q-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .q-num { background: var(--topic-accent); color: #fff; padding: 2px 8px;
+            border-radius: 4px; font-family: 'Consolas',monospace; font-size: 0.72em;
+            font-weight: 700; }
+  .q-pts { background: var(--accent-soft); color: var(--accent-text);
+            padding: 2px 8px; border-radius: 4px; font-family: 'Consolas',monospace;
+            font-size: 0.72em; }
+  .q-type { background: var(--teal-soft); color: var(--teal-text);
+             padding: 2px 8px; border-radius: 4px; font-family: 'Consolas',monospace;
+             font-size: 0.72em; }
+  .q-text { font-weight: 500; font-size: 1.0em; color: #fff; margin: 6px 0 10px 0; }
+  .q-given { background: var(--code-bg); border: 1px solid var(--border);
+              border-radius: 6px; padding: 12px 14px; font-size: 0.85em;
+              margin: 8px 0; color: var(--text-dim); }
+
+  /* ANSWER BLOCK */
+  details.ans { margin-top: 12px; border-left: 3px solid var(--green); padding-left: 14px; }
+  details.ans summary { cursor: pointer; color: var(--green); font-weight: bold;
+                          padding: 4px 0; list-style: none; user-select: none; font-size: 0.95em; }
+  details.ans summary::-webkit-details-marker { display: none; }
+  details.ans[open] summary { color: #81c784; }
+  .ans-content { padding: 10px 0 4px 0; font-size: 0.93em; }
+  .ans-content p { margin: 6px 0; }
+
+  /* PDF REF */
+  .pdf-ref { display: inline-block; background: var(--accent-soft); color: var(--accent-text);
+              border: 1px solid var(--accent); border-radius: 4px; padding: 1px 6px;
+              font-size: 0.76em; font-family: 'Consolas',monospace; margin: 0 2px; }
+
+  /* PROOF BLOCK */
+  .proof-block { background: var(--bg-elev); border-left: 4px solid var(--gold);
+                  padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; }
+  .proof-label { color: var(--gold); font-weight: bold; font-size: 0.88em; }
+  .proof-step { margin: 7px 0; padding-left: 14px; color: var(--text-dim); }
+
+  /* STEP */
+  .step { background: var(--bg-elev2); border-left: 3px solid var(--topic-accent);
+           padding: 10px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; }
+  .step-head { color: var(--topic-accent); font-weight: 600; font-size: 0.92em; }
+  .step-body { margin-top: 5px; color: var(--text-dim); font-size: 0.9em; }
+
+  /* CALLOUT */
+  .callout { border-left: 3px solid var(--orange); background: rgba(255,152,0,0.05);
+              padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 0.93em; }
+  .callout.warn { border-left-color: var(--red); background: rgba(255,82,82,0.05); }
+  .callout.good { border-left-color: var(--green); background: rgba(76,175,80,0.05); }
+  .callout.info { border-left-color: var(--accent); background: rgba(41,121,255,0.05); }
+  .callout strong.lbl { display: block; text-transform: uppercase;
+                          letter-spacing: 1px; font-size: 0.72em; margin-bottom: 3px; }
+  .callout.warn strong.lbl { color: var(--red); }
+  .callout.good strong.lbl { color: var(--green); }
+  .callout.info strong.lbl { color: var(--accent-text); }
+  .callout strong.lbl { color: var(--orange); }
+
+  /* COMPLEXITY BOX */
+  .complexity-box { background: var(--accent-soft); color: var(--accent-text);
+                     border: 1px solid var(--accent); border-radius: 5px;
+                     padding: 8px 12px; font-family: monospace; display: inline-block; margin: 4px 0; }
+
+  /* MISCONCEPTION */
+  .misconception { background: var(--bg-elev2); border: 1px solid var(--border);
+                    border-radius: 6px; padding: 10px 14px; margin: 10px 0; }
+  .myth { color: var(--red); font-weight: 600; }
+  .reality { color: var(--green); font-weight: 600; }
+
+  /* CODE */
+  pre.pseudocode { background: var(--code-bg); color: var(--code-text);
+                    font-family: 'Consolas','Courier New',monospace; font-size: 0.83rem;
+                    line-height: 1.6; padding: 14px 18px; border-radius: 6px;
+                    border-left: 3px solid var(--topic-accent); overflow-x: auto;
+                    white-space: pre; margin: 12px 0; }
+  pre.diagram { background: var(--bg-elev2); border: 1px solid var(--accent);
+                 border-radius: 6px; padding: 14px 18px; overflow-x: auto;
+                 font-size: 0.84em; line-height: 1.5; color: #dce3f0; margin: 12px 0; }
+  .diagram-source { font-size: 0.82em; color: var(--text-faint); margin: -6px 0 14px; font-style: italic; }
+
+  /* TABLE */
+  table.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.88em; }
+  table.data th { background: var(--accent-soft); color: var(--blue-text); text-align: left;
+                   padding: 9px 11px; border: 1px solid var(--border); font-size: 0.82em;
+                   text-transform: uppercase; letter-spacing: 0.6px; }
+  table.data td { padding: 9px 11px; border: 1px solid var(--border); vertical-align: top; }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+  table.trace { width: 100%; border-collapse: collapse; margin: 12px 0;
+                 font-family: 'Consolas',monospace; font-size: 0.82em; }
+  table.trace th { background: var(--accent-soft); color: var(--blue-text);
+                    padding: 7px 9px; border: 1px solid var(--border); }
+  table.trace td { border: 1px solid var(--border); padding: 6px 9px; vertical-align: top; }
+  table.trace tr.highlight { background: var(--bg-elev2); }
+
+  /* BADGE */
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px;
+                padding: 2px 8px; font-size: 0.72em; font-weight: 600; font-family: 'Consolas',monospace; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px;
+                padding: 2px 8px; font-size: 0.72em; font-weight: 600; font-family: 'Consolas',monospace; }
+  .banner { background: linear-gradient(135deg, rgba(124,77,255,0.08), rgba(41,121,255,0.06));
+             border: 1px solid var(--border); border-left: 3px solid var(--topic-accent);
+             border-radius: 6px; padding: 13px 17px; margin: 18px 0; font-size: 0.93em; }
+  .banner strong.label { color: var(--topic-accent); text-transform: uppercase;
+                           letter-spacing: 1px; font-size: 0.76em; }
+  ul.plain { padding-left: 20px; }
+  ul.plain li { margin: 3px 0; }
+
+  /* PAGES COVERAGE */
+  .pages-cov { display: inline-block; background: var(--bg-elev2);
+                border: 1px dashed var(--accent); color: var(--accent-text);
+                padding: 5px 12px; border-radius: 5px; font-family: 'Consolas',monospace;
+                font-size: 0.8em; margin-bottom: 12px; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; }
+    nav.sidebar { top: 44px; width: 100%; height: 52px; bottom: auto; overflow-x: auto;
+                   overflow-y: hidden; display: flex; padding: 8px 10px; gap: 4px; align-items: center; }
+    nav.sidebar .nav-brand, nav.sidebar .nav-section, nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 5px 9px; }
+    main { padding: 24px 16px 60px; }
+  }
+  @media print {
+    body { padding-left: 0; background: #fff; color: #000; }
+    nav.sidebar, .top-bar { display: none; }
+    details { display: block; }
+    details > * { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="nav-brand">🎓 CS 570 · A0–A6</div>
+  <a href="#top">🔝 Overview</a>
+  <hr>
+  <div class="nav-section">Assignments</div>
+  <a href="#a0">A0 · Discrete Math Prerequisites</a>
+  <a href="#a0-q1" class="sub">→ Q1 Set Operations</a>
+  <a href="#a0-q2" class="sub">→ Q2 Proof Techniques</a>
+  <hr>
+  <a href="#a1">A1 · Algorithm Design</a>
+  <a href="#a1-q1" class="sub">→ Q1 Max Product Split</a>
+  <hr>
+  <a href="#a2">A2 · Asymptotic Analysis</a>
+  <a href="#a2-q1" class="sub">→ Q1 True/False Claims</a>
+  <hr>
+  <a href="#a3">A3 · Python Grid Problem</a>
+  <hr>
+  <a href="#a4">A4 · Graded Mixed Topics</a>
+  <a href="#a4-q1" class="sub">→ Q1 Growth Rate Order</a>
+  <a href="#a4-q2" class="sub">→ Q2 (n+a)^b Asymptotic</a>
+  <a href="#a4-q3" class="sub">→ Q3 BFS vs DFS</a>
+  <a href="#a4-q4" class="sub">→ Q4 Balloon Scenarios</a>
+  <a href="#a4-q5" class="sub">→ Q5 Connectivity Proof</a>
+  <a href="#a4-q6" class="sub">→ Q6 Graph Squaring G²</a>
+  <a href="#a4-q7" class="sub">→ Q7 Sliding Window</a>
+  <a href="#a4-q8" class="sub">→ Q8 Min Time Diff</a>
+  <a href="#a4-q9" class="sub">→ Q9 Hamming Distance</a>
+  <hr>
+  <a href="#a5">A5 · NP-Completeness</a>
+  <a href="#a5-q1" class="sub">→ Q1 Definitions</a>
+  <a href="#a5-q2" class="sub">→ Q2 IS ↔ VC Equivalence</a>
+  <a href="#a5-q3" class="sub">→ Q3 VC ≤p SC Reduction</a>
+  <hr>
+  <a href="#a6">A6 · Graded Advanced Topics</a>
+  <a href="#a6-q1" class="sub">→ Q1 Strassen / MT Case 1</a>
+  <a href="#a6-q2" class="sub">→ Q2 MT Case 2</a>
+  <a href="#a6-q3" class="sub">→ Q3 MT Non-applicable</a>
+  <a href="#a6-q4" class="sub">→ Q4 Degree Computation</a>
+  <a href="#a6-q5" class="sub">→ Q5 Median of 2 DBs</a>
+  <a href="#a6-q6" class="sub">→ Q6 MST = Tree Proof</a>
+  <a href="#a6-q7" class="sub">→ Q7 Star Graph Center</a>
+  <a href="#a6-q8" class="sub">→ Q8 Arithmetic Progression</a>
+  <a href="#a6-q9" class="sub">→ Q9 Max-Probability Path</a>
+</nav>
+
+<div class="top-bar">
+  <span class="crumb">CS 570 · Spring 2026 · <strong>All Assignments A0–A6 · Beginner Deep-Dive Answer Guide</strong></span>
+  <div class="theme-pill" onclick="toggleTheme()" title="Toggle theme">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<div class="doc-header">
+  <h1>CS 570 — Assignments A0–A6<br>Comprehensive Beginner Deep-Dive Answer Guide</h1>
+  <h3 style="color:var(--topic-accent);font-weight:500;margin-top:4px;">Every question answered with full worked explanations, proof walkthroughs, pseudocode breakdowns, and visual examples — anchored to the lecture slides and textbooks</h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Term:</strong> Spring 2026<br>
+    <strong>Coverage:</strong> Assignments A0 through A6 — all questions and solutions, fully explained from first principles.<br>
+    <strong>Graded assignments:</strong> A4 and A6 (highest exam-signal weight). All others mandatory but ungraded.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">How to use this guide</strong><br>
+  Each assignment section opens with its context, then presents every question with: the clean problem statement, a patient explanation of the core idea, the full worked solution with justification, and exam tips. Proofs are broken into labeled steps. Pseudocode is annotated line-by-line. Common mistakes are called out explicitly.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 0
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a0">📘 Assignment 0 — Discrete Mathematics Prerequisites</h2>
+<div class="pages-cov">📘 Ungraded · Covers: Sets, Relations, Proofs · Lectures 1–3</div>
+<p>This assignment is a self-assessment of fundamental discrete math prerequisites. Its questions mirror exactly what appeared on Quiz 1 (the midterm). The proof questions in Q2 were reproduced almost verbatim on the midterm.</p>
+
+<!-- A0 Q1 -->
+<div id="a0-q1" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a0">A0 Q1</span>
+  <span class="asgn-title">Basic Set Operations, Functions, Relations &amp; Logic</span>
+  <span style="font-size:0.8em;color:var(--text-faint)">7 sub-questions</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<p style="margin-top:12px;color:var(--text-dim)">These are definitional questions — you must know the <strong>exact formal notation</strong> used in assignments and on the exam. Every answer here is a definition you could be asked to reproduce.</p>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.2</span><span class="q-type">SET OPERATIONS</span></div>
+  <p class="q-text">Define set intersection S₁ ∩ S₂ in set-builder notation. Also define set minus, complementation, and Cartesian product.</p>
+  <details class="ans"><summary>▶ Full Answer &amp; Explanation</summary>
+  <div class="ans-content">
+    <p><strong>Intersection:</strong> S₁ ∩ S₂ = {x : x ∈ S₁ AND x ∈ S₂} — elements appearing in BOTH sets. <span class="pdf-ref">📄 Lec 1, A0</span></p>
+    <p><strong>Set minus:</strong> S₁ − S₂ = {x ∈ S₁ : x ∉ S₂} — elements in S₁ but NOT in S₂.</p>
+    <p><strong>Complementation:</strong> S̄₁ = {x ∈ U : x ∉ S₁} — everything in the universe U that is NOT in S₁. Note you need a universal set U.</p>
+    <p><strong>Cartesian product:</strong> S₁ × S₂ = {(x, y) : x ∈ S₁, y ∈ S₂} — all ordered pairs.</p>
+    <p>Example: If S₁ = {1,2,3} and S₂ = {a,b}, then S₁ × S₂ = {(1,a),(1,b),(2,a),(2,b),(3,a),(3,b)} — 3×2=6 pairs.</p>
+    <p><strong>Powerset:</strong> If S = {1,2,3}, then 2^S = {∅, {1}, {2}, {3}, {1,2}, {1,3}, {2,3}, {1,2,3}}. If |S|=n, then |2^S| = 2^n. <span class="pdf-ref">📄 A0 Q1</span></p>
+    <div class="callout info"><strong class="lbl">📌 Key formula</strong>The powerset of a set with n elements has exactly 2^n elements. Memorize this.</div>
+  </div></details>
+</div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.4</span><span class="q-type">RELATIONS</span></div>
+  <p class="q-text">Define reflexive, symmetric, and transitive relations.</p>
+  <details class="ans"><summary>▶ Full Answer &amp; Explanation</summary>
+  <div class="ans-content">
+    <p><strong>Reflexive:</strong> R on set A is reflexive if every element is related to itself: ∀a ∈ A, (a,a) ∈ R. Example: "≤" on integers is reflexive (x ≤ x for all x). <span class="pdf-ref">📄 A0 Q1.4</span></p>
+    <p><strong>Symmetric:</strong> ∀a,b ∈ A, (a,b) ∈ R ⟹ (b,a) ∈ R. Example: "is a sibling of" is symmetric. "is a parent of" is NOT symmetric.</p>
+    <p><strong>Transitive:</strong> ∀a,b,c ∈ A, (a,b) ∈ R ∧ (b,c) ∈ R ⟹ (a,c) ∈ R. Example: "less than" (&lt;) is transitive. <span class="pdf-ref">📄 A0 Q1.4</span></p>
+  </div></details>
+</div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.5</span><span class="q-type">LOGIC</span></div>
+  <p class="q-text">Write the truth table for P → Q. Is P ∧ (Q ∨ R) equal to (P ∧ Q) ∨ (P ∧ R)?</p>
+  <details class="ans"><summary>▶ Full Answer &amp; Explanation</summary>
+  <div class="ans-content">
+    <p><strong>P → Q truth table</strong> (hint: P→Q is equivalent to ¬P ∨ Q):</p>
+    <table class="data">
+      <thead><tr><th>P</th><th>Q</th><th>P → Q</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>T</td><td>T</td><td><strong>T</strong></td><td>True promise kept</td></tr>
+        <tr><td>T</td><td>F</td><td><strong>F</strong></td><td>True promise broken</td></tr>
+        <tr><td>F</td><td>T</td><td><strong>T</strong></td><td>False premise — vacuously true</td></tr>
+        <tr><td>F</td><td>F</td><td><strong>T</strong></td><td>False premise — vacuously true</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><strong class="lbl">⚠️ Common confusion</strong>F → anything = TRUE. This is "vacuous truth" — if the premise is false, the implication makes no claim, so it's true.</div>
+    <p><strong>Distributive law:</strong> P ∧ (Q ∨ R) = (P ∧ Q) ∨ (P ∧ R) is TRUE. Verified by the 8-row truth table in the submission — all corresponding rows match. This is the distributivity of AND over OR. <span class="pdf-ref">📄 A0 Q1.6</span></p>
+  </div></details>
+</div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.7</span><span class="q-type">GRAPH CYCLES</span></div>
+  <p class="q-text">Draw the graph with V={v₁,v₂,v₃} and edges {(v₁,v₁),(v₁,v₂),(v₂,v₃),(v₂,v₁),(v₃,v₁)}. Enumerate all cycles with base v₁.</p>
+  <details class="ans"><summary>▶ Full Answer &amp; Explanation</summary>
+  <div class="ans-content">
+    <pre class="diagram">
+  Edges: e₁₁: v₁→v₁ (self-loop)
+         e₁₂: v₁→v₂
+         e₂₁: v₂→v₁
+         e₂₃: v₂→v₃
+         e₃₁: v₃→v₁
+
+  Graph picture:
+        v₁ ⟲ (self-loop e₁₁)
+       ↗↙
+      v₂ → v₃ → v₁
+</pre>
+    <p><strong>All cycles with base v₁</strong> (a walk from v₁ back to v₁ with no repeated edges):</p>
+    <ol>
+      <li>e₁₁ (the self-loop alone)</li>
+      <li>e₁₂ → e₂₁ (v₁→v₂→v₁)</li>
+      <li>e₁₂ → e₂₃ → e₃₁ (v₁→v₂→v₃→v₁)</li>
+      <li>e₁₁ → e₁₂ → e₂₁ (use self-loop then go around)</li>
+      <li>e₁₂ → e₂₁ → e₁₁</li>
+      <li>e₁₁ → e₁₂ → e₂₃ → e₃₁</li>
+      <li>e₁₂ → e₂₃ → e₃₁ → e₁₁</li>
+    </ol>
+    <p>The key insight: a "cycle with base v₁" is any walk that starts AND ends at v₁ with no repeated edges. You can combine the self-loop with any other cycle to get new cycles. <span class="pdf-ref">📄 A0 Q1.7</span></p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- A0 Q2 -->
+<div id="a0-q2" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a0">A0 Q2</span>
+  <span class="asgn-title">Proof Techniques: Induction, Construction, Contradiction ⭐ MIDTERM EXACT</span>
+  <span class="badge-graded">MIDTERM ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="callout good"><strong class="lbl">🎯 Exam signal — HIGH</strong>All three proofs in Q2 appeared almost verbatim on Quiz 1 (midterm). Master these cold.</div>
+
+<div class="q-block" id="a0-induction">
+  <div class="q-meta"><span class="q-num">Q2.1</span><span class="q-type">PROOF BY INDUCTION</span><span class="badge-graded">MIDTERM ⭐</span></div>
+  <p class="q-text">A binary tree of height n has at most 2ⁿ leaves. Prove by induction.</p>
+  <details class="ans"><summary>▶ Full Answer with Every Step Explained</summary>
+  <div class="ans-content">
+    <div class="callout info"><strong class="lbl">What is a binary tree of height n?</strong>Height = length of the longest root-to-leaf path. Height 0 = just a single node. Height k = root with subtrees of height ≤ k-1.</div>
+    <div class="proof-block">
+      <div class="proof-label">PROOF BY MATHEMATICAL INDUCTION</div>
+      <div class="proof-label" style="margin-top:8px">Statement P(n):</div>
+      <div class="proof-step">A binary tree of height n has at most 2ⁿ leaves. <span class="pdf-ref">📄 A0 Q2.1</span></div>
+
+      <div class="proof-label" style="margin-top:10px">Base Case: n = 0</div>
+      <div class="proof-step">A binary tree of height 0 is a single node. That node is itself the only leaf. Number of leaves = 1. 2⁰ = 1. Since 1 ≤ 1, P(0) is TRUE. ✓ <span class="pdf-ref">📄 A0 Q2.1</span></div>
+
+      <div class="proof-label" style="margin-top:10px">Inductive Hypothesis (IH):</div>
+      <div class="proof-step">Assume P(k) is true for some integer k ≥ 0. That is: any binary tree of height k has at most 2^k leaves. <span class="pdf-ref">📄 A0 Q2.1</span></div>
+
+      <div class="proof-label" style="margin-top:10px">Inductive Step: Prove P(k+1)</div>
+      <div class="proof-step">Consider any binary tree T of height k+1. T's root has a left subtree T_L and a right subtree T_R (either or both may be empty, or they may exist with height ≤ k).</div>
+      <div class="proof-step">Since T has height k+1, the subtrees T_L and T_R have height at most k.</div>
+      <div class="proof-step">By the IH: T_L has at most 2^k leaves. T_R has at most 2^k leaves.</div>
+      <div class="proof-step">Every leaf of T is a leaf of T_L or T_R. So the total number of leaves in T is at most: 2^k + 2^k = 2 · 2^k = 2^(k+1). ✓ <span class="pdf-ref">📄 A0 Q2.1</span></div>
+
+      <div class="proof-label" style="margin-top:10px">Conclusion:</div>
+      <div class="proof-step">By the principle of mathematical induction, P(n) holds for all n ≥ 0. ∎</div>
+    </div>
+    <pre class="diagram">
+  Concrete verification:
+  n=0: 1 leaf  ≤ 2⁰=1  ✓
+  n=1: up to 2 leaves ≤ 2¹=2  ✓   (root + 2 children)
+  n=2: up to 4 leaves ≤ 2²=4  ✓   (fully filled tree)
+
+       ●          height 2
+      / \
+     ●   ●        height 1
+    / \ / \
+   ● ● ● ●        4 leaves = 2² ✓
+</pre>
+    <div class="callout warn"><strong class="lbl">⚠️ Grader checklist (required for full credit)</strong>
+      ☐ State P(n) clearly · ☐ Base case with numerical verification · ☐ Label "Inductive Hypothesis" · ☐ Inductive step uses IH explicitly · ☐ Conclusion sentence
+    </div>
+  </div></details>
+</div>
+
+<div class="q-block" id="a0-construction">
+  <div class="q-meta"><span class="q-num">Q2.2</span><span class="q-type">PROOF BY CONSTRUCTION</span><span class="badge-graded">MIDTERM ⭐</span></div>
+  <p class="q-text">If a and b are consecutive integers, then a + b is odd. Prove by construction.</p>
+  <details class="ans"><summary>▶ Full Answer with Every Step Explained</summary>
+  <div class="ans-content">
+    <div class="callout info"><strong class="lbl">What is proof by construction?</strong>We explicitly construct a mathematical object that satisfies the required property, rather than just asserting it exists.</div>
+    <div class="proof-block">
+      <div class="proof-label">PROOF BY CONSTRUCTION</div>
+      <div class="proof-step"><strong>Setup:</strong> Let a and b be consecutive integers. By definition, b comes immediately after a, so b = a + 1 for some integer a. <span class="pdf-ref">📄 A0 Q2.2</span></div>
+      <div class="proof-step"><strong>Construct the sum:</strong> a + b = a + (a + 1) = 2a + 1.</div>
+      <div class="proof-step"><strong>Show it's odd:</strong> Since a is an integer, 2a is an even integer (divisible by 2). Then 2a + 1 is the next integer after 2a. By definition, an integer is odd iff it equals 2k + 1 for some integer k. Taking k = a: 2a + 1 = 2(a) + 1 = odd. ✓ <span class="pdf-ref">📄 A0 Q2.2</span></div>
+      <div class="proof-step"><strong>Conclusion:</strong> For any consecutive integers a and b = a+1, their sum a + b = 2a + 1 is always odd. ∎</div>
+    </div>
+    <p><strong>Concrete example:</strong> a=7, b=8. Sum = 15 = 2(7)+1 = odd ✓. a=100, b=101. Sum=201=2(100)+1=odd ✓.</p>
+  </div></details>
+</div>
+
+<div class="q-block" id="a0-contradiction">
+  <div class="q-meta"><span class="q-num">Q2.3</span><span class="q-type">PROOF BY CONTRADICTION</span><span class="badge-graded">MIDTERM ⭐</span></div>
+  <p class="q-text">If n² is even, then n is even. Prove by contradiction.</p>
+  <details class="ans"><summary>▶ Full Answer with Every Step Explained</summary>
+  <div class="ans-content">
+    <div class="callout info"><strong class="lbl">What is proof by contradiction?</strong>Assume the NEGATION of what you want to prove. Show this assumption leads to an impossible situation (contradiction). Therefore the original statement must be true.</div>
+    <div class="proof-block">
+      <div class="proof-label">PROOF BY CONTRADICTION</div>
+      <div class="proof-step"><strong>Original claim (P → Q):</strong> If n² is even, then n is even. <span class="pdf-ref">📄 A0 Q2.3</span></div>
+      <div class="proof-step"><strong>Assume the negation:</strong> Assume n² is even AND n is NOT even (i.e., n is odd).</div>
+      <div class="proof-step"><strong>Work with the assumption:</strong> Since n is odd, we can write n = 2k + 1 for some integer k.</div>
+      <div class="proof-step"><strong>Compute n²:</strong> n² = (2k+1)² = 4k² + 4k + 1 = 2(2k² + 2k) + 1. <span class="pdf-ref">📄 A0 Q2.3</span></div>
+      <div class="proof-step"><strong>Identify the contradiction:</strong> Let r = 2k² + 2k (this is an integer). Then n² = 2r + 1, which is ODD by definition.</div>
+      <div class="proof-step"><strong>Contradiction:</strong> We assumed n² was even, but derived that n² must be odd. These cannot both be true. ✗</div>
+      <div class="proof-step"><strong>Conclusion:</strong> Our assumption (n is odd) must be false. Therefore n is even. ∎ <span class="pdf-ref">📄 A0 Q2.3</span></div>
+    </div>
+    <p><strong>Concrete verification of the contradiction:</strong> Take k=3, so n=7. n²=49. 49 = 2(24)+1 = odd. But we assumed n² is even. Contradiction. ✓</p>
+    <div class="callout warn"><strong class="lbl">⚠️ Misconception</strong>Proof by contradiction does NOT mean showing the claim is false. You assume the OPPOSITE of what you want to prove, then derive absurdity.</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 1
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a1">📘 Assignment 1 — Algorithm Design: Max Product Integer Split</h2>
+<div class="pages-cov">📘 Ungraded · Covers: Pseudocode Design, Divide &amp; Conquer · Lecture 5–6</div>
+
+<div id="a1-q1" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a1">A1 Q1</span>
+  <span class="asgn-title">Pseudocode + English Explanation: Maximum Product by Integer Splitting</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1</span><span class="q-type">PSEUDOCODE + EXPLANATION</span></div>
+  <p class="q-text">Given an integer n, break it into the sum of k ≥ 2 positive integers that maximizes the product. Return the maximum product.</p>
+  <div class="q-given">Example: n=10 → 10=3+3+4 → product=36. &nbsp; n=2 → 2=1+1 → product=1.</div>
+  <details class="ans"><summary>▶ Full Answer with Deep Explanation</summary>
+  <div class="ans-content">
+    <h3>The Core Mathematical Insight</h3>
+    <p>Why do we want pieces of size 3? The submitted solution uses the inequality: (x+a)(x-a) = x² - a² ≤ x². This shows that for a fixed sum 2x, the product is maximized when a=0 (equal halves). So we always want to split as evenly as possible. <span class="pdf-ref">📄 A1 Q1</span></p>
+    <p>For 2: 2 = 1+1 → product = 1 &lt; 2. So DON'T break 2 (but we must for k≥2).</p>
+    <p>For 3: 3 = 1+2 → product = 2 &lt; 3. So DON'T break 3.</p>
+    <p>For 4: 4 = 2+2 → product = 4 = 4. Breaking doesn't help.</p>
+    <p>For 6: 6 = 3+3 → product = 9 &gt; 6. Breaking DOES help here.</p>
+    <p>The greedy rule: keep splitting until all pieces are ≤ 3. The halving strategy (split into two ≈ equal halves) achieves this recursively.</p>
+
+    <h3>Pseudocode (from submitted solution)</h3>
+    <pre class="pseudocode">
+FUNCTION MaxProduct(n):
+    FUNCTION Split(x, current_split_count):
+        # Base cases: x is small enough (≤ 3)
+        IF current_split_count < 2 AND x <= 3 THEN
+            # Must split at least once — break off 1
+            RETURN ( [x-1, 1], current_split_count + 1 )
+        ELSE IF x <= 3 THEN
+            # Already split enough — keep x as-is
+            RETURN ( [x], current_split_count )
+        END IF
+
+        # Recursive split into two halves
+        left_split  = CEILING(x / 2)      # round up
+        right_split = FLOOR(x / 2)         # round down
+        current_split_count = current_split_count + 1
+
+        # Recursively split each half if still > 3
+        IF left_split > 3 THEN
+            (left_splits, current_split_count) = Split(left_split, current_split_count)
+        ELSE
+            left_splits = [left_split]
+        IF right_split > 3 THEN
+            (right_splits, current_split_count) = Split(right_split, current_split_count)
+        ELSE
+            right_splits = [right_split]
+
+        RETURN (left_splits + right_splits, current_split_count)
+    END FUNCTION
+
+    (splits, count) = Split(n, 1)
+    result = 1
+    FOR EACH s IN splits: result = result * s
+    RETURN result
+END FUNCTION</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A1 Q1 submitted solution</span></div>
+
+    <h3>Step-by-step English Explanation</h3>
+    <div class="step"><div class="step-head">Step 1: Base cases for small numbers</div>
+    <div class="step-body">If the number x is ≤ 3 and we haven't yet made 2 splits, we must split once (to satisfy k≥2). We return [x-1, 1]. If x≤3 and we've already split enough, keep x intact.</div></div>
+    <div class="step"><div class="step-head">Step 2: Halving strategy</div>
+    <div class="step-body">For x > 3, split into ⌈x/2⌉ and ⌊x/2⌋. This is the "most balanced" possible split, maximizing the product by the (x+a)(x-a) ≤ x² inequality.</div></div>
+    <div class="step"><div class="step-head">Step 3: Recurse on large halves</div>
+    <div class="step-body">If either half is still > 3, recurse on it. If ≤ 3, keep it. This continues until all pieces are ≤ 3.</div></div>
+    <div class="step"><div class="step-head">Step 4: Multiply all pieces</div>
+    <div class="step-body">Multiply all resulting pieces together for the maximum product.</div></div>
+
+    <h3>Worked Example: n = 10</h3>
+    <pre class="diagram">
+  Split(10, 1):
+    left = 5, right = 5
+    Split(5): left=3, right=2 → returns [3, 2]
+    Split(5): left=3, right=2 → returns [3, 2]
+    Final splits: [3, 2, 3, 2] (but assignment says answer is [3,3,4])
+
+  Note: The instructor's canonical answer is 10 = 3+3+4 → 3×3×4 = 36.
+  The halving approach yields [3,2,3,2] → 3×2×3×2 = 36. ✓ Same product!</pre>
+    <p><strong>Complexity:</strong> Each split divides the problem in half. The recursion depth is O(log n). Total work: O(n) for the multiplication step. Time = <span class="complexity-box">O(n)</span>. <span class="pdf-ref">📄 A1 Q1</span></p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 2
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a2">📘 Assignment 2 — Asymptotic Analysis: Formal Proofs</h2>
+<div class="pages-cov">📘 Ungraded · Covers: Big-O, Omega, Theta formal proofs &amp; counterexamples · Lectures 5–6</div>
+
+<div id="a2-q1" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a2">A2 Q1</span>
+  <span class="asgn-title">True/False with Formal Proof or Counterexample: Three Asymptotic Claims ⭐</span>
+  <span class="badge-graded">MIDTERM ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="callout info"><strong class="lbl">📌 Formal definition reminder</strong>f(n) = O(g(n)) means: ∃c &gt; 0, ∃n₀ such that ∀n ≥ n₀: 0 ≤ f(n) ≤ c·g(n). The witnesses c and n₀ must be produced explicitly. <span class="pdf-ref">📄 Lec 5–6</span></div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.1</span><span class="q-type">PROOF</span><span class="badge-graded">⭐</span></div>
+  <p class="q-text">Claim: If f(n) = O(g(n)) and f(n) = Ω(h(n)), then g(n) = Ω(h(n)). TRUE or FALSE?</p>
+  <details class="ans"><summary>▶ Full Answer: TRUE — Chain Inequality Proof</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">DIRECT PROOF (chaining inequalities)</div>
+      <div class="proof-step"><strong>Given 1:</strong> f(n) = O(g(n)) → ∃c₁ &gt; 0, n₁: ∀n ≥ n₁, f(n) ≤ c₁·g(n). <span class="pdf-ref">📄 Lec 5</span></div>
+      <div class="proof-step"><strong>Given 2:</strong> f(n) = Ω(h(n)) → ∃c₂ &gt; 0, n₂: ∀n ≥ n₂, f(n) ≥ c₂·h(n). <span class="pdf-ref">📄 Lec 5</span></div>
+      <div class="proof-step"><strong>Combine:</strong> Let n₀ = max(n₁, n₂). For all n ≥ n₀, both inequalities hold: c₂·h(n) ≤ f(n) ≤ c₁·g(n).</div>
+      <div class="proof-step"><strong>Derive:</strong> c₂·h(n) ≤ c₁·g(n). Divide both sides by c₁ &gt; 0: (c₂/c₁)·h(n) ≤ g(n).</div>
+      <div class="proof-step"><strong>Conclusion:</strong> Let c = c₂/c₁ &gt; 0. Then g(n) ≥ c·h(n) for all n ≥ n₀. By definition, g(n) = Ω(h(n)). ✓ ∎ <span class="pdf-ref">📄 A2 Q1.1</span></div>
+    </div>
+    <p><strong>Intuition:</strong> f is sandwiched between h (from below) and g (from above). So g must be above h too.</p>
+  </div></details>
+</div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.2</span><span class="q-type">PROOF</span></div>
+  <p class="q-text">Claim: If f(n) = O(g(n)), then f(n)² = O(g(n)²). TRUE or FALSE?</p>
+  <details class="ans"><summary>▶ Full Answer: TRUE — Square Both Sides</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">DIRECT PROOF</div>
+      <div class="proof-step"><strong>Given:</strong> f(n) = O(g(n)) → ∃c₀ &gt; 0, n₀: ∀n ≥ n₀, 0 ≤ f(n) ≤ c₀·g(n). <span class="pdf-ref">📄 A2 Q1.2</span></div>
+      <div class="proof-step"><strong>Square both sides:</strong> f(n)² ≤ (c₀·g(n))² = c₀²·g(n)².</div>
+      <div class="proof-step"><strong>Conclusion:</strong> Let c = c₀² &gt; 0. Then f(n)² ≤ c·g(n)² for all n ≥ n₀. Therefore f(n)² = O(g(n)²). ✓ ∎ <span class="pdf-ref">📄 A2 Q1.2</span></div>
+    </div>
+    <p><strong>Why squaring preserves the inequality:</strong> If 0 ≤ a ≤ b, then a² ≤ b² (both sides non-negative, squaring is monotone). The key assumption is f(n) ≥ 0, which holds for algorithmic complexity functions.</p>
+  </div></details>
+</div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1.3</span><span class="q-type">COUNTEREXAMPLE</span><span class="badge-graded">⭐</span></div>
+  <p class="q-text">Claim: If f(n) = Θ(g(n)), then log f(n) = Θ(log g(n)). TRUE or FALSE?</p>
+  <details class="ans"><summary>▶ Full Answer: FALSE — Concrete Counterexample</summary>
+  <div class="ans-content">
+    <div class="callout warn"><strong class="lbl">⚠️ This is the hard one — FALSE!</strong>Logarithms can destroy Theta relationships when one function approaches a constant.</div>
+    <div class="proof-block">
+      <div class="proof-label">COUNTEREXAMPLE</div>
+      <div class="proof-step"><strong>Define:</strong> f(n) = 2 (constant), g(n) = 1 + 1/n. <span class="pdf-ref">📄 A2 Q1.3</span></div>
+      <div class="proof-step"><strong>Step 1: Show f(n) = Θ(g(n)).</strong> For all n ≥ 1: 1 ≤ g(n) = 1+1/n ≤ 2 = f(n). Choose c₁=1, c₂=2, n₀=1: c₁·g(n) ≤ f(n) ≤ c₂·g(n) ✓. So f = Θ(g).</div>
+      <div class="proof-step"><strong>Step 2: Show log f(n) ≠ Θ(log g(n)).</strong> log f(n) = log 2 = constant. log g(n) = log(1 + 1/n) → 0 as n → ∞.</div>
+      <div class="proof-step"><strong>Ratio diverges:</strong> lim log f(n)/log g(n) = lim (log 2) / (log(1+1/n)) → ∞ as n→∞. The ratio is not bounded by any constant. So log f(n) ≠ Θ(log g(n)). ✗ ∎ <span class="pdf-ref">📄 A2 Q1.3</span></div>
+    </div>
+    <p><strong>Intuition:</strong> Two functions can be within a constant factor of each other (Theta), but their logarithms can diverge wildly if one approaches a constant while the other approaches 0. Theta is NOT preserved under logarithms in general.</p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 3
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a3">📘 Assignment 3 — Python Coding: Max Square Hole in Grid</h2>
+<div class="pages-cov">📘 Ungraded · Python coding in-class · Lec 9</div>
+
+<div class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a3">A3 Q1</span>
+  <span class="asgn-title">Max Area of Square-Shaped Hole After Removing Bars</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1</span><span class="q-type">PYTHON CODING</span></div>
+  <p class="q-text">Given n, m, hBars, vBars: find the maximum area of a square hole by removing some removable horizontal and vertical bars.</p>
+  <div class="q-given">Input: n=2, m=1, hBars=[2,3], vBars=[2] → Output: 4</div>
+  <details class="ans"><summary>▶ Full Answer with Algorithm Explanation</summary>
+  <div class="ans-content">
+    <h3>Core Insight</h3>
+    <p>The maximum gap in horizontal bars determines the max height of the hole. The maximum gap in vertical bars determines max width. The square side = min(max_h_gap, max_v_gap). Area = side². <span class="pdf-ref">📄 A3 Q1</span></p>
+    <p>To maximize consecutive removable bars: sort hBars and find the longest consecutive run (each consecutive pair a, a+1 can be removed together to create a gap of size = run_length + 1).</p>
+    <pre class="pseudocode">
+def maxRectangleArea(n, m, hBars, vBars):
+    def maxGap(bars):
+        bars.sort()
+        max_gap = 1    # minimum gap without removing anything
+        streak = 1
+        for i in range(1, len(bars)):
+            if bars[i] == bars[i-1] + 1:
+                streak += 1    # consecutive bars can be removed together
+            else:
+                streak = 1
+            max_gap = max(max_gap, streak + 1)
+        return max_gap
+
+    h_gap = maxGap(hBars)
+    v_gap = maxGap(vBars)
+    side = min(h_gap, v_gap)
+    return side * side</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A3 Q1</span></div>
+    <p><strong>Complexity:</strong> Sorting hBars and vBars takes O(|hBars| log + |vBars| log). Overall: <span class="complexity-box">O((h+v) log(h+v))</span>. <span class="pdf-ref">📄 A3</span></p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 4 — GRADED
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a4">📘 Assignment 4 — GRADED: Mixed Topics (100 points)</h2>
+<div class="pages-cov">📘 GRADED ⭐ · Covers: Asymptotic, BFS/DFS, Graph Props, Pseudocode · Lec 1–15</div>
+<div class="callout good"><strong class="lbl">🎯 Highest exam-signal weight</strong>A4 defines the question format and difficulty for the exam. Every question here is a template for what to expect on Quiz 2.</div>
+
+<div id="a4-q1" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q1</span>
+  <span class="asgn-title">Growth Rate Ordering of 7 Functions [5 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1</span><span class="q-type">ASYMPTOTIC ORDERING</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">Arrange in ascending order of growth rate: g₁=2^√(log n), g₂=2^n, g₃=n(log n)³, g₄=n^(4/3), g₆=2^(2^n), g₇=2^(n²)</p>
+  <details class="ans"><summary>▶ Full Answer with All 5 Limit Comparisons</summary>
+  <div class="ans-content">
+    <p><strong>Method:</strong> Use limit comparison. lim f/g as n→∞: → 0 means f=o(g) (f slower), → c&gt;0 means f=Θ(g), → ∞ means f=ω(g) (f faster). <span class="pdf-ref">📄 Lec 5–6, A4 Q1</span></p>
+
+    <div class="step"><div class="step-head">Comparison 1: g₁ vs g₃ (g₁ slower)</div>
+    <div class="step-body">log g₁ = √(log n). For g₃ = n(log n)³, log g₃ = log n + 3 log log n ≈ log n. lim √(log n) / log n = lim 1/√(log n) → 0. So g₁ = o(g₃). <span class="pdf-ref">📄 A4 Q1</span></div></div>
+
+    <div class="step"><div class="step-head">Comparison 2: g₃ vs g₄ (g₃ slower)</div>
+    <div class="step-body">g₄/g₃ = n^(4/3) / (n(log n)³) = n^(1/3) / (log n)³. Let x = log n → ∞. Then n^(1/3) = e^(x/3). The ratio e^(x/3)/x³ → ∞. So g₃ = o(g₄). <span class="pdf-ref">📄 A4 Q1</span></div></div>
+
+    <div class="step"><div class="step-head">Comparison 3: g₄ vs g₂ (g₄ slower)</div>
+    <div class="step-body">Exponential grows faster than any polynomial. lim 2^n / n^(4/3) = ∞. So g₄ = o(g₂). <span class="pdf-ref">📄 A4 Q1</span></div></div>
+
+    <div class="step"><div class="step-head">Comparison 4: g₂ vs g₇ (g₂ slower)</div>
+    <div class="step-body">lim g₇/g₂ = lim 2^(n²) / 2^n = lim 2^(n²-n) = lim 2^(n(n-1)) → ∞. So g₂ = o(g₇). <span class="pdf-ref">📄 A4 Q1</span></div></div>
+
+    <div class="step"><div class="step-head">Comparison 5: g₇ vs g₆ (g₇ slower)</div>
+    <div class="step-body">lim g₆/g₇ = lim 2^(2^n) / 2^(n²) = lim 2^(2^n - n²). For large n, 2^n dominates n², so 2^n - n² → ∞. So g₇ = o(g₆). <span class="pdf-ref">📄 A4 Q1</span></div></div>
+
+    <div class="callout good"><strong class="lbl">✅ Final Answer — Ascending Order</strong>
+    <strong>g₁ ≺ g₃ ≺ g₄ ≺ g₂ ≺ g₇ ≺ g₆</strong><br>
+    i.e., 2^√(log n) ≺ n(log n)³ ≺ n^(4/3) ≺ 2^n ≺ 2^(n²) ≺ 2^(2^n)
+    </div>
+    <table class="data">
+      <thead><tr><th>Function</th><th>Category</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>g₁ = 2^√(log n)</td><td>Sub-polynomial</td><td>Grows slower than any polynomial</td></tr>
+        <tr><td>g₃ = n(log n)³</td><td>Quasi-linear</td><td>Polynomial × polylog</td></tr>
+        <tr><td>g₄ = n^(4/3)</td><td>Polynomial</td><td>Degree 4/3</td></tr>
+        <tr><td>g₂ = 2^n</td><td>Exponential</td><td>Standard single exponential</td></tr>
+        <tr><td>g₇ = 2^(n²)</td><td>Super-exponential</td><td>Double exponent with polynomial</td></tr>
+        <tr><td>g₆ = 2^(2^n)</td><td>Doubly exponential</td><td>Fastest growing</td></tr>
+      </tbody>
+    </table>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q2" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q2</span>
+  <span class="asgn-title">(n+a)^b Asymptotic Relationship [3 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q2</span><span class="q-type">LIMIT COMPARISON</span><span class="q-pts">3 pts</span></div>
+  <p class="q-text">For real constants a and b with b &gt; 0, what is the correct relationship? (A) Θ(n^b) (B) O(n^(b+1)) but not Θ(n^b) (C) Θ(n^(b+1))</p>
+  <details class="ans"><summary>▶ Full Answer: (A) (n+a)^b = Θ(n^b)</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">PROOF via Limit Comparison</div>
+      <div class="proof-step">(n+a)^b = n^b · (1 + a/n)^b. As n → ∞, a/n → 0, so (1 + a/n)^b → 1^b = 1. <span class="pdf-ref">📄 A4 Q2</span></div>
+      <div class="proof-step">Therefore: lim (n+a)^b / n^b = 1. Since the limit is a positive finite constant (1), (n+a)^b = Θ(n^b).</div>
+      <div class="proof-step"><strong>Answer: (A)</strong> — The additive constant a in the base is asymptotically irrelevant. ∎ <span class="pdf-ref">📄 A4 Q2</span></div>
+    </div>
+    <p><strong>Formal witnesses:</strong> Choose c₁ = (1-ε)^b and c₂ = (1+ε)^b for any ε ∈ (0,1). For large enough n, (1 + a/n)^b is within these bounds. More directly: for n ≥ 2|a|, we have n/2 ≤ n+a ≤ 2n, so (n/2)^b ≤ (n+a)^b ≤ (2n)^b, giving (1/2^b)n^b ≤ (n+a)^b ≤ 2^b·n^b.</p>
+    <div class="callout info"><strong class="lbl">📌 Key takeaway</strong>Additive constants inside a polynomial base DO NOT change the asymptotic class. Only the exponent b matters: (n + anything)^b = Θ(n^b).</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q3" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q3</span>
+  <span class="asgn-title">BFS vs DFS: Which Visits Fewer Nodes Before Goal? [5 pts] ⭐</span>
+  <span class="badge-graded">GRADED MIDTERM ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q3</span><span class="q-type">ALGORITHM TRACE</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">Starting from the green node at top of the tree, BFS and DFS both choose left-most node first. Which visits fewer nodes before reaching the yellow node? (A) BFS (B) DFS (C) Neither ever reaches it (D) Same count</p>
+  <details class="ans"><summary>▶ Full Answer: (A) BFS — with full trace</summary>
+  <div class="ans-content">
+    <pre class="diagram">
+  The tree (green=root at top, yellow=right child of root's right child):
+
+                      GREEN (root)
+                     /             \
+                  node2           node3
+                 /    \           /    \
+              node4  node5    YELLOW  node6
+             /    \          /
+          node7  node8    node9
+          /
+       node10
+
+  Yellow is at depth 2 (right child of node3).
+</pre>
+    <p><strong>BFS trace</strong> (queue, left-most first): <span class="pdf-ref">📄 A4 Q3</span></p>
+    <table class="trace">
+      <thead><tr><th>Step</th><th>Dequeue</th><th>Queue after</th><th>Found?</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>GREEN</td><td>[node2, node3]</td><td>No</td></tr>
+        <tr><td>2</td><td>node2</td><td>[node3, node4, node5]</td><td>No</td></tr>
+        <tr><td>3</td><td>node3</td><td>[node4, node5, YELLOW, node6]</td><td>No</td></tr>
+        <tr><td>4</td><td>node4</td><td>[node5, YELLOW, node6, node7, node8]</td><td>No</td></tr>
+        <tr class="highlight"><td>5</td><td>node5</td><td>[YELLOW, ...]</td><td>No — add children</td></tr>
+        <tr class="highlight"><td>6</td><td><strong>YELLOW</strong></td><td>—</td><td>✅ FOUND! Visited 5 nodes first</td></tr>
+      </tbody>
+    </table>
+    <p><strong>BFS visited 5 nodes before YELLOW.</strong></p>
+
+    <p><strong>DFS trace</strong> (stack, left-most = explore left first): <span class="pdf-ref">📄 A4 Q3</span></p>
+    <table class="trace">
+      <thead><tr><th>Step</th><th>Visit</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>GREEN</td><td>Go left → node2</td></tr>
+        <tr><td>2</td><td>node2</td><td>Go left → node4</td></tr>
+        <tr><td>3</td><td>node4</td><td>Go left → node7</td></tr>
+        <tr><td>4</td><td>node7</td><td>Go left → node10</td></tr>
+        <tr><td>5</td><td>node10</td><td>Leaf, backtrack</td></tr>
+        <tr><td>6</td><td>node7</td><td>No right, backtrack</td></tr>
+        <tr><td>7</td><td>node4</td><td>Go right → node8</td></tr>
+        <tr><td>8</td><td>node8</td><td>Leaf, backtrack</td></tr>
+        <tr><td>9</td><td>node2</td><td>Go right → node5</td></tr>
+        <tr><td>10</td><td>node5</td><td>Leaf, backtrack to GREEN</td></tr>
+        <tr><td>11</td><td>GREEN</td><td>Go right → node3</td></tr>
+        <tr class="highlight"><td>12</td><td>node3</td><td>Go left → YELLOW (left child is YELLOW!)</td></tr>
+        <tr class="highlight"><td>13</td><td><strong>YELLOW</strong></td><td>✅ Found after 10 nodes visited</td></tr>
+      </tbody>
+    </table>
+    <p><strong>DFS visited 10 nodes before YELLOW.</strong></p>
+    <div class="callout good"><strong class="lbl">✅ Answer: (A) BFS</strong>BFS: 5 nodes · DFS: 10 nodes. BFS finds the goal much faster here because it explores level by level, and the yellow node is at depth 2 (not buried deep in a left subtree). <span class="pdf-ref">📄 A4 Q3</span></div>
+    <div class="callout info"><strong class="lbl">📌 When is BFS better?</strong>BFS wins when the goal is at a shallow depth (close to the root in terms of hops). DFS wins when the goal is deep along a specific branch. In general, BFS finds the shallowest goal first.</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q4" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q4</span>
+  <span class="asgn-title">Balloon Scenarios: Big-Oh from Recurrences [10 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q4 Scenario 1</span><span class="q-type">RECURRENCE ANALYSIS</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">For every 2 balloons shot, 1 new balloon appears. Net decrease = 1 per 2 shots. How many total shots? (A)O(1) (B)O(n) (C)O(log n) (D)O(n²)</p>
+  <details class="ans"><summary>▶ Full Answer: (B) O(n)</summary>
+  <div class="ans-content">
+    <p><strong>Setup:</strong> T(n) = T(n-1) + 2 for n &gt; 0, T(0) = 0. Each "round" we shoot 2 and 1 appears → net 1 balloon removed. <span class="pdf-ref">📄 A4 Q4</span></p>
+    <div class="proof-block">
+      <div class="proof-label">RECURRENCE EXPANSION</div>
+      <div class="proof-step">T(n) = T(n-1) + 2 = T(n-2) + 2 + 2 = T(n-k) + 2k</div>
+      <div class="proof-step">At k=n: T(n) = T(0) + 2n = 0 + 2n = 2n.</div>
+      <div class="proof-step">T(n) = 2n = O(n). <span class="pdf-ref">📄 A4 Q4</span></div>
+    </div>
+    <p><strong>Intuition:</strong> We shoot 2 balloons per "round" and there are n rounds (each removes 1 balloon from the board). Total shots = 2n = O(n).</p>
+  </div></details>
+</div>
+
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q4 Scenario 2</span><span class="q-type">RECURRENCE ANALYSIS</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">Shoot n, then n-1 appear; shoot n-1, then n-2 appear; ... until no new appear. Total shots? (A)O(1) (B)O(n) (C)O(log n) (D)O(n²)</p>
+  <details class="ans"><summary>▶ Full Answer: (D) O(n²)</summary>
+  <div class="ans-content">
+    <p><strong>Setup:</strong> T(n) = T(n-1) + n for n &gt; 0, T(0) = 0. <span class="pdf-ref">📄 A4 Q4</span></p>
+    <div class="proof-block">
+      <div class="proof-label">RECURRENCE EXPANSION</div>
+      <div class="proof-step">T(n) = T(n-1) + n = T(n-2) + (n-1) + n = ... = T(0) + 1 + 2 + ... + n</div>
+      <div class="proof-step">T(n) = n(n+1)/2 = n²/2 + n/2 = O(n²). <span class="pdf-ref">📄 A4 Q4</span></div>
+    </div>
+    <p><strong>For n=20:</strong> T(20) = 20×21/2 = 210 total shots. This is n² behavior (quadratic). The total work is a triangular sum: 1+2+...+n = n(n+1)/2.</p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q5" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q5</span>
+  <span class="asgn-title">Graph Connectivity: degree ≥ n/2 implies connected [5 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q5</span><span class="q-type">GRAPH PROOF</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">G has n (even) nodes. Every node has degree ≥ n/2. Is G: (A) possibly disconnected, (B) always connected, (C) connected only if n is power of 2, (D) connected only if bipartite?</p>
+  <details class="ans"><summary>▶ Full Answer: (B) G is always connected — Proof by Contradiction</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">PROOF BY CONTRADICTION <span class="pdf-ref">📄 A4 Q5</span></div>
+      <div class="proof-step"><strong>Assume:</strong> G is disconnected. Then G can be partitioned into at least 2 connected components. Let C be the smallest component with k vertices.</div>
+      <div class="proof-step"><strong>Size bound:</strong> Since C is the smallest and there are ≥ 2 components sharing n vertices total, k ≤ n/2.</div>
+      <div class="proof-step"><strong>Degree bound:</strong> Any vertex v in C has no edges leaving C (since C is a connected component with no edges to other components). So all of v's neighbors are within C. deg(v) ≤ k - 1.</div>
+      <div class="proof-step"><strong>Contradiction:</strong> The problem states deg(v) ≥ n/2 for all v. Combining: n/2 ≤ deg(v) ≤ k-1. This gives k-1 ≥ n/2, so k ≥ n/2 + 1 &gt; n/2. But we established k ≤ n/2. Contradiction! ✗ <span class="pdf-ref">📄 A4 Q5</span></div>
+      <div class="proof-step"><strong>Conclusion:</strong> G cannot be disconnected. G is always connected. ∎</div>
+    </div>
+    <div class="callout info"><strong class="lbl">📌 Why the intuition works</strong>If every vertex has at least half the total vertices as neighbors, two "separate" groups can't exist — every vertex in group A would need to find all its n/2 neighbors within A alone, but A has fewer than n/2 vertices, which is impossible.</div>
+    <p><strong>Concrete example (n=6):</strong> Any component of size k &lt; 3 would require deg(v) ≤ 1 for nodes inside it, but we need deg(v) ≥ 3. Impossible.</p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q6" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q6</span>
+  <span class="asgn-title">Graph Squaring G²: Algorithm &amp; Complexity [12 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q6</span><span class="q-type">GRAPH ALGORITHM DESIGN</span><span class="q-pts">12 pts</span></div>
+  <p class="q-text">G²=(V,E²) where (u,v)∈E² iff path of length ≤ 2 exists in G. Best algorithm under (A) adj-matrix O(|V|³) / O(|E||V|+|V|) or (B) adj-matrix O(|V|²) / O(|V|+|E|)?</p>
+  <details class="ans"><summary>▶ Full Answer: (A) — with full algorithm explanation</summary>
+  <div class="ans-content">
+    <h3>What is G²?</h3>
+    <p>G² adds an edge (u,v) whenever there is a path of at most 2 hops in G. So (u,v)∈E² if either: (1) there's a direct edge (u,v), or (2) there exists a vertex w with edges (u,w) and (w,v). <span class="pdf-ref">📄 A4 Q6</span></p>
+    <pre class="diagram">
+  Example:  G: 1→2→3→4
+  G²: 1→2, 1→3, 2→3, 2→4, 3→4  (added 1→3 and 2→4)
+</pre>
+    <h3>Adjacency Matrix Algorithm</h3>
+    <p>Compute A + A² (matrix multiplication). A²[u][v] &gt; 0 iff there's a 2-hop path. Matrix multiplication = O(|V|³). <span class="pdf-ref">📄 A4 Q6</span></p>
+
+    <h3>Adjacency List Algorithm</h3>
+    <pre class="pseudocode">
+for each u in V:
+    for each v in Adj[u]:       # 1-hop neighbors → add (u,v) to E²
+        add (u, v) to E²
+        for each w in Adj[v]:   # 2-hop neighbors → add (u,w) to E²
+            add (u, w) to E²</pre>
+    <p><strong>Complexity analysis:</strong> The inner-outer combination visits each edge (u,v) once for the 1-hop step = O(|E|). For the 2-hop step, for each edge (u,v) ∈ E we scan all of Adj[v] = O(deg(v)). Total: Σ_(u,v)∈E deg(v) ≤ Σ_(u,v)∈E |V| = |E|·|V|. Plus outer loop |V|. Total = O(|E||V| + |V|). <span class="pdf-ref">📄 A4 Q6</span></p>
+    <div class="callout good"><strong class="lbl">✅ Answer: (A)</strong>Adjacency matrix: O(|V|³) · Adjacency list: O(|E|·|V| + |V|)</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q7" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q7</span>
+  <span class="asgn-title">Sliding Window Maximum Average [20 pts] ⭐ Pseudocode</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q7</span><span class="q-type">PSEUDOCODE</span><span class="q-pts">20 pts</span></div>
+  <p class="q-text">Find the contiguous subarray of length k with maximum average. Example: nums=[1,12,-5,-6,50,3], k=4 → (12-5-6+50)/4=12.75</p>
+  <details class="ans"><summary>▶ Full Answer with Trace &amp; Complexity</summary>
+  <div class="ans-content">
+    <h3>Core Idea: Sliding Window</h3>
+    <p>Instead of recomputing the sum for each window from scratch (O(nk)), we maintain a running sum and slide it: add the new right element, subtract the dropped left element. O(1) per step. <span class="pdf-ref">📄 A4 Q7</span></p>
+    <pre class="pseudocode">
+def findMaxAverage(nums, k):
+    # Step 1: compute initial window sum (first k elements)
+    window_sum = sum(nums[0:k])   # O(k)
+    max_sum = window_sum
+
+    # Step 2: slide window from position k to end
+    for i in range(k, len(nums)):
+        window_sum = window_sum - nums[i - k] + nums[i]  # slide: remove left, add right
+        max_sum = max(max_sum, window_sum)
+
+    return max_sum / k   # return average</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A4 Q7</span></div>
+
+    <h3>Trace on Example: nums=[1,12,-5,-6,50,3], k=4</h3>
+    <table class="trace">
+      <thead><tr><th>i</th><th>Window</th><th>window_sum</th><th>max_sum</th></tr></thead>
+      <tbody>
+        <tr><td>init</td><td>[1,12,-5,-6]</td><td>1+12-5-6=2</td><td>2</td></tr>
+        <tr><td>4</td><td>[12,-5,-6,50]</td><td>2-1+50=51</td><td>51</td></tr>
+        <tr class="highlight"><td>5</td><td>[-5,-6,50,3]</td><td>51-12+3=42</td><td>51</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Result:</strong> max_sum=51, answer=51/4=12.75 ✓ <span class="pdf-ref">📄 A4 Q7</span></p>
+
+    <h3>Complexity Analysis</h3>
+    <ul class="plain">
+      <li><strong>Time:</strong> Initial sum O(k) + loop iterates n-k times, each O(1) = O(n-k) → <span class="complexity-box">O(n)</span></li>
+      <li><strong>Space:</strong> Three variables (window_sum, max_sum, i) → <span class="complexity-box">O(1)</span> auxiliary</li>
+    </ul>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q8" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q8</span>
+  <span class="asgn-title">Minimum Time Difference (Circular Sort) [20 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q8</span><span class="q-type">PSEUDOCODE</span><span class="q-pts">20 pts</span></div>
+  <p class="q-text">Given a list of 24-hour times in "HH:MM" format, find the minimum minute difference between any two times. Example: ["23:59","00:00"] → 1</p>
+  <details class="ans"><summary>▶ Full Answer with Trace &amp; Complexity</summary>
+  <div class="ans-content">
+    <h3>Core Idea: Convert, Sort, Circular Check</h3>
+    <p>Convert all times to minutes (0 to 1439). Sort. Check consecutive differences. Also check the circular wrap-around (distance from last to first through midnight). <span class="pdf-ref">📄 A4 Q8</span></p>
+    <pre class="pseudocode">
+def findMinDifference(timePoints):
+    # Step 1: Convert all times to total minutes from 00:00
+    minutes = []
+    for time in timePoints:
+        h = int(time[0:2])    # hours part
+        m = int(time[3:5])    # minutes part
+        minutes.append(h * 60 + m)
+
+    # Step 2: Sort to bring close times adjacent
+    minutes.sort()    # O(m log m)
+
+    # Step 3: Find min consecutive difference
+    min_diff = 1440   # max possible is one full day
+    for i in range(1, len(minutes)):
+        diff = minutes[i] - minutes[i-1]
+        min_diff = min(min_diff, diff)
+
+    # Step 4: Check circular wrap (last time to first time through midnight)
+    circular = minutes[0] + 1440 - minutes[-1]
+    min_diff = min(min_diff, circular)
+
+    return min_diff</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A4 Q8</span></div>
+
+    <h3>Trace: ["23:59", "00:00"]</h3>
+    <ul class="plain">
+      <li>Convert: 23×60+59=1439, 0×60+0=0 → minutes=[1439, 0]</li>
+      <li>Sort: [0, 1439]</li>
+      <li>Consecutive: 1439-0=1439</li>
+      <li>Circular: 0 + 1440 - 1439 = 1 ✓</li>
+      <li>min(1439, 1) = <strong>1</strong></li>
+    </ul>
+    <h3>Complexity</h3>
+    <ul class="plain">
+      <li><strong>Time:</strong> Convert O(m) + Sort O(m log m) + Scan O(m) → <span class="complexity-box">O(m log m)</span></li>
+      <li><strong>Space:</strong> minutes array O(m) + sort overhead → <span class="complexity-box">O(m)</span></li>
+    </ul>
+    <div class="callout info"><strong class="lbl">📌 Why the circular check matters</strong>"23:59" and "00:00" are only 1 minute apart, but in linear order they look 1439 minutes apart. The circular diff (first + 1440 - last) captures the wrap-around through midnight.</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a4-q9" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a4">A4 Q9</span>
+  <span class="asgn-title">Total Hamming Distance Sum in O(n) [20 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q9</span><span class="q-type">PSEUDOCODE</span><span class="q-pts">20 pts</span></div>
+  <p class="q-text">Given array nums, return sum of Hamming distances between all pairs. Hamming distance = number of bit positions where two numbers differ. Example: [4,14,2] → 6</p>
+  <details class="ans"><summary>▶ Full Answer with Bit-Position Trick</summary>
+  <div class="ans-content">
+    <h3>The Naive Approach (Too Slow)</h3>
+    <p>Compute Hamming distance for all O(n²) pairs → O(n²) time. For n=10000, this is 10^8 operations — too slow. <span class="pdf-ref">📄 A4 Q9</span></p>
+    <h3>The O(n) Bit-Position Trick</h3>
+    <p>For each bit position i: count how many numbers have bit i set to 1 (call it p) and how many have bit i set to 0 (call it q = n-p). Every pair where one has 1 and the other has 0 contributes 1 to the total Hamming distance at this bit. Number of such pairs = p × q. Sum over all 32 bit positions.</p>
+    <pre class="pseudocode">
+def totalHammingDistance(nums):
+    total = 0
+    n = len(nums)
+
+    for bit in range(32):       # for each bit position 0..31
+        p = 0                   # count of 1s at this position
+        for num in nums:
+            if (num >> bit) & 1:    # check if bit 'bit' is set
+                p += 1
+        q = n - p               # count of 0s = total - count of 1s
+        total += p * q          # pairs with different bits
+
+    return total</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A4 Q9</span></div>
+
+    <h3>Trace: nums = [4, 14, 2]</h3>
+    <pre class="diagram">
+  Binary: 4=0100, 14=1110, 2=0010  (showing bits 3..0)
+
+  Bit 0: 4→0, 14→0, 2→0. p=0, q=3. p×q=0.
+  Bit 1: 4→0, 14→1, 2→1. p=2, q=1. p×q=2.
+  Bit 2: 4→1, 14→1, 2→0. p=2, q=1. p×q=2.
+  Bit 3: 4→0, 14→1, 2→0. p=1, q=2. p×q=2.
+  Bits 4-31: all zeros. p×q=0.
+
+  Total = 0+2+2+2+0+...+0 = 6 ✓ (matches expected output)</pre>
+
+    <h3>Complexity Analysis</h3>
+    <ul class="plain">
+      <li><strong>Time:</strong> Outer loop 32 times × inner loop n times × O(1) = 32n = <span class="complexity-box">O(n)</span></li>
+      <li><strong>Space:</strong> Constant variables only → <span class="complexity-box">O(1)</span></li>
+    </ul>
+    <div class="callout info"><strong class="lbl">📌 Why this works</strong>The total Hamming distance across all pairs at bit position i equals (# of 1s) × (# of 0s) because every 1-0 pair contributes exactly 1. We've decomposed the problem per bit, avoiding O(n²) pairs entirely.</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 5
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a5">📘 Assignment 5 — NP-Completeness: IS, VC, SC Definitions &amp; Reductions</h2>
+<div class="pages-cov">📘 Ungraded · Covers: NP-Completeness · Lectures 25–27</div>
+
+<div id="a5-q1" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a5">A5 Q1</span>
+  <span class="asgn-title">Formal Definitions: Vertex Cover, Independent Set, Set Cover</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1</span><span class="q-type">FORMAL DEFINITIONS</span></div>
+  <p class="q-text">Define Vertex Cover, Independent Set, and Set Cover with formal notation and one example each.</p>
+  <details class="ans"><summary>▶ Full Definitions with Deep Explanations</summary>
+  <div class="ans-content">
+    <pre class="diagram">
+  Working graph for all examples: V={1,2,3,4}, E={(1,2),(1,3),(2,4),(3,4)}
+
+       1
+      / \
+     2   3
+      \ /
+       4
+</pre>
+    <div class="step"><div class="step-head">Vertex Cover (VC)</div>
+    <div class="step-body"><strong>Definition:</strong> S ⊆ V such that ∀(u,v) ∈ E: u ∈ S OR v ∈ S. Every edge has at least one endpoint in S. The decision problem: given G and k, does G have a VC of size ≤ k? <span class="pdf-ref">📄 Lec 26, A5 Q1</span><br>
+    <strong>Example:</strong> S={1,4}. Check: (1,2)→1∈S✓; (1,3)→1∈S✓; (2,4)→4∈S✓; (3,4)→4∈S✓. Valid VC of size 2.<br>
+    <strong>Plain English:</strong> Post a security guard at each node in S so that every corridor (edge) has a guard at one end.</div></div>
+
+    <div class="step"><div class="step-head">Independent Set (IS)</div>
+    <div class="step-body"><strong>Definition:</strong> I ⊆ V such that ∀u,v ∈ I: (u,v) ∉ E. No two vertices in I are adjacent. The decision problem: given G and k, does G have an IS of size ≥ k? <span class="pdf-ref">📄 Lec 26, A5 Q1</span><br>
+    <strong>Example:</strong> I={2,3}. Check: edge (2,3)? NOT in E. So {2,3} is a valid IS of size 2.<br>
+    <strong>Plain English:</strong> Find a group of people where nobody in the group knows anyone else in the group.</div></div>
+
+    <div class="step"><div class="step-head">Set Cover (SC)</div>
+    <div class="step-body"><strong>Definition:</strong> Given universe U and collection F={S₁,...,Sm} of subsets, find C⊆F with |C|≤k such that ∪_{S∈C} S = U. <span class="pdf-ref">📄 Lec 27, A5 Q1</span><br>
+    <strong>Example:</strong> U={a,b,c,d,e}, S₁={a,b,c}, S₂={b,c,d}, S₃={c,d,e}, S₄={a,c}. For k=2: C={S₁,S₃}={a,b,c}∪{c,d,e}={a,b,c,d,e}=U. ✓<br>
+    <strong>Plain English:</strong> Choose the minimum number of software packages to cover all required features.</div></div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a5-q2" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a5">A5 Q2</span>
+  <span class="asgn-title">IS ↔ VC Equivalence Proof (Both Directions) ⭐</span>
+  <span class="badge-graded">EXAM ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q2</span><span class="q-type">NP REDUCTION PROOF</span></div>
+  <p class="q-text">Prove the equivalence: INDEPENDENT-SET =p VERTEX-COVER. Show both directions.</p>
+  <details class="ans"><summary>▶ Full Proof with Both Directions</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">THEOREM: S is IS of size k ⟺ V−S is VC of size n−k</div>
+      <div class="proof-label" style="margin-top:10px">(→) If S is IS, then V−S is VC:</div>
+      <div class="proof-step">Assume S is an IS. Take any edge (u,v) ∈ E. Since S is independent, not both u,v can be in S (that would create an edge inside S — impossible). So at least one of u,v is NOT in S, i.e., is in V−S. Since (u,v) was arbitrary, V−S covers all edges. V−S is a VC. |V−S| = n−k. ✓ <span class="pdf-ref">📄 Lec 26, A5 Q2</span></div>
+      <div class="proof-label" style="margin-top:10px">(←) If V−S is VC, then S is IS:</div>
+      <div class="proof-step">Assume V−S is a VC. Suppose for contradiction that S has an edge (u,v) with u,v ∈ S. Then u ∉ V−S and v ∉ V−S. So edge (u,v) is not covered by V−S — contradicting V−S being a VC. ✗ Therefore S has no internal edges: S is an IS. ✓ <span class="pdf-ref">📄 Lec 26, A5 Q2</span></div>
+    </div>
+    <p><strong>Reductions:</strong> IS ≤p VC: Given (G,k), output (G, n-k) — same graph, k'=n-k, O(1) time. VC ≤p IS: Given (G,k), output (G, n-k). Both O(1). Since IS ≤p VC and VC ≤p IS, they are polynomially equivalent (IS =p VC).</p>
+    <p><strong>Concrete verification:</strong> G with V={1,2,3,4}, IS={2,3} of size 2 ↔ VC={1,4} of size 4-2=2. Confirmed both in Q1. ✓</p>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a5-q3" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a5">A5 Q3</span>
+  <span class="asgn-title">VC ≤p SC: Full Reduction Construction &amp; Proof ⭐</span>
+  <span class="badge-graded">EXAM ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q3</span><span class="q-type">NP REDUCTION</span></div>
+  <p class="q-text">Prove VERTEX-COVER ≤p SET-COVER. Describe the construction, how solutions correspond, and prove correctness.</p>
+  <details class="ans"><summary>▶ Full Reduction with Both-Direction Proof</summary>
+  <div class="ans-content">
+    <h3>Construction</h3>
+    <div class="step"><div class="step-head">Step 1: Universe U = E (edges become elements)</div>
+    <div class="step-body">Every edge of G becomes an element of U. |U| = |E|. <span class="pdf-ref">📄 Lec 27, A5 Q3</span></div></div>
+    <div class="step"><div class="step-head">Step 2: For each vertex v, create subset S_v</div>
+    <div class="step-body">S_v = {e ∈ E : v is an endpoint of e} = all edges incident to v. <span class="pdf-ref">📄 Lec 27, A5 Q3</span></div></div>
+    <div class="step"><div class="step-head">Step 3: Keep parameter k the same</div>
+    <div class="step-body">SC asks: is there a sub-collection of size ≤ k covering all of U? Same k as VC. Construction time: O(|V|+|E|).</div></div>
+
+    <h3>Concrete Example</h3>
+    <pre class="diagram">
+  G: V={1,2,3,4}, E={e₁=(1,2), e₂=(1,3), e₃=(2,4), e₄=(3,4)}, k=2.
+  U = {e₁, e₂, e₃, e₄}
+  S₁ = {e₁, e₂}  (vertex 1's incident edges)
+  S₂ = {e₁, e₃}  (vertex 2's incident edges)
+  S₃ = {e₂, e₄}  (vertex 3's incident edges)
+  S₄ = {e₃, e₄}  (vertex 4's incident edges)
+  VC={1,4} ↔ SC={S₁,S₄}: S₁∪S₄={e₁,e₂}∪{e₃,e₄}=U ✓</pre>
+
+    <div class="proof-block">
+      <div class="proof-label">(→) VC of size k → SC of size k:</div>
+      <div class="proof-step">Let X⊆V be a VC of size k. For any edge e=(u,w)∈E=U: since X covers e, some v∈X is an endpoint of e. Then e∈S_v. So Y={S_v : v∈X} covers all of U. |Y|=|X|=k. ✓ <span class="pdf-ref">📄 A5 Q3</span></div>
+      <div class="proof-label" style="margin-top:8px">(←) SC of size k → VC of size k:</div>
+      <div class="proof-step">Let Y⊆F be a SC of size k. X={v : S_v∈Y}. For any edge e=(u,w)∈E=U: since Y covers e, some S_v∈Y contains e. S_v={all edges incident to v}, so v is an endpoint of e. X covers e. X is a VC. |X|=k. ✓ <span class="pdf-ref">📄 A5 Q3</span></div>
+    </div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ASSIGNMENT 6 — GRADED
+     ══════════════════════════════════════════════════════════ -->
+<h2 id="a6">📘 Assignment 6 — GRADED: Master Theorem, Graph Algorithms, Pseudocode (100+ pts)</h2>
+<div class="pages-cov">📘 GRADED ⭐ · Covers: Master Theorem, Graph representations, Shortest paths, Pseudocode · Lec 17–27</div>
+
+<div id="a6-q1" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q1</span>
+  <span class="asgn-title">Master Theorem Case 1: Strassen Comparison [8 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q1</span><span class="q-type">MASTER THEOREM</span><span class="q-pts">8 pts</span></div>
+  <p class="q-text">T(n) = aT(n/4) + Θ(n²). Largest integer a such that this beats Strassen's Θ(n^{log₂7})? (A)46 (B)47 (C)48 (D)49</p>
+  <details class="ans"><summary>▶ Full Answer: (C) a=48</summary>
+  <div class="ans-content">
+    <div class="callout info"><strong class="lbl">Master Theorem reminder</strong>T(n)=aT(n/b)+f(n), f(n)=Θ(n^c). Critical exponent = log_b(a). Case 1: a &gt; b^c → T(n)=Θ(n^{log_b a}). Case 2: a=b^c → T(n)=Θ(n^c log n). Case 3: a &lt; b^c → T(n)=Θ(n^c). <span class="pdf-ref">📄 A6 Q1</span></div>
+    <div class="proof-block">
+      <div class="proof-label">SOLUTION</div>
+      <div class="proof-step"><strong>Given:</strong> T(n) = aT(n/4) + Θ(n²). So b=4, c=2, b^c = 4² = 16. <span class="pdf-ref">📄 A6 Q1</span></div>
+      <div class="proof-step"><strong>When a &gt; 16:</strong> Case 1 applies → T(n) = Θ(n^{log₄a}).</div>
+      <div class="proof-step"><strong>Strassen's complexity:</strong> Θ(n^{log₂7}) ≈ Θ(n^{2.807}). Note: log₂7 = log₄49 (since log₄49 = log(49)/log(4) = log(7²)/log(4) = 2·log7/2·log2 = log₂7).</div>
+      <div class="proof-step"><strong>Requirement:</strong> To beat Strassen, need log₄a &lt; log₄49, which means a &lt; 49. Largest integer: a=48. <span class="pdf-ref">📄 A6 Q1</span></div>
+      <div class="proof-step"><strong>Verify a=48:</strong> log₄48 &lt; log₄49 = log₂7 ≈ 2.807. T(n)=Θ(n^{log₄48}) which is asymptotically FASTER than Strassen. ✓</div>
+      <div class="proof-step"><strong>Verify a=49 fails:</strong> log₄49 = log₂7, giving T(n)=Θ(n^{log₂7}) — exactly EQUAL to Strassen, not faster. ✗</div>
+    </div>
+    <div class="callout good"><strong class="lbl">✅ Answer: (C) a = 48</strong></div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q2" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q2</span>
+  <span class="asgn-title">Master Theorem Case 2: T(n)=2T(n/4)+√n [5 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q2</span><span class="q-type">MASTER THEOREM</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">Find asymptotic solution: T(n)=2T(n/4)+√n. (A)Θ(√n) (B)Θ(√n log n) (C)Θ(n) (D)Θ(n log n)</p>
+  <details class="ans"><summary>▶ Full Answer: (B) Θ(√n log n)</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">MASTER THEOREM CASE 2 APPLICATION</div>
+      <div class="proof-step"><strong>Parameters:</strong> a=2, b=4, f(n)=√n=n^(1/2). <span class="pdf-ref">📄 A6 Q2</span></div>
+      <div class="proof-step"><strong>Critical exponent:</strong> log_b(a) = log₄(2) = log₂(2)/log₂(4) = 1/2. So n^{log_b a} = n^(1/2) = √n.</div>
+      <div class="proof-step"><strong>Compare:</strong> f(n) = n^(1/2) vs n^{log_b a} = n^(1/2). They are EQUAL: f(n) = Θ(n^{log_b a}). → Case 2 applies.</div>
+      <div class="proof-step"><strong>Case 2 conclusion:</strong> T(n) = Θ(n^{log_b a} · log n) = Θ(n^(1/2) · log n) = <strong>Θ(√n log n)</strong>. ✓ <span class="pdf-ref">📄 A6 Q2</span></div>
+    </div>
+    <div class="callout warn"><strong class="lbl">⚠️ Most common mistake</strong>Forgetting the log n factor in Case 2. Answer is Θ(√n · log n), NOT Θ(√n). The log n multiplier is the signature of Case 2.</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q3" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q3</span>
+  <span class="asgn-title">Master Theorem Non-Applicable: T(n)=4T(n/2)+n²log n [5 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q3</span><span class="q-type">MASTER THEOREM GAP</span><span class="q-pts">5 pts</span></div>
+  <p class="q-text">Can the Master Method be applied to T(n)=4T(n/2)+n²log n? If not, explain why.</p>
+  <details class="ans"><summary>▶ Full Answer: NO — Falls in the Gap</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">CHECKING ALL THREE CASES</div>
+      <div class="proof-step"><strong>Parameters:</strong> a=4, b=2, f(n)=n² log n. log_b(a) = log₂4 = 2. So n^{log_b a} = n². <span class="pdf-ref">📄 A6 Q3</span></div>
+      <div class="proof-step"><strong>Case 1 check:</strong> Need f(n) = O(n^{2-ε}) for some ε&gt;0. But n² log n grows FASTER than n^{2-ε} for any ε&gt;0 (the log n factor makes it larger). Case 1 fails. ✗</div>
+      <div class="proof-step"><strong>Case 2 check:</strong> Need f(n) = Θ(n²). But f(n) = n² log n ≠ Θ(n²) — the log n factor means f grows faster than n². Case 2 fails. ✗</div>
+      <div class="proof-step"><strong>Case 3 check:</strong> Need f(n) = Ω(n^{2+ε}) for some ε&gt;0. But n² log n is NOT polynomially larger than n² — log n = o(n^ε) for any ε&gt;0. Case 3 fails. ✗ <span class="pdf-ref">📄 A6 Q3</span></div>
+      <div class="proof-step"><strong>Conclusion:</strong> f(n) = n² log n falls in the GAP between Case 2 (which handles Θ(n²)) and Case 3 (which needs Ω(n^{2+ε})). The standard Master Theorem cannot be applied. ∎</div>
+    </div>
+    <div class="callout info"><strong class="lbl">📌 Extension</strong>The Extended Master Theorem handles T(n)=aT(n/b)+n^c·log^p n. For this case with a=b^c and p&gt;0: T(n)=Θ(n^c · log^{p+1} n). So T(n)=Θ(n² log² n).</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q4" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q4</span>
+  <span class="asgn-title">Out-Degree &amp; In-Degree via Adjacency List [8 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q4</span><span class="q-type">GRAPH ALGORITHMS</span><span class="q-pts">8 pts</span></div>
+  <p class="q-text">Compute out-degree and in-degree of every vertex in directed G=(V,E) with adjacency list. Best time complexity?</p>
+  <details class="ans"><summary>▶ Full Answer: (B) Both O(V+E)</summary>
+  <div class="ans-content">
+    <h3>Out-Degree (easy)</h3>
+    <p>Out-degree of vertex u = |Adj[u]| = length of adjacency list. Just count each list: <span class="pdf-ref">📄 A6 Q4</span></p>
+    <pre class="pseudocode">
+for each u in V:
+    out_degree[u] = length(Adj[u])</pre>
+    <p><strong>Time:</strong> Σ_u |Adj[u]| = |E| (each edge in exactly one list) + |V| for outer loop = O(V+E).</p>
+
+    <h3>In-Degree (requires scanning)</h3>
+    <p>In-degree is not directly stored. Must scan all lists and count appearances: <span class="pdf-ref">📄 A6 Q4</span></p>
+    <pre class="pseudocode">
+initialize in_degree[v] = 0 for all v in V      # O(V)
+for each u in V:
+    for each v in Adj[u]:                        # total O(E) across all u
+        in_degree[v] += 1</pre>
+    <p><strong>Time:</strong> Init O(V) + scanning all edges O(E) = O(V+E).</p>
+    <div class="callout good"><strong class="lbl">✅ Answer: (B) Both O(V+E)</strong>Both out-degree and in-degree can be computed in linear time O(V+E) with adjacency lists. <span class="pdf-ref">📄 A6 Q4</span></div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q5" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q5</span>
+  <span class="asgn-title">Median of Two Databases in O(log n) Queries [8 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q5</span><span class="q-type">BINARY SEARCH ON ANSWER</span><span class="q-pts">8 pts</span></div>
+  <p class="q-text">Two databases each have n values. You can query "k-th smallest" in each. Find the median of all 2n values. How many queries? (A)O(n) (B)O(log n) (C)O(n log n) (D)O(√n)</p>
+  <details class="ans"><summary>▶ Full Answer: (B) O(log n) — Binary Search on Partition</summary>
+  <div class="ans-content">
+    <h3>Core Idea: Binary Search on Partition Index</h3>
+    <p>The median of 2n values is the n-th smallest overall. We binary search on how many values come from database A in the "lower half." If A contributes i values and B contributes n-i, we check if this is the correct partition. <span class="pdf-ref">📄 A6 Q5</span></p>
+    <pre class="pseudocode">
+def findMedian(A, B, n):
+    lo, hi = 0, n
+    while lo <= hi:
+        i = (lo + hi) // 2      # A contributes i elements to lower half
+        j = n - i               # B contributes j = n-i elements
+
+        A_i  = query(A, i)   if i > 0 else -∞   # i-th smallest in A
+        A_i1 = query(A, i+1) if i < n else +∞
+        B_j  = query(B, j)   if j > 0 else -∞
+        B_j1 = query(B, j+1) if j < n else +∞
+
+        if A_i <= B_j1 and B_j <= A_i1:
+            return max(A_i, B_j)   # correct partition! median = larger of two max elements
+
+        elif A_i > B_j1:
+            hi = i - 1   # A has too many large values — go left
+        else:
+            lo = i + 1   # B has too many large values — go right</pre>
+    <p><strong>Why O(log n):</strong> Binary search on i ∈ [0,n] does O(log n) iterations. Each iteration makes ≤ 4 queries (A_i, A_{i+1}, B_j, B_{j+1}). Total = 4 log n = <span class="complexity-box">O(log n) queries</span>. <span class="pdf-ref">📄 A6 Q5</span></p>
+    <div class="callout good"><strong class="lbl">✅ Answer: (B) O(log n) queries</strong></div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q6" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q6</span>
+  <span class="asgn-title">MST Property: Min Connected Positive-Weight Subgraph = Tree [6 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q6</span><span class="q-type">GRAPH PROOF</span><span class="q-pts">6 pts</span></div>
+  <p class="q-text">All edge weights positive. A subset of edges connecting all vertices with minimum total weight must be: (A) a tree, (B) can have cycles, (C) true even with zero/negative weights, (D) must have exactly 1 cycle.</p>
+  <details class="ans"><summary>▶ Full Answer: (A) Must be a tree — Proof by Contradiction</summary>
+  <div class="ans-content">
+    <div class="proof-block">
+      <div class="proof-label">PROOF BY CONTRADICTION <span class="pdf-ref">📄 A6 Q6</span></div>
+      <div class="proof-step"><strong>Setup:</strong> Let H be a connected spanning subgraph of G with minimum total weight. All edge weights are positive.</div>
+      <div class="proof-step"><strong>Assume H has a cycle:</strong> Let C be a cycle in H. Pick any edge e=(u,v) in C.</div>
+      <div class="proof-step"><strong>Remove e:</strong> Form H' = H − {e}. H' is still connected! Why? Any path that used e can now route through the rest of the cycle C (going the long way around). The alternative path uses all other edges of C. <span class="pdf-ref">📄 A6 Q6</span></div>
+      <div class="proof-step"><strong>Weight decreases:</strong> weight(H') = weight(H) − weight(e) &lt; weight(H), since weight(e) &gt; 0.</div>
+      <div class="proof-step"><strong>Contradiction:</strong> H' is a connected spanning subgraph with strictly less total weight than H. But H was assumed minimum. ✗</div>
+      <div class="proof-step"><strong>Conclusion:</strong> H cannot contain a cycle. A connected acyclic graph with n vertices has exactly n−1 edges — by definition, it's a tree. ∎ <span class="pdf-ref">📄 A6 Q6</span></div>
+    </div>
+    <div class="callout warn"><strong class="lbl">⚠️ Why (C) is false</strong>With zero-weight edges, removing the cycle edge might not decrease total weight (zero weight = free). With negative weights, removing an edge might INCREASE total weight. The argument breaks. Positive weights are essential.</div>
+    <div class="callout good"><strong class="lbl">✅ Answer: (A) Such a subset must be a tree</strong></div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q7" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q7</span>
+  <span class="asgn-title">Star Graph Center — O(1) Algorithm [20 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q7</span><span class="q-type">PSEUDOCODE</span><span class="q-pts">20 pts</span></div>
+  <p class="q-text">Given a star graph's edge list, find the center node. Example: edges=[[1,2],[2,3],[4,2]] → center=2</p>
+  <details class="ans"><summary>▶ Full Answer with O(1) Trick</summary>
+  <div class="ans-content">
+    <h3>Key Observation</h3>
+    <p>In a star graph, the center appears in EVERY edge. Each leaf appears in exactly ONE edge. Therefore the center must appear in BOTH the first and second edge. Just check which node from edges[0] also appears in edges[1]. <span class="pdf-ref">📄 A6 Q7</span></p>
+    <pre class="pseudocode">
+def findCenter(edges):
+    # The center appears in both edges[0] and edges[1]
+    u0, v0 = edges[0][0], edges[0][1]
+    u1, v1 = edges[1][0], edges[1][1]
+
+    # Whichever endpoint of edges[0] also appears in edges[1] is the center
+    if u0 == u1 or u0 == v1:
+        return u0
+    else:
+        return v0</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A6 Q7</span></div>
+    <p><strong>Trace: edges=[[1,2],[2,3],[4,2]]:</strong> edges[0]=[1,2], edges[1]=[2,3]. u0=1, v0=2, u1=2, v1=3. u0==u1? 1==2? No. u0==v1? 1==3? No. Return v0=2. ✓</p>
+    <ul class="plain">
+      <li><strong>Time:</strong> O(1) — exactly 4 comparisons regardless of graph size</li>
+      <li><strong>Space:</strong> O(1) — just 4 variables</li>
+    </ul>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q8" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q8</span>
+  <span class="asgn-title">Arithmetic Progression Check via Sort [20 pts] ⭐</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q8</span><span class="q-type">PSEUDOCODE</span><span class="q-pts">20 pts</span></div>
+  <p class="q-text">Given array arr, return true if it can be rearranged into an arithmetic progression (constant consecutive difference). Example: [3,5,1] → true (rearranges to [1,3,5]).</p>
+  <details class="ans"><summary>▶ Full Answer with Trace &amp; Complexity</summary>
+  <div class="ans-content">
+    <h3>Core Idea: Sort then Verify Constant Difference</h3>
+    <p>An arithmetic progression has a constant difference between consecutive terms. After sorting, the differences between adjacent elements must all be equal. <span class="pdf-ref">📄 A6 Q8</span></p>
+    <pre class="pseudocode">
+def canMakeArithmeticProgression(arr):
+    n = len(arr)
+    if n < 2:
+        return True      # trivially AP
+
+    arr.sort()           # O(n log n)
+
+    d = arr[1] - arr[0]  # expected common difference
+
+    for i in range(2, n):
+        if arr[i] - arr[i-1] != d:   # check every consecutive pair
+            return False
+
+    return True</pre>
+    <p><strong>Trace: arr=[3,5,1]:</strong> Sort → [1,3,5]. d=3-1=2. Check: 5-3=2==d ✓. Return True.</p>
+    <p><strong>Trace: arr=[1,2,4]:</strong> Sort → [1,2,4]. d=2-1=1. Check: 4-2=2 ≠ 1. Return False.</p>
+    <ul class="plain">
+      <li><strong>Time:</strong> Sort O(n log n) + verification loop O(n) → <span class="complexity-box">O(n log n)</span></li>
+      <li><strong>Space:</strong> In-place sort → <span class="complexity-box">O(1)</span> auxiliary (O(n) if using stable sort)</li>
+    </ul>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<div id="a6-q9" class="asgn-card">
+<details>
+<summary class="asgn-header">
+  <span class="asgn-badge badge-a6">A6 Q9</span>
+  <span class="asgn-title">Maximum Probability Path: Modified Dijkstra [20 pts] ⭐⭐ HARDEST</span>
+  <span class="badge-graded">GRADED ⭐</span>
+  <span class="chevron">▶</span>
+</summary>
+<div class="asgn-body">
+<div class="q-block">
+  <div class="q-meta"><span class="q-num">Q9</span><span class="q-type">PSEUDOCODE + ALGORITHM DESIGN</span><span class="q-pts">20 pts</span></div>
+  <p class="q-text">Undirected graph where each edge has a success probability. Find max-probability path from start to end. Example: n=3, edges=[[0,1],[1,2],[0,2]], probs=[0.5,0.5,0.2], start=0, end=2 → 0.25</p>
+  <details class="ans"><summary>▶ Full Answer: Modified Dijkstra with Max-Heap</summary>
+  <div class="ans-content">
+    <h3>The Key Insight: 6 Changes from Standard Dijkstra</h3>
+    <table class="data">
+      <thead><tr><th>Aspect</th><th>Standard Dijkstra (min dist)</th><th>Modified (max prob)</th></tr></thead>
+      <tbody>
+        <tr><td>Goal</td><td>Minimize distance</td><td>Maximize probability</td></tr>
+        <tr><td>Init source</td><td>Distance[s]=0</td><td>Prob[s]=1.0</td></tr>
+        <tr><td>Init others</td><td>Distance[v]=∞</td><td>Prob[v]=0.0</td></tr>
+        <tr><td>Heap type</td><td>Min-heap (smallest dist)</td><td>Max-heap (negate: −prob)</td></tr>
+        <tr><td>Relaxation</td><td>dist[u]+w(u,v)</td><td>Prob[u]×p(u,v)</td></tr>
+        <tr><td>Update when</td><td>new &lt; Dist[v]</td><td>new &gt; Prob[v]</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Why multiplication works:</strong> Probabilities of independent events multiply. P(path A→B→C) = P(A→B) × P(B→C). We maximize this product. <span class="pdf-ref">📄 A6 Q9</span></p>
+    <pre class="pseudocode">
+def maxProbability(n, edges, succProb, start, end):
+    # Build adjacency list
+    graph = {i: [] for i in range(n)}
+    for i, (u, v) in enumerate(edges):
+        p = succProb[i]
+        graph[u].append((v, p))
+        graph[v].append((u, p))   # undirected
+
+    # Initialize
+    Prob = [0.0] * n
+    Prob[start] = 1.0
+
+    # Max-heap: store (-prob, vertex) to use Python's min-heap
+    max_heap = [(-1.0, start)]
+
+    while max_heap is not empty:
+        neg_p, u = heappop(max_heap)     # extract max-prob vertex
+        curr_prob = -neg_p               # actual probability
+
+        if u == end:
+            return curr_prob             # found destination!
+
+        if curr_prob < Prob[u]:          # stale entry — skip
+            continue
+
+        for (v, edge_prob) in graph[u]:
+            new_prob = curr_prob * edge_prob   # multiply probabilities
+            if new_prob > Prob[v]:             # found better path?
+                Prob[v] = new_prob
+                heappush(max_heap, (-new_prob, v))
+
+    return 0.0   # no path found</pre>
+    <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 A6 Q9</span></div>
+
+    <h3>Trace on Example</h3>
+    <pre class="diagram">
+  n=3, edges=[[0,1],[1,2],[0,2]], probs=[0.5,0.5,0.2], start=0, end=2.
+  Paths: 0→1→2 = 0.5×0.5 = 0.25; 0→2 = 0.2.
+  Max = 0.25 ✓</pre>
+
+    <h3>Complexity</h3>
+    <ul class="plain">
+      <li><strong>Time:</strong> Build adjacency list O(E). Each edge can trigger one heap operation O(log E). Total: <span class="complexity-box">O((V+E) log E)</span></li>
+      <li><strong>Space:</strong> Prob array O(V) + adjacency list O(V+E) + heap O(E) → <span class="complexity-box">O(V+E)</span></li>
+    </ul>
+    <div class="callout info"><strong class="lbl">📌 Why greedy works here</strong>Probabilities p ∈ [0,1]. Multiplying by p ≤ 1 can only DECREASE the running probability. So once we extract the vertex with maximum Prob (greedily settling it), no future path through a lower-prob vertex can improve it. This mirrors Dijkstra's non-negative weights argument.</div>
+  </div></details>
+</div>
+</div>
+</details>
+</div>
+
+<!-- Quick Reference Summary -->
+<h2 style="color:var(--gold)">📋 Quick Reference: All Assignment Answers</h2>
+<table class="data">
+  <thead><tr><th>Asgn</th><th>Question</th><th>Answer</th><th>Key Concept</th></tr></thead>
+  <tbody>
+    <tr><td>A0 Q2.1</td><td>Binary tree leaves ≤ 2^n</td><td>TRUE — induction</td><td>Proof by induction structure</td></tr>
+    <tr><td>A0 Q2.2</td><td>a+b odd if consecutive</td><td>b=a+1 → a+b=2a+1 (odd)</td><td>Proof by construction</td></tr>
+    <tr><td>A0 Q2.3</td><td>n² even → n even</td><td>Contradiction: assume n odd → n²=2r+1 (odd) ✗</td><td>Proof by contradiction</td></tr>
+    <tr><td>A2 Q1.1</td><td>f=O(g),f=Ω(h)→g=Ω(h)</td><td>TRUE — chain inequality</td><td>Asymptotic transitivity</td></tr>
+    <tr><td>A2 Q1.2</td><td>f=O(g)→f²=O(g²)</td><td>TRUE — square both sides</td><td>Big-O squaring</td></tr>
+    <tr><td>A2 Q1.3</td><td>f=Θ(g)→log f=Θ(log g)</td><td>FALSE — f=2, g=1+1/n</td><td>Log destroys Theta</td></tr>
+    <tr><td>A4 Q1</td><td>Growth rate order</td><td>g₁ ≺ g₃ ≺ g₄ ≺ g₂ ≺ g₇ ≺ g₆</td><td>Limit comparison method</td></tr>
+    <tr><td>A4 Q2</td><td>(n+a)^b relationship</td><td>(A) Θ(n^b)</td><td>Additive constant irrelevant</td></tr>
+    <tr><td>A4 Q3</td><td>BFS vs DFS to goal</td><td>(A) BFS — 5 vs 10 nodes</td><td>BFS optimal for shallowest goal</td></tr>
+    <tr><td>A4 Q4</td><td>Balloon scenario 1,2</td><td>(B) O(n); (D) O(n²)</td><td>Recurrence expansion</td></tr>
+    <tr><td>A4 Q5</td><td>deg≥n/2 → connected</td><td>(B) Always connected</td><td>Contradiction on component size</td></tr>
+    <tr><td>A4 Q6</td><td>G² complexity</td><td>(A) Matrix O(V³); List O(EV+V)</td><td>Graph squaring algorithm</td></tr>
+    <tr><td>A4 Q7</td><td>Max average subarray</td><td>Sliding window O(n)</td><td>init+slide trick</td></tr>
+    <tr><td>A4 Q8</td><td>Min time difference</td><td>Sort+circular O(m log m)</td><td>Circular wrap-around</td></tr>
+    <tr><td>A4 Q9</td><td>Hamming distance sum</td><td>Bit counting O(n)</td><td>p×q per bit position</td></tr>
+    <tr><td>A5 Q2</td><td>IS =p VC equivalence</td><td>S IS ⟺ V−S VC (both directions)</td><td>Complementarity theorem</td></tr>
+    <tr><td>A5 Q3</td><td>VC ≤p SC reduction</td><td>U=E; S_v=incident edges; k same</td><td>Edges→elements, vertices→sets</td></tr>
+    <tr><td>A6 Q1</td><td>Largest a vs Strassen</td><td>(C) a=48</td><td>MT Case 1; log₄48 &lt; log₂7</td></tr>
+    <tr><td>A6 Q2</td><td>T(n)=2T(n/4)+√n</td><td>(B) Θ(√n log n)</td><td>MT Case 2 (equal exponents)</td></tr>
+    <tr><td>A6 Q3</td><td>T(n)=4T(n/2)+n²log n</td><td>NOT applicable (gap between C2/C3)</td><td>MT non-applicable gap</td></tr>
+    <tr><td>A6 Q4</td><td>Out-degree + In-degree</td><td>(B) Both O(V+E)</td><td>Adjacency list linear scan</td></tr>
+    <tr><td>A6 Q5</td><td>Median of 2 databases</td><td>(B) O(log n) queries</td><td>Binary search on partition</td></tr>
+    <tr><td>A6 Q6</td><td>Min connected = tree</td><td>(A) Must be a tree</td><td>Cycle removal reduces weight</td></tr>
+    <tr><td>A6 Q7</td><td>Star graph center</td><td>Common node in edges[0],[1] — O(1)</td><td>Center appears in every edge</td></tr>
+    <tr><td>A6 Q8</td><td>Arithmetic progression</td><td>Sort + constant diff check O(n log n)</td><td>Sort enables linear verification</td></tr>
+    <tr><td>A6 Q9</td><td>Max-probability path</td><td>Modified Dijkstra: ×, max-heap, init 1.0</td><td>MIMI: Max-heap,Init 1,Multiply,Identity</td></tr>
+  </tbody>
+</table>
+
+<div class="banner" style="margin-top:32px">
+  <strong class="label">Scope of this guide</strong><br>
+  This document covers every question from Assignments A0 through A6 for CS 570 Spring 2026. The graded assignments (A4 and A6) contain the highest exam-signal questions — their formats define what Quiz 2 will ask. Use the condensed topic study guides (study_guide_topic1 through study_guide_topic5) for per-topic exam preparation.
+</div>
+
+</main>
+
+<script>
+(function(){
+  var KEY='cs570-all-asgn-theme';
+  function apply(t){
+    document.documentElement.setAttribute('data-theme',t);
+    document.getElementById('optDark').classList.toggle('active',t==='dark');
+    document.getElementById('optLight').classList.toggle('active',t==='light');
+    try{localStorage.setItem(KEY,t);}catch(e){}
+  }
+  var s='';try{s=localStorage.getItem(KEY)||'';}catch(e){}
+  if(s==='light'||s==='dark'){apply(s);}
+  window.toggleTheme=function(){
+    var c=document.documentElement.getAttribute('data-theme');
+    apply(c==='dark'?'light':'dark');
+  };
+})();
+</script>
+</body>
+</html>
