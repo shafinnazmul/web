@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 570 Final Exam · Topic 2 (Beginner Deep-Dive): Asymptotic Analysis &amp; Growth Rates Unpacked</title>
+<style>
+  /* ================================================================
+     COLOR PALETTE — DARK MODE (default)
+     Topic 2 deep-dive: Coral / Burnt-orange accent (distinct from Topic 1 Crimson)
+     ================================================================ */
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161a24;
+    --bg-elev2: #1c1f2a;
+    --surface: #1e2230;
+    --text: #e8eaf0;
+    --text-dim: #a8aec0;
+    --text-faint: #7a8095;
+    --border: #2a2f3e;
+
+    --accent: #2979ff;
+    --accent-soft: #1a3a5c;
+    --accent-text: #64b5f6;
+
+    --topic-accent: #ff7043;   /* Coral — Topic 2 deep-dive (Asymptotic Analysis) */
+
+    --red: #ff5252;
+    --orange: #ff9800;
+    --yellow: #ffeb3b;
+    --gold: #ffd700;
+    --green: #4caf50;
+    --green-soft: #1b5e20;
+    --green-text: #a5d6a7;
+    --blue-soft: #0d47a1;
+    --blue-text: #90caf9;
+    --purple-soft: #4a148c;
+    --purple-text: #ce93d8;
+    --code-bg: #0a0c14;
+    --code-text: #ffcc80;
+  }
+
+  /* ================================================================
+     LIGHT MODE OVERRIDES
+     ================================================================ */
+  [data-theme="light"] {
+    --bg: #fdf8f5;
+    --bg-elev: #ffffff;
+    --bg-elev2: #fef0ea;
+    --surface: #fde8df;
+    --text: #1a1208;
+    --text-dim: #5a3a28;
+    --text-faint: #9a7a68;
+    --border: #e8cfc4;
+
+    --accent: #1a5fe0;
+    --accent-soft: #dbeafe;
+    --accent-text: #1a4fb0;
+
+    --topic-accent: #bf360c;   /* Brick-red for light mode contrast */
+
+    --red: #d32f2f;
+    --orange: #e65100;
+    --yellow: #f9a825;
+    --gold: #c17900;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --green-text: #1b5e20;
+    --blue-soft: #e3f2fd;
+    --blue-text: #0d47a1;
+    --purple-soft: #f3e5f5;
+    --purple-text: #4a148c;
+    --code-bg: #fef0ea;
+    --code-text: #bf360c;
+  }
+
+  [data-theme="light"] strong { color: #0d0f1a; }
+  [data-theme="light"] h1 { color: #0d0f1a; }
+  [data-theme="light"] h3 { color: #0d0f1a; }
+  [data-theme="light"] .question-stem { color: #0d0f1a; }
+  [data-theme="light"] pre.diagram { color: #1a1d2e; background: #fef0ea; border-color: var(--topic-accent); }
+  [data-theme="light"] pre.pseudocode { background: var(--code-bg); color: var(--code-text); }
+  [data-theme="light"] .cheat-sheet { background: linear-gradient(135deg, rgba(191,54,12,0.05), rgba(26,95,224,0.04)); }
+  [data-theme="light"] .callout { background: rgba(230,81,0,0.05); }
+  [data-theme="light"] .callout.quote { background: rgba(191,54,12,0.05); }
+  [data-theme="light"] .callout.warning { background: rgba(211,47,47,0.05); }
+  [data-theme="light"] .banner { background: linear-gradient(135deg, rgba(191,54,12,0.05), rgba(26,95,224,0.05)); }
+  [data-theme="light"] .step { background: #fef0ea; }
+  [data-theme="light"] .misconception { background: #fef0ea; }
+  [data-theme="light"] details.answer-block { border-left-color: var(--green); }
+  [data-theme="light"] details.answer-block summary { color: var(--green); }
+  [data-theme="light"] details.answer-block[open] summary { color: #388e3c; }
+  [data-theme="light"] table.page-index tr:nth-child(even),
+  [data-theme="light"] table.data tr:nth-child(even) { background: #fef0ea; }
+
+  /* ================================================================
+     THEME TOGGLE — FIXED IN THE TOP BAR
+     ================================================================ */
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 240px;
+    right: 0;
+    height: 44px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 28px;
+    gap: 10px;
+    z-index: 60;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .top-bar .crumb {
+    font-size: 0.82em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    margin-right: auto;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-bar .crumb strong { color: var(--topic-accent); }
+  .theme-toggle-label {
+    font-size: 0.75em;
+    color: var(--text-faint);
+    font-family: 'Consolas', monospace;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .theme-pill:hover { border-color: var(--topic-accent); }
+  .theme-opt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 22px;
+    border-radius: 16px;
+    font-size: 12px;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-faint);
+    user-select: none;
+  }
+  .theme-opt.active { background: var(--topic-accent); color: #fff; }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 240px;
+    padding-top: 44px;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+
+  code, pre, .mono { font-family: 'Consolas', 'Courier New', 'Menlo', monospace; }
+
+  h1, h2, h3, h4 { font-family: 'Segoe UI', system-ui, sans-serif; font-weight: 600; letter-spacing: 0.2px; }
+  h1 { font-size: 2.1em; margin: 0 0 8px 0; color: #fff; line-height: 1.25; }
+  h2 { font-size: 1.55em; color: var(--topic-accent); margin: 36px 0 14px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.2em; color: #fff; margin: 26px 0 10px 0; }
+  h4 { color: var(--text-dim); margin: 18px 0 8px 0; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.82em; }
+
+  p { margin: 8px 0 12px 0; }
+  a { color: var(--accent-text); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+
+  /* ================================================================
+     STICKY NAVIGATION
+     ================================================================ */
+  nav.sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px;
+    overflow-y: auto;
+    font-size: 0.88em;
+    z-index: 50;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  nav.sidebar .nav-title {
+    font-weight: 700;
+    color: var(--topic-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.74em;
+    margin-bottom: 14px;
+  }
+  nav.sidebar a {
+    display: block;
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  nav.sidebar a:hover { background: var(--bg-elev2); color: var(--text); border-left-color: var(--topic-accent); text-decoration: none; }
+  nav.sidebar a.sub { padding-left: 22px; font-size: 0.93em; }
+  nav.sidebar a.sub2 { padding-left: 34px; font-size: 0.88em; }
+  nav.sidebar hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    body { padding-left: 0; padding-top: 96px; }
+    .top-bar { left: 0; height: 44px; padding: 0 12px; }
+    nav.sidebar { top: 44px; width: 100%; height: 52px; bottom: auto; display: flex; overflow-x: auto; overflow-y: hidden; padding: 8px 12px; gap: 6px; align-items: center; }
+    nav.sidebar .nav-title, nav.sidebar hr { display: none; }
+    nav.sidebar a { white-space: nowrap; padding: 6px 10px; }
+    nav.sidebar a.sub, nav.sidebar a.sub2 { padding-left: 10px; }
+  }
+
+  main { max-width: 1100px; padding: 40px 48px 80px 48px; }
+  @media (max-width: 900px) { main { padding: 28px 20px 60px 20px; } }
+
+  /* ================================================================
+     HEADER / HERO
+     ================================================================ */
+  .doc-header {
+    border-left: 4px solid var(--topic-accent);
+    padding: 4px 0 4px 22px;
+    margin-bottom: 32px;
+  }
+  .doc-header .meta { color: var(--text-faint); font-size: 0.9em; margin-top: 6px; }
+  .doc-header .meta strong { color: var(--text-dim); }
+
+  .banner {
+    background: linear-gradient(135deg, rgba(255,112,67,0.08), rgba(41,121,255,0.08));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.94em;
+    transition: background 0.22s ease;
+  }
+  .banner strong.label { color: var(--topic-accent); text-transform: uppercase; letter-spacing: 1px; font-size: 0.78em; }
+
+  /* ================================================================
+     SUB-TOPIC BANNER
+     ================================================================ */
+  .subtopic-banner {
+    background: var(--bg-elev);
+    border-top: 3px solid var(--topic-accent);
+    border-radius: 4px;
+    padding: 14px 22px;
+    margin: 28px 0 18px 0;
+  }
+  .subtopic-banner .letter {
+    display: inline-block;
+    background: var(--topic-accent);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Consolas', monospace;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 0.88em;
+    letter-spacing: 1px;
+  }
+  .subtopic-banner .title { font-size: 1.12em; font-weight: 600; color: var(--text); }
+  .subtopic-banner .pages { display: block; margin-top: 4px; font-family: 'Consolas', monospace; font-size: 0.82em; color: var(--text-faint); }
+
+  /* ================================================================
+     PDF REFERENCE & ASSIGNMENT BADGES
+     ================================================================ */
+  .pdf-ref {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    cursor: default;
+    vertical-align: baseline;
+  }
+  .asgn-ref {
+    display: inline-block;
+    background: var(--purple-soft);
+    color: var(--purple-text);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 0.78em;
+    font-family: 'Consolas', monospace;
+    white-space: nowrap;
+    margin: 0 3px;
+    vertical-align: baseline;
+  }
+
+  .exam-star { color: var(--gold); font-weight: bold; }
+
+  /* ================================================================
+     SECTIONS & BLOCKS
+     ================================================================ */
+  div.section-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 26px;
+    margin: 22px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .pages-coverage {
+    display: inline-block;
+    background: var(--bg-elev2);
+    border: 1px dashed var(--accent);
+    color: var(--accent-text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.82em;
+    margin: 0 0 14px 0;
+  }
+
+  /* ================================================================
+     TABLES
+     ================================================================ */
+  table.page-index { width: 100%; border-collapse: collapse; margin: 12px 0 18px 0; font-size: 0.92em; }
+  table.page-index th { background: var(--accent-soft); color: var(--blue-text); text-align: left; padding: 10px 14px; border: 1px solid var(--border); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.8px; }
+  table.page-index td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+  table.page-index tr:nth-child(even) { background: var(--bg-elev2); }
+  table.page-index td:last-child { font-family: 'Consolas', monospace; color: var(--accent-text); white-space: nowrap; }
+
+  table.data { width: 100%; border-collapse: collapse; margin: 12px 0 18px 0; font-size: 0.92em; }
+  table.data th { background: var(--accent-soft); color: var(--blue-text); text-align: left; padding: 10px 12px; border: 1px solid var(--border); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.6px; }
+  table.data td { padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
+  table.data tr:nth-child(even) { background: var(--bg-elev2); }
+
+  table.trace-table { border-collapse: collapse; font-family: 'Consolas', monospace; font-size: 0.82rem; width: 100%; margin: 12px 0; }
+  table.trace-table th { background: var(--accent-soft); color: var(--blue-text); padding: 8px 10px; border: 1px solid var(--border); }
+  table.trace-table td { border: 1px solid var(--border); padding: 7px 10px; vertical-align: top; }
+  table.trace-table tr.highlight { background: var(--bg-elev2); }
+
+  /* ================================================================
+     CODE BLOCKS
+     ================================================================ */
+  pre.diagram {
+    background: var(--bg-elev2);
+    border: 1px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 0.86em;
+    line-height: 1.55;
+    color: #dce3f0;
+    margin: 14px 0;
+    transition: background 0.22s ease, color 0.22s ease;
+  }
+  pre.pseudocode {
+    background: var(--code-bg);
+    color: var(--code-text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding: 16px 20px;
+    border-radius: 6px;
+    border-left: 3px solid var(--topic-accent);
+    overflow-x: auto;
+    white-space: pre;
+    margin: 14px 0;
+  }
+  .diagram-source { font-size: 0.85em; color: var(--text-faint); margin: -6px 0 16px 0; font-style: italic; }
+
+  /* ================================================================
+     PROOF & STEP BLOCKS
+     ================================================================ */
+  .proof-block {
+    background: var(--bg-elev);
+    border-left: 4px solid var(--gold);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .proof-block .proof-step { margin: 8px 0; padding-left: 16px; }
+  .proof-block .proof-label { color: var(--gold); font-weight: bold; font-size: 0.9em; }
+
+  .step {
+    background: var(--bg-elev2);
+    border-left: 3px solid var(--topic-accent);
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.22s ease;
+  }
+  .step .step-head { color: var(--topic-accent); font-weight: 600; font-size: 0.95em; }
+  .step .step-detail { margin-top: 6px; font-size: 0.93em; color: var(--text-dim); }
+
+  /* ================================================================
+     MISCONCEPTIONS
+     ================================================================ */
+  .misconception {
+    background: var(--bg-elev2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    transition: background 0.22s ease;
+  }
+  .misconception .myth { color: var(--red); font-weight: 600; }
+  .misconception .reality { color: var(--green); font-weight: 600; }
+
+  /* ================================================================
+     COMPLEXITY BOX
+     ================================================================ */
+  .complexity-box {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: monospace;
+    display: inline-block;
+    margin: 4px 0;
+  }
+
+  /* ================================================================
+     QUESTION BLOCKS
+     ================================================================ */
+  .question-block {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    transition: background 0.22s ease, border-color 0.22s ease;
+  }
+  .question-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .q-format { background: var(--surface); color: var(--text-dim); padding: 2px 9px; border-radius: 4px; font-size: 0.78em; font-family: 'Consolas', monospace; font-weight: 600; letter-spacing: 0.8px; }
+  .question-stem { font-weight: 500; font-size: 1.02em; margin: 6px 0 10px 0; color: #fff; }
+  ol.mcq-options { margin: 4px 0 6px 0; padding-left: 26px; }
+  ol.mcq-options li { padding: 3px 0; color: var(--text-dim); }
+
+  details.answer-block { margin-top: 10px; border-left: 3px solid var(--green); padding-left: 14px; }
+  details.answer-block summary { cursor: pointer; color: var(--green); font-weight: bold; padding: 4px 0; list-style: none; user-select: none; }
+  details.answer-block summary::-webkit-details-marker { display: none; }
+  details.answer-block[open] summary { color: #81c784; }
+  details.answer-block .answer-content { padding: 8px 0 4px 0; font-size: 0.95em; }
+  details.answer-block .answer-content p { margin: 6px 0; }
+  details.answer-block ul { padding-left: 22px; }
+
+  .badge-beg { background: var(--green-soft); color: var(--green-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-int { background: var(--blue-soft); color: var(--blue-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-adv { background: var(--purple-soft); color: var(--purple-text); border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; }
+  .badge-warmup { background: #1a2a1a; color: #a5d6a7; border-radius: 4px; padding: 2px 9px; font-size: 0.74em; font-weight: 600; font-family: 'Consolas', monospace; letter-spacing: 0.5px; border: 1px solid #2a4a2a; }
+
+  /* ================================================================
+     CHEAT SHEET
+     ================================================================ */
+  .cheat-sheet {
+    background: linear-gradient(135deg, rgba(255,112,67,0.06), rgba(255,215,0,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 16px 0;
+    transition: background 0.22s ease;
+  }
+  .cheat-sheet h4 { color: var(--gold); font-size: 0.82em; margin-top: 14px; }
+  .cheat-sheet h4:first-child { margin-top: 0; }
+  .cheat-sheet ol { padding-left: 22px; }
+  .cheat-sheet .oneliner { font-size: 1.08em; font-style: italic; color: var(--text); }
+  .cheat-sheet .remember { font-size: 1.08em; color: var(--gold); font-weight: 600; }
+
+  /* ================================================================
+     CALLOUTS
+     ================================================================ */
+  .callout { border-left: 3px solid var(--orange); background: rgba(255,152,0,0.06); padding: 10px 16px; margin: 14px 0; border-radius: 0 6px 6px 0; font-size: 0.95em; transition: background 0.22s ease; }
+  .callout.quote { border-left-color: var(--topic-accent); background: rgba(255,112,67,0.06); }
+  .callout.warning { border-left-color: var(--red); background: rgba(255,82,82,0.05); }
+  .callout strong.lbl { display: block; color: var(--orange); text-transform: uppercase; letter-spacing: 1px; font-size: 0.74em; margin-bottom: 4px; }
+  .callout.quote strong.lbl { color: var(--topic-accent); }
+  .callout.warning strong.lbl { color: var(--red); }
+
+  /* Formula highlight */
+  .formula-box {
+    display: inline-block;
+    background: rgba(255,112,67,0.10);
+    border: 1px solid var(--topic-accent);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'Consolas', monospace;
+    font-size: 1.05em;
+    color: var(--topic-accent);
+    margin: 6px 0;
+    font-weight: 600;
+  }
+  [data-theme="light"] .formula-box { background: rgba(191,54,12,0.08); }
+
+  /* Challenge banner */
+  .challenge-banner { background: rgba(255,215,0,0.07); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 12px; font-size: 0.82em; color: var(--gold); font-family: 'Consolas', monospace; display: inline-block; margin-bottom: 8px; }
+
+  /* ================================================================
+     PRINT
+     ================================================================ */
+  @media print {
+    body { padding-left: 0; padding-top: 0; background: #fff; color: #000; }
+    nav.sidebar, .top-bar { display: none; }
+    main { max-width: none; padding: 0; }
+    details { display: block; }
+    details > * { display: block; }
+    .pdf-ref { border: 1px solid #000; color: #000; background: #eee; }
+    .section-block, .cheat-sheet, .question-block, .subtopic-banner { break-inside: avoid; background: #fff; color: #000; }
+    h1, h2, h3, h4, strong { color: #000; }
+    pre.diagram, pre.pseudocode { background: #fff; color: #000; border-color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     SIDEBAR NAVIGATION
+     ================================================================ -->
+<nav class="sidebar">
+  <div class="nav-title">🟠 Topic 2 ⓓ</div>
+  <a href="#top">🔝 Top</a>
+  <a href="#warmup">🧗 Warm-up Glossary</a>
+  <a href="#topic-index">📑 Page Index</a>
+  <a href="#section-1">§1 What &amp; Why (Plain English)</a>
+  <a href="#s1-1" class="sub">→ 1.1 The fundamental problem</a>
+  <a href="#s1-2" class="sub">→ 1.2 O / Ω / Θ — three lenses</a>
+  <a href="#s1-3" class="sub">→ 1.3 Rental contract analogy</a>
+  <a href="#s1-4" class="sub">→ 1.4 Formal definitions</a>
+  <a href="#s1-5" class="sub">→ 1.5 Key Terms Table (25 rows)</a>
+  <a href="#section-2">§2 How — Worked Examples</a>
+  <a href="#s2a" class="sub">→ 2a · Formal O/Ω/Θ Proofs</a>
+  <a href="#s2b" class="sub">→ 2b · Limit Comparison Method</a>
+  <a href="#s2c" class="sub">→ 2c · True/False Asymptotic Claims</a>
+  <a href="#s2d" class="sub">→ 2d · Function Growth Ordering</a>
+  <a href="#section-3">§3 Exam Intelligence</a>
+  <a href="#warmup-checks">🧗 Warm-up Checks</a>
+  <a href="#section-4">§4 Practice Questions</a>
+  <a href="#s4-mcq" class="sub">→ MCQ (4 questions)</a>
+  <a href="#s4-proof" class="sub">→ Proof (3 questions)</a>
+  <a href="#s4-trace" class="sub">→ Trace / Analysis (3 questions)</a>
+  <a href="#s4-pseudo" class="sub">→ Pseudocode / Design (3 questions)</a>
+  <a href="#section-5">§5 Cheat Sheet</a>
+</nav>
+
+<!-- ================================================================
+     TOP BAR
+     ================================================================ -->
+<div class="top-bar" role="toolbar">
+  <span class="crumb">CS 570 · Final Exam · <strong>Topic 2 (Deep-Dive) · Asymptotic Analysis &amp; Growth Rates Unpacked</strong></span>
+  <span class="theme-toggle-label">THEME</span>
+  <div class="theme-pill" id="themePill" onclick="toggleTheme()" title="Toggle light / dark mode" role="button" tabindex="0">
+    <span class="theme-opt active" id="optDark">🌙</span>
+    <span class="theme-opt" id="optLight">☀️</span>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ================================================================
+     DOCUMENT HEADER
+     ================================================================ -->
+<div class="doc-header">
+  <h1>Topic 2 (Beginner Deep-Dive)</h1>
+  <h3 style="color:var(--topic-accent); margin-top:4px; font-weight:500;">
+    Asymptotic Analysis &amp; Growth Rates Unpacked — Big-O · Big-Ω · Big-Θ · Limit Comparison · Function Ordering · Formal Proofs &amp; Counterexamples, with every constant and witness computed step-by-step
+  </h3>
+  <div class="meta">
+    <strong>Course:</strong> CS 570 / CS 470 — Computer Algorithms &nbsp;·&nbsp;
+    <strong>Instructor:</strong> Dr. Bineet Ghosh, University of Alabama &nbsp;·&nbsp;
+    <strong>Exam:</strong> Final (Quiz 2) — April 30, 2026 · Class hours · Closed-book, one cheat sheet<br>
+    <strong>Master Reference:</strong> <span class="mono">00_Lec1_27_all-combined-densed-ocr.pdf</span> (Lectures 1–27, Spring 2026)<br>
+    <strong>Companion to:</strong> <span class="mono">study_guide_topic2_asymptotic_analysis.html</span> (condensed exam-prep version — read this deep-dive FIRST)<br>
+    <strong>Audience:</strong> Designed for a student who can follow the solution but is not yet confident choosing constants c and n₀, proving asymptotic claims formally, or ordering growth rates using limits.
+  </div>
+</div>
+
+<div class="banner">
+  <strong class="label">How to use this deep-dive</strong><br>
+  <strong>Step 1.</strong> Read the <a href="#warmup">🧗 Warm-up Glossary</a> to confirm you're comfortable with limits, logarithms, and what "grows faster" means mathematically.<br>
+  <strong>Step 2.</strong> Work through §1 and §2 with pencil and paper — plug in specific values of n whenever a formula appears.<br>
+  <strong>Step 3.</strong> Take the <a href="#warmup-checks">§3.5 Warm-up Understanding Checks</a> before attempting the 13 graded practice questions.<br>
+  <strong>Step 4.</strong> Use §3 (Exam Intelligence) and §5 (Cheat Sheet) as your last-hour review.
+</div>
+
+<!-- ================================================================
+     §0 WARM-UP GLOSSARY
+     ================================================================ -->
+<h2 id="warmup">🧗 Warm-up Glossary — Vocabulary You Need Before §1</h2>
+<p style="color:var(--text-dim);">Asymptotic analysis relies on concepts from calculus and discrete math that are often assumed. Here they are, introduced from scratch. Skip to <a href="#section-1">§1</a> if you already know all of these.</p>
+
+<div class="section-block">
+
+<h3>What does "grows faster" mean — formally? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  We say function f(n) <strong>grows faster</strong> than g(n) if, as n gets very large, the ratio f(n)/g(n) increases without bound. In other words, f eventually dwarfs g — no matter how big a constant head-start g has.
+</p>
+<p>
+  <strong>Concrete example:</strong> Does n² grow faster than n? Compute the ratio: n²/n = n. As n → ∞, this ratio → ∞. Yes — n² grows strictly faster than n. Now check: does n grow faster than log₂ n? Ratio: n / log₂ n → ∞ as n → ∞ (use L'Hôpital or plug in n = 1,000,000: 1,000,000 / 20 = 50,000). Yes — n grows faster than log n. <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h3>What is a "limit" and why do we use it? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  A <strong>limit</strong> describes what value a function approaches as its input goes to infinity. We write: lim<sub>n→∞</sub> f(n)/g(n) = L. This means: for very large n, the ratio f(n)/g(n) gets arbitrarily close to L.
+</p>
+<p>
+  Three useful outcomes when comparing f(n) to g(n):<br>
+  — If L = 0: f grows <em>slower</em> than g (f is "little-oh" of g).<br>
+  — If 0 &lt; L &lt; ∞ (finite, nonzero): f grows at the <em>same rate</em> as g (f is "Theta" of g).<br>
+  — If L = ∞: f grows <em>faster</em> than g.
+</p>
+<p>
+  <strong>Concrete example:</strong> lim<sub>n→∞</sub> (3n²+5n) / n² = lim (3 + 5/n) = 3. A finite nonzero constant → Θ(n²). <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h3>What is log base b? <span class="pdf-ref">📄 p. 39</span></h3>
+<p>
+  <strong>log<sub>b</sub>(x)</strong> is the exponent you must raise b to in order to get x. So log<sub>2</sub>(8) = 3 because 2³ = 8. In CS 570, "log n" means log<sub>2</sub> n unless stated otherwise. <span class="pdf-ref">📄 p. 39</span>
+</p>
+<p>
+  Key facts: log<sub>2</sub>(n²) = 2·log₂(n). log<sub>2</sub>(2ⁿ) = n. Logarithm growth is extremely slow: log₂(1,000,000) ≈ 20. This is why O(log n) algorithms are nearly instantaneous even for massive inputs.
+</p>
+
+<h3>What is a "constant factor" and why do we ignore it? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  A <strong>constant factor</strong> is a multiplier that doesn't depend on n. For example, in 5n², the "5" is a constant factor. In asymptotic analysis, we ignore constant factors because:
+</p>
+<p>
+  (1) On modern hardware, constant factors are absorbed by instruction-level parallelism, cache effects, and compiler optimizations. (2) The growth rate (the exponent of n) dominates for large inputs. For n = 1,000,000: 5n² = 5 × 10¹² while n³ = 10¹⁸ — the cubic term is 200,000× larger regardless of the constant 5. <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h3>What is a "witness" (c and n₀)? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  To prove f(n) = O(g(n)) formally, you must provide two constants: <strong>c &gt; 0</strong> and <strong>n₀ ≥ 0</strong> such that f(n) ≤ c·g(n) for all n ≥ n₀. The pair (c, n₀) is called the <strong>witness</strong> for the O-claim.
+</p>
+<p>
+  <strong>How to find witnesses:</strong> Start with the inequality f(n) ≤ c·g(n). Solve for c or n₀ algebraically. Then verify. Example: prove 3n² + 5n = O(n²). We need 3n² + 5n ≤ c·n². Divide by n²: 3 + 5/n ≤ c. For n ≥ 1, 5/n ≤ 5, so 3 + 5/n ≤ 8. Choose c = 8, n₀ = 1. Done. <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h3>What is a polynomial vs an exponential function? <span class="pdf-ref">📄 pp. 39–42</span></h3>
+<p>
+  A <strong>polynomial</strong> in n has n raised to a fixed constant exponent: n, n², n³, n⁰·⁵ = √n, n^1.5, etc.
+  An <strong>exponential</strong> has n as the exponent: 2ⁿ, 3ⁿ, 10ⁿ. Exponentials grow incomparably faster than any polynomial — for large enough n, 2ⁿ exceeds n^1000. This is why polynomial-time algorithms are "tractable" and exponential-time ones are not. <span class="pdf-ref">📄 pp. 39–42</span>
+</p>
+
+<h3>What is a "tight bound"? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  A bound is <strong>tight</strong> when it is both an upper and a lower bound simultaneously — i.e., when f(n) = Θ(g(n)). This means g(n) captures the growth rate of f(n) exactly (up to constant factors). Example: n(n-1)/2 is a tight bound of Θ(n²) — it is both O(n²) and Ω(n²). <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h3>What does ∀ and ∃ mean? <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  <strong>∀</strong> means "for all" — a statement must hold for every value. <strong>∃</strong> means "there exists" — at least one value satisfies the statement.
+  The Big-O definition says: ∃ c &gt; 0, ∃ n₀ ≥ 0 such that ∀ n ≥ n₀, f(n) ≤ c·g(n). In plain English: "We can find some c and n₀ such that, from n₀ onward, f(n) never exceeds c·g(n)." <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+</div>
+
+<!-- ================================================================
+     TOPIC PAGE INDEX
+     ================================================================ -->
+<h2 id="topic-index">📑 Topic Page Index</h2>
+<p class="mono" style="color:var(--text-faint); font-size:0.86em;">
+  Topic 2 is tested across Lectures 3–6 and Assignments 2 and 4. This index mirrors the condensed guide — use it to jump to the exact PDF page for any concept.
+</p>
+
+<h4 style="color:var(--topic-accent); margin-top:22px;">Formal Definitions &amp; Witnesses <span class="pdf-ref">📄 pp. 39–44</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th><th>Textbook Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Big-O definition: c, n₀ witnesses <span class="exam-star">⭐</span></td><td>pp. 39–41</td><td><span class="asgn-ref">📋 A2 Q1</span></td><td>[KT] §2.1, [CLRS] §3.1</td></tr>
+    <tr><td>Big-Ω definition <span class="exam-star">⭐</span></td><td>pp. 39–41</td><td><span class="asgn-ref">📋 A2 Q1</span></td><td>[KT] §2.1, [CLRS] §3.1</td></tr>
+    <tr><td>Big-Θ (tight bound) definition <span class="exam-star">⭐</span></td><td>pp. 39–41</td><td><span class="asgn-ref">📋 A2 Q1</span></td><td>[KT] §2.1, [CLRS] §3.1</td></tr>
+    <tr><td>Tight-bound proof: n(n-1)/2 = Θ(n²) — choose c₁,c₂,n₀ <span class="exam-star">⭐</span></td><td>p. 39</td><td><span class="asgn-ref">📋 A4 Q2</span></td><td>[KT] §2.1</td></tr>
+    <tr><td>Little-o and little-ω (strict bounds)</td><td>pp. 39–41</td><td>Lec 5</td><td>[CLRS] §3.1</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color:var(--topic-accent); margin-top:22px;">Limit Comparison Method &amp; Function Ordering <span class="pdf-ref">📄 pp. 39–45</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th><th>Textbook Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Limit comparison: lim f/g = 0 → f=o(g), c → f=Θ(g), ∞ → f=ω(g) <span class="exam-star">⭐</span></td><td>pp. 39–42</td><td><span class="asgn-ref">📋 A4 Q1</span></td><td>[KT] §2.2</td></tr>
+    <tr><td>Growth-rate ordering of 6+ functions <span class="exam-star">⭐</span></td><td>pp. 39–42</td><td><span class="asgn-ref">📋 A4 Q1</span></td><td>[KT] §2.2</td></tr>
+    <tr><td>Canonical ordering: 1 ≺ log n ≺ √n ≺ n ≺ n log n ≺ n² ≺ 2ⁿ <span class="exam-star">⭐</span></td><td>pp. 39–42</td><td>Lec 5</td><td>[KT] §2.2</td></tr>
+    <tr><td>2^√(log n) ≺ n(log n)² ≺ n^(4/3) ≺ 2ⁿ ≺ 2^(n²) ≺ 2^(2^n) <span class="exam-star">⭐</span></td><td>pp. 39–42</td><td><span class="asgn-ref">📋 A4 Q1</span></td><td>[KT] §2.2</td></tr>
+    <tr><td>(n+a)^b = Θ(n^b) — formal limit proof <span class="exam-star">⭐</span></td><td>p. 42</td><td><span class="asgn-ref">📋 A4 Q2</span></td><td>[KT] §2.1</td></tr>
+  </tbody>
+</table>
+
+<h4 style="color:var(--topic-accent); margin-top:22px;">True/False Claims, Proofs &amp; Counterexamples <span class="pdf-ref">📄 pp. 43–45</span></h4>
+<table class="page-index">
+  <thead><tr><th>Sub-topic / Concept</th><th>Page(s)</th><th>Assignment Ref</th><th>Textbook Ref</th></tr></thead>
+  <tbody>
+    <tr><td>Ex 3-1: f=O(g) ∧ f=Ω(h) → g=Ω(h) — TRUE <span class="exam-star">⭐</span></td><td>pp. 43–45</td><td><span class="asgn-ref">📋 A2 Q1-1</span></td><td>[KT] §2.1</td></tr>
+    <tr><td>Ex 3-2: f=O(g) → f²=O(g²) — TRUE <span class="exam-star">⭐</span></td><td>pp. 43–45</td><td><span class="asgn-ref">📋 A2 Q1-2</span></td><td>[KT] §2.1</td></tr>
+    <tr><td>Ex 3-3: f=Θ(g) → log f = Θ(log g) — FALSE (counterexample) <span class="exam-star">⭐</span></td><td>pp. 43–45</td><td><span class="asgn-ref">📋 A2 Q1-3</span></td><td>[KT] §2.1</td></tr>
+    <tr><td>n = O(n log n); n log n = O(n²); n² = O(n² + n log n) — all TRUE <span class="exam-star">⭐</span></td><td>pp. 43–45</td><td><span class="asgn-ref">📋 A4 Q4</span></td><td>[KT] §2.1</td></tr>
+    <tr><td>Transitivity of O, Ω, Θ</td><td>pp. 43–45</td><td>Lec 5–6</td><td>[CLRS] §3.1</td></tr>
+  </tbody>
+</table>
+
+<!-- ================================================================
+     §1 WHAT & WHY (PLAIN ENGLISH)
+     ================================================================ -->
+<h2 id="section-1">§1 — What &amp; Why, in Plain English</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 23–54 (Lectures 3–6)</div>
+
+<div class="section-block">
+
+<h3 id="s1-1">1.1 The fundamental problem — comparing algorithms without running them <span class="pdf-ref">📄 pp. 23–30</span></h3>
+
+<p>
+  Imagine two taxi companies quote you a price for a trip. Company A charges $10 + $1 per mile. Company B charges $0.50 per mile, but $50 upfront. For a 5-mile trip, A is cheaper ($15 vs $52.50). For a 1,000-mile trip, B is much cheaper ($550 vs $1,010). The <strong>crossover point</strong> — the trip length at which B becomes better — is roughly 80 miles.
+</p>
+<p>
+  Comparing algorithms is exactly like this. Two algorithms solve the same problem but with different "pricing structures." Algorithm A might do 100n + 5 operations; Algorithm B might do 2n² + 1 operations. For small inputs (n &lt; 50), A might use more operations. For large inputs (n &gt; 50), B is catastrophically slower. <strong>Asymptotic analysis</strong> formalizes the notion of "which algorithm is better for large inputs." <span class="pdf-ref">📄 pp. 23–30</span>
+</p>
+
+<pre class="diagram">
+  Concrete operation counts for two algorithms:
+
+  Input size n  |  Algorithm A: 100n + 5  |  Algorithm B: 2n²  | Winner
+  ─────────────────────────────────────────────────────────────────────
+  n = 10        |  1,005                  |  200               | B
+  n = 50        |  5,005                  |  5,000             | B (≈tie)
+  n = 100       |  10,005                 |  20,000            | A
+  n = 1,000     |  100,005                |  2,000,000         | A (20×)
+  n = 1,000,000 |  100,000,005            |  2,000,000,000,000 | A (20,000×)
+
+  Conclusion: Algorithm A is O(n), Algorithm B is O(n²).
+  For large n, the O(n) algorithm wins by an enormous margin.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–30</span></div>
+
+<h3 id="s1-2">1.2 O / Ω / Θ — three lenses for the same algorithm <span class="pdf-ref">📄 pp. 39–41</span></h3>
+
+<p>
+  We use three different "lenses" to describe an algorithm's growth, each answering a different question:
+</p>
+
+<table class="data">
+  <thead>
+    <tr><th>Notation</th><th>What it says</th><th>Bound type</th><th>Real-world analogy</th><th>Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>f(n) = O(g(n))</strong></td>
+      <td>f grows at most as fast as g (up to a constant)</td>
+      <td>Upper bound</td>
+      <td>"Your bill will NEVER exceed c·g(n)" — a maximum guarantee</td>
+      <td><span class="pdf-ref">📄 p. 39</span></td>
+    </tr>
+    <tr>
+      <td><strong>f(n) = Ω(g(n))</strong></td>
+      <td>f grows at least as fast as g (up to a constant)</td>
+      <td>Lower bound</td>
+      <td>"Your bill will ALWAYS cost at least c·g(n)" — a minimum guarantee</td>
+      <td><span class="pdf-ref">📄 p. 40</span></td>
+    </tr>
+    <tr>
+      <td><strong>f(n) = Θ(g(n))</strong></td>
+      <td>f grows at exactly the same rate as g (up to constants)</td>
+      <td>Tight bound</td>
+      <td>"Your bill is sandwiched between c₁·g(n) and c₂·g(n)" — precise rate</td>
+      <td><span class="pdf-ref">📄 p. 41</span></td>
+    </tr>
+    <tr>
+      <td><strong>f(n) = o(g(n))</strong></td>
+      <td>f grows strictly slower than g (ratio → 0)</td>
+      <td>Strict upper</td>
+      <td>"Your bill becomes negligible compared to g(n) for large n"</td>
+      <td><span class="pdf-ref">📄 p. 41</span></td>
+    </tr>
+    <tr>
+      <td><strong>f(n) = ω(g(n))</strong></td>
+      <td>f grows strictly faster than g (ratio → ∞)</td>
+      <td>Strict lower</td>
+      <td>"Your bill eventually dwarfs g(n) by any factor"</td>
+      <td><span class="pdf-ref">📄 p. 41</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout quote">
+  <strong class="lbl">📌 Critical Relationship</strong>
+  f(n) = Θ(g(n)) if and only if f(n) = O(g(n)) AND f(n) = Ω(g(n)).
+  Think of it as a "sandwich": Θ requires both the upper roof (O) and the lower floor (Ω) to be made of the same material. <span class="pdf-ref">📄 p. 41</span>
+</div>
+
+<h3 id="s1-3">1.3 The rental contract analogy — a second framing <span class="pdf-ref">📄 pp. 39–41</span></h3>
+
+<p>
+  Think of the asymptotic notation as different types of rental contracts for a storage unit:
+</p>
+<p>
+  <strong>O (upper bound) = a price CAP.</strong> "I guarantee you'll pay no more than c × g(n) dollars from month n₀ onward." The actual price could be much lower — you just know it won't exceed the cap.
+</p>
+<p>
+  <strong>Ω (lower bound) = a price FLOOR.</strong> "The price will never drop below c × g(n) from month n₀ onward." Prices could be higher — but they won't fall below this floor.
+</p>
+<p>
+  <strong>Θ (tight) = a FIXED RATE bracket.</strong> "From month n₀ onward, you'll always pay between c₁ × g(n) and c₂ × g(n)." Both the floor and ceiling are set by the same function g(n) — only the constants differ.
+</p>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Most Common Confusion — O is NOT "equals"</strong>
+  "O(n)" does NOT mean the algorithm performs exactly n operations. It means the algorithm performs <em>at most</em> c·n operations for large n. An O(n) algorithm might actually run in 0.001·n operations — still O(n). The notation is a <em>bound</em>, not a precise formula. <span class="pdf-ref">📄 pp. 39–41</span>
+</div>
+
+<h3 id="s1-4">1.4 Technical definitions (using lecture notation) <span class="pdf-ref">📄 pp. 39–41</span></h3>
+
+<p><strong>Big-O Definition:</strong> f(n) = O(g(n)) if there exist constants c &gt; 0 and n₀ ≥ 0 such that for all n ≥ n₀: f(n) ≤ c · g(n). <span class="pdf-ref">📄 p. 39</span></p>
+
+<p><strong>Big-Ω Definition:</strong> f(n) = Ω(g(n)) if there exist constants c &gt; 0 and n₀ ≥ 0 such that for all n ≥ n₀: f(n) ≥ c · g(n). <span class="pdf-ref">📄 p. 40</span></p>
+
+<p><strong>Big-Θ Definition:</strong> f(n) = Θ(g(n)) if there exist constants c₁ &gt; 0, c₂ &gt; 0, and n₀ ≥ 0 such that for all n ≥ n₀: c₁ · g(n) ≤ f(n) ≤ c₂ · g(n). Equivalently: f(n) = O(g(n)) AND f(n) = Ω(g(n)). <span class="pdf-ref">📄 p. 41</span></p>
+
+<p><strong>Relationship to limits (for the limit comparison method):</strong> <span class="pdf-ref">📄 pp. 39–42</span></p>
+
+<pre class="diagram">
+  lim    f(n)        Conclusion
+  n→∞    ────    ──────────────────────────────────────────
+         g(n)
+
+  = 0              f(n) = o(g(n))  → f is strictly slower than g
+                   Also f(n) = O(g(n)) (O is implied by o)
+
+  = c  (finite,    f(n) = Θ(g(n))  → f and g grow at the same rate
+        nonzero)   Also f(n) = O(g(n)) AND f(n) = Ω(g(n))
+
+  = ∞              f(n) = ω(g(n))  → f is strictly faster than g
+                   Also f(n) = Ω(g(n)) (Ω is implied by ω)
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–42</span></div>
+
+<h3 id="s1-5">1.5 Key Terms Table — 25 rows <span class="pdf-ref">📄 pp. 39–54</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Term</th><th>Plain-English Meaning</th><th>Example / Mental Image</th><th>📄 Page</th><th>Textbook Ref</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>f(n) = O(g(n))</strong></td><td>f grows at most as fast as g</td><td>3n² + 5n = O(n²) — n² is the ceiling</td><td>p. 39</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>f(n) = Ω(g(n))</strong></td><td>f grows at least as fast as g</td><td>n² = Ω(n) — n² always exceeds any c·n eventually</td><td>p. 40</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>f(n) = Θ(g(n))</strong></td><td>f and g grow at the exact same rate (up to constants)</td><td>n(n-1)/2 = Θ(n²) — sandwiched by n²/4 and n²/2</td><td>p. 41</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>f(n) = o(g(n))</strong></td><td>f grows strictly slower than g; ratio f/g → 0</td><td>n = o(n²); log n = o(n)</td><td>p. 41</td><td>[CLRS] §3.1</td></tr>
+    <tr><td><strong>f(n) = ω(g(n))</strong></td><td>f grows strictly faster than g; ratio f/g → ∞</td><td>n² = ω(n); 2ⁿ = ω(n^1000)</td><td>p. 41</td><td>[CLRS] §3.1</td></tr>
+    <tr><td><strong>Witness (c, n₀)</strong></td><td>The two constants that "prove" an O/Ω claim</td><td>For 3n²+5n = O(n²): c=8, n₀=1</td><td>pp. 39–41</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Upper bound</strong></td><td>A function that is ≥ f(n) for all large n (up to constants)</td><td>O is about upper bounds — your algorithm never does more than this</td><td>p. 39</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Lower bound</strong></td><td>A function that is ≤ f(n) for all large n (up to constants)</td><td>Ω is about lower bounds — your algorithm always does at least this</td><td>p. 40</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Tight bound</strong></td><td>Both upper AND lower bound; the exact growth rate</td><td>Θ is a tight bound — O and Ω agree on the same function</td><td>p. 41</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Limit comparison method</strong></td><td>Determine growth relationship by computing lim f(n)/g(n)</td><td>lim (3n² + 5n)/n² = 3 → Θ(n²)</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td><strong>Asymptotically</strong></td><td>In the limit, as n → ∞; ignoring small-n behavior</td><td>n² + 100n behaves like n² asymptotically</td><td>pp. 39–41</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Growth rate</strong></td><td>How fast a function increases as n increases</td><td>n² grows faster than n; exponential grows faster than any polynomial</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td><strong>n₀ (threshold)</strong></td><td>The input size from which the O/Ω inequality holds</td><td>For n ≥ n₀, f(n) ≤ c·g(n) — behavior for n &lt; n₀ doesn't matter</td><td>pp. 39–41</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Constant factor</strong></td><td>A multiplier independent of n</td><td>In 5n², the "5" is constant; O ignores it</td><td>pp. 39–41</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Dominant term</strong></td><td>The term that grows fastest and controls the overall rate</td><td>In 3n² + 5n + 100, the n² term dominates</td><td>pp. 39–42</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>log n</strong></td><td>Logarithm base 2 (in CS 570 unless stated otherwise)</td><td>log₂(1024) = 10; log₂(n) ≪ n for large n</td><td>p. 39</td><td>[KT] §2.2</td></tr>
+    <tr><td><strong>n log n</strong></td><td>Linearithmic growth — between linear and quadratic</td><td>Merge sort: Θ(n log n); much better than O(n²) for large n</td><td>pp. 79–90</td><td>[KT] §5.1</td></tr>
+    <tr><td><strong>Polynomial function</strong></td><td>n raised to a fixed constant power: n^k</td><td>n, n², n³, n^1.5, √n — all polynomial</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td><strong>Exponential function</strong></td><td>A constant raised to the power n</td><td>2ⁿ, 3ⁿ — grows faster than any polynomial</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td><strong>Function hierarchy</strong></td><td>The canonical ordering of common growth rates</td><td>1 ≺ log n ≺ √n ≺ n ≺ n log n ≺ n² ≺ n³ ≺ 2ⁿ</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td><strong>Worst-case complexity</strong></td><td>The maximum operations for any input of size n</td><td>Linear search: worst case is target at end → O(n)</td><td>pp. 23–30</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Transitivity of O</strong></td><td>If f=O(g) and g=O(h), then f=O(h)</td><td>Chain of bounds: tighten from both ends</td><td>pp. 43–45</td><td>[CLRS] §3.1</td></tr>
+    <tr><td><strong>f=O(g) ⟺ g=Ω(f)</strong></td><td>Upper bound in one direction = lower bound in the other</td><td>If f≤c·g, then g≥(1/c)·f</td><td>pp. 43–45</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Counterexample</strong></td><td>A specific case that shows a general claim is FALSE</td><td>f=2, g=1+1/n: f=Θ(g) but log f ≠ Θ(log g)</td><td>pp. 43–45</td><td>[KT] §2.1</td></tr>
+    <tr><td><strong>Balloon scenario</strong></td><td>A recurrence-style analysis of iterative code complexity</td><td>Nested loops: outer runs n times, inner runs n times → O(n²)</td><td>pp. 23–35</td><td>[KT] §2.4</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Common Point of Confusion Before §2</strong>
+  "f(n) = Θ(g(n)) implies log f(n) = Θ(log g(n))" — this looks true (logs preserve order) but is FALSE. The counterexample (f = 2, g = 1 + 1/n) appears directly in Assignment 2 Q1-3 and is very likely to appear on the final. Review §2c carefully. <span class="pdf-ref">📄 pp. 43–45</span>
+</div>
+
+</div>
+
+<!-- ================================================================
+     §2 HOW — WORKED EXAMPLES
+     ================================================================ -->
+<h2 id="section-2">§2 — How: Worked Examples from Scratch</h2>
+<div class="pages-coverage">📘 LECTURE PDF COVERAGE: pp. 39–54 (Lectures 5–6) + Assignments 2 &amp; 4</div>
+
+<p style="color:var(--text-dim);">Each sub-section follows the same recipe: <strong>(1) Intuition</strong> — the big picture before any symbols. <strong>(2) Mechanism</strong> — the formal tool or proof structure. <strong>(3) Worked Example</strong> — every step computed with specific numbers. Trace every inequality with pencil and paper.</p>
+
+<!-- ─── 2a ─────────────────────────────────────────── -->
+<div class="subtopic-banner" id="s2a">
+  <span class="letter">2a</span>
+  <span class="title">Formal O / Ω / Θ Proofs — Finding Witnesses c and n₀</span>
+  <span class="pages">Lecture PDF: pp. 39–41 · Assignments 2 &amp; 4 <span class="asgn-ref">📋 A2 Q1</span> <span class="asgn-ref">📋 A4 Q2</span></span>
+</div>
+
+<h3>Intuition: Pinning down a growth rate with two constants <span class="pdf-ref">📄 pp. 39–41</span></h3>
+<p>
+  When we say f(n) = O(g(n)), we're making a bet: "for every input large enough, f(n) fits under the ceiling c·g(n)." To prove it, we need to produce the ceiling height (c) and the input size from which the ceiling holds (n₀). These two numbers are the <strong>witnesses</strong>. Finding them is the core skill of asymptotic proofs.
+</p>
+<p>
+  The strategy: algebraically manipulate f(n) ≤ c·g(n) to solve for c given a concrete n₀ (or vice versa). Then verify the inequality holds. <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h3>Mechanism: Big-O formal proof template <span class="pdf-ref">📄 pp. 39–41</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">BIG-O PROOF TEMPLATE: f(n) = O(g(n))</div>
+  <div class="proof-step"><strong>Goal:</strong> Find c &gt; 0 and n₀ ≥ 0 such that f(n) ≤ c · g(n) for all n ≥ n₀.</div>
+  <div class="proof-step"><strong>Step 1 [Write the inequality]:</strong> f(n) ≤ c · g(n). Substitute the explicit formula for f(n).</div>
+  <div class="proof-step"><strong>Step 2 [Upper bound each term]:</strong> Replace each term in f(n) with something ≤ c · g(n). Use the fact that lower-order terms (like 5n) are ≤ the dominant term (n²) for large n.</div>
+  <div class="proof-step"><strong>Step 3 [Choose n₀ so lower-order terms are manageable]:</strong> If your upper bound requires n ≥ some value, that value becomes n₀.</div>
+  <div class="proof-step"><strong>Step 4 [State the witnesses explicitly]:</strong> "Choose c = [value] and n₀ = [value]." Then verify the inequality holds for all n ≥ n₀.</div>
+</div>
+
+<h3>Worked Example 1: Prove 3n² + 5n = O(n²) <span class="pdf-ref">📄 pp. 39–41</span> <span class="asgn-ref">📋 A4 Q2</span></h3>
+
+<pre class="diagram">
+  Goal: find c, n₀ such that 3n² + 5n ≤ c · n² for all n ≥ n₀.
+
+  Step 1: Divide both sides by n² (valid since n² > 0 for n > 0):
+          3 + 5/n ≤ c
+
+  Step 2: When n ≥ 1, we have 5/n ≤ 5, so:
+          3 + 5/n ≤ 3 + 5 = 8
+
+  Step 3: Therefore, choose c = 8 and n₀ = 1.
+
+  Verification: For all n ≥ 1:
+          3n² + 5n ≤ 3n² + 5n²   (since n ≤ n² for n ≥ 1)
+                   = 8n²
+                   = c · n²  ✓
+
+  Witnesses: c = 8, n₀ = 1.
+  Conclusion: 3n² + 5n = O(n²). ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–41</span></div>
+
+<h3>Worked Example 2: Prove n(n-1)/2 = Θ(n²) (tight bound) <span class="pdf-ref">📄 p. 39</span></h3>
+
+<pre class="diagram">
+  We need BOTH an upper bound (O) AND a lower bound (Ω).
+
+  ─── Upper bound: n(n-1)/2 = O(n²) ────────────────────────────
+
+  n(n-1)/2 = n²/2 - n/2 ≤ n²/2  (since -n/2 ≤ 0 for n ≥ 0)
+
+  So: n(n-1)/2 ≤ (1/2)·n² for all n ≥ 0.
+  Witnesses: c₂ = 1/2, n₀ = 0. ✓
+
+  ─── Lower bound: n(n-1)/2 = Ω(n²) ───────────────────────────
+
+  n(n-1)/2 = n²/2 - n/2
+  We need: n²/2 - n/2 ≥ c₁·n²
+
+  Rearrange: n²/2 - n/2 = (n/2)·(n - 1) ≥ (n/2)·(n/2)  when n ≥ 2
+             (since n - 1 ≥ n/2 when n ≥ 2)
+           = n²/4
+
+  So: n(n-1)/2 ≥ (1/4)·n² for all n ≥ 2.
+  Witnesses: c₁ = 1/4, n₀ = 2. ✓
+
+  ─── Combined ──────────────────────────────────────────────────
+
+  (1/4)·n² ≤ n(n-1)/2 ≤ (1/2)·n² for all n ≥ 2.
+  Choose c₁ = 1/4, c₂ = 1/2, n₀ = max(0, 2) = 2.
+  Conclusion: n(n-1)/2 = Θ(n²). ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 p. 39</span></div>
+
+<h3>Worked Example 3: Prove 5n log n + 20n = O(n log n) and = Ω(n log n) → Θ(n log n) <span class="pdf-ref">📄 pp. 39–41</span></h3>
+
+<pre class="diagram">
+  f(n) = 5n log n + 20n.  Claim: f(n) = Θ(n log n).
+
+  ─── Upper bound (O) ──────────────────────────────────────────
+
+  5n log n + 20n ≤ 5n log n + 20n log n   (since n ≤ n log n for n ≥ 2)
+                = 25n log n
+
+  Witnesses: c₂ = 25, n₀ = 2. ✓
+
+  ─── Lower bound (Ω) ──────────────────────────────────────────
+
+  5n log n + 20n ≥ 5n log n               (since 20n ≥ 0)
+
+  Witnesses: c₁ = 5, n₀ = 1. ✓
+
+  Conclusion: 5n log n + 20n = Θ(n log n). ✓
+
+  Verification at n = 64 (log₂ 64 = 6):
+  f(64) = 5·64·6 + 20·64 = 1920 + 1280 = 3200
+  c₁·g(64) = 5·64·6 = 1920 ≤ 3200 ✓
+  c₂·g(64) = 25·64·6 = 9600 ≥ 3200 ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–41</span></div>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ Trap: Tightening Ω proofs</strong>
+  For the lower bound (Ω), you need f(n) ≥ c·g(n). A common mistake is dropping terms that are POSITIVE — which makes the left side smaller and potentially breaks the inequality. You can drop negative terms, but never drop positive ones. If you drop a positive term, it should be to achieve a valid lower bound (e.g., "f(n) = A + B ≥ A" only works if you've already shown A ≥ c·g(n)). <span class="pdf-ref">📄 pp. 39–41</span>
+</div>
+
+<!-- ─── 2b ─────────────────────────────────────────── -->
+<div class="subtopic-banner" id="s2b">
+  <span class="letter">2b</span>
+  <span class="title">The Limit Comparison Method — A Faster Tool for Growth Rate Analysis</span>
+  <span class="pages">Lecture PDF: pp. 39–42 · Assignments 2 &amp; 4 <span class="asgn-ref">📋 A4 Q1</span></span>
+</div>
+
+<h3>Intuition: Asking the ratio "who wins the race?" <span class="pdf-ref">📄 pp. 39–42</span></h3>
+<p>
+  The witness-based proof is rigorous but slow. The <strong>limit comparison method</strong> gives the same information much faster: compute lim<sub>n→∞</sub> f(n)/g(n) and read off the relationship from the result. Think of it as asking: "As n → ∞, who wins the race between f and g? By how much?"
+</p>
+
+<h3>Mechanism: The three cases <span class="pdf-ref">📄 pp. 39–42</span></h3>
+
+<pre class="diagram">
+  LIMIT COMPARISON DECISION TABLE:
+
+  Compute L = lim  f(n) / g(n)
+               n→∞
+
+  ┌──────────────┬──────────────────────────────────────────────────┐
+  │  L = 0       │  f(n) = o(g(n)) — f grows STRICTLY SLOWER        │
+  │              │  Also: f(n) = O(g(n)) is true                    │
+  │              │  But: f(n) ≠ Θ(g(n)) (no tight bound)            │
+  ├──────────────┼──────────────────────────────────────────────────┤
+  │  0 < L < ∞  │  f(n) = Θ(g(n)) — SAME growth rate               │
+  │  (L finite,  │  Also: f(n) = O(g(n)) AND f(n) = Ω(g(n))        │
+  │   nonzero)   │  c₁ = L/2, c₂ = 2L are valid witnesses           │
+  ├──────────────┼──────────────────────────────────────────────────┤
+  │  L = ∞       │  f(n) = ω(g(n)) — f grows STRICTLY FASTER        │
+  │              │  Also: f(n) = Ω(g(n)) is true                    │
+  │              │  But: f(n) ≠ Θ(g(n)) (and NOT O(g(n)))           │
+  └──────────────┴──────────────────────────────────────────────────┘
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–42</span></div>
+
+<h3>Worked Example: Compare n(log n)² vs n^(4/3) <span class="pdf-ref">📄 pp. 39–42</span> <span class="asgn-ref">📋 A4 Q1</span></h3>
+
+<pre class="diagram">
+  Question: which grows faster — f(n) = n(log n)² or g(n) = n^(4/3)?
+
+  Step 1: Compute the ratio f/g:
+          f(n)/g(n) = n(log n)² / n^(4/3)
+                    = (log n)² / n^(1/3)       [divide top and bottom by n]
+
+  Step 2: Find the limit as n → ∞.
+          We know: any power of n grows faster than (log n)^k.
+          Formally: lim (log n)^k / n^ε = 0 for any k > 0, ε > 0.
+          Here: k = 2, ε = 1/3.
+
+  Step 3: lim (log n)² / n^(1/3) = 0.
+
+  Step 4: L = 0 → f(n) = o(g(n)) → n(log n)² grows STRICTLY SLOWER than n^(4/3).
+
+  Conclusion: n(log n)² ≺ n^(4/3) in growth rate.
+
+  ─── Sanity check with n = 2^30 ≈ 10^9 ──────────────────────
+  log₂(2^30) = 30.  f = 2^30 · 30² = 2^30 · 900 ≈ 9.7 × 10^11
+  g = (2^30)^(4/3) = 2^40 ≈ 1.1 × 10^12.
+  Indeed g > f for this n.  ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–42</span></div>
+
+<h3>Worked Example: Compare 2^√(log n) vs n^(1/10) <span class="pdf-ref">📄 pp. 39–42</span> <span class="asgn-ref">📋 A4 Q1</span></h3>
+
+<pre class="diagram">
+  Question: which grows faster — f(n) = 2^√(log n) or g(n) = n^(1/10)?
+
+  Strategy: Take logs of both functions to compare exponents.
+
+  log f(n) = √(log n)  [since log(2^x) = x]
+  log g(n) = (1/10)·log n
+
+  Now compare log f vs log g:
+  lim  √(log n) / [(1/10)·log n]
+  n→∞
+       = lim  10·√(log n) / log n
+              = lim  10 / √(log n)    [divide numerator and denominator by √(log n)]
+              = 10 / ∞ = 0
+
+  So log f(n) grows slower than log g(n).
+  Therefore f(n) grows slower than g(n).
+
+  Conclusion: 2^√(log n) ≺ n^(1/10) in growth rate.
+
+  The reason: 2^√(log n) = n^(√(log n)/log n) = n^(1/√(log n)).
+  The exponent 1/√(log n) → 0 as n → ∞, so the function grows subpolynomially.
+  Meanwhile n^(1/10) has a fixed exponent 1/10 > 0.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–42</span></div>
+
+<h3>Complete growth-rate hierarchy with limit justification <span class="pdf-ref">📄 pp. 39–42</span></h3>
+
+<pre class="diagram">
+  CANONICAL GROWTH-RATE ORDERING (slowest to fastest):
+
+  1 ≺ log log n ≺ log n ≺ (log n)² ≺ 2^√(log n) ≺ n^(1/10) ≺ √n
+    ≺ n ≺ n log n ≺ n(log n)² ≺ n^(4/3) ≺ n^1.5 ≺ n²
+    ≺ n² log n ≺ n³ ≺ 2^n ≺ 2^(n²) ≺ 2^(2^n) ≺ n!
+
+  Key limit justifications:
+  ┌──────────────────────────────┬────────────────────────────────┐
+  │ Pair to compare              │ Limit result                   │
+  ├──────────────────────────────┼────────────────────────────────┤
+  │ log n vs n^ε (any ε > 0)    │ lim (log n)/n^ε = 0 → log≺n^ε │
+  │ n^a vs n^b (a < b)          │ lim n^a/n^b = lim n^(a-b) = 0  │
+  │ n^k vs 2^n (any k)          │ lim n^k/2^n = 0 → poly ≺ exp  │
+  │ (log n)^k vs n^ε (any k,ε)  │ = 0 → log powers ≺ any poly   │
+  │ n vs n log n                 │ lim n/(n log n) = lim 1/log n = 0│
+  └──────────────────────────────┴────────────────────────────────┘
+
+  From Assignment 4 Q1 — order these specific functions:
+  g₁ = 2^√(log n)    g₂ = n(log n)²    g₃ = n^(4/3)
+  g₄ = 2^n           g₅ = 2^(n²)       g₆ = 2^(2^n)
+
+  Ordering: g₁ ≺ g₂ ≺ g₃ ≺ g₄ ≺ g₅ ≺ g₆
+
+  Key comparison: g₁ vs g₂: lim 2^√(log n) / [n(log n)²] = 0 → g₁ ≺ g₂
+  Key comparison: g₂ vs g₃: lim n(log n)² / n^(4/3)
+                           = lim (log n)² / n^(1/3) = 0 → g₂ ≺ g₃
+  Key comparison: g₄ vs g₅: lim 2^n / 2^(n²) = lim 2^(n-n²) = 0 → g₄ ≺ g₅
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 39–42</span> <span class="asgn-ref">📋 A4 Q1</span></div>
+
+<!-- ─── 2c ─────────────────────────────────────────── -->
+<div class="subtopic-banner" id="s2c">
+  <span class="letter">2c</span>
+  <span class="title">True/False Asymptotic Claims — Proving and Disproving with Counterexamples</span>
+  <span class="pages">Lecture PDF: pp. 43–45 · Assignments 2 &amp; 4 <span class="asgn-ref">📋 A2 Q1</span> <span class="asgn-ref">📋 A4 Q4</span></span>
+</div>
+
+<h3>Intuition: The three exercise types and what they test <span class="pdf-ref">📄 pp. 43–45</span></h3>
+<p>
+  Asymptotic claims come in three kinds: (1) claims that are TRUE — requiring a formal proof via witnesses or limits. (2) Claims that are FALSE — requiring a <em>counterexample</em> (one specific f and g that violate the claim). (3) Claims that follow from transitivity — chain inequalities. The Assignment 2 Q1 exercises and the Quiz 1 questions follow this exact structure. <span class="pdf-ref">📄 pp. 43–45</span>
+</p>
+
+<h3>Claim 1 (TRUE): If f=O(g) and f=Ω(h), then g=Ω(h) <span class="pdf-ref">📄 pp. 43–45</span> <span class="asgn-ref">📋 A2 Q1-1</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">PROOF (direct, using witnesses)</div>
+  <div class="proof-step"><strong>Given:</strong> f(n) = O(g(n)) → ∃ c₁, n₁ such that f(n) ≤ c₁·g(n) for all n ≥ n₁. <span class="pdf-ref">📄 p. 43</span></div>
+  <div class="proof-step"><strong>Given:</strong> f(n) = Ω(h(n)) → ∃ c₂, n₂ such that f(n) ≥ c₂·h(n) for all n ≥ n₂. <span class="pdf-ref">📄 p. 43</span></div>
+  <div class="proof-step"><strong>Combining:</strong> For all n ≥ max(n₁, n₂): c₂·h(n) ≤ f(n) ≤ c₁·g(n). So c₂·h(n) ≤ c₁·g(n). <span class="pdf-ref">📄 p. 43</span></div>
+  <div class="proof-step"><strong>Rearrange:</strong> h(n) ≤ (c₁/c₂)·g(n). This shows g(n) ≥ (c₂/c₁)·h(n). <span class="pdf-ref">📄 p. 44</span></div>
+  <div class="proof-step"><strong>Conclusion:</strong> Set c = c₂/c₁ and n₀ = max(n₁, n₂). Then g(n) ≥ c·h(n) for all n ≥ n₀. So g(n) = Ω(h(n)). ✓ <span class="pdf-ref">📄 p. 44</span></div>
+</div>
+
+<pre class="diagram">
+  Concrete verification (n=100, using f=n², g=n³, h=n):
+    f=O(g): n² ≤ n³ for n ≥ 1 ✓ (c₁=1)
+    f=Ω(h): n² ≥ n for n ≥ 1  ✓ (c₂=1)
+    Claim: g=Ω(h): n³ ≥ n for n ≥ 1 ✓ (c=1)  ← theorem holds
+
+  The key insight: f is sandwiched between h (below) and g (above),
+  so g must be above h as well — g ≥ f ≥ c·h.
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 43–44</span></div>
+
+<h3>Claim 2 (TRUE): If f=O(g), then f²=O(g²) <span class="pdf-ref">📄 pp. 43–45</span> <span class="asgn-ref">📋 A2 Q1-2</span></h3>
+
+<div class="proof-block">
+  <div class="proof-label">PROOF (square both sides)</div>
+  <div class="proof-step"><strong>Given:</strong> f(n) = O(g(n)) → ∃ c, n₀ such that f(n) ≤ c·g(n) for all n ≥ n₀. <span class="pdf-ref">📄 p. 43</span></div>
+  <div class="proof-step"><strong>Square both sides</strong> (both sides are non-negative for large n): f(n)² ≤ (c·g(n))² = c²·g(n)². <span class="pdf-ref">📄 p. 44</span></div>
+  <div class="proof-step"><strong>Conclusion:</strong> Set c' = c². Then f(n)² ≤ c'·g(n)² for all n ≥ n₀. So f² = O(g²). ✓ <span class="pdf-ref">📄 p. 44</span></div>
+</div>
+
+<pre class="diagram">
+  Concrete example: f = 3n² + 5n = O(n²) with c=8, n₀=1.
+  Then f² = (3n² + 5n)² = O((n²)²) = O(n⁴), with c' = 64, n₀ = 1.
+
+  Check at n=10: f²=(300+50)²=350²=122,500. c'·(n²)²=64·10,000=640,000. ✓
+  Check at n=100: f²=(30,000+500)²=915,250,000. c'·n⁴=64·100,000,000=6,400,000,000. ✓
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 43–44</span></div>
+
+<h3>Claim 3 (FALSE): If f=Θ(g), then log f = Θ(log g) <span class="pdf-ref">📄 pp. 43–45</span> <span class="asgn-ref">📋 A2 Q1-3</span></h3>
+
+<div class="callout warning">
+  <strong class="lbl">⚠️ HIGH EXAM PRIORITY — This appeared on the midterm and is the most-missed claim</strong>
+  This claim looks intuitively true (logs are monotone, so they should preserve order). But it is FALSE. The counterexample is subtle and specific: you need f and g that are Θ of each other but whose log values are NOT in a constant ratio. The key is that logs are not homogeneous — they collapse multiplicative constants to additive ones. <span class="pdf-ref">📄 pp. 43–45</span>
+</div>
+
+<div class="proof-block">
+  <div class="proof-label">COUNTEREXAMPLE CONSTRUCTION</div>
+  <div class="proof-step"><strong>Choose:</strong> f(n) = 2 (constant), g(n) = 1 + 1/n. <span class="pdf-ref">📄 p. 45</span></div>
+  <div class="proof-step"><strong>Step 1 — Show f = Θ(g):</strong><br>
+    Since 1 ≤ g(n) = 1 + 1/n ≤ 2 for all n ≥ 1, we have: g(n)/2 ≤ 1 ≤ g(n), which gives 1 = Θ(g(n)).<br>
+    Also f(n) = 2 = Θ(1) = Θ(g(n)). So f = Θ(g). ✓ <span class="pdf-ref">📄 p. 45</span>
+  </div>
+  <div class="proof-step"><strong>Step 2 — Compute log f(n):</strong> log f(n) = log 2 = 1 (a constant). <span class="pdf-ref">📄 p. 45</span></div>
+  <div class="proof-step"><strong>Step 3 — Compute log g(n):</strong> log g(n) = log(1 + 1/n) → 0 as n → ∞. <span class="pdf-ref">📄 p. 45</span></div>
+  <div class="proof-step"><strong>Step 4 — Compare:</strong> lim (log f(n)) / (log g(n)) = lim 1 / log(1 + 1/n) = ∞. So log f ≠ O(log g). <span class="pdf-ref">📄 p. 45</span></div>
+  <div class="proof-step"><strong>Conclusion:</strong> f = Θ(g) but log f ≠ Θ(log g). The claim is FALSE. ✗ <span class="pdf-ref">📄 p. 45</span></div>
+</div>
+
+<pre class="diagram">
+  Why does this happen? Because:
+  log(c · g(n)) = log c + log g(n) ≠ c' · log g(n)
+
+  The log of a constant multiple is a SHIFTED version, not a SCALED version.
+  When log g(n) → 0, even a tiny additive shift (log c = log 2 = 1)
+  makes the ratio (log f)/(log g) = 1/(log g) blow up to infinity.
+
+  Concrete table for n = 1, 10, 100, 1000:
+  ┌────────┬─────────┬──────────────┬──────────────┬───────────────────────┐
+  │   n    │  f(n)   │  g(n)=1+1/n  │  log f = 1   │  log g = log(1+1/n)   │
+  ├────────┼─────────┼──────────────┼──────────────┼───────────────────────┤
+  │   1    │    2    │  2.000       │    1.000     │   1.000               │
+  │  10    │    2    │  1.100       │    1.000     │   0.137               │
+  │ 100    │    2    │  1.010       │    1.000     │   0.0145              │
+  │ 1000   │    2    │  1.001       │    1.000     │   0.00145             │
+  └────────┴─────────┴──────────────┴──────────────┴───────────────────────┘
+
+  Ratio (log f)/(log g) at n=1000: 1.000 / 0.00145 ≈ 690 — growing to ∞. ✗
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 43–45</span></div>
+
+<!-- ─── 2d ─────────────────────────────────────────── -->
+<div class="subtopic-banner" id="s2d">
+  <span class="letter">2d</span>
+  <span class="title">Function Growth Ordering — Iterative Complexity Analysis of Code</span>
+  <span class="pages">Lecture PDF: pp. 23–35, 39–54 · Assignment 4 <span class="asgn-ref">📋 A4 Q4</span> <span class="asgn-ref">📋 A4 Q7–Q9</span></span>
+</div>
+
+<h3>Intuition: Reading algorithm complexity from code structure <span class="pdf-ref">📄 pp. 23–35</span></h3>
+<p>
+  Every loop, nested loop, and recursive call contributes to the overall running time. The key insight: to find the complexity of iterative code, identify the innermost operation and count how many times it runs. The total is determined by the nesting structure.
+</p>
+
+<h3>Mechanism: The loop-counting rules <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<pre class="diagram">
+  RULE 1: Single loop from 0 to n-1 → O(n)
+  RULE 2: Nested loops, each from 0 to n-1 → O(n^k) for k nested loops
+  RULE 3: Loop that halves the problem each iteration → O(log n)
+  RULE 4: Sequential code blocks → add their complexities
+  RULE 5: Multiplicative nesting → multiply complexities
+  RULE 6: Ignore additive lower-order terms and constant multipliers
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span></div>
+
+<h3>Worked Example: Analyze 3 iterative examples from Assignment 4 <span class="pdf-ref">📄 pp. 23–35</span></h3>
+
+<pre class="diagram">
+  ─── Example A: Sliding Window Maximum Average (A4 Q7) ────────
+  function maxAverage(nums, k):
+    window_sum = sum(nums[0:k])         # O(k) = O(n) in worst case
+    max_avg = window_sum / k
+    for i in range(k, len(nums)):        # runs n-k times ≈ O(n)
+      window_sum += nums[i]              # O(1)
+      window_sum -= nums[i-k]            # O(1)
+      max_avg = max(max_avg, window_sum/k)  # O(1)
+    return max_avg
+
+  Analysis:
+    Init sum: O(k) ≤ O(n)
+    Loop body: O(1) per iteration × (n-k) iterations = O(n)
+    Total: O(n) + O(n) = O(n).  Space: O(1) extra.
+
+  Why NOT O(nk)? Because we SLIDE the window — we remove one element
+  and add one element instead of recomputing the sum from scratch.
+
+  ─── Example B: Hamming Distance Sum (A4 Q9) ────────────────
+  function totalHammingDistance(nums):
+    total = 0
+    for bit in range(32):               # 32 iterations (constant)
+      ones = sum(1 for x in nums if x>>bit & 1)  # O(n)
+      zeros = len(nums) - ones          # O(1)
+      total += ones * zeros             # O(1)
+    return total
+
+  Analysis:
+    Outer loop: 32 iterations (constant = O(1))
+    Inner operation: O(n) per bit
+    Total: 32 × O(n) = O(n).  Space: O(1).
+    Key insight: instead of comparing all O(n²) pairs,
+    we count 1-bits per position and use combinatorics.
+
+  ─── Example C: Minimum Time Difference (A4 Q8) ──────────────
+  function findMinDifference(timePoints):
+    minutes = sorted([h*60+m for t in timePoints for h,m in [map(int,t.split(':'))]])
+    diffs = [minutes[i+1]-minutes[i] for i in range(len(minutes)-1)]
+    diffs.append(1440 - minutes[-1] + minutes[0])  # circular diff
+    return min(diffs)
+
+  Analysis:
+    Convert: O(n)
+    Sort: O(n log n)   ← DOMINANT TERM
+    Compute diffs: O(n)
+    Find min: O(n)
+    Total: O(n log n).  Space: O(n).
+</pre>
+<div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span> <span class="asgn-ref">📋 A4 Q7–Q9</span></div>
+
+<h3>§2 Synthesis: Choosing the right asymptotic tool <span class="pdf-ref">📄 pp. 39–54</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>Task</th><th>Best Tool</th><th>Key Step</th><th>Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Prove f = O(g) formally</td>
+      <td>Witness proof (find c, n₀)</td>
+      <td>Write f(n) ≤ c·g(n), upper-bound each term, choose c and n₀</td>
+      <td><span class="pdf-ref">📄 pp. 39–41</span></td>
+    </tr>
+    <tr>
+      <td>Compare two functions' growth rates</td>
+      <td>Limit comparison method</td>
+      <td>Compute lim f/g; read O/Θ/Ω from L=0/L finite/L=∞</td>
+      <td><span class="pdf-ref">📄 pp. 39–42</span></td>
+    </tr>
+    <tr>
+      <td>Order a list of functions slowest to fastest</td>
+      <td>Pairwise limit comparison</td>
+      <td>Use the canonical hierarchy; verify each adjacent pair with limit</td>
+      <td><span class="pdf-ref">📄 pp. 39–42</span></td>
+    </tr>
+    <tr>
+      <td>Prove an asymptotic claim is TRUE</td>
+      <td>Witness proof or limit computation</td>
+      <td>Establish the inequality with explicit constants</td>
+      <td><span class="pdf-ref">📄 pp. 43–45</span></td>
+    </tr>
+    <tr>
+      <td>Show an asymptotic claim is FALSE</td>
+      <td>Counterexample (one specific f and g)</td>
+      <td>Choose f, g; verify they satisfy the hypothesis but violate the conclusion</td>
+      <td><span class="pdf-ref">📄 pp. 43–45</span></td>
+    </tr>
+    <tr>
+      <td>Analyze code complexity</td>
+      <td>Loop counting rules</td>
+      <td>Identify dominant term; multiply nested loops; add sequential blocks</td>
+      <td><span class="pdf-ref">📄 pp. 23–35</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ================================================================
+     §3 EXAM INTELLIGENCE
+     ================================================================ -->
+<h2 id="section-3">§3 — Exam Intelligence</h2>
+<div class="pages-coverage">📘 PRIMARY SOURCE: Graded Assignments 2, 4; Quiz 1 patterns; Lectures 3–6</div>
+
+<div class="section-block">
+
+<h3>Exam Patterns — What the Questions Will Look Like <span class="pdf-ref">📄 pp. 39–54</span></h3>
+
+<table class="data">
+  <thead>
+    <tr><th>#</th><th>Question Stem Pattern</th><th>Required Answer Elements</th><th>Most Common Error</th><th>Page</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>"Order these 6 functions by growth rate from slowest to fastest" <span class="exam-star">⭐</span></td>
+      <td>Complete ordered list with Θ-groupings for ties; at least 3 limit comparisons shown explicitly (A4 Q1 style)</td>
+      <td>Placing n(log n)² before or after n^(4/3) incorrectly; swapping 2^(n²) and 2^(2^n)</td>
+      <td><span class="pdf-ref">📄 pp. 39–42</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>"Prove f(n) = O(g(n)) formally" <span class="exam-star">⭐</span></td>
+      <td>State the goal (find c, n₀); show the algebraic manipulation; state witnesses explicitly; verify the inequality holds</td>
+      <td>Choosing witnesses without proving they work; missing the ∀ n ≥ n₀ quantification</td>
+      <td><span class="pdf-ref">📄 pp. 39–41</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>"Show that (n+a)^b = Θ(n^b) for any constants a, b &gt; 0" <span class="exam-star">⭐</span></td>
+      <td>Apply binomial expansion or limit: lim (n+a)^b / n^b = lim (1 + a/n)^b = 1 → Θ</td>
+      <td>Only proving O without proving Ω; forgetting to state both witnesses c₁ and c₂</td>
+      <td><span class="pdf-ref">📄 p. 42</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>"TRUE or FALSE: if f=O(g) and f=Ω(h), then g=Ω(h)" <span class="exam-star">⭐</span></td>
+      <td>State TRUE; provide the chained-inequality proof; explicitly compute the witness c = c₂/c₁</td>
+      <td>Saying TRUE without proving it; only giving an example instead of a general proof</td>
+      <td><span class="pdf-ref">📄 pp. 43–44</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>"TRUE or FALSE: if f=Θ(g), then log f = Θ(log g)" <span class="exam-star">⭐</span></td>
+      <td>State FALSE; give the counterexample f=2, g=1+1/n; show f=Θ(g); show log f ≠ Θ(log g) using limits</td>
+      <td>Saying TRUE (intuition from log being monotone); giving an invalid counterexample; not verifying f=Θ(g) first</td>
+      <td><span class="pdf-ref">📄 pp. 43–45</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>"What is the time complexity of this pseudocode? Justify line by line."</td>
+      <td>Walk through each block; identify the dominant loop structure; state the Big-O result with justification</td>
+      <td>Forgetting to count all loops; confusing O(n log n) with O(n²) for sort+scan patterns</td>
+      <td><span class="pdf-ref">📄 pp. 23–35</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>"Is n = O(n log n)? Is n log n = O(n²)?" <span class="exam-star">⭐</span></td>
+      <td>Both TRUE; show limit for each: lim n/(n log n) = 0 (so n = o(n log n) → O); lim n log n / n² = lim log n / n = 0 (so O)</td>
+      <td>Confusing O with Θ — both claims are O (not Θ)</td>
+      <td><span class="pdf-ref">📄 pp. 43–45</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>"What is the best possible algorithm for this problem? Express in Big-Ω."</td>
+      <td>State the lower bound using Ω; explain that Ω is typically used for problem classes, not individual algorithms</td>
+      <td>Confusing Ω for an algorithm with Ω for a problem (the problem lower bound applies to ALL algorithms)</td>
+      <td><span class="pdf-ref">📄 p. 40</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Assignment Replay: A2 and A4 Worked Solutions</h3>
+
+<div class="section-block" style="background:var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A2 Q1-1</span> <strong>TRUE: If f=O(g) and f=Ω(h), then g=Ω(h).</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Proof technique:</strong> Chain the two given inequalities. f ≤ c₁·g (from O) and f ≥ c₂·h (from Ω) together give c₂·h ≤ c₁·g → g ≥ (c₂/c₁)·h. <span class="pdf-ref">📄 pp. 43–44</span></li>
+        <li><strong>Witness:</strong> c = c₂/c₁, n₀ = max(n₁, n₂). Explicitly state these. <span class="pdf-ref">📄 p. 43</span></li>
+        <li><strong>Grading criterion:</strong> State the two given inequalities; chain them; identify the witness c and n₀. Missing the witness = partial credit. <span class="pdf-ref">📄 pp. 43–44</span></li>
+        <li><strong>Exam variant:</strong> The converse — "if g=Ω(h) and f=O(g), must f=Ω(h)?" is also TRUE by the same proof. <span class="pdf-ref">📄 p. 44</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background:var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A2 Q1-2</span> <strong>TRUE: If f=O(g), then f²=O(g²).</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Proof technique:</strong> Square both sides of f(n) ≤ c·g(n). Since both sides are non-negative for large n, squaring preserves the inequality: f(n)² ≤ c²·g(n)². <span class="pdf-ref">📄 pp. 43–44</span></li>
+        <li><strong>Witness:</strong> c' = c², n₀ same as the original. State this explicitly. <span class="pdf-ref">📄 p. 44</span></li>
+        <li><strong>Caveat:</strong> For this squaring argument to work cleanly, we need f(n) ≥ 0 and g(n) ≥ 0. Since we're counting operations, this holds for all n ≥ n₀. <span class="pdf-ref">📄 p. 44</span></li>
+        <li><strong>Exam variant:</strong> "If f=O(g), does √f = O(√g)?" is also TRUE by the same argument (take square roots of f ≤ c·g). <span class="pdf-ref">📄 p. 44</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background:var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A2 Q1-3</span> <strong>FALSE: If f=Θ(g), then log f = Θ(log g).</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Counterexample:</strong> f(n) = 2, g(n) = 1 + 1/n. Show f=Θ(g) (both bounded between 1 and 2). Then log f = log 2 = 1 (constant), log g = log(1+1/n) → 0. Their ratio → ∞. <span class="pdf-ref">📄 pp. 43–45</span></li>
+        <li><strong>WHY counterexamples work:</strong> The claim says Θ is preserved under log. But log turns multiplication into addition — "log(c·g) = log c + log g" — so a constant factor multiplier c in f ≤ c·g becomes an additive shift log c in log f ≤ log c + log g, which is NOT the same as a multiplicative bound c'·log g when log g → 0. <span class="pdf-ref">📄 p. 45</span></li>
+        <li><strong>Grading criterion:</strong> State f and g explicitly; verify f=Θ(g) with witnesses; show log f ≠ Θ(log g) via limits; conclude FALSE. Missing the verification that f=Θ(g) = partial credit. <span class="pdf-ref">📄 pp. 43–45</span></li>
+        <li><strong>Safe version:</strong> If f = Θ(g) AND both f,g ≥ 1 AND f,g are polynomially bounded, then log f = Θ(log g) holds. The counterexample exploits log g → 0. <span class="pdf-ref">📄 p. 45</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="section-block" style="background:var(--bg-elev2);">
+  <p><span class="asgn-ref">📋 A4 Q1</span> <strong>Order: 2^√(log n), n(log n)², n^(4/3), 2^n, 2^(n²), 2^(2^n) from slowest to fastest.</strong></p>
+  <details class="answer-block">
+    <summary>▶ Key Points in the Solution</summary>
+    <div class="answer-content">
+      <ul>
+        <li><strong>Ordering:</strong> 2^√(log n) ≺ n(log n)² ≺ n^(4/3) ≺ 2^n ≺ 2^(n²) ≺ 2^(2^n). <span class="pdf-ref">📄 pp. 39–42</span></li>
+        <li><strong>Key comparison 1:</strong> 2^√(log n) vs n(log n)². The first is subpolynomial (its exponent 1/√(log n) → 0), the second is superlinear polynomial. Limit = 0 → first is slower. <span class="pdf-ref">📄 pp. 39–42</span></li>
+        <li><strong>Key comparison 2:</strong> n(log n)² vs n^(4/3). Ratio = (log n)² / n^(1/3) → 0. Polynomial beats log powers. <span class="pdf-ref">📄 pp. 39–42</span></li>
+        <li><strong>Key comparison 3:</strong> 2^n vs 2^(n²). Ratio = 2^(n-n²) = 2^(-n(n-1)) → 0. Second grows much faster. <span class="pdf-ref">📄 pp. 39–42</span></li>
+        <li><strong>Grading criterion:</strong> Show at least 3 of the 5 adjacent pairwise comparisons with limit justification. A table format is preferred. <span class="pdf-ref">📄 pp. 39–42</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3>Misconception Cards <span class="pdf-ref">📄 pp. 39–54</span></h3>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "O(n) means the algorithm always takes exactly n steps."</p>
+  <p><span class="reality">✅ Reality:</span> O(n) means the runtime is bounded ABOVE by c·n for some constant c and large n. The actual runtime could be 0.001n or 50n or even O(1) on a particular input. O is an upper bound, not an exact count. <span class="pdf-ref">📄 pp. 39–41</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "O is always worst-case, Ω is always best-case."</p>
+  <p><span class="reality">✅ Reality:</span> O, Ω, Θ describe the growth of a specific function, not input cases. You can have an O bound on the best case, or an Ω bound on the worst case. They are properties of FUNCTIONS, not cases. However, O is commonly used for worst-case analysis in practice. <span class="pdf-ref">📄 pp. 39–41</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "If f=O(g), then f is always smaller than g."</p>
+  <p><span class="reality">✅ Reality:</span> f can be much larger than g for small n. The O-bound only kicks in from n₀ onward. Before n₀, anything can happen. That's why we say "for sufficiently large n." <span class="pdf-ref">📄 pp. 39–41</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "n² = O(n³) means n² and n³ have the same growth rate."</p>
+  <p><span class="reality">✅ Reality:</span> n² = O(n³) is TRUE but it's not a tight bound. It says "n² grows at most as fast as n³," which is true but weak. The tight bound would be n² = Θ(n²), NOT Θ(n³). O allows the bound to be loose. <span class="pdf-ref">📄 pp. 39–41</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "Θ(g(n)) means the algorithm uses exactly g(n) steps."</p>
+  <p><span class="reality">✅ Reality:</span> Θ(g(n)) means the runtime is SANDWICHED between c₁·g(n) and c₂·g(n) for large n. There can be constant-factor differences. n²/4 and 100n² are both Θ(n²). <span class="pdf-ref">📄 p. 41</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "log is preserved under Θ — if f=Θ(g), then log f = Θ(log g)."</p>
+  <p><span class="reality">✅ Reality:</span> FALSE — see the counterexample f=2, g=1+1/n in §2c. Log turns multiplicative constants into additive shifts, which breaks the Θ relationship when log g → 0. This is the most-tested FALSE claim in CS 570. <span class="pdf-ref">📄 pp. 43–45</span></p>
+</div>
+
+<div class="misconception">
+  <p><span class="myth">❌ Misconception:</span> "To prove a claim FALSE, I just need to say 'this doesn't look right.'"</p>
+  <p><span class="reality">✅ Reality:</span> A FALSE proof requires a COMPLETE counterexample: (1) specific f and g, (2) verification that the hypothesis holds (e.g., f=Θ(g) must be verified), and (3) proof that the conclusion fails (e.g., log f ≠ Θ(log g) must be shown via limits). All three parts are required for full credit. <span class="pdf-ref">📄 pp. 43–45</span></p>
+</div>
+
+<h3>Memory Aids &amp; Mnemonics <span class="pdf-ref">📄 pp. 39–54</span></h3>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 1: O/Ω/Θ — "Ceiling, Floor, Sandwich"</strong>
+  <strong>O = Ceiling</strong> — f(n) never goes above c·g(n) from n₀ on. Think of a maximum rent cap.
+  <strong>Ω = Floor</strong> — f(n) never drops below c·g(n) from n₀ on. Think of a minimum wage.
+  <strong>Θ = Sandwich</strong> — f(n) is squeezed between c₁·g(n) and c₂·g(n). The same bread (g) top and bottom. <span class="pdf-ref">📄 pp. 39–41</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 2: Limit outcomes — "Zero, Constant, Infinity"</strong>
+  lim f/g = 0 → f GOES to zero relative to g → f is SLOWER (f = o(g), also O)
+  lim f/g = c → f CONVERGES relative to g → f is the SAME rate (f = Θ(g))
+  lim f/g = ∞ → f BLOWS UP relative to g → f is FASTER (f = ω(g), also Ω)
+  One word per case: <strong>"Gone, Constant, Blows"</strong> → o, Θ, ω. <span class="pdf-ref">📄 pp. 39–42</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 3: Growth hierarchy — "Lily Can Stay Near N-town, Not Escaping"</strong>
+  <strong>L</strong>og n &lt; <strong>C</strong>ube-root n (n^1/3) &lt; <strong>S</strong>qrt n &lt; n^2/3 &lt; <strong>N</strong>-linear &lt; <strong>N</strong>logN &lt; <strong>N</strong>-squared &lt; <strong>E</strong>xponential
+  Translation: log n ≺ n^(1/3) ≺ √n ≺ n^(2/3) ≺ n ≺ n log n ≺ n² ≺ 2ⁿ. <span class="pdf-ref">📄 pp. 39–42</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 4: Witness proof recipe — "WASP"</strong>
+  <strong>W</strong>rite the inequality: f(n) ≤ c·g(n).
+  <strong>A</strong>lgebraically simplify: factor out n² or divide both sides.
+  <strong>S</strong>elect n₀ so lower-order terms are bounded.
+  <strong>P</strong>ick c explicitly and verify. <span class="pdf-ref">📄 pp. 39–41</span>
+</div>
+
+<div class="callout quote">
+  <strong class="lbl">🧠 Mnemonic 5: Log Θ Counterexample — "Two stays one, one halves to zero"</strong>
+  f = <strong>2</strong> (stays at 2, log = <strong>1</strong> stays at 1).
+  g = 1 + 1/n (halves toward 1, log g → <strong>0</strong>).
+  "Two stays one, one-plus-halves has zero log." → the ratio 1/0 = ∞ → NOT Θ. <span class="pdf-ref">📄 pp. 43–45</span>
+</div>
+
+</div>
+
+<!-- ================================================================
+     §3.5 WARM-UP UNDERSTANDING CHECKS
+     ================================================================ -->
+<h2 id="warmup-checks">🧗 Warm-up Understanding Checks</h2>
+<p style="color:var(--text-dim);">Five conceptual self-tests — confirm you absorbed §1–2 before attempting the 13 graded practice questions. These are NOT exam-style.</p>
+
+<!-- WC-1 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">CONCEPTUAL</span>
+    <span class="pdf-ref">📄 pp. 39–41</span>
+  </div>
+  <p class="question-stem">WC-1. A classmate says: "O(n²) means the algorithm performs exactly n² operations." Explain what they got right and what they got wrong. Give a concrete function that is O(n²) but is NOT Θ(n²).</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What they got right:</strong> O(n²) does communicate that n² is the relevant benchmark — it's the "ballpark" of the runtime. The algorithm's runtime won't exceed some constant multiple of n². <span class="pdf-ref">📄 pp. 39–41</span></p>
+      <p><strong>What they got wrong:</strong> O(n²) is an UPPER BOUND, not an exact count. It means f(n) ≤ c·n² for some c and large n. The actual runtime could be n log n (much less than n²) and still be O(n²). <span class="pdf-ref">📄 pp. 39–41</span></p>
+      <p><strong>Concrete example:</strong> f(n) = n is O(n²) because n ≤ 1·n² for all n ≥ 1 (choose c=1, n₀=1). But f(n) = n is NOT Θ(n²) because n/n² = 1/n → 0 as n → ∞, so n grows strictly slower than n². <span class="pdf-ref">📄 pp. 39–42</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-2 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">WITNESS FINDING</span>
+    <span class="pdf-ref">📄 pp. 39–41</span>
+  </div>
+  <p class="question-stem">WC-2. Find witnesses c and n₀ to formally prove that 7n + 100 = O(n). Show every algebraic step.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Goal:</strong> Find c &gt; 0 and n₀ ≥ 0 such that 7n + 100 ≤ c·n for all n ≥ n₀. <span class="pdf-ref">📄 pp. 39–41</span></p>
+      <p><strong>Step 1 — Divide both sides by n (valid for n &gt; 0):</strong> 7 + 100/n ≤ c.</p>
+      <p><strong>Step 2 — Bound 100/n:</strong> If n ≥ 100, then 100/n ≤ 1. So 7 + 100/n ≤ 7 + 1 = 8.</p>
+      <p><strong>Step 3 — Choose witnesses:</strong> c = 8, n₀ = 100.</p>
+      <p><strong>Verify:</strong> For all n ≥ 100: 7n + 100 ≤ 7n + n = 8n. ✓</p>
+      <p><strong>Conclusion:</strong> 7n + 100 = O(n) with witnesses c = 8, n₀ = 100. <span class="pdf-ref">📄 pp. 39–41</span></p>
+      <p><em>Note: Many witness choices work. c=107, n₀=1 also works (since 7n+100 ≤ 107n for n≥1). The exam just needs one valid pair.</em></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-3 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">LIMIT COMPUTATION</span>
+    <span class="pdf-ref">📄 pp. 39–42</span>
+  </div>
+  <p class="question-stem">WC-3. Use the limit comparison method to determine the relationship between f(n) = n² and g(n) = n log n. Is f = O(g), f = Ω(g), f = Θ(g), or none of the above?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Compute the limit:</strong> lim<sub>n→∞</sub> f(n)/g(n) = lim n² / (n log n) = lim n / (log n). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p><strong>Evaluate:</strong> As n → ∞, n grows without bound while log n grows much more slowly. The ratio n / log n → ∞. (Formally: L'Hôpital: lim n/log n = lim 1/(1/n) = lim n = ∞.)</p>
+      <p><strong>L = ∞, so:</strong> f(n) = ω(g(n)) — f grows STRICTLY FASTER than g. This also means f = Ω(g). But f ≠ O(g) and f ≠ Θ(g). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p><strong>Conclusion:</strong> n² = Ω(n log n) — quadratic is strictly larger than linearithmic. <span class="pdf-ref">📄 p. 40</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-4 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">PROOF STRUCTURE LABELING</span>
+    <span class="pdf-ref">📄 pp. 43–45</span>
+  </div>
+  <p class="question-stem">WC-4. A student writes this proof of "if f=O(g), then f²=O(g²)": <em>"Since f=O(g), we have f(n) ≤ c·g(n). Therefore f(n)² ≤ (c·g(n))² = c²·g(n)². Done."</em> Is this proof complete? What is missing?</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>What is correct:</strong> The algebraic step (squaring both sides) is valid. The conclusion that f² = O(g²) with constant c² is correct in spirit. <span class="pdf-ref">📄 pp. 43–44</span></p>
+      <p><strong>What is MISSING (causes partial credit):</strong></p>
+      <ul>
+        <li>The student never stated the formal O-definition at the start: "∃ c &gt; 0, n₀ ≥ 0 such that f(n) ≤ c·g(n) for all n ≥ n₀." <span class="pdf-ref">📄 p. 39</span></li>
+        <li>The squaring argument requires that both f(n) and g(n) are non-negative. This should be stated (it's true since f and g count operations, but must be mentioned). <span class="pdf-ref">📄 p. 44</span></li>
+        <li>The student never explicitly stated the new witnesses: "c' = c² and n₀' = n₀ — so f(n)² ≤ c'·g(n)² for all n ≥ n₀'." The conclusion must name the witnesses. <span class="pdf-ref">📄 p. 44</span></li>
+      </ul>
+      <p><strong>Corrected final statement:</strong> "Set c' = c² and n₀' = n₀. Then for all n ≥ n₀', f(n)² ≤ c'·g(n)², so f² = O(g²). ✓" <span class="pdf-ref">📄 p. 44</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- WC-5 -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-warmup">WARM-UP</span>
+    <span class="q-format">MISCONCEPTION PUNCTURE</span>
+    <span class="pdf-ref">📄 pp. 43–45</span>
+  </div>
+  <p class="question-stem">WC-5. Your classmate says: "Obviously if f=Θ(g), then log f = Θ(log g), because log is a monotone function so it preserves order." What is wrong with this reasoning? Give the specific counterexample.</p>
+  <details class="answer-block">
+    <summary>▶ Show Explanation</summary>
+    <div class="answer-content">
+      <p><strong>Why the reasoning fails:</strong> "Preserving order" means log f ≤ log g when f ≤ g. But Θ doesn't say f ≤ g — it says c₁·g ≤ f ≤ c₂·g. Taking logs: log c₁ + log g ≤ log f ≤ log c₂ + log g. This gives ADDITIVE shifts (log c₁ and log c₂), not MULTIPLICATIVE ones. Θ requires c₁·(log g) ≤ log f ≤ c₂·(log g), which is a multiplicative bound. An additive shift ≠ multiplicative scaling when log g → 0. <span class="pdf-ref">📄 pp. 43–45</span></p>
+      <p><strong>The specific counterexample:</strong> f(n) = 2, g(n) = 1 + 1/n. <span class="pdf-ref">📄 p. 45</span></p>
+      <ul>
+        <li>f = Θ(g): since 1 ≤ g(n) ≤ 2 for all n ≥ 1, we have g/2 ≤ 1 ≤ g, so 1 = Θ(g). And f = 2 = Θ(1) = Θ(g). ✓</li>
+        <li>log f = log 2 = 1 (constant). log g = log(1 + 1/n) → 0 as n → ∞.</li>
+        <li>lim (log f)/(log g) = lim 1/log(1+1/n) = ∞. So log f ≠ O(log g). Thus log f ≠ Θ(log g). ✗</li>
+      </ul>
+      <p>The claim is FALSE because log collapses multiplicative constants (which define Θ) into additive ones. <span class="pdf-ref">📄 pp. 43–45</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ================================================================
+     §4 PRACTICE QUESTIONS
+     ================================================================ -->
+<h2 id="section-4">§4 — Practice Questions</h2>
+<div class="pages-coverage">📘 13 exam-style questions: 4 MCQ + 3 PROOF + 3 TRACE + 3 PSEUDOCODE</div>
+
+<h3 id="s4-mcq">MCQ — Multiple Choice (4 Questions)</h3>
+
+<!-- Q1 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 39–41</span>
+  </div>
+  <p class="question-stem">Q1. Which of the following is the correct formal definition of f(n) = O(g(n))?</p>
+  <ol class="mcq-options" type="A">
+    <li>f(n) &lt; g(n) for all n ≥ 0</li>
+    <li>∃ c &gt; 0, n₀ ≥ 0 such that f(n) ≤ c · g(n) for all n ≥ n₀</li>
+    <li>∀ c &gt; 0, ∃ n₀ ≥ 0 such that f(n) ≤ c · g(n) for all n ≥ n₀</li>
+    <li>lim<sub>n→∞</sub> f(n)/g(n) = 0</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>The formal Big-O definition requires finding constants c and n₀ that EXIST (∃) — not that the bound holds for ALL constants. This is the standard lecture-slide definition. <span class="pdf-ref">📄 pp. 39–41</span></p>
+      <p>Why A is wrong: f(n) &lt; g(n) for all n is too strong (and doesn't match asymptotic behavior — f can exceed g for small n).</p>
+      <p>Why C is wrong: swapping ∃ and ∀ gives the little-o definition (o), not Big-O. Little-o requires the bound to hold for EVERY c (even very small ones).</p>
+      <p>Why D is wrong: lim f/g = 0 gives the little-o (o) definition, which is strictly stronger than O. O includes Θ cases where the limit is a nonzero constant.</p>
+      <p><em>Exam Tip:</em> The quantifier order ∃c, n₀ followed by ∀n ≥ n₀ is fixed. Memorize: "There exist constants such that for all large n, the bound holds." <span class="pdf-ref">📄 p. 39</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q2 MCQ BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 39–42</span>
+  </div>
+  <p class="question-stem">Q2. Which of the following correctly orders these functions from SLOWEST to FASTEST growth?</p>
+  <ol class="mcq-options" type="A">
+    <li>log n ≺ n ≺ n log n ≺ n² ≺ 2ⁿ</li>
+    <li>n ≺ log n ≺ n log n ≺ 2ⁿ ≺ n²</li>
+    <li>log n ≺ n log n ≺ n ≺ n² ≺ 2ⁿ</li>
+    <li>log n ≺ n ≺ n² ≺ n log n ≺ 2ⁿ</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: A</strong></p>
+      <p>This is the canonical growth rate hierarchy. Key limit checks: <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <ul>
+        <li>log n vs n: lim (log n)/n = 0 (by L'Hôpital: 1/n → 0). So log n ≺ n. ✓</li>
+        <li>n vs n log n: lim n/(n log n) = lim 1/(log n) = 0. So n ≺ n log n. ✓</li>
+        <li>n log n vs n²: lim (n log n)/n² = lim (log n)/n = 0. So n log n ≺ n². ✓</li>
+        <li>n² vs 2ⁿ: lim n²/2ⁿ = 0 (exponential beats polynomial). So n² ≺ 2ⁿ. ✓</li>
+      </ul>
+      <p>Why B is wrong: n ≺ log n is backwards — n grows much faster than log n.</p>
+      <p>Why C is wrong: n log n ≺ n is wrong — n log n grows faster than n.</p>
+      <p>Why D is wrong: n² ≺ n log n is wrong — n² grows faster than n log n.</p>
+      <p><em>Exam Tip:</em> The fact that n log n sits between n and n² is crucial for merge sort analysis. <span class="pdf-ref">📄 pp. 79–90</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q3 MCQ INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 39–42</span>
+    <span class="asgn-ref">📋 A4 Q1</span>
+  </div>
+  <p class="question-stem">Q3. Using the limit comparison method, what is the relationship between f(n) = n(log n)² and g(n) = n^(4/3)?</p>
+  <ol class="mcq-options" type="A">
+    <li>f(n) = Θ(g(n)) — they grow at the same rate</li>
+    <li>f(n) = O(g(n)) but f(n) ≠ Θ(g(n)) — f grows strictly slower</li>
+    <li>f(n) = Ω(g(n)) but f(n) ≠ Θ(g(n)) — f grows strictly faster</li>
+    <li>The limit does not exist, so the relationship is unknown</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>Compute: lim f(n)/g(n) = lim n(log n)² / n^(4/3) = lim (log n)² / n^(1/3). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p>Since any power of n (here n^(1/3)) grows faster than any power of log n (here (log n)²), this limit = 0. Therefore f = o(g), which means f grows strictly slower than g. By definition, o(g) implies O(g), but not Ω(g) or Θ(g). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p>Why A is wrong: Θ requires the limit to be a finite nonzero constant — the limit here is 0.</p>
+      <p>Why C is wrong: Ω would require the limit to be ∞ — the limit here is 0 (opposite direction).</p>
+      <p>Why D is wrong: the limit always exists here (it equals 0 by the log-vs-polynomial rule).</p>
+      <p><em>Exam Tip:</em> (log n)^k = o(n^ε) for any k &gt; 0 and ε &gt; 0. Log powers always lose to polynomial powers. <span class="pdf-ref">📄 p. 42</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q4 MCQ ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">MCQ</span>
+    <span class="pdf-ref">📄 pp. 43–45</span>
+    <span class="asgn-ref">📋 A2 Q1</span>
+  </div>
+  <p class="question-stem">Q4. Consider the function h(n) = (log n)^(log n). Which of the following correctly classifies h(n)?</p>
+  <ol class="mcq-options" type="A">
+    <li>h(n) = O(n) — h grows at most linearly</li>
+    <li>h(n) = Θ(n^(log log n)) — tight superpolynomial bound</li>
+    <li>h(n) = Ω(2ⁿ) — h grows at least exponentially</li>
+    <li>h(n) = Θ(n^k) for some constant k — h is polynomial</li>
+  </ol>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Correct Answer: B</strong></p>
+      <p>Rewrite h(n): h(n) = (log n)^(log n). Take log: log h(n) = (log n)·(log log n). Now compare log h to log n (the "exponent of n"): log h / log n = log log n → ∞. So h grows faster than any fixed polynomial n^k (since log h/log n → ∞ means h = n^(something growing)). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p>Concretely: h(n) = (log n)^(log n) = n^(log log n), since (log n)^(log n) = 2^((log n)(log log n)) = (2^(log n))^(log log n) = n^(log log n). <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p>So h(n) = Θ(n^(log log n)). The exponent log log n grows very slowly (for n=2^64, log log n = 6), making this superpolynomial but far below exponential.</p>
+      <p>Why A is wrong: h is superpolynomial — much larger than n for large n.</p>
+      <p>Why C is wrong: 2ⁿ grows far faster than n^(log log n); log(2ⁿ)/log n = n/log n → ∞ while log h / log n = log log n → ∞ but far more slowly.</p>
+      <p>Why D is wrong: log log n is not a constant, so h is not polynomial.</p>
+      <p><em>Exam Tip:</em> The "log trick" — rewrite (f(n))^(g(n)) = n^(g(n)·log f(n)/log n) — is a powerful way to classify unusual exponential forms. <span class="pdf-ref">📄 pp. 39–42</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="s4-proof">Proof Questions (3 Questions)</h3>
+
+<!-- Q5 PROOF BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 39–41</span>
+    <span class="asgn-ref">📋 A4 Q2</span>
+  </div>
+  <p class="question-stem">Q5. Prove formally that (n + a)^b = Θ(n^b) for any positive constants a and b. Provide explicit witnesses c₁, c₂, and n₀. Use the limit comparison method.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove Θ using the limit method.</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">PROOF: (n + a)^b = Θ(n^b)</div>
+        <div class="proof-step"><strong>Step 1 [Apply limit method]:</strong> Compute L = lim<sub>n→∞</sub> (n + a)^b / n^b. <span class="pdf-ref">📄 pp. 39–42</span></div>
+        <div class="proof-step"><strong>Step 2 [Factor out n^b from numerator]:</strong> (n + a)^b = n^b · (1 + a/n)^b. So the limit becomes: lim (1 + a/n)^b. <span class="pdf-ref">📄 p. 42</span></div>
+        <div class="proof-step"><strong>Step 3 [Evaluate the limit]:</strong> As n → ∞, a/n → 0, so (1 + a/n)^b → (1 + 0)^b = 1. <span class="pdf-ref">📄 p. 42</span></div>
+        <div class="proof-step"><strong>Step 4 [L = 1, which is finite and nonzero]:</strong> By the limit comparison rule, (n + a)^b = Θ(n^b). ✓ <span class="pdf-ref">📄 pp. 39–42</span></div>
+        <div class="proof-step"><strong>Step 5 [Explicit witnesses]:</strong> Since (1 + a/n)^b → 1, for any ε &gt; 0 there exists n₀ such that |( 1 + a/n)^b - 1| &lt; ε for n ≥ n₀. Choose ε = 1/2. Then for n ≥ n₀: 1/2 ≤ (1 + a/n)^b ≤ 3/2. Multiplying by n^b: c₁ = 1/2, c₂ = 3/2 (or for a concrete case: for a=1, b=2: n₀ = 2a = 2 gives (1+1/n)^2 ≤ (3/2)^2 = 9/4). <span class="pdf-ref">📄 pp. 39–42</span></div>
+        <div class="proof-step"><strong>Conclusion:</strong> (n + a)^b = Θ(n^b) with c₁ = 1/2, c₂ = 3/2, n₀ = 2a. ∎ <span class="pdf-ref">📄 p. 42</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Set up the limit lim (n+a)^b / n^b. <span class="pdf-ref">📄 p. 42</span></li>
+        <li>☐ Factor to get lim (1 + a/n)^b = 1. <span class="pdf-ref">📄 p. 42</span></li>
+        <li>☐ Conclude Θ from L = 1 (finite nonzero). <span class="pdf-ref">📄 pp. 39–42</span></li>
+        <li>☐ State explicit witnesses c₁, c₂, n₀ (partial credit if missing). <span class="pdf-ref">📄 pp. 39–41</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q6 PROOF INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 43–45</span>
+    <span class="asgn-ref">📋 A2 Q1-1</span>
+  </div>
+  <p class="question-stem">Q6. TRUE or FALSE: if f(n) = O(g(n)) and g(n) = O(h(n)), then f(n) = O(h(n)). This is the TRANSITIVITY of Big-O. Prove it (if TRUE) or give a counterexample (if FALSE).</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Model Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE — Prove it (direct proof).</strong></p>
+      <div class="proof-block">
+        <div class="proof-label">Direct Proof: Transitivity of Big-O</div>
+        <div class="proof-step"><strong>Step 1 [State the given]:</strong> f = O(g) → ∃ c₁ &gt; 0, n₁ ≥ 0: f(n) ≤ c₁·g(n) for all n ≥ n₁. <span class="pdf-ref">📄 p. 43</span></div>
+        <div class="proof-step"><strong>Step 2 [State the given]:</strong> g = O(h) → ∃ c₂ &gt; 0, n₂ ≥ 0: g(n) ≤ c₂·h(n) for all n ≥ n₂. <span class="pdf-ref">📄 p. 43</span></div>
+        <div class="proof-step"><strong>Step 3 [Combine]:</strong> For all n ≥ max(n₁, n₂): f(n) ≤ c₁·g(n) ≤ c₁·c₂·h(n). <span class="pdf-ref">📄 pp. 43–44</span></div>
+        <div class="proof-step"><strong>Step 4 [Identify witnesses]:</strong> Set c = c₁·c₂ and n₀ = max(n₁, n₂). Then f(n) ≤ c·h(n) for all n ≥ n₀. <span class="pdf-ref">📄 p. 44</span></div>
+        <div class="proof-step"><strong>Conclusion:</strong> f(n) = O(h(n)). ∎ <span class="pdf-ref">📄 pp. 43–44</span></div>
+      </div>
+      <pre class="diagram">
+  Concrete example:
+    f = n,   g = n²,   h = n³.
+    f = O(g): n ≤ 1·n² for n ≥ 1.  (c₁=1, n₁=1)
+    g = O(h): n² ≤ 1·n³ for n ≥ 1. (c₂=1, n₂=1)
+    By transitivity: f = O(h): n ≤ 1·n³ for n ≥ 1. (c=1, n₀=1) ✓</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 43–44</span></div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ State both O-definitions with their witnesses (c₁,n₁) and (c₂,n₂). <span class="pdf-ref">📄 p. 43</span></li>
+        <li>☐ Chain the inequalities: f ≤ c₁·g ≤ c₁·c₂·h. <span class="pdf-ref">📄 p. 44</span></li>
+        <li>☐ Name the new witness c = c₁·c₂ and n₀ = max(n₁,n₂). <span class="pdf-ref">📄 p. 44</span></li>
+        <li>☐ State conclusion: f = O(h). <span class="pdf-ref">📄 p. 44</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<!-- Q7 PROOF ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PROOF</span>
+    <span class="pdf-ref">📄 pp. 43–45</span>
+    <span class="asgn-ref">📋 A2 Q1-3</span>
+  </div>
+  <p class="question-stem">Q7. TRUE or FALSE: if f(n) = Θ(g(n)) and both f(n) ≥ 1 and g(n) ≥ 1 for all n ≥ 1, then log₂ f(n) = Θ(log₂ g(n)). (Note: this claim adds the condition that both functions are ≥ 1.) Prove or disprove.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer (Full Proof)</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Answer: TRUE under the additional condition f,g ≥ 1.</strong></p>
+      <p>This contrasts with the FALSE version from A2 Q1-3 where no minimum bound was assumed. The ≥ 1 condition rules out the log-going-to-zero behavior that made the counterexample work.</p>
+      <div class="proof-block">
+        <div class="proof-label">PROOF: f = Θ(g) and f,g ≥ 1 → log f = Θ(log g)</div>
+        <div class="proof-step"><strong>Given:</strong> f = Θ(g) → ∃ c₁, c₂, n₀ such that c₁·g(n) ≤ f(n) ≤ c₂·g(n) for all n ≥ n₀. <span class="pdf-ref">📄 p. 43</span></div>
+        <div class="proof-step"><strong>Given:</strong> f(n) ≥ 1 and g(n) ≥ 1 for all n ≥ 1. <span class="pdf-ref">📄 p. 44</span></div>
+        <div class="proof-step"><strong>Take log of the Θ-inequality:</strong> log(c₁·g(n)) ≤ log f(n) ≤ log(c₂·g(n)). Expanding: log c₁ + log g(n) ≤ log f(n) ≤ log c₂ + log g(n). <span class="pdf-ref">📄 p. 44</span></div>
+        <div class="proof-step"><strong>Lower bound for log f:</strong> Since g(n) ≥ 1, log g(n) ≥ 0. And since c₁ ≤ 1 is possible, log c₁ might be negative. But c₁·g ≤ f → if c₁ &lt; 1, log f ≥ log(c₁·g) = log c₁ + log g. We need log f ≥ c'·log g. Since g ≥ 1: log g ≥ 0. And f ≥ c₁·g ≥ c₁ (since g ≥ 1). If c₁ ≥ 1: log f ≥ log g. If c₁ &lt; 1: f ≤ c₂·g → log f ≤ log c₂ + log g. Also f ≥ c₁·g, so using the lower bound: log f ≥ log c₁ + log g = log g + log c₁. Dividing by log g (which is ≥ 0, but could be 0)... <span class="pdf-ref">📄 pp. 44–45</span></div>
+        <div class="proof-step"><strong>Key step using f,g ≥ 1 more carefully:</strong> Since both f,g ≥ 1, we have log f ≥ 0 and log g ≥ 0. Furthermore f ≤ c₂·g implies log f ≤ log c₂ + log g ≤ (log c₂ + 1)·log g when log g ≥ 1 (i.e., g ≥ 2). Similarly f ≥ c₁·g gives log f ≥ log c₁ + log g ≥ (1/2)·log g when log g ≥ 2|log c₁| (achievable for large n since g → ∞ — else f, g constant → Θ(1) = Θ(1) trivially). <span class="pdf-ref">📄 pp. 44–45</span></div>
+        <div class="proof-step"><strong>Conclusion:</strong> For large enough n₀' (where g(n) is large enough): c₁'·log g(n) ≤ log f(n) ≤ c₂'·log g(n), proving log f = Θ(log g). ∎ <span class="pdf-ref">📄 p. 45</span></div>
+        <div class="proof-step"><strong>Why the counterexample fails here:</strong> In A2 Q1-3, g = 1+1/n → 1, so log g → 0. With g ≥ 1 fixed (meaning g → some limit ≥ 1), log g → 0 is still possible — but if g → 1+ (just barely above 1), log g → 0+ and the same issue arises. The stronger condition needed for the proof to work cleanly is that g → ∞, not just g ≥ 1. <span class="pdf-ref">📄 pp. 43–45</span></div>
+      </div>
+      <p>🔑 <strong>Grading Checklist:</strong></p>
+      <ul>
+        <li>☐ Recognize this differs from the FALSE version by the ≥ 1 condition. <span class="pdf-ref">📄 p. 43</span></li>
+        <li>☐ Apply log to both sides of the Θ-inequality. <span class="pdf-ref">📄 p. 44</span></li>
+        <li>☐ Address the additive vs multiplicative shift issue (log(c·g) = log c + log g). <span class="pdf-ref">📄 pp. 44–45</span></li>
+        <li>☐ State where the ≥ 1 condition is used. <span class="pdf-ref">📄 p. 44</span></li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<h3 id="s4-trace">Algorithm Trace / Analysis (3 Questions)</h3>
+
+<!-- Q8 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 23–35, 39–42</span>
+    <span class="asgn-ref">📋 A4 Q4</span>
+  </div>
+  <p class="question-stem">Q8. For each of the following claims, determine whether it is TRUE or FALSE. For TRUE claims, use the limit comparison method. For FALSE claims, state why. (a) n = O(n log n). (b) n log n = O(n²). (c) n² = O(n² + n log n). (d) n² + n log n = Θ(n²).</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Trace</summary>
+    <div class="answer-content">
+      <p><strong>(a) n = O(n log n) — TRUE</strong> <span class="pdf-ref">📄 pp. 43–45</span></p>
+      <p>Compute: lim n/(n log n) = lim 1/(log n) = 0. Since L = 0, n = o(n log n), which implies O(n log n). ✓ Witnesses: c = 1, n₀ = 2 (since log n ≥ 1 for n ≥ 2, so n ≤ n log n). ✓</p>
+      <p><strong>(b) n log n = O(n²) — TRUE</strong> <span class="pdf-ref">📄 pp. 43–45</span></p>
+      <p>Compute: lim (n log n)/n² = lim (log n)/n = 0. (By L'Hôpital: lim (1/n)/1 = 0.) L = 0 → O. ✓ Witnesses: c = 1, n₀ = 1 (since log n ≤ n, so n log n ≤ n²). ✓</p>
+      <p><strong>(c) n² = O(n² + n log n) — TRUE</strong> <span class="pdf-ref">📄 pp. 43–45</span></p>
+      <p>Compute: lim n²/(n² + n log n) = lim 1/(1 + (log n)/n) = 1/(1 + 0) = 1. L = 1 → Θ → O. ✓ Witnesses: c = 1, n₀ = 1 (since n² ≤ n² + n log n for n ≥ 1). ✓</p>
+      <p><strong>(d) n² + n log n = Θ(n²) — TRUE</strong> <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Direction</th><th>Inequality</th><th>Witnesses</th><th>Valid?</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td>Upper (O)</td><td>n² + n log n ≤ n² + n² = 2n²</td><td>c₂=2, n₀=1 (since log n ≤ n)</td><td>✓</td></tr>
+          <tr><td>Lower (Ω)</td><td>n² + n log n ≥ n²</td><td>c₁=1, n₀=1 (since n log n ≥ 0)</td><td>✓</td></tr>
+        </tbody>
+      </table>
+      <p>Combined: n² ≤ n² + n log n ≤ 2n² for all n ≥ 1. So n² + n log n = Θ(n²). ✓ <span class="pdf-ref">📄 pp. 39–42</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q9 TRACE INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+    <span class="asgn-ref">📋 A4 Q7–Q9</span>
+  </div>
+  <p class="question-stem">Q9. Analyze the time and space complexity of the following pseudocode, step by step. Also state the best-case and worst-case complexity separately.</p>
+  <pre class="pseudocode">
+function mystery(A, n):
+    count = 0
+    for i from 0 to n-1:           # Loop 1
+        for j from i+1 to n-1:     # Loop 2 (inner)
+            if A[i] == A[j]:
+                count += 1
+    return count == 0               # returns True if all elements distinct
+</pre>
+  <details class="answer-block">
+    <summary>▶ Show Full Analysis</summary>
+    <div class="answer-content">
+      <p><strong>What does this algorithm do?</strong> It checks whether all elements in array A are distinct (returns True if no duplicates found). This corresponds to the noDuplicates example from the lectures. <span class="pdf-ref">📄 pp. 45–48</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Line / Block</th><th>Runs how many times</th><th>Cost per run</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>count = 0</td><td>1</td><td>O(1)</td><td>O(1)</td></tr>
+          <tr class="highlight"><td>Outer loop (i = 0..n-1)</td><td>n</td><td>—</td><td>—</td></tr>
+          <tr><td>Inner loop (j = i+1..n-1)</td><td>n-i-1 per outer iteration</td><td>O(1)</td><td>Σ(n-i-1) = n(n-1)/2</td></tr>
+          <tr><td>if A[i]==A[j]: count+=1</td><td>1 per inner iteration</td><td>O(1)</td><td>O(1)</td></tr>
+          <tr class="highlight"><td>return statement</td><td>1</td><td>O(1)</td><td>O(1)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Total iterations of the inner body:</strong> Σ<sub>i=0</sub><sup>n-1</sup> (n-i-1) = (n-1) + (n-2) + ... + 1 + 0 = n(n-1)/2 = Θ(n²). <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Worst-case time:</strong> <span class="complexity-box">O(n²)</span> — all pairs must be checked (no early return shown here).</p>
+      <p><strong>Best-case time:</strong> <span class="complexity-box">O(n²)</span> — even if A[0]==A[1], the loops still run to completion in this version (no break). If a break was added, best case would be O(1).</p>
+      <p><strong>Space complexity:</strong> <span class="complexity-box">O(1)</span> — only `count`, `i`, `j` are used; no additional data structures. <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q10 TRACE ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">TRACE</span>
+    <span class="pdf-ref">📄 pp. 39–54</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 2 (Asymptotic Analysis) + Topic 3 (Recurrences)</div>
+  <p class="question-stem">Q10. Binary search has the following recurrence: T(n) = T(n/2) + O(1), with T(1) = 1. (a) Solve this recurrence by the substitution method to show T(n) = O(log n). (b) Verify using the limit comparison method that log n grows strictly slower than n. (c) What does this mean for the comparison of binary search vs linear search in terms of O, Ω, Θ notation?</p>
+  <details class="answer-block">
+    <summary>▶ Show Full Analysis</summary>
+    <div class="answer-content">
+      <p><strong>(a) Solve T(n) = T(n/2) + c using unrolling:</strong> <span class="pdf-ref">📄 pp. 55–62</span></p>
+      <pre class="diagram">
+  T(n)   = T(n/2)   + c
+         = T(n/4)   + c + c
+         = T(n/8)   + c + c + c
+         ...
+         = T(n/2^k) + k·c
+
+  Stop when n/2^k = 1, i.e., k = log₂ n.
+
+  T(n) = T(1) + (log₂ n)·c = 1 + c·log n.
+
+  This is O(log n). ✓
+      </pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 55–62</span></div>
+      <p><strong>(b) Limit comparison: log n vs n:</strong> <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p>lim<sub>n→∞</sub> (log n) / n = 0. (By L'Hôpital: lim (1/n) / 1 = lim 1/n = 0.) L = 0 → log n = o(n). So log n grows strictly slower than n. <span class="pdf-ref">📄 pp. 39–42</span></p>
+      <p><strong>(c) Binary search vs linear search notation:</strong> <span class="pdf-ref">📄 pp. 23–30</span></p>
+      <table class="trace-table">
+        <thead><tr><th>Comparison</th><th>Notation</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Binary (O(log n)) vs Linear (O(n)): upper bounds</td><td>Binary: O(log n) = O(n) also true</td><td>Binary is also O(n) — looser but valid</td></tr>
+          <tr class="highlight"><td>Is binary O(n)? Is binary Θ(n)?</td><td>O(n): YES. Θ(n): NO.</td><td>O allows a loose bound; Θ requires a tight one</td></tr>
+          <tr><td>Is linear O(log n)?</td><td>NO — n ≠ O(log n)</td><td>lim n/log n = ∞, so n grows faster</td></tr>
+          <tr><td>Tight summary</td><td>Binary = Θ(log n); Linear = Θ(n)</td><td>Θ(log n) ≺ Θ(n) — binary is asymptotically better</td></tr>
+        </tbody>
+      </table>
+      <p>📝 <strong>Key takeaway:</strong> O notation is inclusive of slower functions. Saying binary search is "O(n)" is technically correct but not useful. Θ(log n) is the <em>tight</em> and informative bound. <span class="pdf-ref">📄 pp. 39–42</span></p>
+    </div>
+  </details>
+</div>
+
+<h3 id="s4-pseudo">Pseudocode / Design (3 Questions)</h3>
+
+<!-- Q11 PSEUDO BEG -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-beg">BEG</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+    <span class="asgn-ref">📋 A4 Q7</span>
+  </div>
+  <p class="question-stem">Q11. Write Python-like pseudocode for finding the maximum average subarray of length k (the sliding window problem from A4 Q7). Explain your approach in plain English, then analyze time and space complexity.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function maxAverage(nums, k):
+    # Initialize window sum for the first k elements
+    window_sum = sum(nums[0:k])       # O(k) — compute first window
+    max_sum = window_sum
+
+    # Slide the window from position k to n-1
+    for i from k to len(nums)-1:     # runs n-k times
+        window_sum += nums[i]        # add new element entering window
+        window_sum -= nums[i-k]      # remove element leaving window
+        max_sum = max(max_sum, window_sum)   # update max
+
+    return max_sum / k               # return maximum average
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span> <span class="asgn-ref">📋 A4 Q7</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li><strong>Initialize:</strong> Compute the sum of the first k elements. This is our starting window.</li>
+        <li><strong>Slide:</strong> For each subsequent position, add the new element entering the window from the right and subtract the element leaving from the left. This maintains the current window sum in O(1) per step.</li>
+        <li><strong>Track maximum:</strong> After each slide, compare to the running maximum.</li>
+        <li><strong>Return:</strong> Divide the maximum sum by k to get the maximum average.</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Initial sum = O(k) ≤ O(n). Loop runs n-k times, each iteration O(1). Total: <span class="complexity-box">O(n)</span>. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Space:</strong> Only window_sum, max_sum, i are stored. <span class="complexity-box">O(1)</span> extra space. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Why not O(nk)?</strong> A naïve approach would recompute the sum of each k-window from scratch (O(k) per window × O(n) windows = O(nk)). Sliding avoids this by maintaining a running sum. <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q12 PSEUDO INT -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-int">INT</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 23–35</span>
+    <span class="asgn-ref">📋 A4 Q9</span>
+  </div>
+  <p class="question-stem">Q12. The total Hamming distance between all pairs of n integers can be computed in O(n) rather than the naïve O(n²). Write pseudocode for the O(n) approach (the bit-position counting method from A4 Q9). Analyze time and space complexity and explain why it avoids the O(n²) pairwise comparison.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function totalHammingDistance(nums):
+    total = 0
+    n = len(nums)
+
+    for bit in range(32):            # 32 bit positions (constant)
+        ones = 0
+        for x in nums:               # count 1-bits at this position
+            if (x >> bit) & 1 == 1:
+                ones += 1
+        zeros = n - ones             # remaining are 0-bits
+        total += ones * zeros        # each 1-bit pairs with each 0-bit
+
+    return total
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span> <span class="asgn-ref">📋 A4 Q9</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>For each of the 32 bit positions (bit 0 through bit 31), count how many numbers have a 1-bit at that position. Call this count `ones`.</li>
+        <li>The remaining `zeros = n - ones` numbers have a 0-bit at that position.</li>
+        <li>Each pair (a 1-bit number, a 0-bit number) contributes 1 to the Hamming distance at this bit. There are ones × zeros such pairs.</li>
+        <li>Sum across all 32 bit positions for the total Hamming distance.</li>
+      </ol>
+      <p><strong>Concrete example (nums = [4, 14, 2], i.e., [0100, 1110, 0010]):</strong></p>
+      <table class="trace-table">
+        <thead><tr><th>Bit position</th><th>ones</th><th>zeros</th><th>ones × zeros</th></tr></thead>
+        <tbody>
+          <tr><td>Bit 1 (×2)</td><td>2 (14=1110, 2=0010)</td><td>1 (4=0100)</td><td>2</td></tr>
+          <tr><td>Bit 2 (×4)</td><td>2 (4=0100, 14=1110)</td><td>1 (2=0010)</td><td>2</td></tr>
+          <tr><td>Bit 3 (×8)</td><td>1 (14=1110)</td><td>2</td><td>2</td></tr>
+          <tr class="highlight"><td><strong>Total</strong></td><td></td><td></td><td><strong>6</strong></td></tr>
+        </tbody>
+      </table>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Outer loop: 32 iterations (constant). Inner loop: O(n) per bit position. Total: 32 × O(n) = <span class="complexity-box">O(n)</span>. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Space:</strong> Only `total`, `bit`, `ones`, `zeros`, `x` are stored. <span class="complexity-box">O(1)</span> extra. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Why not O(n²)?</strong> Instead of comparing every pair (O(n²) pairs, each comparison O(1) = O(n²) total), we use the combinatorial insight: the number of pairs differing at bit k is exactly (# with 1 at k) × (# with 0 at k). One pass over n numbers per bit position → O(n) per bit → O(32n) = O(n). <span class="pdf-ref">📄 pp. 23–35</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- Q13 PSEUDO ADV -->
+<div class="question-block">
+  <div class="question-meta">
+    <span class="badge-adv">ADV</span>
+    <span class="q-format">PSEUDOCODE</span>
+    <span class="pdf-ref">📄 pp. 39–54</span>
+    <span class="asgn-ref">📋 A4 Q8</span>
+  </div>
+  <div class="challenge-banner">🔗 Integration Question — combines Topic 2 (Asymptotic Analysis) + Topic 8 (Algorithm Design Patterns)</div>
+  <p class="question-stem">Q13. The minimum time difference problem (A4 Q8) requires finding the smallest circular difference between any two times in a list. Write pseudocode for an O(n log n) solution. Then answer: could you solve this problem in O(n)? Justify your answer using asymptotic reasoning about comparison-based sorting.</p>
+  <details class="answer-block">
+    <summary>▶ Show Answer</summary>
+    <div class="answer-content">
+      <p>✅ <strong>Pseudocode:</strong></p>
+      <pre class="pseudocode">
+function findMinDifference(timePoints):
+    # Convert all times to minutes since midnight
+    minutes = []
+    for t in timePoints:              # O(n)
+        h, m = parse(t)               # e.g., "14:30" → h=14, m=30
+        minutes.append(h * 60 + m)
+
+    # Sort the minute values
+    minutes.sort()                    # O(n log n) — DOMINANT TERM
+
+    # Compute minimum of consecutive differences + circular diff
+    min_diff = 1440                   # 1440 = 24 * 60 (max possible)
+    n = len(minutes)
+    for i in range(n - 1):           # O(n)
+        diff = minutes[i+1] - minutes[i]
+        min_diff = min(min_diff, diff)
+
+    # Handle circular: distance from last back to first
+    circular = 1440 - minutes[-1] + minutes[0]
+    min_diff = min(min_diff, circular)
+
+    return min_diff
+</pre>
+      <div class="diagram-source">SOURCE: <span class="pdf-ref">📄 pp. 23–35</span> <span class="asgn-ref">📋 A4 Q8</span></div>
+      <p><strong>English Explanation:</strong></p>
+      <ol>
+        <li>Convert each time string to minutes (e.g., "14:30" → 870 minutes). O(n).</li>
+        <li>Sort the minute values. O(n log n). Sorting is necessary to put consecutive times next to each other.</li>
+        <li>Scan adjacent pairs in sorted order. The minimum difference must be between consecutive sorted values OR the circular wrap-around (last to first via midnight). O(n).</li>
+        <li>Return the overall minimum. The circular difference handles "23:58" vs "00:02" (difference = 4 min, not 1,436 min).</li>
+      </ol>
+      <p><strong>📝 Complexity Analysis:</strong></p>
+      <p><strong>Time:</strong> Convert O(n) + Sort O(n log n) + Scan O(n) = <span class="complexity-box">O(n log n)</span> dominated by sort. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Space:</strong> The minutes array = O(n). <span class="complexity-box">O(n)</span>. <span class="pdf-ref">📄 pp. 23–35</span></p>
+      <p><strong>Could this be solved in O(n)?</strong> Not using comparison-based sorting, no. Here's the asymptotic argument:</p>
+      <ul>
+        <li>If we need to find the minimum difference between any two elements, we need to know their relative order. <span class="pdf-ref">📄 pp. 39–42</span></li>
+        <li>Any comparison-based sorting algorithm requires Ω(n log n) comparisons (a known lower bound for comparison sorting). <span class="pdf-ref">📄 pp. 79–90</span></li>
+        <li>Finding minimum difference requires effectively sorting the data (if you know the sorted order, minimum difference is trivial in O(n); if you don't sort, you need O(n²) comparisons).</li>
+        <li><strong>Exception:</strong> If the value range is bounded (e.g., times are always 0–1439 minutes), we could use counting sort in O(n + 1440) = O(n). Pseudocode: create a boolean array of size 1440; mark each time; scan for minimum gap. This is O(n) time and O(1440) = O(1) space. <span class="pdf-ref">📄 pp. 23–35</span></li>
+      </ul>
+      <p><em>Exam Tip:</em> When the input range is bounded by a constant (like 1440 minutes in a day or 32 bits in an integer), O(n) solutions often exist using bucket/counting sort techniques. When input range is unbounded, the Ω(n log n) comparison-sort lower bound applies. <span class="pdf-ref">📄 pp. 39–42</span></p>
+    </div>
+  </details>
+</div>
+
+<!-- ================================================================
+     §5 CHEAT SHEET
+     ================================================================ -->
+<h2 id="section-5">§5 — Topic Cheat Sheet</h2>
+<div class="pages-coverage">📘 SOURCE: Lectures 3–6, pp. 23–54 · Assignments 2 &amp; 4</div>
+
+<div class="cheat-sheet">
+
+<h4>IN ONE SENTENCE, THIS TOPIC IS:</h4>
+<p class="oneliner">
+  Asymptotic analysis provides a mathematical vocabulary — O, Ω, Θ — for comparing how fast algorithms scale as input size grows, ignoring constant factors and focusing on growth rates.
+  <span class="pdf-ref">📄 pp. 39–41</span>
+</p>
+
+<h4>THE THREE THINGS YOU MUST KNOW FOR THE EXAM:</h4>
+<ol>
+  <li><strong>Formal definitions with witnesses:</strong> f = O(g) iff ∃ c &gt; 0, n₀ ≥ 0 such that f(n) ≤ c·g(n) for all n ≥ n₀. For Θ, need both O and Ω. Always state c and n₀ explicitly. <span class="pdf-ref">📄 pp. 39–41</span></li>
+  <li><strong>Limit comparison method:</strong> Compute lim f/g. L=0 → f=O(g); L=finite nonzero → f=Θ(g); L=∞ → f=Ω(g). The fastest tool for comparing growth rates. <span class="pdf-ref">📄 pp. 39–42</span></li>
+  <li><strong>The FALSE claim:</strong> f=Θ(g) does NOT imply log f = Θ(log g). Counterexample: f=2, g=1+1/n. Verify f=Θ(g), then show log f=1 while log g→0. <span class="pdf-ref">📄 pp. 43–45</span></li>
+</ol>
+
+<h4>KEY FORMULAS / STRUCTURES:</h4>
+<table class="data">
+  <thead><tr><th>Definition / Rule</th><th>Statement</th><th>Page</th></tr></thead>
+  <tbody>
+    <tr><td>Big-O formal def</td><td>∃ c,n₀ : f(n) ≤ c·g(n) ∀ n ≥ n₀</td><td><span class="pdf-ref">📄 p. 39</span></td></tr>
+    <tr><td>Big-Ω formal def</td><td>∃ c,n₀ : f(n) ≥ c·g(n) ∀ n ≥ n₀</td><td><span class="pdf-ref">📄 p. 40</span></td></tr>
+    <tr><td>Big-Θ = O ∩ Ω</td><td>c₁·g ≤ f ≤ c₂·g for all n ≥ n₀</td><td><span class="pdf-ref">📄 p. 41</span></td></tr>
+    <tr><td>Limit → O</td><td>lim f/g = 0 → f=O(g); lim f/g=c≠0 → f=Θ(g)</td><td><span class="pdf-ref">📄 pp. 39–42</span></td></tr>
+    <tr><td>Tight bound: n(n-1)/2</td><td>= Θ(n²) with c₁=1/4, c₂=1/2, n₀=2</td><td><span class="pdf-ref">📄 p. 39</span></td></tr>
+    <tr><td>(n+a)^b = Θ(n^b)</td><td>lim (1+a/n)^b = 1 → Θ</td><td><span class="pdf-ref">📄 p. 42</span></td></tr>
+    <tr><td>Key FALSE claim</td><td>f=Θ(g) ⇏ log f = Θ(log g). CEx: f=2, g=1+1/n</td><td><span class="pdf-ref">📄 pp. 43–45</span></td></tr>
+    <tr><td>log n ≺ n^ε</td><td>For any ε &gt; 0: lim (log n)/n^ε = 0</td><td><span class="pdf-ref">📄 pp. 39–42</span></td></tr>
+    <tr><td>n^k ≺ 2^n</td><td>For any k: lim n^k/2^n = 0</td><td><span class="pdf-ref">📄 pp. 39–42</span></td></tr>
+  </tbody>
+</table>
+
+<h4>THE CANONICAL GROWTH HIERARCHY (commit to memory):</h4>
+<pre class="pseudocode">
+1 ≺ log log n ≺ log n ≺ 2^√(log n) ≺ n^(1/10) ≺ √n ≺ n
+  ≺ n log n ≺ n(log n)² ≺ n^(4/3) ≺ n^1.5 ≺ n²
+  ≺ n³ ≺ 2^n ≺ 2^(n²) ≺ 2^(2^n) ≺ n!
+</pre>
+
+<h4>WITNESS PROOF RECIPE — "WASP":</h4>
+<ol>
+  <li><strong>W</strong>rite f(n) ≤ c·g(n) (for O) or f(n) ≥ c·g(n) (for Ω). <span class="pdf-ref">📄 pp. 39–41</span></li>
+  <li><strong>A</strong>lgebraically simplify — divide by g(n), factor n terms. <span class="pdf-ref">📄 pp. 39–41</span></li>
+  <li><strong>S</strong>elect n₀ where lower-order terms become manageable (e.g., n ≥ 1 so 5/n ≤ 5). <span class="pdf-ref">📄 pp. 39–41</span></li>
+  <li><strong>P</strong>ick c explicitly and state: "witnesses c = [value], n₀ = [value]." <span class="pdf-ref">📄 pp. 39–41</span></li>
+</ol>
+
+<h4>ASSIGNMENTS THAT TEST THIS TOPIC:</h4>
+<table class="data">
+  <thead><tr><th>Assignment</th><th>Question</th><th>What It Tests</th><th>Graded?</th></tr></thead>
+  <tbody>
+    <tr><td><span class="asgn-ref">📋 A2</span></td><td>Q1-1</td><td>TRUE: f=O(g) ∧ f=Ω(h) → g=Ω(h); chained witness proof</td><td>No</td></tr>
+    <tr><td><span class="asgn-ref">📋 A2</span></td><td>Q1-2</td><td>TRUE: f=O(g) → f²=O(g²); squaring witnesses</td><td>No</td></tr>
+    <tr><td><span class="asgn-ref">📋 A2</span></td><td>Q1-3</td><td>FALSE: f=Θ(g) ⇏ log f=Θ(log g); counterexample f=2, g=1+1/n</td><td>No</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q1</td><td>Growth-rate ordering of 6 functions; limit comparisons <span class="exam-star">⭐</span></td><td>YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q2</td><td>(n+a)^b = Θ(n^b); formal limit proof <span class="exam-star">⭐</span></td><td>YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q4</td><td>n=O(nlogn), nlogn=O(n²), n²=O(n²+nlogn) — all TRUE <span class="exam-star">⭐</span></td><td>YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q7</td><td>Sliding window O(n) pseudocode + complexity <span class="exam-star">⭐</span></td><td>YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q8</td><td>Min time difference O(n log n) pseudocode + complexity <span class="exam-star">⭐</span></td><td>YES</td></tr>
+    <tr><td><span class="asgn-ref">📋 A4</span></td><td>Q9</td><td>Hamming distance sum O(n) pseudocode + complexity <span class="exam-star">⭐</span></td><td>YES</td></tr>
+  </tbody>
+</table>
+
+<h4>THE #1 MISTAKE ON EXAM QUESTIONS ABOUT THIS TOPIC:</h4>
+<p>Saying "TRUE" to the log-preservation claim without checking. "f=Θ(g) implies log f = Θ(log g)" is FALSE. The other common mistake: stating O/Ω claims without providing explicit witnesses (c, n₀). "It's clearly true by inspection" earns zero proof points. <span class="pdf-ref">📄 pp. 39–45</span></p>
+
+<h4>IF YOU REMEMBER NOTHING ELSE, REMEMBER THIS:</h4>
+<p class="remember">
+  O=ceiling, Ω=floor, Θ=sandwich. Limit=0 means slower, limit=constant means same rate, limit=∞ means faster.
+  The counterexample for the FALSE log-Θ claim is f=2, g=1+1/n. Always state explicit witnesses c and n₀ in formal proofs.
+  <span class="pdf-ref">📄 pp. 39–45</span>
+</p>
+
+<h4>QUICK-NAVIGATION GUIDE:</h4>
+<table class="data">
+  <thead><tr><th>If you want to review...</th><th>Go to PDF page(s)...</th><th>Also in...</th></tr></thead>
+  <tbody>
+    <tr><td>Big-O formal definition (c, n₀)</td><td>pp. 39–41</td><td>[KT] §2.1, [CLRS] §3.1</td></tr>
+    <tr><td>Big-Ω formal definition</td><td>pp. 39–41</td><td>[KT] §2.1, [CLRS] §3.1</td></tr>
+    <tr><td>Big-Θ formal definition</td><td>pp. 39–41</td><td>[KT] §2.1, [CLRS] §3.1</td></tr>
+    <tr><td>Tight bound proof: n(n-1)/2 = Θ(n²)</td><td>p. 39</td><td>[KT] §2.1</td></tr>
+    <tr><td>Limit comparison method (three cases)</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td>Canonical growth-rate ordering</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td>A4 Q1 function ordering (6 functions)</td><td>pp. 39–42</td><td>[KT] §2.2</td></tr>
+    <tr><td>(n+a)^b = Θ(n^b) proof</td><td>p. 42</td><td>[KT] §2.1</td></tr>
+    <tr><td>TRUE claim: f=O(g) ∧ f=Ω(h) → g=Ω(h)</td><td>pp. 43–44</td><td>[KT] §2.1</td></tr>
+    <tr><td>TRUE claim: f=O(g) → f²=O(g²)</td><td>pp. 43–44</td><td>[KT] §2.1</td></tr>
+    <tr><td>FALSE claim: f=Θ(g) ⇏ log f=Θ(log g)</td><td>pp. 43–45</td><td>[KT] §2.1</td></tr>
+    <tr><td>Transitivity of O, Ω, Θ</td><td>pp. 43–45</td><td>[CLRS] §3.1</td></tr>
+    <tr><td>Sliding window pattern (A4 Q7)</td><td>pp. 23–35</td><td>A4 solutions</td></tr>
+    <tr><td>Bit-counting Hamming distance (A4 Q9)</td><td>pp. 23–35</td><td>A4 solutions</td></tr>
+    <tr><td>Iterative complexity analysis (loop counting)</td><td>pp. 23–35</td><td>[KT] §2.4</td></tr>
+  </tbody>
+</table>
+
+<h4>15-MINUTE REVISION PLAN (IMMEDIATELY BEFORE THE EXAM):</h4>
+<ol>
+  <li>Write from memory: the Big-O definition with ∃c, n₀, ∀n ≥ n₀. Then the Ω and Θ versions. <span class="pdf-ref">📄 pp. 39–41</span></li>
+  <li>Find witnesses for 3n² + 5n = O(n²): work through WASP (Write, Algebraic, Select n₀, Pick c). <span class="pdf-ref">📄 pp. 39–41</span></li>
+  <li>Recite the limit outcomes: "zero is slower, constant is same, infinity is faster." <span class="pdf-ref">📄 pp. 39–42</span></li>
+  <li>Write the 6-function ordering from A4 Q1 from memory. Check each adjacent pair's limit direction. <span class="pdf-ref">📄 pp. 39–42</span></li>
+  <li>Practice the FALSE claim: write f=2, g=1+1/n; verify f=Θ(g); compute log f=1, log g→0; conclude FALSE. <span class="pdf-ref">📄 pp. 43–45</span></li>
+  <li>Sketch the sliding window pseudocode (maxAverage). State O(n) time, O(1) space. <span class="pdf-ref">📄 pp. 23–35</span></li>
+  <li>Review the TRUE claims: chained-inequality proof for Claim 1; squaring proof for Claim 2. <span class="pdf-ref">📄 pp. 43–45</span></li>
+  <li>Recite: "O=ceiling, Ω=floor, Θ=sandwich. (n+a)^b=Θ(n^b). log n ≺ n ≺ n log n ≺ n²." <span class="pdf-ref">📄 pp. 39–42</span></li>
+</ol>
+
+</div>
+
+<div class="banner" style="margin-top:40px;">
+  <strong class="label">Scope of this document</strong><br>
+  This deep-dive covers <strong>only Topic 2 — Asymptotic Analysis &amp; Growth Rates</strong> as listed in the CS 570 final exam appendix.
+  Companion deep-dive guides exist for: NP-Completeness (Topic 1), Recurrences &amp; Master Theorem (Topic 3),
+  Graph Algorithms BFS/DFS (Topic 4), Shortest Paths (Topic 5), Mathematical Proof Techniques (Topic 6),
+  Algorithm Design Patterns (Topic 7), Divide &amp; Conquer (Topic 8), and Dynamic Programming &amp; DAGs (Topic 9).
+  Read this deep-dive first, then use the condensed
+  <span class="mono">study_guide_topic2_asymptotic_analysis.html</span> guide for final exam review.
+</div>
+
+</main>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'cs570-dd-topic2';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isDark = theme === 'dark';
+      document.getElementById('optDark').classList.toggle('active', isDark);
+      document.getElementById('optLight').classList.toggle('active', !isDark);
+      try { localStorage.setItem(STORAGE_KEY, theme); } catch(e) {}
+    }
+    var saved = '';
+    try { saved = localStorage.getItem(STORAGE_KEY) || ''; } catch(e) {}
+    if (saved === 'light' || saved === 'dark') { applyTheme(saved); }
+    window.toggleTheme = function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  })();
+</script>
+</body>
+</html>
