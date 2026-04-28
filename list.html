@@ -1,0 +1,856 @@
+html
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS 570 — Computer Algorithms: Final Exam Study Guide</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0d0f14;
+      --bg-surface: #13161e;
+      --bg-card: #181c26;
+      --bg-hover: #1e2233;
+      --border: #2a2f42;
+      --border-accent: #3a4060;
+      --text-primary: #e8ecf5;
+      --text-secondary: #8a91ab;
+      --text-muted: #545a72;
+      --accent-red: #ff4d6d;
+      --accent-orange: #ff8c42;
+      --accent-yellow: #f5c842;
+      --accent-blue: #4d8fff;
+      --accent-teal: #3dd6c0;
+      --accent-purple: #a06af8;
+      --tag-bg: #1e2640;
+      --tag-border: #3a4a80;
+      --mono-bg: #0a0c12;
+      --badge-explicit: rgba(255, 77, 109, 0.15);
+      --badge-strong: rgba(255, 140, 66, 0.15);
+      --badge-moderate: rgba(245, 200, 66, 0.12);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+      --toggle-bg: #1e2233;
+      --toggle-knob: #4d8fff;
+      --header-gradient: linear-gradient(135deg, #1a1f30 0%, #0d0f14 100%);
+      --star-color: #f5c842;
+      --search-bg: #13161e;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f0f2f8;
+      --bg-surface: #ffffff;
+      --bg-card: #f7f8fc;
+      --bg-hover: #eef0f9;
+      --border: #d4d8eb;
+      --border-accent: #b0b8d8;
+      --text-primary: #1a1e30;
+      --text-secondary: #4a5070;
+      --text-muted: #8890b0;
+      --accent-red: #d42050;
+      --accent-orange: #d4620a;
+      --accent-yellow: #b58800;
+      --accent-blue: #1a5fd4;
+      --accent-teal: #0a9e8a;
+      --accent-purple: #6a3ed4;
+      --tag-bg: #eef0fa;
+      --tag-border: #c0caec;
+      --mono-bg: #e8eaf4;
+      --badge-explicit: rgba(212, 32, 80, 0.1);
+      --badge-strong: rgba(212, 98, 10, 0.1);
+      --badge-moderate: rgba(181, 136, 0, 0.1);
+      --shadow: 0 4px 24px rgba(0, 0, 40, 0.1);
+      --toggle-bg: #d4d8eb;
+      --toggle-knob: #1a5fd4;
+      --header-gradient: linear-gradient(135deg, #e4e8f8 0%, #f0f2f8 100%);
+      --star-color: #b58800;
+      --search-bg: #ffffff;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 2rem;
+      box-shadow: var(--shadow);
+      transition: background 0.3s, border-color 0.3s;
+      gap: 1rem;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .topbar-title {
+      font-size: 0.78rem;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .topbar-title strong {
+      color: var(--accent-blue);
+    }
+
+    /* ── SEARCH BAR ── */
+    .topbar-search {
+      position: relative;
+      flex: 1;
+      max-width: 280px;
+    }
+
+    .topbar-search input {
+      width: 100%;
+      background: var(--search-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem 0.3rem 2rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .topbar-search input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .topbar-search input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .topbar-search .search-icon {
+      position: absolute;
+      left: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-highlight {
+      background: rgba(77, 143, 255, 0.25);
+      border-radius: 2px;
+    }
+
+    /* ── THEME TOGGLE ── */
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+    }
+
+    .toggle-track {
+      width: 42px;
+      height: 22px;
+      background: var(--toggle-bg);
+      border-radius: 11px;
+      position: relative;
+      transition: background 0.3s;
+      border: 1px solid var(--border);
+    }
+
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--toggle-knob);
+      border-radius: 50%;
+      transition: transform 0.3s, background 0.3s;
+    }
+
+    [data-theme="light"] .toggle-knob {
+      transform: translateX(20px);
+    }
+
+    .icon {
+      font-size: 0.9rem;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+      background: var(--header-gradient);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.2rem 2.5rem 2rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: 40%;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-teal) 0%, transparent 70%);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .course-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-blue);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      padding: 0.25rem 0.7rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 0.9rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .page-header h1 span {
+      color: var(--accent-red);
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .meta-item strong {
+      color: var(--text-secondary);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .callout strong {
+      color: var(--text-primary);
+    }
+
+    /* ── SECTION ── */
+    .section-block {
+      margin-bottom: 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.2s;
+    }
+
+    .section-block:hover {
+      box-shadow: var(--shadow);
+      border-color: var(--border-accent);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 1.5rem;
+      background: var(--bg-surface);
+      cursor: pointer;
+      transition: background 0.2s;
+      list-style: none;
+      gap: 1rem;
+    }
+
+    .section-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .section-header::-webkit-details-marker {
+      display: none;
+    }
+
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .section-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent-blue);
+      background: var(--tag-bg);
+      border: 1px solid var(--tag-border);
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .chevron {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+
+    details[open]>.section-header .chevron {
+      transform: rotate(90deg);
+    }
+
+    details[open]>.sub-header .chevron {
+      transform: rotate(90deg);
+    }
+
+    .section-body {
+      padding: 0 1.5rem 1.5rem;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+
+    /* ── SUB-SECTION ── */
+    .sub-details {
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .sub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.1rem;
+      background: var(--bg-surface);
+      cursor: pointer;
+      transition: background 0.2s;
+      list-style: none;
+      gap: 0.75rem;
+    }
+
+    .sub-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .sub-header::-webkit-details-marker {
+      display: none;
+    }
+
+    .sub-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .sub-body {
+      padding: 0.75rem 1.1rem 1rem;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── TYPOGRAPHY ── */
+    p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+    }
+
+    p:first-child {
+      margin-top: 0.5rem;
+    }
+
+    strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    em {
+      color: var(--accent-teal);
+      font-style: italic;
+    }
+
+    a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.2rem 0;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.64rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .badge-explicit {
+      background: var(--badge-explicit);
+      color: var(--accent-red);
+      border: 1px solid rgba(255, 77, 109, 0.3);
+    }
+
+    .badge-strong {
+      background: var(--badge-strong);
+      color: var(--accent-orange);
+      border: 1px solid rgba(255, 140, 66, 0.3);
+    }
+
+    .badge-moderate {
+      background: var(--badge-moderate);
+      color: var(--accent-yellow);
+      border: 1px solid rgba(245, 200, 66, 0.25);
+    }
+
+    .star {
+      color: var(--star-color);
+      font-size: 0.85em;
+    }
+
+    /* ── TABLES ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 0.75rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    th {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.45rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    td strong {
+      color: var(--text-primary);
+    }
+
+    /* ── CODE / MONO ── */
+    pre {
+      background: var(--mono-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      margin-top: 0.75rem;
+      line-height: 1.65;
+      white-space: pre;
+      transition: background 0.3s;
+    }
+
+    code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8em;
+      background: var(--mono-bg);
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+      color: var(--accent-teal);
+    }
+
+    /* ── LISTS ── */
+    ul,
+    ol {
+      padding-left: 1.4rem;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* ── BLOCKQUOTE ── */
+    blockquote {
+      border-left: 3px solid var(--accent-teal);
+      margin: 0.75rem 0;
+      padding: 0.6rem 1rem;
+      background: var(--mono-bg);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* ── WARN ── */
+    .warn {
+      background: var(--badge-moderate);
+      border: 1px solid rgba(245, 200, 66, 0.25);
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--accent-yellow);
+      margin-top: 0.75rem;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-accent);
+      color: var(--text-primary);
+    }
+
+    .btn-primary {
+      border-color: var(--tag-border);
+      color: var(--accent-blue);
+    }
+
+    /* ── TOC ── */
+    .toc-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 0.5rem;
+    }
+
+    .toc-list li {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-list li:last-child {
+      border-bottom: none;
+    }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.25rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+
+    .toc-list a:hover {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    .toc-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      width: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    /* ── TOPIC CLUSTER HEADER ── */
+    .cluster-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-purple);
+      margin: 1.25rem 0 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .cluster-label::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── PRIORITY PILL ── */
+    .priority-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 99px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .priority-1 {
+      background: rgba(255, 77, 109, 0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(255, 77, 109, 0.3);
+    }
+
+    .priority-2 {
+      background: rgba(255, 140, 66, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(255, 140, 66, 0.3);
+    }
+
+    .priority-3 {
+      background: rgba(160, 106, 248, 0.12);
+      color: var(--accent-purple);
+      border: 1px solid rgba(160, 106, 248, 0.3);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .wrapper {
+        padding: 1.5rem 1rem 3rem;
+      }
+
+      .page-header {
+        padding: 1.5rem 1.25rem 1.25rem;
+      }
+
+      .page-header h1 {
+        font-size: 1.35rem;
+      }
+
+      .section-header {
+        padding: 0.9rem 1rem;
+      }
+
+      .section-body {
+        padding: 0 1rem 1.2rem;
+      }
+
+      table {
+        font-size: 0.7rem;
+      }
+
+      .topbar {
+        padding: 0.7rem 1rem;
+      }
+
+      .topbar-search {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <nav class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title"><strong>CS 570</strong> · Algorithms · Final Exam Study Guide</div>
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search topics, concepts…" oninput="handleSearch(this.value)"
+          autocomplete="off">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span class="icon" id="theme-icon">🌙</span>
+        <div class="toggle-track">
+          <div class="toggle-knob"></div>
+        </div>
+        <span id="theme-label">DARK</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="course-badge">Spring 2026 · Dr. Bineet Ghosh</div>
+      <h1>CS 570 — Computer Algorithms<br><span>Final Exam Study Appendix</span></h1>
+      <div class="meta-row">
+        <div class="meta-item">📅 <strong>Exam:</strong> Quiz 2 — April 30, 2026</div>
+        <div class="meta-item">⏰ <strong>Time:</strong> Class hours · 120 min</div>
+        <div class="meta-item">📕 <strong>Format:</strong> Closed-book, one cheat sheet</div>
+        <div class="meta-item">📄 <strong>Lectures:</strong> 27 lectures · ~280 slides</div>
+        <div class="meta-item">📄 <strong>All pdf Slides:</strong> <a
+            href="./cs570/resources/00_Lec1_27_all-combined-densed-ocr.pdf"> all pdf slides </a> </div>
+      </div>
+    </div>
+
+
+	<!-- HOW TO READ CALLOUT -->
+    <div class="callout">
+      <!-- meta-row starts here -->
+      <!-- meta-row starts here -->
+      <div class="meta-row">
+        <div class="meta-item">
+          📄
+          <a href="./cs548/cs548_study_guide.html">
+            cs548 study guide
+          </a>
+        </div>
+      </div>
+      <!-- meta-row ends here -->
+	  <div class="meta-row">
+        <div class="meta-item">
+          📄
+          <a href="./cs570/cs570_study_guide.html">
+            cs570 study guide
+          </a>
+        </div>
+      </div>
+      <!-- meta-row ends here -->
+      <!-- meta-row starts here -->
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <button class="btn btn-primary" onclick="expandAll()">▶ Expand All</button>
+      <button class="btn" onclick="collapseAll()">▼ Collapse All</button>
+      <button class="btn" onclick="expandSection('s4')">📚 Jump to Topics</button>
+      <button class="btn" onclick="expandSection('s5')">🔗 Cross-Topic Themes</button>
+    </div>
+</html>
